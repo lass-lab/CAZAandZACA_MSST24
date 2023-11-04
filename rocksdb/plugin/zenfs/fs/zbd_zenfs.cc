@@ -1805,6 +1805,39 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
   return s;
 }
 
+  void ZonedBlockDevice::AdjacentFileList(Slice& smallest ,Slice& largest, int level, std::vector<uint64_t>& fno_list){
+    assert(db_ptr_!=nullptr);
+    fno_list.clear();
+    db_ptr_->AdjacentFileList(smallest,largest,level,fno_list);
+  }
+
+  void ZonedBlockDevice::SameLevelFileList(int level, std::vector<uint64_t>& fno_list){
+    assert(db_ptr_!=nullptr);
+    fno_list.clear();
+    // printf("level %d",level);
+    db_ptr_->SameLevelFileList(level,fno_list);
+  }
+
+  IOStatus ZonedBlockDevice::GetNearestZoneFromZoneFile(ZoneFile* zFile,Zone** zone_out){
+    IOStatus s;
+    auto extents = zFile->GetExtents();
+    Zone* allocated_zone=nullptr;
+    for(auto e : extents){
+
+      if(!e->zone_->Acquire()){
+        continue;
+      }
+    
+      if(e->zone_->IsFull()){
+        e->zone_->Release();
+      }
+      allocated_zone=e->zone_;
+      break;
+    }
+
+    *zone_out=allocated_zone;
+    return IOStatus::OK();
+  }
 
 IOStatus ZonedBlockDevice::AllocateEmptyZone(Zone **zone_out) {
   IOStatus s;
