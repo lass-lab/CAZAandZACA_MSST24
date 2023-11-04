@@ -823,12 +823,12 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   std::vector<SSTBuffer*>* sst_buffers=zoneFile_->GetSSTBuffers();
 
   for(auto it : *sst_buffers){
-    if(it->positioned_==true){
-      if (it->offset_ != wp) {
-        // assert(false);
-        return IOStatus::IOError("positioned append not at write pointer 2");
-      }
-    }
+    // if(it->positioned_==true){
+    //   if (it->offset_ != wp) {
+    //     // assert(false);
+    //     return IOStatus::IOError("positioned append not at write pointer 2");
+    //   }
+    // }
     if(buffered){
       buffer_mtx_.lock();
       s=BufferedWrite(it->content_,it->size_);
