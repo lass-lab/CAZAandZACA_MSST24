@@ -1212,7 +1212,7 @@ IOStatus ZonedBlockDevice::RuntimeReset(void){
     return s;
   }
   std::vector<bool> is_reseted;
-  auto start_chrono = std::chrono::high_resolution_clock::now();
+  // auto start_chrono = std::chrono::high_resolution_clock::now();
   is_reseted.assign(io_zones.size(),false);
   switch (GetPartialResetScheme())
   {
@@ -1234,8 +1234,8 @@ IOStatus ZonedBlockDevice::RuntimeReset(void){
     default:
       break;
   }
-  auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
-  long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()
+  // auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
+  // long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
   return s;
 }
 

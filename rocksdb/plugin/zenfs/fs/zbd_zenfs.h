@@ -922,7 +922,9 @@ class ZonedBlockDevice {
 
   IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
                                     Zone** zone_out);
+  
   void AdjacentFileList(Slice& smallest,Slice& largest, int level, std::vector<uint64_t>& fno_list);
+  void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
 
   IOStatus AllocateSameLevelFilesZone(Slice& smallest, Slice& largest ,
                                       const std::vector<uint64_t>& fno_list,Zone** zone_out);
