@@ -289,6 +289,9 @@ struct BlockBasedTableBuilder::Rep {
 
   TableProperties props;
 
+  Slice smallest;
+  Slice largest;
+  int level_at_creation;
   // States of the builder.
   //
   // - `kBuffered`: This is the initial state where zero or more data blocks are
@@ -918,6 +921,12 @@ void BlockBasedTableBuilder::Add(const Slice& key, const Slice& value) {
   Rep* r = rep_;
   assert(rep_->state != Rep::State::kClosed);
   if (!ok()) return;
+
+  if(r->smallest.size()==0){
+    r->smallest = key;
+  }
+  r->largest=key;
+  
   ValueType value_type = ExtractValueType(key);
   if (IsValueType(value_type)) {
 #ifndef NDEBUG
