@@ -1336,7 +1336,9 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
     // if(fno_set_==false){
     //   return IOStatus::IOError("PositionedAppend to SST should set fno before append");
     // }
-    return zoneFile_->CAZAAppend(data.data(),data.size(),true,offset);
+    IOStatus s = oneFile_->CAZAAppend(data.data(),data.size(),true,offset);
+    if (s.ok()) wp += data.size();
+    return s;
   }
 
   if (offset != wp) {
