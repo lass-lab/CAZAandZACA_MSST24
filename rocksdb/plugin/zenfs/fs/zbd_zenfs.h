@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include "metrics.h"
 #include "rocksdb/env.h"
+#include "rocksdb/db.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/io_status.h"
 #include "rocksdb/comparator.h"
