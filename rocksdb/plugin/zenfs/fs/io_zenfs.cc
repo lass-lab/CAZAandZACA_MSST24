@@ -817,8 +817,8 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   }
   // zoneFile_->SetSstEnded();
   zoneFile_->fno_=fno_;
-  SetSSTFileforZBDNoLock(fno,zoneFile_.get());
-  std::vector<SSTBuffer*>* sst_buffers=zoneFile_->GetSstBuffers();
+  zbd_->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+  std::vector<SSTBuffer*>* sst_buffers=zoneFile_->GetSSTBuffers();
 
   for(auto it : *sst_buffers){
     if(it->positioned_==true){

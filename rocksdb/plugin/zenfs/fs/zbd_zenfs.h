@@ -894,6 +894,12 @@ class ZonedBlockDevice {
   void PrintZoneToFileStatus(void);
 
 
+  bool SetSSTFileforZBDNoLock(uint64_t fno,ZoneFile* zoneFile);
+
+  bool DeleteSSTFileforZBDNoLock(uint64_t fno);
+
+  ZoneFile* GetSSTZoneFileInZBDNoLock(uint64_t fno);
+
   // Zone* GetIOZoneByOffset(uint64_t offset);
  private:
   IOStatus GetZoneDeferredStatus();
@@ -908,11 +914,6 @@ class ZonedBlockDevice {
   IOStatus AllocateEmptyZone(Zone **zone_out);
 
 
-  bool SetSSTFileforZBDNoLock(uint64_t fno,ZoneFile* zoneFile);
-
-  bool DeleteSSTFileforZBDNoLock(uint64_t fno);
-
-  ZoneFile* GetSSTZoneFileInZBDNoLock(uint64_t fno);
 
   IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
                                           Env::WriteLifeTimeHint file_lifetime,Zone **zone_out);

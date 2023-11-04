@@ -141,7 +141,10 @@ class ZoneFile {
   IOStatus Append(void* buffer, uint64_t data_size);
   IOStatus BufferedAppend(char* data, uint64_t size);
   IOStatus SparseAppend(char* data, uint64_t size);
+
   IOStatus CAZAAppend(const char* data, uint32_t size,bool positioned,uint64_t offset);
+  std::vector<SstBuffer*>* GetSSTBuffers(void) { return &sst_buffers_; }
+
   IOStatus SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime);
   void SetIOType(IOType io_type);
   std::string GetFilename();
