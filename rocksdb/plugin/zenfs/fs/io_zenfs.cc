@@ -1268,7 +1268,7 @@ IOStatus ZonedWritableFile::Append(const Slice& data,
                                                data.size());
 
 
-  if(zoneFile_->IsSst()&&zoneFile_->GetAllocationScheme()==CAZA){
+  if(zoneFile_->IsSST()&&zoneFile_->GetAllocationScheme()==CAZA){
     // if(fno_set_==false){
     //   return IOStatus::IOError("PositionedAppend to SST should set fno before append");
     // }
@@ -1302,7 +1302,7 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
 
-  if(zoneFile_->IsSst()&&zoneFile_->GetAllocationScheme()==CAZA){
+  if(zoneFile_->IsSST()&&zoneFile_->GetAllocationScheme()==CAZA){
     // if(fno_set_==false){
     //   return IOStatus::IOError("PositionedAppend to SST should set fno before append");
     // }

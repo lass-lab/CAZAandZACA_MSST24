@@ -1527,7 +1527,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
       if(cur_score > max_score){
         if(allocated_zone){
-          s=allocated_zone->CheckRelease();
+          s=allocated_zone->Release();
           if(!s.ok()){
             printf("AllocateCompactionAwaredZone :: fail 1\n");
             return s;
@@ -1541,7 +1541,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
       if(cur_score == max_score && cur_invalid_data>max_invalid_data){
         if(allocated_zone){
-          s=allocated_zone->CheckRelease();
+          s=allocated_zone->Release();
           if(!s.ok()){
             printf("AllocateCompactionAwaredZone :: fail 2\n");
             return s;
@@ -1552,7 +1552,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
         continue;
       }
 
-      s = target_zone->CheckRelease();
+      s = target_zone->Release();
       if(!s.ok()){
         printf("AllocateCompactionAwaredZone :: fail 2.5\n");
         return s;
@@ -1657,7 +1657,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
 
     if(cur_score>max_score){
       if(allocated_zone){
-        s = allocated_zone->CheckRelease();
+        allocated_zone->Release();
         if(!s.ok()){
           printf("AllocateMostL0FilesZone :: fail 1\n");
           return s;
@@ -1668,7 +1668,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
       continue;
     }
 
-    s = target_zone->CheckRelease();
+    target_zone->Release();
     if(!s.ok()){
       printf("AllocateMostL0FilesZone :: fail 2\n");
       return s;

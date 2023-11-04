@@ -120,7 +120,7 @@ class ZoneFile {
   Slice smallest_;
   Slice largest_;
   int level_;
-  
+
   std::vector<ZoneExtent*> extents_;
   static const uint64_t SPARSE_HEADER_SIZE = 8;
 
@@ -145,7 +145,7 @@ class ZoneFile {
   IOStatus SparseAppend(char* data, uint64_t size);
 
   IOStatus CAZAAppend(const char* data, uint32_t size,bool positioned,uint64_t offset);
-  std::vector<SstBuffer*>* GetSSTBuffers(void) { return &sst_buffers_; }
+  std::vector<SSTBuffer*>* GetSSTBuffers(void) { return &sst_buffers_; }
 
   IOStatus SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime);
   void SetIOType(IOType io_type);
