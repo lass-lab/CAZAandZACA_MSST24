@@ -353,7 +353,7 @@ void ZenFS::PartialResetWorker(uint64_t T){
 size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
   size_t should_be_copied=0;
-
+  (void)(forced);
   uint64_t zone_size=zbd_->GetZoneSize();
   // uint64_t zone_per_erase_unit_ratio=(zbd_->GetEraseUnitSize()*100)/zone_size;
   // uint64_t erase_unit_size=zbd_->GetEraseUnitSize();
@@ -438,9 +438,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
   //   threshold = 0;
   // }
     // reclaimed_zone_n=2;
-      if(forced){
-      reclaimed_zone_n+=1;
-    }
+    // if(forced){
+    //   reclaimed_zone_n+=1;
+    // }
 
 
   reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
@@ -1116,7 +1116,7 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
       zoneFile->SetIOType(IOType::kUnknown);
     }
     zoneFile->is_sst_=ends_with(fname,".sst");
-    
+
     /* Persist the creation of the file */
     s = SyncFileMetadataNoLock(zoneFile);
     if (!s.ok()) {

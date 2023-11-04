@@ -1448,7 +1448,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   if(allocation_scheme_==LIZA){
     return IOStatus::OK();
   }
-  // return IOStatus::OK();
+
   (void)(file_lifetime);
 
   return IOStatus::OK();
@@ -1471,25 +1471,9 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   }  
 
   {
-    // std::lock_guard<std::mutex> lg(sst_file_map_lock_);
-    
-    // if(sst_file_map_.empty()){
-    //   s = AllocateEmptyZone(&allocated_zone);
-    //   if(s.ok()){
-    //     allocated_zone->lifetime_ = file_lifetime;
-    //   }
-    //   return s;
-    // }
 
     AdjacentFileList(smallest, largest, level, fno_list);
 
-    // if(fno_list.empty()){
-    //   s = AllocateEmptyZone(&allocated_zone);
-    //   if(s.ok()&&allocated_zone!= ){
-    //     allocated_zone->lifetime_ = file_lifetime;
-    //   }
-    //   return s; 
-    // }
 
     for (auto fno : fno_list){
       ZoneFile* zFile= GetSSTZoneFileInZBDNoLock(fno);
