@@ -414,10 +414,10 @@ IOStatus WritableFileWriter::Sync(bool use_fsync) {
     return s;
   }
   TEST_KILL_RANDOM("WritableFileWriter::Sync:0");
-  writable_file()->CAZAFlushSST();
-  // if(!s.ok()){
-  //   return s;
-  // }
+  s= writable_file()->CAZAFlushSST();
+  if(!s.ok()){
+    return s;
+  }
   if (!use_direct_io() && pending_sync_) {
     s = SyncInternal(use_fsync);
     if (!s.ok()) {
