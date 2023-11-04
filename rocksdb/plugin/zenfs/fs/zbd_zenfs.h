@@ -37,6 +37,8 @@ class ZonedBlockDevice;
 class ZonedBlockDeviceBackend;
 class ZoneSnapshot;
 class ZenFSSnapshotOptions;
+class Zone;
+class ZoneFile;
 
 // uint64_t ZONE_CLEANING_KICKING_POINT=20;
 
