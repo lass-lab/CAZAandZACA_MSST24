@@ -772,7 +772,7 @@ IOStatus ZoneFile::CAZAAppend(const char* data, uint32_t size,bool positioned,ui
   IOStatus s=IOStatus::OK();
   // printf("@@@ CAZASstBufferedAppend called : %ld %u\n",fno_,size);
   char* buf;
-  if(!is_sst_){
+  if(!IsSST()){
     return IOStatus::IOError("CAZASstBufferedAppend only apply to sst file");
   }
   if(is_sparse_){
