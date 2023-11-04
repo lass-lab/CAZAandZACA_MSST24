@@ -812,9 +812,10 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   if(zoneFile_->GetAllocationScheme()==LIZA){ // no need to flush
     return IOStatus::OK();
   }
-  if(!zoneFile_->IsSST()){
-    return IOStatus::IOError("FlushSstAfterEnded only apply to sst file");
-  }
+  // if(!zoneFile_->IsSST()){
+  //   // return IOStatus::IOError("FlushSstAfterEnded only apply to sst file");
+  //   return IOStatus::OK();
+  // }
   // zoneFile_->SetSstEnded();
   zoneFile_->fno_=fno_;
   zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
