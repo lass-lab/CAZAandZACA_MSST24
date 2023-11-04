@@ -87,9 +87,6 @@ class ZoneFile {
 
   ZonedBlockDevice* zbd_;
 
-  Slice smallest_;
-  Slice largest_;
-  int level_;
 
 
   std::vector<std::string> linkfiles_;
@@ -118,7 +115,12 @@ class ZoneFile {
   std::atomic<int> readers_{0};
   FileSystemWrapper* zenfs_;
  public:
-   uint64_t fno_;
+
+  uint64_t fno_;
+  Slice smallest_;
+  Slice largest_;
+  int level_;
+  
   std::vector<ZoneExtent*> extents_;
   static const uint64_t SPARSE_HEADER_SIZE = 8;
 
