@@ -90,7 +90,7 @@ class ZoneFile {
   Slice smallest_;
   Slice largest_;
   int level_;
-  uint64_t fno_;
+
 
   std::vector<std::string> linkfiles_;
   Zone* active_zone_;
@@ -118,6 +118,7 @@ class ZoneFile {
   std::atomic<int> readers_{0};
   FileSystemWrapper* zenfs_;
  public:
+   uint64_t fno_;
   std::vector<ZoneExtent*> extents_;
   static const uint64_t SPARSE_HEADER_SIZE = 8;
 
@@ -130,7 +131,7 @@ class ZoneFile {
   bool TryAcquireWRLock();
   void ReleaseWRLock();
 
-  inline bool IsSst() { return io_type_!=IOType::kWAL; }
+  inline bool IsSST() { return io_type_!=IOType::kWAL; }
   inline uint64_t GetAllocationScheme()  { return zbd_->GetAllocationScheme(); }
   IOStatus CloseWR();
   bool IsOpenForWR();

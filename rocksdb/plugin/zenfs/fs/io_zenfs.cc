@@ -593,7 +593,7 @@ void ZoneFile::PushExtent() {
 
 IOStatus ZoneFile::AllocateNewZone() {
   Zone* zone;
-  IOStatus s = zbd_->AllocateIOZone(lifetime_, io_type_, &zone);
+  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone);
   // assert(IOStatus::NoSpace("Not enough capacity for append")==IOStatus::NosSpace());
   
   if(zone==nullptr){
@@ -611,7 +611,7 @@ IOStatus ZoneFile::AllocateNewZone() {
 
       // sleep(1);
       usleep(1000 * 1000);
-      s = zbd_->AllocateIOZone(lifetime_, io_type_, &zone);
+      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone);
       // zenfs_->ZCUnLock();
       if(zone!=nullptr){
         break;
@@ -780,9 +780,9 @@ IOStatus ZoneFile::CAZAAppend(const char* data, uint32_t size,bool positioned,ui
   }
 
 
-  if(is_sst_ended_){
-    return IOStatus::IOError("SST file could not Append after file ended");
-  }
+  // if(is_sst_ended_){
+  //   return IOStatus::IOError("SST file could not Append after file ended");
+  // }
   // buf=new char[size];
   int r= posix_memalign((void**)&buf,sysconf(_SC_PAGE_SIZE),size);
   if(r<0){
@@ -805,14 +805,15 @@ IOStatus ZoneFile::CAZAAppend(const char* data, uint32_t size,bool positioned,ui
 IOStatus ZonedWritableFile::CAZAFlushSST(){
   IOStatus s;
 
-  if(!zoneFile_->IsSST()){
-    return IOStatus::IOError("FlushSstAfterEnded only apply to sst file");
-  }
-  if(zoneFile_->IsSSTEnded()){
-    return IOStatus::IOError("FlushSstAfterEnded only flush once");
-  }
+
+  // if(zoneFile_->IsSSTEnded()){
+  //   return IOStatus::IOError("FlushSstAfterEnded only flush once");
+  // }
   if(zoneFile_->GetAllocationScheme()==LIZA){ // no need to flush
     return IOStatus::OK();
+  }
+  if(!zoneFile_->IsSST()){
+    return IOStatus::IOError("FlushSstAfterEnded only apply to sst file");
   }
   // zoneFile_->SetSstEnded();
   zoneFile_->fno_=fno_;

@@ -906,12 +906,23 @@ class ZonedBlockDevice {
                                 uint64_t min_capacity = 0);
   IOStatus GetAnyLargestRemainingZone(Zone** zone_out,bool force,uint64_t min_capacity = 0);
   IOStatus AllocateEmptyZone(Zone **zone_out);
+
+
+  bool SetSSTFileforZBDNoLock(sst_fileno fno,ZoneFile* zoneFile);
+
+  bool DeleteSSTFileforZBDNoLock(sst_fileno fno);
+
+  ZoneFile* GetSSTZoneFileInZBDNoLock(sst_fileno fno);
+
   IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
                                           Env::WriteLifeTimeHint file_lifetime,Zone **zone_out);
   
+  
+
   IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
                                     Zone** zone_out);
-                                    
+  void AdjacentFileList(Slice& smallest,Slice& largest, int level, std::vector<uint64_t>& fno_list);
+
   IOStatus AllocateSameLevelFilesZone(Slice& smallest, Slice& largest ,
                                       const std::vector<uint64_t>& fno_list,Zone** zone_out);
   IOStatus GetNearestZoneFromZoneFile(ZoneFile* zFile,Zone** zone_out);
