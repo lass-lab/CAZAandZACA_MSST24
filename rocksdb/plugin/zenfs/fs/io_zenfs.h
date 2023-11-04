@@ -106,7 +106,7 @@ class ZoneFile {
   time_t m_time_;
   bool is_sparse_ = false;
   bool is_deleted_ = false;
-  bool is_sst_;
+  
   MetadataWriter* metadata_writer_ = NULL;
 
   std::vector<SSTBuffer*> sst_buffers_;
@@ -115,7 +115,7 @@ class ZoneFile {
   std::atomic<int> readers_{0};
   FileSystemWrapper* zenfs_;
  public:
-
+  bool is_sst_ = false;
   uint64_t fno_;
   Slice smallest_;
   Slice largest_;
@@ -133,7 +133,7 @@ class ZoneFile {
   bool TryAcquireWRLock();
   void ReleaseWRLock();
 
-  inline bool IsSST() { return io_type_!=IOType::kWAL; }
+  inline bool IsSST() { return is_sst_; }
   inline uint64_t GetAllocationScheme()  { return zbd_->GetAllocationScheme(); }
   IOStatus CloseWR();
   bool IsOpenForWR();
