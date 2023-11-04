@@ -1,0 +1,4 @@
+git pull origin PartialResetBGTurningPoint
+sudo DEBUG_LEVEL=0 ROCKSDB_PLUGINS=zenfs make -j16 db_bench install
+
+

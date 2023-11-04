@@ -1,0 +1,32 @@
+@@@ write f zbd_open 5 /dev/nullb0
+device free space : 20480
+Set seed to 1690475504200593 because --seed was 0
+Initializing RocksDB Options from the specified file
+Initializing RocksDB Options from command-line flags
+FAR STAT 0 :: ZC Triggered Count : 0
+============================================================
+FAR STAT 1 :: WWP (MB) : 0, R_wp : 100
+FAR STAT 2 :: ZC IO Blocking time : 0, Compaction Refused : 0
+FAR STAT 4 :: Zone Cleaning Trigger Time Lapse
+============================================================
+Total ZC Copied (MB) :: 0, Recaimed by ZC :: 0 
+============================================================
+
+FAR STAT  :: Reset Count (R+ZC) : 0+0=0
+FAR STAT 5 :: Total Run-time Reset Latency : 0.00, avg Zone Reset Latency : -nan
+============================================================
+
+FAR STAT 6-1 :: I/O Blocked Time Lapse
+============================================================
+FAR STAT 6-2 :: Compaction Blocked TimeLapse
+============================================================
+
+============================================================
+
+============================================================
+============================================================
+
+FAR STAT :: Time Lapse
+Sec   | Free |  RC | R_wp |   RT  |  Stall  |      Cause         |
+============================================================
+

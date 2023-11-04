@@ -1,0 +1,49 @@
+
+
+
+sudo /home/gs201/ZNS_tutorial/destroy-nullblk-zoned.sh 0     
+sudo /home/gs201/ZNS_tutorial/nullblk-zoned.sh 4096 16 0 640
+sudo rm -rf ~/log
+sudo mkdir -p ~/log
+
+
+
+echo "mq-deadline" | sudo tee /sys/block/nullb0/queue/scheduler
+
+sudo /home/gs201/FAST24/DeviceSideCircular/rocksdb/plugin/zenfs/util/zenfs mkfs --force --enable_gc --zbd=/nullb0 --aux_path=/home/gs201/log
+
+sudo /home/gs201/FAST24/DeviceSideCircular/rocksdb/db_bench  \
+                         -reads=4582912 -writes=4582912 -finish_after_writes=true -benchmarks="readwhilewriting,stats" --fs_uri=zenfs://dev:nullb0 -statistics -threads=4 -writer_threads=2 -value_size=1024 \
+                        -file_opening_threads=4  \
+                        -max_background_flushes=4 -max_background_compactions=4 -histogram \
+                        -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=0 > /home/gs201/FAST24/result
+                        
+                        
+                        
+                        
+sudo /home/gs201/FAST24/DeviceSideCircular/rocksdb/db_bench \
+                        -num=17582912 -benchmarks="readwhilewriting,stats" --fs_uri=zenfs://dev:nullb0 -statistics -threads=1 -value_size=1024 \
+                        -file_opening_threads=4  \
+                        -max_background_flushes=4 -max_background_compactions=4 -histogram \
+                        -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=4 > /home/gs201/FAST24/result
+                        
+                                                
+                    
+//sudo /home/gs201/ZNS_tutorial/destroy-nullblk-zoned.sh 0            
+//sudo /home/gs201/ZNS_tutorial/nullblk-zoned.sh 4096 512 0 48
+
+sudo /home/gs201/ZNS_tutorial/destroy-nullblk-zoned.sh 0     
+sudo /home/gs201/ZNS_tutorial/nullblk-zoned.sh 4096 16 0 64
+
+sudo DEBUG_LEVEL=0 ROCKSDB_PLUGINS=zenfs make -j16 db_bench install
+
+
+
+// pass scheme
+#define PARTIAL_RESET_DISABLED 0
+#define PARTIAL_RESET_AT_DELETE_TIME_BEFORE_ZONE_RESET 1 // called n : 292161 erased unit n : 4608
+#define PARTIAL_RESET_AT_DELETE_TIME_AFTER_ZONE_RESET 2 // called n : 288383 erased unit n : 124 , called n : 288345 erased unit n : 39
+#define PARTIAL_RESET_AT_DELETE_TIME_BOTH 3 // called n : 585580 erased unit n : 4732
+#define PARTIAL_RESET_AT_BACKGROUND 4 // called n : 44227 erased unit n : 7386
+#define PARTIAL_RESET_AGGRESIVELY 5
+
