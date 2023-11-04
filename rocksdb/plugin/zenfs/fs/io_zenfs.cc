@@ -826,7 +826,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     if(it->positioned_==true){
       if (it->offset_ != wp) {
         // assert(false);
-        return IOStatus::IOError("positioned append not at write pointer");
+        return IOStatus::IOError("positioned append not at write pointer 2");
       }
     }
     if(buffered){
