@@ -1499,7 +1499,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       }
       auto extents=zFile->GetExtents();
       for(auto extent: extents){
-        if(!extent->zone_->IsBusy() && !extent->zone_->IsFull()){
+        if(!extent->zone_->IsFull()){
           // zone_->index do not skip meta,spare zone
           zone_score[extent->zone_->zidx_]+=extent->length_;
           no_near_level_files=false;
@@ -1527,11 +1527,11 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
       if(cur_score > max_score){
         if(allocated_zone){
-          s=allocated_zone->Release();
-          if(!s.ok()){
-            printf("AllocateCompactionAwaredZone :: fail 1\n");
-            return s;
-          }
+          allocated_zone->Release();
+          // if(!s.ok()){
+          //   printf("AllocateCompactionAwaredZone :: fail 1\n");
+          //   return s;
+          // }
         }
         allocated_zone=target_zone;
         max_score=cur_score;
@@ -1541,11 +1541,11 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
       if(cur_score == max_score && cur_invalid_data>max_invalid_data){
         if(allocated_zone){
-          s=allocated_zone->Release();
-          if(!s.ok()){
-            printf("AllocateCompactionAwaredZone :: fail 2\n");
-            return s;
-          }
+          allocated_zone->Release();
+          // if(!s.ok()){
+          //   printf("AllocateCompactionAwaredZone :: fail 2\n");
+          //   return s;
+          // }
         }
         allocated_zone=target_zone;
         max_invalid_data=cur_invalid_data;
@@ -1632,7 +1632,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
       }
       auto extents=zFile->GetExtents();
       for(auto e : extents){
-        if(!e->zone_->IsBusy()&& !e->zone_->IsFull()){
+        if(!e->zone_->IsFull()){
           zone_score[e->zone_->zidx_]+=e->length_;
           no_same_level_files=false;
         }

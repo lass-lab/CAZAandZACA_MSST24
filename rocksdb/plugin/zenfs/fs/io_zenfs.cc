@@ -817,7 +817,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   }
   // zoneFile_->SetSstEnded();
   zoneFile_->fno_=fno_;
-  zbd_->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+  zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
   std::vector<SSTBuffer*>* sst_buffers=zoneFile_->GetSSTBuffers();
 
   for(auto it : *sst_buffers){
@@ -1272,7 +1272,7 @@ IOStatus ZonedWritableFile::Append(const Slice& data,
     // if(fno_set_==false){
     //   return IOStatus::IOError("PositionedAppend to SST should set fno before append");
     // }
-    return zoneFile_->CAZAAppend(data.data(),data.size(),true,offset);
+    return zoneFile_->CAZAAppend(data.data(),data.size(),true,0);
   }
 
 
