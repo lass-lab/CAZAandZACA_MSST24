@@ -273,7 +273,7 @@ class ZonedWritableFile : public FSWritableFile {
   void SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) override;
 
 
-  void CAZAFlushSST() override;
+  IOStatus CAZAFlushSST() override;
   
   void SetMinMaxKeyAndLevel(const Slice& s,const Slice& l,const int output_level) override;
 
