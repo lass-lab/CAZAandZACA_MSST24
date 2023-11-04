@@ -1862,10 +1862,13 @@ IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
   return s;
 }
 
-IOStatus ZonedBlockDevice::TakeMigrateZone(Zone **out_zone,
+// IOStatus ZonedBlockDevice::TakeMigrateZone(Zone **out_zone,
+//                                            Env::WriteLifeTimeHint file_lifetime,
+//                                            uint64_t min_capacity,
+//                                            bool* run_gc_worker_) {
+IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int level,Zone **out_zone,
                                            Env::WriteLifeTimeHint file_lifetime,
-                                           uint64_t min_capacity,
-                                           bool* run_gc_worker_) {
+                                           uint32_t min_capacity, bool* run_gc_worker_) {
   std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
   if((*run_gc_worker_)==false){
       migrating_=false;
@@ -1886,6 +1889,15 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Zone **out_zone,
       migrating_=false;
       return IOStatus::OK();
     }
+
+    if(allocation_scheme_==CAZA){
+      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone);
+      if (s.ok() && (*out_zone) != nullptr) {
+        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+        break;
+      }
+    }
+
     s=GetBestOpenZoneMatch(file_lifetime, &best_diff, out_zone, min_capacity);
     
 
