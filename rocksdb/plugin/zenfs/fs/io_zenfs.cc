@@ -809,9 +809,9 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   // if(zoneFile_->IsSSTEnded()){
   //   return IOStatus::IOError("FlushSstAfterEnded only flush once");
   // }
-  if(zoneFile_->GetAllocationScheme()==LIZA){ // no need to flush
-    return IOStatus::OK();
-  }
+  // if(zoneFile_->GetAllocationScheme()==LIZA){ // no need to flush
+  //   return IOStatus::OK();
+  // }
   if(!zoneFile_->IsSST()){
     // return IOStatus::IOError("FlushSstAfterEnded only apply to sst file");
     return IOStatus::OK();
@@ -1337,7 +1337,7 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
     //   return IOStatus::IOError("PositionedAppend to SST should set fno before append");
     // }
     s = zoneFile_->CAZAAppend(data.data(),data.size(),true,offset);
-    if (s.ok()) wp += data.size();
+    // if (s.ok()) wp += data.size();
     return s;
   }
 
