@@ -1225,6 +1225,34 @@ IOStatus ZonedWritableFile::FlushBuffer() {
   return IOStatus::OK();
 }
 
+IOStatus ZonedWritableFile::BufferedWrite(char* data, uint32_t data_left) {
+  // uint32_t data_left = slice.size();
+  IOStatus s;
+
+  while (data_left) {
+    uint32_t buffer_left = buffer_sz - buffer_pos;
+    uint32_t to_buffer;
+
+    if (!buffer_left) {
+      s = FlushBuffer();
+      if (!s.ok()) return s;
+      buffer_left = buffer_sz;
+    }
+
+    to_buffer = data_left;
+    if (to_buffer > buffer_left) {
+      to_buffer = buffer_left;
+    }
+
+    memcpy(buffer + buffer_pos, data, to_buffer);
+    buffer_pos += to_buffer;
+    data_left -= to_buffer;
+    data += to_buffer;
+  }
+
+  return IOStatus::OK();
+}
+
 IOStatus ZonedWritableFile::BufferedWrite(const Slice& slice) {
   uint64_t data_left = slice.size();
   char* data = (char*)slice.data();

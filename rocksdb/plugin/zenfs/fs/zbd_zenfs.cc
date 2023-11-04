@@ -1552,11 +1552,11 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
         continue;
       }
 
-      s = target_zone->Release();
-      if(!s.ok()){
-        printf("AllocateCompactionAwaredZone :: fail 2.5\n");
-        return s;
-      }
+      target_zone->Release();
+      // if(!s.ok()){
+      //   printf("AllocateCompactionAwaredZone :: fail 2.5\n");
+      //   return s;
+      // }
     }
   }
 
