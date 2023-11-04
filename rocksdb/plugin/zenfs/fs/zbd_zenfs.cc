@@ -1448,6 +1448,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   if(allocation_scheme_==LIZA){
     return IOStatus::OK();
   }
+  return IOStatus::OK();
   (void)(file_lifetime);
 
   return IOStatus::OK();
