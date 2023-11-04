@@ -2888,8 +2888,8 @@ void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();\
   CompactionInputFiles higher_output_level_inputs;
   CompactionInputFiles lower_output_level_inputs;
-  InternalKeyImpl largest;
-  InternalKeyImpl smallest;
+  InternalKey largest;
+  InternalKey smallest;
   largest.DecodeFrom(l);
   smallest.DecodeFrom(s);
   // printf("ajacent 1\n");
