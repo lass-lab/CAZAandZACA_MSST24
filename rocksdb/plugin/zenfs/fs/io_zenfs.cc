@@ -767,6 +767,86 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
   return IOStatus::OK();
 }
 
+
+IOStatus ZoneFile::CAZAAppend(const char* data, uint32_t size,bool positioned,uint64_t offset){
+  IOStatus s=IOStatus::OK();
+  // printf("@@@ CAZASstBufferedAppend called : %ld %u\n",fno_,size);
+  char* buf;
+  if(!is_sst_){
+    return IOStatus::IOError("CAZASstBufferedAppend only apply to sst file");
+  }
+  if(is_sparse_){
+    return IOStatus::IOError("sst file should not be sparse");
+  }
+
+
+  if(is_sst_ended_){
+    return IOStatus::IOError("SST file could not Append after file ended");
+  }
+  // buf=new char[size];
+  int r= posix_memalign((void**)&buf,sysconf(_SC_PAGE_SIZE),size);
+  if(r<0){
+    printf("posix memalign error here@@@@@@@@@@@2\n");
+    return IOStatus::IOError("CAZASstBufferedAppend fail to allocate memory");
+  }
+
+  memcpy(buf,data,size);
+  SSTBuffer* sst_buffer=new SSTBuffer(buf,size,positioned,offset);
+
+  if(sst_buffer==nullptr){
+    return IOStatus::IOError("CAZASstBufferedAppend fail to allocate memory");
+  }
+  sst_buffers_.push_back(sst_buffer);
+
+  return s;
+}
+
+
+IOStatus ZonedWritableFile::CAZAFlushSST(){
+  IOStatus s;
+
+  if(!zoneFile_->IsSST()){
+    return IOStatus::IOError("FlushSstAfterEnded only apply to sst file");
+  }
+  if(zoneFile_->IsSSTEnded()){
+    return IOStatus::IOError("FlushSstAfterEnded only flush once");
+  }
+  if(zoneFile_->GetAllocationScheme()==LIZA){ // no need to flush
+    return IOStatus::OK();
+  }
+  // zoneFile_->SetSstEnded();
+  zoneFile_->fno_=fno_;
+  SetSSTFileforZBDNoLock(fno,zoneFile_.get());
+  std::vector<SSTBuffer*>* sst_buffers=zoneFile_->GetSstBuffers();
+
+  for(auto it : *sst_buffers){
+    if(it->positioned_==true){
+      if (it->offset_ != wp) {
+        // assert(false);
+        return IOStatus::IOError("positioned append not at write pointer");
+      }
+    }
+    if(buffered){
+      buffer_mtx_.lock();
+      s=BufferedWrite(it->content_,it->size_);
+      buffer_mtx_.unlock();
+      if(!s.ok()){
+        return s;
+      }
+    }else{
+      s = zoneFile_->Append(it->content_,it->size_);
+      if(!s.ok()){
+        return s;
+      }  
+      wp+=it->size_;
+    }
+    delete it;
+  }
+
+
+  return s;
+}
+
 /* Assumes that data and size are block aligned */
 IOStatus ZoneFile::Append(void* data, uint64_t data_size) {
   uint64_t left = data_size;
@@ -951,6 +1031,18 @@ IOStatus ZoneFile::RemoveLinkName(const std::string& linkf) {
 IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime) {
   lifetime_ = lifetime;
   return IOStatus::OK();
+}
+
+void ZonedWritableFile::SetMinMaxKeyAndLevel(const Slice& s,const Slice& l,const int output_level){
+  if(output_level<0){
+    // printf("@@@ ZonedWritableFile::SetMinMaxAndLEvel :: failed , level should be > 0\n");
+    return;
+  }
+  // printf("set min max : fno :%ld at %d\n",zoneFile_->fno_,output_level);
+  zoneFile_->smallest_=s;
+  zoneFile_->largest_=l;
+  zoneFile_->level_=output_level;
+  return;
 }
 
 void ZoneFile::ReleaseActiveZone() {
@@ -1174,6 +1266,16 @@ IOStatus ZonedWritableFile::Append(const Slice& data,
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
 
+
+  if(zoneFile_->IsSst()&&zoneFile_->GetAllocationScheme()==CAZA){
+    // if(fno_set_==false){
+    //   return IOStatus::IOError("PositionedAppend to SST should set fno before append");
+    // }
+    return zoneFile_->CAZAAppend(data.data(),data.size(),true,offset);
+  }
+
+
+
   if (buffered) {
     buffer_mtx_.lock();
     s = BufferedWrite(data);
@@ -1198,6 +1300,13 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
   zoneFile_->GetZBDMetrics()->ReportQPS(ZENFS_WRITE_QPS, 1);
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
+
+  if(zoneFile_->IsSst()&&zoneFile_->GetAllocationScheme()==CAZA){
+    // if(fno_set_==false){
+    //   return IOStatus::IOError("PositionedAppend to SST should set fno before append");
+    // }
+    return zoneFile_->CAZAAppend(data.data(),data.size(),true,offset);
+  }
 
   if (offset != wp) {
     assert(false);

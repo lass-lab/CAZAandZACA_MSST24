@@ -30,6 +30,16 @@
 namespace ROCKSDB_NAMESPACE {
 
 // class ZenFS;
+struct SSTBuffer{
+  SSTBuffer(char* data,uint32_t size,bool positioned,uint64_t offset) : 
+                          content_(data),size_(size),positioned_(positioned),offset_(offset) { }
+  SSTBuffer() {}
+  ~SSTBuffer(){ free(content_); }
+  char* content_=nullptr;
+  uint32_t size_=-1;
+  bool positioned_;
+  uint64_t offset_;
+};
 
 class ZoneExtent {
  public:
@@ -77,6 +87,10 @@ class ZoneFile {
 
   ZonedBlockDevice* zbd_;
 
+  Slice smallest_;
+  Slice largest_;
+  int level_;
+  uint64_t fno_;
 
   std::vector<std::string> linkfiles_;
   Zone* active_zone_;
@@ -95,8 +109,10 @@ class ZoneFile {
   time_t m_time_;
   bool is_sparse_ = false;
   bool is_deleted_ = false;
-
+  bool is_sst_;
   MetadataWriter* metadata_writer_ = NULL;
+
+  std::vector<SSTBuffer*> sst_buffers_;
 
   std::mutex writer_mtx_;
   std::atomic<int> readers_{0};
@@ -114,6 +130,8 @@ class ZoneFile {
   bool TryAcquireWRLock();
   void ReleaseWRLock();
 
+  inline bool IsSst() { return io_type_!=IOType::kWAL; }
+  inline uint64_t GetAllocationScheme()  { return zbd_->GetAllocationScheme(); }
   IOStatus CloseWR();
   bool IsOpenForWR();
 
@@ -122,6 +140,7 @@ class ZoneFile {
   IOStatus Append(void* buffer, uint64_t data_size);
   IOStatus BufferedAppend(char* data, uint64_t size);
   IOStatus SparseAppend(char* data, uint64_t size);
+  IOStatus CAZAAppend(const char* data, uint32_t size,bool positioned,uint64_t offset);
   IOStatus SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime);
   void SetIOType(IOType io_type);
   std::string GetFilename();
@@ -252,6 +271,12 @@ class ZonedWritableFile : public FSWritableFile {
     return zoneFile_->GetBlockSize();
   }
   void SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) override;
+
+
+  void CAZAFlushSST() override;
+  
+  void SetMinMaxKeyAndLevel(const Slice& s,const Slice& l,const int output_level) override;
+
   virtual Env::WriteLifeTimeHint GetWriteLifeTimeHint() override {
     return zoneFile_->GetWriteLifeTimeHint();
   }

@@ -496,8 +496,9 @@ loop:
   }
   void SetDBPtr(DB *ptr) override{
     db_ptr_=ptr;
+    zbd_->SetDBPtr(ptr);
   }
-  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until) override;
+  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) override;
 
   bool IsZoneDevice(){ return true; }
   void ZoneCleaningWorker(bool run_once=false) override;

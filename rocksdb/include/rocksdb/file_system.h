@@ -531,7 +531,7 @@ class FileSystem : public Customizable {
                                const IOOptions& options, uint64_t* file_size,
                                IODebugContext* dbg) = 0;
 
-  virtual void SetResetScheme(uint32_t ,uint32_t, uint64_t, uint64_t, uint64_t) {}
+  virtual void SetResetScheme(uint32_t ,uint32_t, uint64_t, uint64_t, uint64_t,uint64_t) {}
 
   // Store the last modification time of fname in *file_mtime.
   virtual IOStatus GetFileModificationTime(const std::string& fname,
@@ -970,7 +970,7 @@ class FSWritableFile {
         strict_bytes_per_sync_(options.strict_bytes_per_sync) {}
 
   virtual ~FSWritableFile() {}
-
+  uint64_t fno_;
   // Append data to the end of the file
   // Note: A WriteableFile object must support either Append or
   // PositionedAppend, so the users cannot mix the two.
@@ -1177,7 +1177,10 @@ class FSWritableFile {
 
   // If you're adding methods here, remember to add them to
   // WritableFileWrapper too.
-
+  virtual void SetMinMaxKeyAndLevel(const Slice& ,const Slice& ,const int ){}
+  virtual IOStatus FlushSSTAfterEnded(void){
+    return IOStatus::OK();
+  }
  protected:
   size_t preallocation_block_size() { return preallocation_block_size_; }
 
@@ -1455,8 +1458,8 @@ class FileSystemWrapper : public FileSystem {
     return target_->GetFileSize(f, options, s, dbg);
   }
 
-  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until) {
-    target_->SetResetScheme(r,partial_reset_scheme,T,zc,until);
+  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) {
+    target_->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
   }
 
   IOStatus GetFileModificationTime(const std::string& fname,
@@ -1776,6 +1779,12 @@ class FSWritableFileWrapper : public FSWritableFile {
   IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& options,
                     IODebugContext* dbg) override {
     return target_->Allocate(offset, len, options, dbg);
+  }
+  void SetMinMaxKeyAndLevel(const Slice& smallest,const Slice& largest,const int level) override {
+      target_->SetMinMaxKeyAndLevel(smallest,largest,level);
+  }
+  IOStatus CAZAFlushSST(void){
+    return target_->CAZAFlushSST();
   }
 
  private:

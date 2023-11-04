@@ -666,6 +666,7 @@ struct DBOptions {
   std::string wal_dir = "";
 
   uint32_t reset_scheme;
+  uint64_t allocation_scheme;
   
   uint32_t partial_reset_scheme;
 

@@ -67,6 +67,9 @@ class ZenFSSnapshotOptions;
 #define PASS 0
 #define SPINLOCK 1 
 
+#define LIZA 0
+#define CAZA 1
+
 #define PARTIAL_RESET_KICKED_THRESHOLD 40
                                                       // | zone-reset | partial-reset |
 #define RUNTIME_ZONE_RESET_DISABLED 0    	           	// |      x     |       x       |
@@ -370,6 +373,11 @@ class ZonedBlockDevice {
   int zone_cleaning_io_block_ = 0;
   clock_t ZBD_mount_time_;
   bool zone_allocation_state_ = true;
+
+  DB* db_ptr_;
+  
+  ZoneFile** sst_file_bitmap_;
+
   struct ZCStat{
     size_t zc_z;
     int s;
@@ -463,6 +471,7 @@ class ZonedBlockDevice {
                       const std::vector<Zone *> zones);
   void CalculateResetThreshold(uint64_t free_percent);
   uint32_t reset_scheme_;
+  uint64_t allocation_scheme_;
   uint32_t partial_reset_scheme_;
   uint64_t tuning_point_;
   enum {
@@ -533,6 +542,8 @@ class ZonedBlockDevice {
   void ZCorPartialLock(); 
   bool ZCorPartialTryLock();
   void ZCorPartialUnLock();
+
+  inline uint64_t GetAllocationScheme() { return allocation_scheme_;}
 
   uint64_t GetZoneCleaningKickingPoint(){ 
     if(zc_until_set_){
@@ -620,8 +631,9 @@ class ZonedBlockDevice {
 
   Zone *GetIOZone(uint64_t offset);
 
-  IOStatus AllocateIOZone(Env::WriteLifeTimeHint file_lifetime, IOType io_type,
-                          Zone **out_zone);
+  IOStatus AllocateIOZone(bool is_sst,Slice& smallest, Slice& largest ,int level,Env::WriteLifeTimeHint file_lifetime, IOType io_type,
+                          Zone **out_zone );
+  
   void SetZoneAllocationFailed() { zone_allocation_state_=false; }
   bool IsZoneAllocationFailed(){ return zone_allocation_state_==false; }
   IOStatus AllocateMetaZone(Zone **out_meta_zone);
@@ -778,7 +790,9 @@ class ZonedBlockDevice {
   // int GetResetCountBG() {return reset_count_bg_.load();}
   uint64_t GetWWP() { return wasted_wp_.load();}
   
-
+  void SetDBPtr(DB* db_ptr){
+    db_ptr_=db_ptr;  
+  }
 
   void SetCurFreepercent(uint64_t free_percent) { cur_free_percent_=free_percent; }
   
@@ -846,8 +860,9 @@ class ZonedBlockDevice {
   bool ShouldForceZCTriggered(void) { return force_zc_should_triggered_.load(); }
   
   IOStatus ResetAllZonesForForcedNewFileSystem(void);
-  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until) { 
+  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) { 
     reset_scheme_=r; 
+    allocation_scheme_=allocation_scheme;
     partial_reset_scheme_=partial_reset_scheme;
     tuning_point_=T;
     if(zc!=0){
@@ -887,6 +902,15 @@ class ZonedBlockDevice {
                                 uint64_t min_capacity = 0);
   IOStatus GetAnyLargestRemainingZone(Zone** zone_out,bool force,uint64_t min_capacity = 0);
   IOStatus AllocateEmptyZone(Zone **zone_out);
+  IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
+                                          Env::WriteLifeTimeHint file_lifetime,Zone **zone_out);
+  
+  IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
+                                    Zone** zone_out);
+                                    
+  IOStatus AllocateSameLevelFilesZone(Slice& smallest, Slice& largest ,
+                                      const std::vector<uint64_t>& fno_list,Zone** zone_out);
+  IOStatus GetNearestZoneFromZoneFile(ZoneFile* zFile,Zone** zone_out);
 
   inline uint64_t LazyLog(uint64_t sz,uint64_t fr,uint64_t T);
 

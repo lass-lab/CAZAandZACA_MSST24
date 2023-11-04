@@ -99,7 +99,6 @@ Status BuildTable(
         range_del_iter->total_tombstone_payload_bytes();
     range_del_agg->AddTombstones(std::move(range_del_iter));
   }
-
   std::string fname = TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
                                     meta->fd.GetPathId());
   std::vector<std::string> blob_file_paths;
@@ -172,6 +171,11 @@ Status BuildTable(
           tmp_set.Contains(FileType::kTableFile), false));
 
       builder = NewTableBuilder(tboptions, file_writer.get());
+      std::string sst(".sst");
+      if(std::equal(sst.rbegin(),sst.rend(),fname.rbegin())){
+        // builder->rep_->file->writable_file()->fno_=meta->fd.GetNumber();      
+        builder->SetFileNumber(meta->fd.GetNumber());
+      }
     }
 
     MergeHelper merge(

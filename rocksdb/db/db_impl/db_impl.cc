@@ -282,7 +282,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   printf("reclaim until %lu~%lu\n",options.zc,options.until);
   // fs_->reset_scheme_= initial_db_options_.reset_scheme;
   fs_->SetResetScheme(initial_db_options_.reset_scheme,initial_db_options_.partial_reset_scheme,initial_db_options_.tuning_point,
-                        initial_db_options_.zc,initial_db_options_.until);
+                        initial_db_options_.zc,initial_db_options_.until,initial_db_options_.allocation_scheme);
 }
 
 Status DBImpl::Resume() {
@@ -2884,6 +2884,52 @@ Status DBImpl::DropColumnFamilies(
   return s;
 }
 
+void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list) {
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();\
+  CompactionInputFiles higher_output_level_inputs;
+  CompactionInputFiles lower_output_level_inputs;
+  InternalKeyImpl largest;
+  InternalKeyImpl smallest;
+  largest.DecodeFrom(l);
+  smallest.DecodeFrom(s);
+  // printf("ajacent 1\n");
+  vstorage->GetOverlappingInputs(level+1,&smallest,&largest,&higher_output_level_inputs.files);
+  // printf("ajacent 2\n");
+  if(level>0){
+    level--;
+  }
+  // printf("ajacent 3\n");
+  vstorage->GetOverlappingInputs(level,&smallest,&largest,&lower_output_level_inputs.files);
+// printf("ajacent 4\n");
+  for(const auto& f : higher_output_level_inputs.files){
+    if(!f->being_compacted){
+      fno_list.push_back(f->fd.GetNumber());
+    }
+  }
+
+  for(const auto&f : lower_output_level_inputs.files){
+    if(!f->being_compacted){
+      fno_list.push_back(f->fd.GetNumber());
+    }
+  }
+  return;
+}
+
+void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list){
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+
+  auto files=vstorage->LevelFiles(level);
+
+  for(const auto f: files){
+    fno_list.push_back(f->fd.GetNumber());
+  }
+}
+
+const Comparator* DBImpl::GetDefaultICMP(void){
+  return versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info()->InternalComparator();
+}
+
+
 Status DBImpl::DropColumnFamilyImpl(ColumnFamilyHandle* column_family) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
@@ -4274,6 +4320,19 @@ Status DB::DropColumnFamilies(
     const std::vector<ColumnFamilyHandle*>& /*column_families*/) {
   return Status::NotSupported("");
 }
+
+//CAZA
+void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
+
+  std::cout<<"DB::AdjcanetFileLIst not Supported\n";
+}
+
+void DB::SameLevelFileList(int , std::vector<uint64_t>& ){
+  std::cout<<"DB::AdjcanetFileLIst not Supported\n";
+}
+
+const Comparator* DB::GetDefaultICMP(void) { return nullptr;}
+
 
 Status DB::DestroyColumnFamilyHandle(ColumnFamilyHandle* column_family) {
   if (DefaultColumnFamily() == column_family) {

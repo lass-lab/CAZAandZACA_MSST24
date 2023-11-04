@@ -2012,6 +2012,9 @@ Status BlockBasedTableBuilder::Finish() {
   if (ok()) {
     WriteFooter(metaindex_block_handle, index_block_handle);
   }
+  if(r->file->file_name().substr(r->file->file_name().size() -3)=="sst" ){
+    r->file->writable_file()->SetMinMaxKeyAndLevel(r->smallest,r->largest,r->level_at_creation);
+  }
   r->state = Rep::State::kClosed;
   r->SetStatus(r->CopyIOStatus());
   Status ret_status = r->CopyStatus();
@@ -2084,7 +2087,9 @@ const char* BlockBasedTableBuilder::GetFileChecksumFuncName() const {
     return kUnknownFileChecksumFuncName;
   }
 }
-
+void BlockBasedTableBuilder::SetFileNumber(uint64_t fno) {
+  rep_->file->writable_file()->fno_=fno;
+}
 const std::string BlockBasedTable::kObsoleteFilterBlockPrefix = "filter.";
 const std::string BlockBasedTable::kFullFilterBlockPrefix = "fullfilter.";
 const std::string BlockBasedTable::kPartitionedFilterBlockPrefix =

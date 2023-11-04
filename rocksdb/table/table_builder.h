@@ -222,6 +222,7 @@ class TableBuilder {
 
   // Return file checksum function name
   virtual const char* GetFileChecksumFuncName() const = 0;
+  virtual void SetFileNumber(uint64_t ) { }
 };
 
 }  // namespace ROCKSDB_NAMESPACE

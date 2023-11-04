@@ -380,6 +380,10 @@ class DB {
   virtual Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families);
 
+  virtual void AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
+  virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
+  virtual const Comparator* GetDefaultICMP(void);
+  
   // Release and deallocate a column family handle. A column family is only
   // removed once it is dropped (DropColumnFamily) and all handles have been
   // destroyed (DestroyColumnFamilyHandle). Use this method to destroy

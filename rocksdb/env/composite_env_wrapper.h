@@ -115,9 +115,6 @@ class CompositeEnv : public Env {
     return file_system_->GetFileSize(f, io_opts, s, &dbg);
   }
 
-  // void SetResetScheme(uint32_t r) override {
-  //   file_system_->SetResetScheme(r);
-  // }
 
   Status GetFileModificationTime(const std::string& fname,
                                  uint64_t* file_mtime) override {

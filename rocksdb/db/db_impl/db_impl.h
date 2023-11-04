@@ -325,7 +325,12 @@ class DBImpl : public DB {
   virtual Status DropColumnFamily(ColumnFamilyHandle* column_family) override;
   virtual Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families) override;
-
+  // using DB::AdjacentFileList;
+  virtual void AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list) override;
+  
+  // using DB::SameLevelFileList;
+  virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list) override;
+  
   // Returns false if key doesn't exist in the database and true if it may.
   // If value_found is not passed in as null, then return the value if found in
   // memory. On return, if value was found, then value_found will be set to true

@@ -1192,8 +1192,8 @@ IOStatus ZenFS::GetFileSize(const std::string& filename,
   return s;
 }
 
-void ZenFS::SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until) {
-  zbd_->SetResetScheme(r,partial_reset_scheme,T,zc,until);
+void ZenFS::SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) {
+  zbd_->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
   
   // if(gc_worker_!=nullptr){
 

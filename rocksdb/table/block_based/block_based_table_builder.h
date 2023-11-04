@@ -99,7 +99,7 @@ class BlockBasedTableBuilder : public TableBuilder {
 
   // Get file checksum function name
   const char* GetFileChecksumFuncName() const override;
-
+  virtual void SetFileNumber(uint64_t fno) override;  
  private:
   bool ok() const { return status().ok(); }
 
