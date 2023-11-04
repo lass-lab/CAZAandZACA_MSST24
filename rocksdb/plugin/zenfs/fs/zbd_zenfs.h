@@ -908,11 +908,11 @@ class ZonedBlockDevice {
   IOStatus AllocateEmptyZone(Zone **zone_out);
 
 
-  bool SetSSTFileforZBDNoLock(sst_fileno fno,ZoneFile* zoneFile);
+  bool SetSSTFileforZBDNoLock(uint64_t fno,ZoneFile* zoneFile);
 
-  bool DeleteSSTFileforZBDNoLock(sst_fileno fno);
+  bool DeleteSSTFileforZBDNoLock(uint64_t fno);
 
-  ZoneFile* GetSSTZoneFileInZBDNoLock(sst_fileno fno);
+  ZoneFile* GetSSTZoneFileInZBDNoLock(uint64_t fno);
 
   IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
                                           Env::WriteLifeTimeHint file_lifetime,Zone **zone_out);
