@@ -2066,6 +2066,7 @@ printf("DBImpl::Open 3\n");
     delete impl;
     *dbptr = nullptr;
   }
+  printf("DBImpl::Open return\n");
   return s;
 }
 }  // namespace ROCKSDB_NAMESPACE
