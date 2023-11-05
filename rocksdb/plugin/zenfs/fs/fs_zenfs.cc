@@ -1430,6 +1430,7 @@ IOStatus ZenFS::AreFilesSame(const std::string& file, const std::string& linkf,
     std::lock_guard<std::mutex> lock(files_mtx_);
     src_file = GetFileNoLock(fname);
     dst_file = GetFileNoLock(link);
+    printf("src_file %p, dst_file %p\n",dst_file.get(),src_file.get());
     if (src_file != nullptr && dst_file != nullptr) {
       if (src_file->GetID() == dst_file->GetID()){
         printf("ZenFS :: AreFilesSame return true\n");
