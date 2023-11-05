@@ -1511,10 +1511,6 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       if(cur_score > max_score){
         if(allocated_zone){
           allocated_zone->Release();
-          // if(!s.ok()){
-          //   printf("AllocateCompactionAwaredZone :: fail 1\n");
-          //   return s;
-          // }
         }
         allocated_zone=target_zone;
         max_score=cur_score;
@@ -1525,10 +1521,6 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       if(cur_score == max_score && cur_invalid_data>max_invalid_data){
         if(allocated_zone){
           allocated_zone->Release();
-          // if(!s.ok()){
-          //   printf("AllocateCompactionAwaredZone :: fail 2\n");
-          //   return s;
-          // }
         }
         allocated_zone=target_zone;
         max_invalid_data=cur_invalid_data;
@@ -1821,6 +1813,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
     
       if(e->zone_->IsFull()){
         e->zone_->Release();
+        continue;
       }
       allocated_zone=e->zone_;
       break;
