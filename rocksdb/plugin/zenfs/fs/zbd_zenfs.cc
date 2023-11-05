@@ -1965,14 +1965,14 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       return IOStatus::OK();
     }
 
-    if(allocation_scheme_==CAZA){
-      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,min_capacity);
-      if (s.ok() && (*out_zone) != nullptr) {
-        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-        // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
-        break;
-      }
-    }
+    // if(allocation_scheme_==CAZA){
+    //   AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,min_capacity);
+    //   if (s.ok() && (*out_zone) != nullptr) {
+    //     Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+    //     // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
+    //     break;
+    //   }
+    // }
 
     s=GetBestOpenZoneMatch(file_lifetime, &best_diff, out_zone, min_capacity);
     
