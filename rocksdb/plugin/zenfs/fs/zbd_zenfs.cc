@@ -1642,7 +1642,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
   for(size_t i =ZENFS_META_ZONES+ZENFS_SPARE_ZONES; i<zone_score.size(); i++){
     cur_score=zone_score[i];
     target_zone=io_zones[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES];
-    if(cur_score == 0||target_zone->IsFull()){
+    if(cur_score == 0){
       continue;
     }
 
