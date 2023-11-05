@@ -24,6 +24,7 @@ Status BlobDB::Open(const Options& options, const BlobDBOptions& bdb_options,
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   std::vector<ColumnFamilyHandle*> handles;
+  printf("utilites/blob_db/blob_db.cc :: BlobDB::Open\n");
   Status s = BlobDB::Open(db_options, bdb_options, dbname, column_families,
                           &handles, blob_db);
   if (s.ok()) {
@@ -31,6 +32,8 @@ Status BlobDB::Open(const Options& options, const BlobDBOptions& bdb_options,
     // i can delete the handle since DBImpl is always holding a reference to
     // default column family
     delete handles[0];
+  }else{
+    printf("error at here !! utilites/blob_db/blob_db.cc :: BlobDB::Open\n");
   }
   return s;
 }

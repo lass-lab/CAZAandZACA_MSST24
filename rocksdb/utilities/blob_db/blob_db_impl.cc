@@ -134,6 +134,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   assert(db_ == nullptr);
     printf("BlobDBImpl::Open\n");
   if (blob_dir_.empty()) {
+    printf("BlobDBImpl::Open error?\n");
     return Status::NotSupported("No blob directory in options");
   }
 
@@ -184,6 +185,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
                                           nullptr);
   printf("BlobDBImpl::Open : NewDirectory\n");                                  
   if (!s.ok()) {
+    printf("BlobDBImpl::Open : fail to open blob dir\n");   
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to open blob_dir %s, status: %s", blob_dir_.c_str(),
                     s.ToString().c_str());
