@@ -1555,7 +1555,8 @@ l0:
   if(level==0 || level==100){
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
-    zone_score.assign(zone_score.size(),0);
+    zone_score.clear();
+    zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
     SameLevelFileList(0,fno_list);
     s = AllocateMostL0FilesZone(zone_score,fno_list,&allocated_zone,
                                 min_capacity);
@@ -1565,7 +1566,8 @@ l0:
   }else{ // if other level, same level but near key-sstfile zone
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
-    zone_score.assign(zone_score.size(),0);
+    zone_score.clear();
+    zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
     SameLevelFileList(level,fno_list);
     s = AllocateSameLevelFilesZone(smallest,largest,fno_list,&allocated_zone,
                                   min_capacity);
