@@ -132,7 +132,7 @@ BlobDBOptions BlobDBImpl::GetBlobDBOptions() const { return bdb_options_; }
 Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   assert(handles != nullptr);
   assert(db_ == nullptr);
-
+    printf("BlobDBImpl::Open\n");
   if (blob_dir_.empty()) {
     return Status::NotSupported("No blob directory in options");
   }
@@ -171,14 +171,18 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   }
 
   // Open blob directory.
+ 
   s = env_->CreateDirIfMissing(blob_dir_);
+   printf("BlobDBImpl::Open : CreateDirIfMissing\n");
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to create blob_dir %s, status: %s",
                     blob_dir_.c_str(), s.ToString().c_str());
   }
+  
   s = env_->GetFileSystem()->NewDirectory(blob_dir_, IOOptions(), &dir_ent_,
                                           nullptr);
+  printf("BlobDBImpl::Open : NewDirectory\n");                                  
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to open blob_dir %s, status: %s", blob_dir_.c_str(),

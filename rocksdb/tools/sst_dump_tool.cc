@@ -390,7 +390,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
     Status s = env->FileExists(dir_or_file);
     // dir_or_file does not exist
     if (!s.ok()) {
-      fprintf(stderr, "%s%s: No such file or directory\n", s.ToString().c_str(),
+      fprintf(stderr, "%s%s: SSTDumpTool::Run No such file or directory 222\n", s.ToString().c_str(),
               dir_or_file);
       return 1;
     }
