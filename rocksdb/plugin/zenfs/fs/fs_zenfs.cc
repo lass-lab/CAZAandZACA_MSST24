@@ -1423,7 +1423,7 @@ IOStatus ZenFS::AreFilesSame(const std::string& file, const std::string& linkf,
   std::string fname = FormatPathLexically(file);
   std::string link = FormatPathLexically(linkf);
   IOStatus s;
-
+  printf("ZenFS :: AreFilesSame\n");
   Debug(logger_, "AreFilesSame: %s, %s\n", fname.c_str(), link.c_str());
 
   {
@@ -1431,10 +1431,14 @@ IOStatus ZenFS::AreFilesSame(const std::string& file, const std::string& linkf,
     src_file = GetFileNoLock(fname);
     dst_file = GetFileNoLock(link);
     if (src_file != nullptr && dst_file != nullptr) {
-      if (src_file->GetID() == dst_file->GetID())
+      if (src_file->GetID() == dst_file->GetID()){
+        printf("ZenFS :: AreFilesSame return true\n");
         *res = true;
-      else
+      }
+      else{
+        printf("ZenFS :: AreFilesSame return false\n");
         *res = false;
+      }
       return IOStatus::OK();
     }
   }
