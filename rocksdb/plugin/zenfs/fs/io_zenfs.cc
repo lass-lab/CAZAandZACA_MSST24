@@ -1046,6 +1046,10 @@ void ZonedWritableFile::SetMinMaxKeyAndLevel(const Slice& s,const Slice& l,const
     return;
   }
   // printf("set min max : fno :%ld at %d\n",zoneFile_->fno_,output_level);
+  
+  if(zoneFile_->GetLinkFiles().size()){
+    printf("SetMinMaxKeyAndLevel :: %s output level %d\n",zoneFile_->GetLinkFiles()[0],output_level);
+  }
   zoneFile_->smallest_=s;
   zoneFile_->largest_=l;
   zoneFile_->level_=output_level;
