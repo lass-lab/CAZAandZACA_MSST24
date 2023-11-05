@@ -214,7 +214,7 @@ class Zone {
   // bool compare(int a, int b){
   //     return a > b;
   // }
-  bool SortByResetCount(Zone* za,Zone* zb){
+  static bool SortByResetCount(Zone* za,Zone* zb){
     return za->reset_count_ < zb->reset_count_;
   }
 
