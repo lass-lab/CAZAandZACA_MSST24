@@ -1083,6 +1083,7 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
         // reset_status = z->Reset();
         is_reseted[i]=true;
         reset_count_.fetch_add(1);
+        z->reset_count_++;
         // 
 
         // clock_t end=clock();
@@ -1886,7 +1887,12 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
 IOStatus ZonedBlockDevice::AllocateEmptyZone(Zone **zone_out) {
   IOStatus s;
   Zone *allocated_zone = nullptr;
-  for (const auto z : io_zones) {
+  std::vector<Zone*> sorted_zone=io_zones;
+  if(allocation_scheme_==CAZA_W){
+    sort(sorted_zone.begin(),sorted_zone.end(),Zone::SortByResetCount);
+  }
+
+  for (const auto z : sorted_zone) {
     if (z->Acquire()) {
       if (z->IsEmpty()) {
         allocated_zone = z;
@@ -1969,7 +1975,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       return IOStatus::OK();
     }
 
-    if(allocation_scheme_==CAZA){
+    if(allocation_scheme_!=LIZA){
       AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,min_capacity);
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
@@ -2057,7 +2063,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
 
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
-  if(is_sst&&level>=0 && allocation_scheme_==CAZA){
+  if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
     s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,&allocated_zone);
     if(!s.ok()){
       PutOpenIOZoneToken();

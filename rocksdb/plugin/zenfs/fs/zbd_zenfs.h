@@ -73,6 +73,7 @@ class ZoneFile;
 
 #define LIZA 0
 #define CAZA 1
+#define CAZA_W 2
 
 #define PARTIAL_RESET_KICKED_THRESHOLD 40
                                                       // | zone-reset | partial-reset |
@@ -197,6 +198,8 @@ class Zone {
   unsigned int log2_erase_unit_size_ = 0;
   uint64_t erase_unit_size_ = 0;
   uint64_t block_sz_;
+
+  uint64_t reset_count_ = 0;
   // uint64_t invalid_wp_;
 
 
@@ -208,6 +211,12 @@ class Zone {
   std::mutex zone_extents_lock_;
   Env::WriteLifeTimeHint lifetime_;
   std::atomic<uint64_t> used_capacity_;
+  // bool compare(int a, int b){
+  //     return a > b;
+  // }
+  bool SortByResetCount(Zone* za,Zone* zb){
+    return za->reset_count_ < zb->reset_count_;
+  }
 
   IOStatus Reset();
   IOStatus PartialReset(size_t* erase_sz);
