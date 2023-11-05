@@ -1590,15 +1590,15 @@ l0:
 
 
   // Empty zone allocation should set lifetime for zone
-  // s = AllocateEmptyZone(&allocated_zone);
+  s = AllocateEmptyZone(&allocated_zone);
   // if(!s.ok()){
   //   return s;
   // }
-  // if(allocated_zone!=nullptr){
-  //   *zone_out=allocated_zone;
-  //   allocated_zone->lifetime_ = file_lifetime;
-  //   return s;
-  // }
+  if(allocated_zone!=nullptr){
+    *zone_out=allocated_zone;
+    allocated_zone->lifetime_ = file_lifetime;
+    // return s;
+  }
 
 
   // if(!s.ok()){
