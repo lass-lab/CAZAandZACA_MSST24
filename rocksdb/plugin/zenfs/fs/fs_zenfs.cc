@@ -1443,7 +1443,7 @@ IOStatus ZenFS::AreFilesSame(const std::string& file, const std::string& linkf,
     
       return IOStatus::OK();
     }
-    if(link=="/rocksdbtest/dbbench"){
+    if(fname=="/rocksdbtest/dbbench/blob_dir"){
       *res=true;
       return IOStatus::OK();
     }
