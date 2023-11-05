@@ -1509,7 +1509,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
         continue;
       }
 
-      if(target_zone->capacity<min_capacity){
+      if(target_zone->capacity_<min_capacity){
         target_zone->Release();
         continue;
       }
@@ -1647,7 +1647,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
     if(!target_zone->Acquire()){
       continue;
     }
-    if(target_zone->capacity<min_capacity){
+    if(target_zone->capacity_<min_capacity){
       target_zone->Release();
       continue;
     }
