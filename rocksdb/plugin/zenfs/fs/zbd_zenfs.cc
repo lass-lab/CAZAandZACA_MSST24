@@ -1920,7 +1920,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone);
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-        printf("CAZA allocated : %lu\n",out_zone->zidx_);
+        printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
         break;
       }
     }
@@ -2012,6 +2012,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
     }
   }
   if(allocated_zone!=nullptr){
+    printf("AllocateIOZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
     goto end;
   }
 
