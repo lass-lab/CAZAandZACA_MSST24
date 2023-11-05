@@ -1451,7 +1451,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
   (void)(file_lifetime);
 
-  return IOStatus::OK();
+  // return IOStatus::OK();
   IOStatus s;
   uint64_t cur_score;
   uint64_t cur_invalid_data;
