@@ -1544,6 +1544,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
 /////////////////////////////
 l0:
+  return IOStatus::OK();
 // if level 0, most level 0 zone
   if(level==0 || level==100){
     fno_list.clear();
