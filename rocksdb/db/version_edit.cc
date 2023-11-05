@@ -41,7 +41,7 @@ Status FileMetaData::UpdateBoundaries(const Slice& key, const Slice& value,
 
     if (!blob_index.IsInlined() && !blob_index.HasTTL()) {
       if (blob_index.file_number() == kInvalidBlobFileNumber) {
-        return Status::Corruption("Invalid blob file number");
+        return Status::Corruption("Invalid blob file number 1");
       }
 
       if (oldest_blob_file_number == kInvalidBlobFileNumber ||
