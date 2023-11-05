@@ -779,7 +779,7 @@ IOStatus ZenFS::SyncFileMetadataNoLock(ZoneFile* zoneFile, bool replace) {
   zoneFile->EncodeUpdateTo(&fileRecord);
   PutLengthPrefixedSlice(&output, Slice(fileRecord));
 
-  // s = PersistRecord(output);
+  s = PersistRecord(output);
   if (s.ok()) zoneFile->MetadataSynced();
 
   return s;
@@ -826,7 +826,7 @@ IOStatus ZenFS::DeleteFileNoLock(std::string fname, const IOOptions& options,
     s = zoneFile->RemoveLinkName(fname);
     if (!s.ok()) return s;
     EncodeFileDeletionTo(zoneFile, &record, fname);
-    // s = PersistRecord(record);
+    s = PersistRecord(record);
     if (!s.ok()) {
       /* Failed to persist the delete, return to a consistent state */
       files_.insert(std::make_pair(fname.c_str(), zoneFile));
