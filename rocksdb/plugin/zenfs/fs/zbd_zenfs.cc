@@ -1546,6 +1546,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   }
 
   if(allocated_zone!=nullptr){
+    printf("CAZA 1 \n");
     *zone_out=allocated_zone;
     return IOStatus::OK();
   }
@@ -1559,11 +1560,17 @@ l0:
     zone_score.assign(0,zone_score.size());
     SameLevelFileList(0,fno_list);
     s = AllocateMostL0FilesZone(zone_score,fno_list,&allocated_zone);
+    if(allocated_zone!=nullptr){
+      printf("CAZA 2.1\n")
+    }
   }else{ // if other level, same level but near key-sstfile zone
     fno_list.clear();
     zone_score.assign(0,zone_score.size());
     SameLevelFileList(level,fno_list);
     s = AllocateSameLevelFilesZone(smallest,largest,fno_list,&allocated_zone);
+    if(allocated_zone!=nullptr){
+       printf("CAZA 2.2\n")
+    }
   }
 
 
@@ -1571,6 +1578,7 @@ l0:
     return s;
   }
   if(allocated_zone!=nullptr){
+    printf("CAZA 3\n")
     *zone_out=allocated_zone;
     return s;
   }
@@ -1912,6 +1920,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone);
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+        printf("CAZA allocated : %lu\n",out_zone->zidx_);
         break;
       }
     }
