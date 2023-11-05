@@ -2012,7 +2012,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
     }
   }
   if(allocated_zone!=nullptr){
-    printf("AllocateIOZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
+    printf("AllocateIOZone :: CAZA allocated : %lu\n",(*allocated_zone)->zidx_);
     goto end;
   }
 
