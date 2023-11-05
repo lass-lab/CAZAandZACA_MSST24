@@ -1509,7 +1509,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
         continue;
       }
 
-      if(target_zone->capacity_<min_capacity){
+      if(target_zone->capacity_<=min_capacity){
         target_zone->Release();
         continue;
       }
@@ -1651,7 +1651,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
     if(!target_zone->Acquire()){
       continue;
     }
-    if(target_zone->capacity_<min_capacity){
+    if(target_zone->capacity_<=min_capacity){
       target_zone->Release();
       continue;
     }
@@ -1867,7 +1867,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
       if(!e->zone_->Acquire()){
         continue;
       }
-      if(e->zone_->capacity_<min_capacity){
+      if(e->zone_->capacity_<=min_capacity){
         e->zone_->Release();
         continue;
       }
@@ -1969,14 +1969,14 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       return IOStatus::OK();
     }
 
-    // if(allocation_scheme_==CAZA){
-    //   AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,min_capacity);
-    //   if (s.ok() && (*out_zone) != nullptr) {
-    //     Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-    //     // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
-    //     break;
-    //   }
-    // }
+    if(allocation_scheme_==CAZA){
+      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,min_capacity);
+      if (s.ok() && (*out_zone) != nullptr) {
+        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+        // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
+        break;
+      }
+    }
 
     s=GetBestOpenZoneMatch(file_lifetime, &best_diff, out_zone, min_capacity);
     
