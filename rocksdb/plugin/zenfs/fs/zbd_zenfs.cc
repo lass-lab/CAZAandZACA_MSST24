@@ -1561,7 +1561,7 @@ l0:
     SameLevelFileList(0,fno_list);
     s = AllocateMostL0FilesZone(zone_score,fno_list,&allocated_zone);
     if(allocated_zone!=nullptr){
-      printf("CAZA 2.1\n")
+      printf("CAZA 2.1\n");
     }
   }else{ // if other level, same level but near key-sstfile zone
     fno_list.clear();
@@ -1569,7 +1569,7 @@ l0:
     SameLevelFileList(level,fno_list);
     s = AllocateSameLevelFilesZone(smallest,largest,fno_list,&allocated_zone);
     if(allocated_zone!=nullptr){
-       printf("CAZA 2.2\n")
+       printf("CAZA 2.2\n");
     }
   }
 
@@ -1578,7 +1578,7 @@ l0:
     return s;
   }
   if(allocated_zone!=nullptr){
-    printf("CAZA 3\n")
+    printf("CAZA 3\n");
     *zone_out=allocated_zone;
     return s;
   }
