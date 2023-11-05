@@ -1891,7 +1891,7 @@ Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
   const uint64_t blob_file_number = blob_index.file_number();
 
   if (!storage_info_.GetBlobFileMetaData(blob_file_number)) {
-    return Status::Corruption("Invalid blob file number 2");
+    return Status::Corruption("Invalid blob file number 2 %lu\n",blob_file_number);
   }
 
   CacheHandleGuard<BlobFileReader> blob_file_reader;
