@@ -57,6 +57,7 @@ Status BlobDB::Open(const DBOptions& db_options,
   if (s.ok()) {
     *blob_db = static_cast<BlobDB*>(blob_db_impl);
   } else {
+    printf("error at here !!2 BlobDB::Open\n");
     if (!handles->empty()) {
       for (ColumnFamilyHandle* cfh : *handles) {
         blob_db_impl->DestroyColumnFamilyHandle(cfh);

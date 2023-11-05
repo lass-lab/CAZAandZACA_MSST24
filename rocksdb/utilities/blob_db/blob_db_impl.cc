@@ -137,7 +137,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
     printf("BlobDBImpl::Open error?\n");
     return Status::NotSupported("No blob directory in options");
   }
-
+  printf("BlobDBImpl::Open\n");
   if (bdb_options_.garbage_collection_cutoff < 0.0 ||
       bdb_options_.garbage_collection_cutoff > 1.0) {
     return Status::InvalidArgument(
@@ -154,11 +154,13 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   }
 
   Status s;
-
+  
   // Create info log.
+  printf("BlobDBImpl::Open\n");
   if (db_options_.info_log == nullptr) {
     s = CreateLoggerFromOptions(dbname_, db_options_, &db_options_.info_log);
     if (!s.ok()) {
+      printf("BlobDBImpl::Open err1\n");
       return s;
     }
   }
@@ -195,6 +197,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   // Open blob files.
   s = OpenAllBlobFiles();
   if (!s.ok()) {
+    printf("BlobDBImpl::Open err2\n");
     return s;
   }
 
@@ -218,6 +221,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   ColumnFamilyDescriptor cf_descriptor(kDefaultColumnFamilyName, cf_options_);
   s = DB::Open(db_options_, dbname_, {cf_descriptor}, handles, &db_);
   if (!s.ok()) {
+    printf("BlobDBImpl::Open err3\n");
     return s;
   }
   db_impl_ = static_cast_with_check<DBImpl>(db_->GetRootDB());
@@ -237,6 +241,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
     bool blob_dir_same_as_cf_dir = false;
     s = env_->AreFilesSame(blob_dir_, cf_path.path, &blob_dir_same_as_cf_dir);
     if (!s.ok()) {
+      printf("BlobDBImpl::Open err4\n");
       ROCKS_LOG_ERROR(db_options_.info_log,
                       "Error while sanitizing blob_dir %s, status: %s",
                       blob_dir_.c_str(), s.ToString().c_str());
@@ -244,6 +249,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
     }
 
     if (blob_dir_same_as_cf_dir) {
+      printf("BlobDBImpl::Open err5\n");
       return Status::NotSupported(
           "Using the base DB's storage directories for BlobDB files is not "
           "supported.");
