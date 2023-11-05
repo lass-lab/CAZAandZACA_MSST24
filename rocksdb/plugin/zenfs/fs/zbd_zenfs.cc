@@ -1478,8 +1478,6 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
     for (auto fno : fno_list){
       ZoneFile* zFile= GetSSTZoneFileInZBDNoLock(fno);
       if(zFile==nullptr){
-        // printf("GetSSTZoneFileNolock get nullptr : %lu\n",fno);
-        // return IOStatus::IOError("get sst zsonefile get nullptr :%ld");
         continue;
       }
       auto extents=zFile->GetExtents();
@@ -1546,7 +1544,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   }
 
   if(allocated_zone!=nullptr){
-    printf("CAZA 1 \n");
+    // printf("CAZA 1 \n");
     *zone_out=allocated_zone;
     return IOStatus::OK();
   }
@@ -1561,7 +1559,7 @@ l0:
     SameLevelFileList(0,fno_list);
     s = AllocateMostL0FilesZone(zone_score,fno_list,&allocated_zone);
     if(allocated_zone!=nullptr){
-      printf("CAZA 2.1\n");
+      // printf("CAZA 2.1\n");
     }
   }else{ // if other level, same level but near key-sstfile zone
     fno_list.clear();
@@ -1569,7 +1567,7 @@ l0:
     SameLevelFileList(level,fno_list);
     s = AllocateSameLevelFilesZone(smallest,largest,fno_list,&allocated_zone);
     if(allocated_zone!=nullptr){
-       printf("CAZA 2.2\n");
+      //  printf("CAZA 2.2\n");
     }
   }
 
@@ -2012,7 +2010,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
     }
   }
   if(allocated_zone!=nullptr){
-    printf("AllocateIOZone :: CAZA allocated : %lu\n",allocated_zone->zidx_);
+    // printf("AllocateIOZone :: CAZA allocated : %lu\n",allocated_zone->zidx_);
     goto end;
   }
 
