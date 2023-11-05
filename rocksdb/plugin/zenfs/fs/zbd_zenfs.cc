@@ -1745,42 +1745,79 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
     // it is middle key file
     else {
       // while((l_idx>=0) || (r_idx<fno_list_sz) ){
-      bool flip = true;
-      while((l_idx<r_idx) || (r_idx<fno_list_sz) ){
-        // if(l_idx>=0){
-        if(l_idx<r_idx && flip){
-          flip=!flip;
-          zFile=GetSSTZoneFileInZBDNoLock(fno_list[l_idx]);
-          if(zFile==nullptr){
-            continue;
-          }
-          s=GetNearestZoneFromZoneFile(zFile,&allocated_zone);
-          if(!s.ok()){
-            return s;
-          }
-          if(allocated_zone!=nullptr){
-            break;
-          }
-          
-          l_idx--;
-        }
+      
 
-        if(r_idx<fno_list_sz&&!flip){
-          flip=!flip;
-          zFile=GetSSTZoneFileInZBDNoLock(fno_list[r_idx]);
-          if(zFile==nullptr){
-            continue;
+      for(bool flip = true; ((l_idx<r_idx) || (r_idx<fno_list_sz) )  ; flip=!flip){
+        if(flip){
+          if(l_idx<r_idx){
+            zFile=GetSSTZoneFileInZBDNoLock(fno_list[l_idx]);
+            if(zFile==nullptr){
+              continue;
+            }
+            s=GetNearestZoneFromZoneFile(zFile,&allocated_zone);
+            if(!s.ok()){
+              return s;
+            }
+            if(allocated_zone!=nullptr){
+              break;
+            }
+            l_idx--;
           }
-          s=GetNearestZoneFromZoneFile(zFile,&allocated_zone);
-          if(!s.ok()){
-            return s;
+        }else{
+          if(r_idx<fno_list_sz){
+            zFile=GetSSTZoneFileInZBDNoLock(fno_list[r_idx]);
+            if(zFile==nullptr){
+              continue;
+            }
+            s=GetNearestZoneFromZoneFile(zFile,&allocated_zone);
+            if(!s.ok()){
+              return s;
+            }
+            if(allocated_zone!=nullptr){
+              break;
+            }
+            r_idx++;
           }
-          if(allocated_zone!=nullptr){
-            break;
-          }
-          r_idx++;
         }
       }
+
+
+      // bool flip = true;
+      // while((l_idx<r_idx) || (r_idx<fno_list_sz) ){
+      //   // if(l_idx>=0){
+      //   if(l_idx<r_idx && flip){
+      //     flip=!flip;
+      //     zFile=GetSSTZoneFileInZBDNoLock(fno_list[l_idx]);
+      //     if(zFile==nullptr){
+      //       continue;
+      //     }
+      //     s=GetNearestZoneFromZoneFile(zFile,&allocated_zone);
+      //     if(!s.ok()){
+      //       return s;
+      //     }
+      //     if(allocated_zone!=nullptr){
+      //       break;
+      //     }
+          
+      //     l_idx--;
+      //   }
+
+      //   if(r_idx<fno_list_sz&&!flip){
+      //     flip=!flip;
+      //     zFile=GetSSTZoneFileInZBDNoLock(fno_list[r_idx]);
+      //     if(zFile==nullptr){
+      //       continue;
+      //     }
+      //     s=GetNearestZoneFromZoneFile(zFile,&allocated_zone);
+      //     if(!s.ok()){
+      //       return s;
+      //     }
+      //     if(allocated_zone!=nullptr){
+      //       break;
+      //     }
+      //     r_idx++;
+      //   }
+      // }
     }
   }
 
