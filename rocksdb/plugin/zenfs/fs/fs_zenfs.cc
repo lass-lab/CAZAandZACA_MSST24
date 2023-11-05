@@ -1443,6 +1443,7 @@ IOStatus ZenFS::AreFilesSame(const std::string& file, const std::string& linkf,
       return IOStatus::OK();
     }
   }
+  printf("ZenFS arfile same reach ehre\n");
   s = target()->AreFilesSame(fname, link, options, res, dbg);
   return s;
 }
