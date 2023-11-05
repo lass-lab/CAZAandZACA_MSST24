@@ -769,7 +769,7 @@ class ZonedBlockDevice {
   //                          uint64_t min_capacity,bool* run_gc_worker_);
   IOStatus TakeMigrateZone(Slice& smallest,Slice& largest, int level,Zone **out_zone,
                                            Env::WriteLifeTimeHint file_lifetime,
-                                           uint32_t min_capacity,bool* run_gc_worker_);
+                                           uint64_t min_capacity,bool* run_gc_worker_);
   uint64_t CalculateProperReclaimedZoneN(void){
     size_t zone_percentage=100/io_zones.size();
     size_t to_be_reclaimed_ratio=(ZONE_CLEANING_KICKING_POINT+5)-cur_free_percent_;
@@ -918,19 +918,22 @@ class ZonedBlockDevice {
 
 
   IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
-                                          Env::WriteLifeTimeHint file_lifetime,Zone **zone_out);
+                                          Env::WriteLifeTimeHint file_lifetime,Zone **zone_out,
+                                          uint64_t min_capacity = 0);
   
   
 
   IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
-                                    Zone** zone_out);
+                                    Zone** zone_out,uint64_t min_capacity);
   
   void AdjacentFileList(Slice& smallest,Slice& largest, int level, std::vector<uint64_t>& fno_list);
   void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
 
   IOStatus AllocateSameLevelFilesZone(Slice& smallest, Slice& largest ,
-                                      const std::vector<uint64_t>& fno_list,Zone** zone_out);
-  IOStatus GetNearestZoneFromZoneFile(ZoneFile* zFile,Zone** zone_out);
+                                      const std::vector<uint64_t>& fno_list,Zone** zone_out,
+                                      uint64_t min_capacity);
+  IOStatus GetNearestZoneFromZoneFile(ZoneFile* zFile,Zone** zone_out,
+                                      uint64_t min_capacity);
 
   inline uint64_t LazyLog(uint64_t sz,uint64_t fr,uint64_t T);
 
