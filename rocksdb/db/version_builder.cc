@@ -880,13 +880,13 @@ class VersionBuilder::Rep {
     printf("MergeBlobFileMetas");
     auto base_it = base_vstorage_->GetBlobFileMetaDataLB(first_blob_file);
     const auto base_it_end = base_vstorage_->GetBlobFiles().end();
-    // if((*base_it)){
-    // //  printf("MergeBlobFileMetas %lu~%lu\n",(*base_it)->GetBlobFileNumber(),(*base_it_end)->GetBlobFileNumber());
-    //   printf("%lu~",(*base_it)->GetBlobFileNumber());
-    // }
-    // if((*base_it_end)){
-    //   printf("%lu",(*base_it_end)->GetBlobFileNumber());
-    // }
+    if(base_it != base_it_end){
+    //  printf("MergeBlobFileMetas %lu~%lu\n",(*base_it)->GetBlobFileNumber(),(*base_it_end)->GetBlobFileNumber());
+      printf("%lu~",(*base_it)->GetBlobFileNumber());
+    }
+    if(base_it != base_it_end){
+      printf("%lu",(*base_it_end)->GetBlobFileNumber());
+    }
     printf("\n");
 
     auto mutable_it = mutable_blob_file_metas_.lower_bound(first_blob_file);
