@@ -725,7 +725,7 @@ void BlobDBImpl::RegisterBlobFile(std::shared_ptr<BlobFile> blob_file) {
 
   auto it = blob_files_.lower_bound(blob_file_number);
   assert(it == blob_files_.end() || it->first != blob_file_number);
-
+  printf("BlobDBImpl::RegisterBlobFile : %lu\n",blob_file_number);
   blob_files_.insert(it,
                      std::map<uint64_t, std::shared_ptr<BlobFile>>::value_type(
                          blob_file_number, std::move(blob_file)));
@@ -894,9 +894,10 @@ Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>* blob_file) {
       /* has_ttl */ false, ExpirationRange(),
       /* reason */ "SelectBlobFile", blob_file, &writer);
   if (!s.ok()) {
+    printf("BlobDBImpl::SelectBlobFile error here?\n");
     return s;
   }
-
+  printf("BlobDBImpl::SelectBlobFile 2\n");
   RegisterBlobFile(*blob_file);
   open_non_ttl_file_ = *blob_file;
 
