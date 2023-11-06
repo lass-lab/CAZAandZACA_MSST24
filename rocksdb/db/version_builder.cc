@@ -877,10 +877,12 @@ class VersionBuilder::Rep {
                           ProcessMutable process_mutable,
                           ProcessBoth process_both) const {
     assert(base_vstorage_);
-   
+    printf("MergeBlobFileMetas\n");
     auto base_it = base_vstorage_->GetBlobFileMetaDataLB(first_blob_file);
     const auto base_it_end = base_vstorage_->GetBlobFiles().end();
+    if((*base_it)){
      printf("MergeBlobFileMetas %lu~%lu\n",(*base_it)->GetBlobFileNumber(),(*base_it_end)->GetBlobFileNumber());
+    }
     auto mutable_it = mutable_blob_file_metas_.lower_bound(first_blob_file);
     const auto mutable_it_end = mutable_blob_file_metas_.end();
 
