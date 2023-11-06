@@ -3089,6 +3089,7 @@ void VersionStorageInfo::AddBlobFile(
          (blob_files_.back() && blob_files_.back()->GetBlobFileNumber() <
                                     blob_file_meta->GetBlobFileNumber()));
 
+  printf("VersionStorageInfo::AddBlobFile : %lu\n",blob_file_meta->GetBlobFileNumber());
   blob_files_.emplace_back(std::move(blob_file_meta));
 }
 
