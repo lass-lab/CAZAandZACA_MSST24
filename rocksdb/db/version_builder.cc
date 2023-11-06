@@ -877,7 +877,7 @@ class VersionBuilder::Rep {
                           ProcessMutable process_mutable,
                           ProcessBoth process_both) const {
     assert(base_vstorage_);
-
+    printf("MergeBlobFileMetas\n");
     auto base_it = base_vstorage_->GetBlobFileMetaDataLB(first_blob_file);
     const auto base_it_end = base_vstorage_->GetBlobFiles().end();
 
@@ -1011,6 +1011,7 @@ class VersionBuilder::Rep {
 
     if (meta->GetLinkedSsts().empty() &&
         meta->GetGarbageBlobCount() >= meta->GetTotalBlobCount()) {
+          printf("AddBlobFileIfNeeded :: why return here?\n");
       return;
     }
 
@@ -1020,6 +1021,7 @@ class VersionBuilder::Rep {
   // Merge the blob file metadata from the base version with the changes (edits)
   // applied, and save the result into *vstorage.
   void SaveBlobFilesTo(VersionStorageInfo* vstorage) const {
+    printf("SaveBlobFilesTo\n");
     assert(vstorage);
 
     assert(base_vstorage_);
