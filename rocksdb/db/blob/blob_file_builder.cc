@@ -174,6 +174,7 @@ Status BlobFileBuilder::OpenBlobFileIfNeeded() {
 
   {
     assert(file_options_);
+    printf("BlobFileBuilder::OpenBlobFileIfNeeded %s %d %d\n",blob_file_path.c_str(),write_hint_,io_priority_);
     Status s = NewWritableFile(fs_, blob_file_path, &file, *file_options_);
 
     TEST_SYNC_POINT_CALLBACK(
