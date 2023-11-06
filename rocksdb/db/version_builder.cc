@@ -891,7 +891,11 @@ class VersionBuilder::Rep {
 
     auto mutable_it = mutable_blob_file_metas_.lower_bound(first_blob_file);
     const auto mutable_it_end = mutable_blob_file_metas_.end();
-
+    if(mutable_it != mutable_it_end){
+      printf("mutable it %lu(%lu)~%lu(%lu)\n",
+            mutable_it->first,mutable_it->second.GetBlobFileNumber(),
+              mutable_it_end->first,mutable_it_end->second.GetBlobFileNumber());
+    }
     while (base_it != base_it_end && mutable_it != mutable_it_end) {
       const auto& base_meta = *base_it;
       assert(base_meta);
@@ -956,11 +960,14 @@ class VersionBuilder::Rep {
     assert(min_oldest_blob_file_num);
 
     if (!meta.GetLinkedSsts().empty()) {
+      printf("CheckLinkedSsts not empty\n");
       assert(*min_oldest_blob_file_num == kInvalidBlobFileNumber);
 
       *min_oldest_blob_file_num = meta.GetBlobFileNumber();
 
       return false;
+    }else{
+      printf("CheckLinkedSsts empty\n");
     }
 
     return true;

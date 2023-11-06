@@ -726,6 +726,7 @@ void BlobDBImpl::RegisterBlobFile(std::shared_ptr<BlobFile> blob_file) {
   auto it = blob_files_.lower_bound(blob_file_number);
   assert(it == blob_files_.end() || it->first != blob_file_number);
   printf("BlobDBImpl::RegisterBlobFile : %lu\n",blob_file_number);
+  // db_impl_->GetVersionSet()->GetColumnFamilySet()->GetDefault()->current()->storage_info()->AddBlobFile()
   blob_files_.insert(it,
                      std::map<uint64_t, std::shared_ptr<BlobFile>>::value_type(
                          blob_file_number, std::move(blob_file)));
