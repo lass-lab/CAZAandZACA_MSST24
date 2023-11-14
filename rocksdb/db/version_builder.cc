@@ -562,6 +562,7 @@ class VersionBuilder::Rep {
   MutableBlobFileMetaData* GetOrCreateMutableBlobFileMetaData(
       uint64_t blob_file_number) {
     auto mutable_it = mutable_blob_file_metas_.find(blob_file_number);
+    printf("GetOrCreateMutableBlobFileMetaData %lu\n",blob_file_number);
     if (mutable_it != mutable_blob_file_metas_.end()) {
       return &mutable_it->second;
     }
@@ -795,7 +796,7 @@ class VersionBuilder::Rep {
     add_files.emplace(file_number, f);
 
     const uint64_t blob_file_number = f->oldest_blob_file_number;
-
+    printf("ApplyFileAddition :: oldest blob file number : %lu\n",blob_file_number);
     if (blob_file_number != kInvalidBlobFileNumber) {
       MutableBlobFileMetaData* const mutable_meta =
           GetOrCreateMutableBlobFileMetaData(blob_file_number);
@@ -822,7 +823,7 @@ class VersionBuilder::Rep {
     // table file addition/deletion logic depends on the blob files
     // already being there.
 
-    // Add new blob files
+    // Add new blob filesz
     for (const auto& blob_file_addition : edit->GetBlobFileAdditions()) {
       const Status s = ApplyBlobFileAddition(blob_file_addition);
       if (!s.ok()) {
@@ -850,6 +851,7 @@ class VersionBuilder::Rep {
     }
 
     // Add new table files
+    printf("VersionBuilder::Rep::Apply new file n %lu\n",edit->GetNewFiles().size());
     for (const auto& new_file : edit->GetNewFiles()) {
       const int level = new_file.first;
       const FileMetaData& meta = new_file.second;
@@ -1298,6 +1300,7 @@ bool VersionBuilder::CheckConsistencyForNumLevels() {
 }
 
 Status VersionBuilder::Apply(const VersionEdit* edit) {
+  printf("VersionBuilder::Apply\n");
   return rep_->Apply(edit);
 }
 
