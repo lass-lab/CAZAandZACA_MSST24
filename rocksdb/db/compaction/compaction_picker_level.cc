@@ -430,8 +430,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   uint64_t zns_free_space;
   uint64_t zns_free_percent;
   
-  ioptions()->fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
-
+  ioptions_->fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
+  printf("%lu %lu\n",zns_free_space,zns_free_percent);
   start_level_inputs_.clear();
 
   assert(start_level_ >= 0);
