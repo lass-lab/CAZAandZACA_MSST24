@@ -427,6 +427,10 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     TEST_SYNC_POINT("LevelCompactionPicker::PickCompactionBySize:0");
     return false;
   }
+  uint64_t zns_free_space;
+  uint64_t zns_free_percent;
+  
+  ioptions()->fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
 
   start_level_inputs_.clear();
 
