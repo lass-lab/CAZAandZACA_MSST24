@@ -217,6 +217,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
     }
   }
   if (!start_level_inputs_.empty()) {
+    printf("SetupInitialFiles return 0\n");
     return;
   }
 
