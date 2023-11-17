@@ -3199,7 +3199,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       if (c != nullptr) {
         bool enough_room = EnoughRoomForCompaction(
             cfd, *(c->inputs()), &sfm_reserved_compact_space, log_buffer);
-        printf("BackgroundCompaction:: c.reset() : %lu\n",c->inputs()->size());
+        // printf("BackgroundCompaction:: c.reset() : %lu\n",c->inputs()->size());
         if (!enough_room) {
           // Then don't do the compaction
           c->ReleaseCompactionFiles(status);

@@ -591,6 +591,9 @@ Compaction* LevelCompactionPicker::PickCompaction(
   LevelCompactionBuilder builder(cf_name, vstorage, earliest_mem_seqno, this,
                                  log_buffer, mutable_cf_options, ioptions_,
                                  mutable_db_options);
-  return builder.PickCompaction();
+  Compaction* ret= builder.PickCompaction();
+  // return builder.PickCompaction();
+  printf("LevelCompactionPicker::PickCompaction :: %lu\n",ret->inputs()->size());
+  return ret;
 }
 }  // namespace ROCKSDB_NAMESPACE
