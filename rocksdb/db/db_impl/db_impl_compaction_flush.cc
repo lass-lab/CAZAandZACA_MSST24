@@ -3422,7 +3422,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     // Should handle erorr?
     printf("BackgroundCOmpaction :: input size before run : %lu\n",c->inputs()->size());
 
-    for(auto ci : c->inputs()){
+    for(auto ci : (*c->inputs())){
       // for(auto ci2 : ci-)
       for(auto cif : ci->files){
         printf("%lu\n",cif.fd->GetNumber());
