@@ -1116,7 +1116,7 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
       zoneFile->SetIOType(IOType::kUnknown);
     }
     zoneFile->is_sst_=ends_with(fname,".sst");
-    printf("fname : %s\n",fname.c_str());
+    // printf("fname : %s\n",fname.c_str());
     /* Persist the creation of the file */
     s = SyncFileMetadataNoLock(zoneFile);
     if (!s.ok()) {

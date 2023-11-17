@@ -1033,9 +1033,9 @@ IOStatus ZoneFile::RemoveLinkName(const std::string& linkf) {
 
 IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime) {
   lifetime_ = lifetime;
-  if(linkfiles_.size()){
-    printf("SetWriteLifeTimeHint : %s %d\n",linkfiles_[0].c_str(),lifetime);
-  }
+  // if(linkfiles_.size()){
+  //   printf("SetWriteLifeTimeHint : %s %d\n",linkfiles_[0].c_str(),lifetime);
+  // }
   
   return IOStatus::OK();
 }
@@ -1047,9 +1047,9 @@ void ZonedWritableFile::SetMinMaxKeyAndLevel(const Slice& s,const Slice& l,const
   }
   // printf("set min max : fno :%ld at %d\n",zoneFile_->fno_,output_level);
   
-  if(zoneFile_->GetLinkFiles().size()){
-    printf("SetMinMaxKeyAndLevel :: %s output level %d\n",zoneFile_->GetLinkFiles()[0].c_str(),output_level);
-  }
+  // if(zoneFile_->GetLinkFiles().size()){
+  //   printf("SetMinMaxKeyAndLevel :: %s output level %d\n",zoneFile_->GetLinkFiles()[0].c_str(),output_level);
+  // }
   zoneFile_->smallest_=s;
   zoneFile_->largest_=l;
   zoneFile_->level_=output_level;

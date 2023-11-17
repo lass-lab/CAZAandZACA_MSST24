@@ -479,6 +479,13 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     }
 
     printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
+    printf("[start] ");
+    for(auto s : start_i.files){
+      printf("%lu.sst ",s->fd.GetNumber());
+    }
+    printf("\n");
+
+    printf("[out] ");
     for(auto o : output_i.files){
       printf("%lu.sst ",o->fd.GetNumber());
     }
@@ -530,11 +537,18 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     }
     printf("-----------------SELECTED--------------\n");
     printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
+
+    printf("[start] ");
+    for(auto s : start_level_inputs_.files){
+      printf("%lu.sst ",s->fd.GetNumber());
+    }
+    printf("\n");
+
     for(auto o : output_level_inputs.files){
       printf("%lu.sst ",o->fd.GetNumber());
     }
     printf("\n");
-    printf("---------------------------------------\n");
+    printf("-----------------END-------------------\n");
     base_index_ = index;
     break;
   }
