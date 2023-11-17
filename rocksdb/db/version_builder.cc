@@ -562,7 +562,7 @@ class VersionBuilder::Rep {
   MutableBlobFileMetaData* GetOrCreateMutableBlobFileMetaData(
       uint64_t blob_file_number) {
     auto mutable_it = mutable_blob_file_metas_.find(blob_file_number);
-    printf("GetOrCreateMutableBlobFileMetaData %lu\n",blob_file_number);
+    // printf("GetOrCreateMutableBlobFileMetaData %lu\n",blob_file_number);
     if (mutable_it != mutable_blob_file_metas_.end()) {
       return &mutable_it->second;
     }
@@ -796,7 +796,7 @@ class VersionBuilder::Rep {
     add_files.emplace(file_number, f);
 
     const uint64_t blob_file_number = f->oldest_blob_file_number;
-    printf("ApplyFileAddition :: oldest blob file number : %lu\n",blob_file_number);
+    // printf("ApplyFileAddition :: oldest blob file number : %lu\n",blob_file_number);
     if (blob_file_number != kInvalidBlobFileNumber) {
       MutableBlobFileMetaData* const mutable_meta =
           GetOrCreateMutableBlobFileMetaData(blob_file_number);
@@ -1300,7 +1300,7 @@ bool VersionBuilder::CheckConsistencyForNumLevels() {
 }
 
 Status VersionBuilder::Apply(const VersionEdit* edit) {
-  printf("VersionBuilder::Apply\n");
+  // printf("VersionBuilder::Apply\n");
   return rep_->Apply(edit);
 }
 

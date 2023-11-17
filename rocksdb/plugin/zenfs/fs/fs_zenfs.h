@@ -408,7 +408,7 @@ loop:
                         IODebugContext* dbg) override {
     Debug(logger_, "NewDirectory: %s to aux: %s\n", name.c_str(),
           ToAuxPath(name).c_str());
-    printf("ZenFS:: NewDirectory : %s\n",name.c_str());
+    // printf("ZenFS:: NewDirectory : %s\n",name.c_str());
     return target()->NewDirectory(ToAuxPath(name), io_opts, result, dbg);
   }
 
