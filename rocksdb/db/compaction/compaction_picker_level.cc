@@ -596,7 +596,7 @@ Compaction* LevelCompactionPicker::PickCompaction(
   // return builder.PickCompaction();
   if(ret!=nullptr){
     printf("LevelCompactionPicker::PickCompaction :: %lu\n",ret->inputs()->size());
-    for(auto ci : (ret->inputs())){
+    for(auto ci : (*ret->inputs())){
       // for(auto ci2 : ci-)
       for(auto cif : ci.files){
         printf("%lu.sst ",cif->fd.GetNumber());
