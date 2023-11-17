@@ -3425,7 +3425,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     for(auto ci : (*c->inputs())){
       // for(auto ci2 : ci-)
       for(auto cif : ci.files){
-        printf("%lu.sst ",cif.fd->GetNumber());
+        printf("%lu.sst ",cif->fd.GetNumber());
       }
     }
     printf("\n");
