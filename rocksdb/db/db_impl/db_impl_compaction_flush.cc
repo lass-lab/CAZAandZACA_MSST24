@@ -3424,10 +3424,11 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
     for(auto ci : (*c->inputs())){
       // for(auto ci2 : ci-)
-      for(auto cif : ci->files){
-        printf("%lu\n",cif.fd->GetNumber());
+      for(auto cif : ci.files){
+        printf("%lu.sst ",cif.fd->GetNumber());
       }
     }
+    printf("\n");
     compaction_job.Run().PermitUncheckedError();
     TEST_SYNC_POINT("DBImpl::BackgroundCompaction:NonTrivial:AfterRun");
     mutex_.Lock();
