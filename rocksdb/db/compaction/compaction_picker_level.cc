@@ -603,6 +603,7 @@ Compaction* LevelCompactionPicker::PickCompaction(
       }
       printf(" || ");
     }
+    printf("\n");
   }
   return ret;
 }
