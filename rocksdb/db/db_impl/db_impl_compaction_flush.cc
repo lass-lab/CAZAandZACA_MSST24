@@ -3193,13 +3193,13 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       TEST_SYNC_POINT("DBImpl::BackgroundCompaction():BeforePickCompaction");
       c.reset(cfd->PickCompaction(*mutable_cf_options, mutable_db_options_,
                                   log_buffer));
-      printf("BackgroundCompaction:: c.reset() : %lu\n",c->inputs()->size());
+      
       TEST_SYNC_POINT("DBImpl::BackgroundCompaction():AfterPickCompaction");
 
       if (c != nullptr) {
         bool enough_room = EnoughRoomForCompaction(
             cfd, *(c->inputs()), &sfm_reserved_compact_space, log_buffer);
-
+        printf("BackgroundCompaction:: c.reset() : %lu\n",c->inputs()->size());
         if (!enough_room) {
           // Then don't do the compaction
           c->ReleaseCompactionFiles(status);
