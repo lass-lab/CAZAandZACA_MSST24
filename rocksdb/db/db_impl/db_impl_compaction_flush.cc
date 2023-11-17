@@ -3408,9 +3408,12 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
         db_id_, db_session_id_, c->column_family_data()->GetFullHistoryTsLow(),
         c->trim_ts(), &blob_callback_);\
     
-    printf("BackgroundCOmpaction :: input size before prepare : %lu\n",c->inputs()->size());
+    // printf("BackgroundCOmpaction :: input size before prepare : %lu\n",c->inputs()->size());
+
+
+
     compaction_job.Prepare();
-    printf("BackgroundCOmpaction :: input size after prepare : %lu\n",c->inputs()->size());
+    // printf("BackgroundCOmpaction :: input size after prepare : %lu\n",c->inputs()->size());
     NotifyOnCompactionBegin(c->column_family_data(), c.get(), status,
                             compaction_job_stats, job_context->job_id);
     mutex_.Unlock();
@@ -3418,6 +3421,13 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
         "DBImpl::BackgroundCompaction:NonTrivial:BeforeRun", nullptr);
     // Should handle erorr?
     printf("BackgroundCOmpaction :: input size before run : %lu\n",c->inputs()->size());
+
+    for(auto ci : c->inputs()){
+      // for(auto ci2 : ci-)
+      for(auto cif : ci->files){
+        printf("%lu\n",cif.fd->GetNumber());
+      }
+    }
     compaction_job.Run().PermitUncheckedError();
     TEST_SYNC_POINT("DBImpl::BackgroundCompaction:NonTrivial:AfterRun");
     mutex_.Lock();
