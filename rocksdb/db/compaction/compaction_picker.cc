@@ -84,7 +84,7 @@ bool FindIntraL0Compaction(const std::vector<FileMetaData*>& level_files,
     }
     compact_bytes_per_del_file = new_compact_bytes_per_del_file;
   }
-  printf("FindIntraL0COmpaction :: earliest_mem_seqno : %lu, start : %lu, limit 5lu\n",earliest_mem_seqno,start,limit);
+  printf("FindIntraL0COmpaction :: earliest_mem_seqno : %lu, start : %lu, limit %lu\n",earliest_mem_seqno,start,limit);
   if ((limit - start) >= min_files_to_compact &&
       compact_bytes_per_del_file < max_compact_bytes_per_del_file) {
     assert(comp_inputs != nullptr);
