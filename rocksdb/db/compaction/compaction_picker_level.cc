@@ -442,6 +442,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       vstorage_->FilesByCompactionPri(start_level_);
   const std::vector<FileMetaData*>& level_files =
       vstorage_->LevelFiles(start_level_);
+  printf("---------------------------------------\n");
   printf("PickFileToCompact :: start level %d size %lu\n",start_level_,file_size.size());
   unsigned int cmp_idx;
 
@@ -527,6 +528,13 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       start_level_inputs_.clear();
       continue;
     }
+    printf("-----------------SELECTED--------------\n");
+    printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
+    for(auto o : output_i.files){
+      printf("%lu.sst ",o->fd.GetNumber());
+    }
+    printf("\n");
+    printf("---------------------------------------\n");
     base_index_ = index;
     break;
   }

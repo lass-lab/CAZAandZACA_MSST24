@@ -423,7 +423,7 @@ loop:
                               IODebugContext* dbg) override {
     Debug(logger_, "CreatDirIfMissing: %s to aux: %s\n", d.c_str(),
           ToAuxPath(d).c_str());
-    printf("ZenFS:: CreateDirIfMissing %s\n",d.c_str());
+    // printf("ZenFS:: CreateDirIfMissing %s\n",d.c_str());
     return target()->CreateDirIfMissing(ToAuxPath(d), options, dbg);
   }
 

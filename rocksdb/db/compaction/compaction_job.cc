@@ -2104,7 +2104,7 @@ Status CompactionJob::FinishCompactionOutputFile(
 Status CompactionJob::InstallCompactionResults(
     const MutableCFOptions& mutable_cf_options) {
   assert(compact_);
-  printf("CompactionJob::InstallCompactionResults\n");
+  // printf("CompactionJob::InstallCompactionResults\n");
   db_mutex_->AssertHeld();
 
   auto* compaction = compact_->compaction;
@@ -2131,7 +2131,7 @@ Status CompactionJob::InstallCompactionResults(
     for (const auto& out : sub_compact.outputs) {
       edit->AddFile(compaction->output_level(), out.meta);
     }
-    printf("CompactionJob::InstallCompactionResults AddBlobFile? %lu\n",sub_compact.blob_file_additions.size());
+    // printf("CompactionJob::InstallCompactionResults AddBlobFile? %lu\n",sub_compact.blob_file_additions.size());
     for (const auto& blob : sub_compact.blob_file_additions) {
       edit->AddBlobFile(blob);
     }
