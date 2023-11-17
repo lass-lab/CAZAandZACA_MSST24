@@ -3060,6 +3060,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   std::unique_ptr<Compaction> c;
   if (prepicked_compaction != nullptr &&
       prepicked_compaction->compaction != nullptr) {
+    printf("Compaction prepicked!!\n");
     c.reset(prepicked_compaction->compaction);
   }
   bool is_prepicked = is_manual || c;

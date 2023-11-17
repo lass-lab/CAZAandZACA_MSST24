@@ -322,6 +322,7 @@ Compaction* LevelCompactionBuilder::PickCompaction() {
 
   // If it is a L0 -> base level compaction, we need to set up other L0
   // files if needed.
+  // if 0->1
   if (!SetupOtherL0FilesIfNeeded()) {
     return nullptr;
   }
