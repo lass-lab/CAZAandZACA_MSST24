@@ -1293,7 +1293,7 @@ Status DBImpl::CompactFilesImpl(
     int output_path_id, JobContext* job_context, LogBuffer* log_buffer,
     CompactionJobInfo* compaction_job_info) {
   mutex_.AssertHeld();
-
+  printf("CompactFilesImpl??\n");
   if (shutting_down_.load(std::memory_order_acquire)) {
     return Status::ShutdownInProgress();
   }
@@ -3211,7 +3211,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
                                        *(c->mutable_cf_options()));
           AddToCompactionQueue(cfd);
           ++unscheduled_compactions_;
-
+          printf("Not Enough room!! c.reset\n");
           c.reset();
           // Don't need to sleep here, because BackgroundCallCompaction
           // will sleep if !s.ok()
