@@ -43,6 +43,7 @@ bool FindIntraL0Compaction(const std::vector<FileMetaData*>& level_files,
                            uint64_t max_compaction_bytes,
                            CompactionInputFiles* comp_inputs,
                            SequenceNumber earliest_mem_seqno) {
+  
   // Do not pick ingested file when there is at least one memtable not flushed
   // which of seqno is overlap with the sst.
   TEST_SYNC_POINT("FindIntraL0Compaction");
@@ -62,6 +63,7 @@ bool FindIntraL0Compaction(const std::vector<FileMetaData*>& level_files,
   if (start >= level_files.size()) {
     return false;
   }
+  
   size_t compact_bytes = static_cast<size_t>(level_files[start]->fd.file_size);
   uint64_t compensated_compact_bytes =
       level_files[start]->compensated_file_size;
@@ -82,7 +84,7 @@ bool FindIntraL0Compaction(const std::vector<FileMetaData*>& level_files,
     }
     compact_bytes_per_del_file = new_compact_bytes_per_del_file;
   }
-
+  printf("FindIntraL0COmpaction :: earliest_mem_seqno : %lu, start : %lu, limit 5lu\n",earliest_mem_seqno,start,limit);
   if ((limit - start) >= min_files_to_compact &&
       compact_bytes_per_del_file < max_compact_bytes_per_del_file) {
     assert(comp_inputs != nullptr);
