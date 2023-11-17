@@ -228,6 +228,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
       cf_name_, vstorage_, &start_level_, &output_level_, &start_level_inputs_);
   if (!start_level_inputs_.empty()) {
     compaction_reason_ = CompactionReason::kFilesMarkedForCompaction;
+    printf("SetupInitialFiles return 1\n");
     return;
   }
 
@@ -235,6 +236,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
   PickFileToCompact(vstorage_->BottommostFilesMarkedForCompaction(), false);
   if (!start_level_inputs_.empty()) {
     compaction_reason_ = CompactionReason::kBottommostFiles;
+    printf("SetupInitialFiles return 2\n");
     return;
   }
 
@@ -242,6 +244,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
   PickFileToCompact(vstorage_->ExpiredTtlFiles(), true);
   if (!start_level_inputs_.empty()) {
     compaction_reason_ = CompactionReason::kTtl;
+    printf("SetupInitialFiles return 3\n");
     return;
   }
 
@@ -249,6 +252,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
   PickFileToCompact(vstorage_->FilesMarkedForPeriodicCompaction(), false);
   if (!start_level_inputs_.empty()) {
     compaction_reason_ = CompactionReason::kPeriodicCompaction;
+    printf("SetupInitialFiles return 4\n");
     return;
   }
 
@@ -256,6 +260,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
   PickFileToCompact(vstorage_->FilesMarkedForForcedBlobGC(), false);
   if (!start_level_inputs_.empty()) {
     compaction_reason_ = CompactionReason::kForcedBlobGC;
+    printf("SetupInitialFiles return 5\n");
     return;
   }
 }
@@ -543,7 +548,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       printf("%lu.sst ",s->fd.GetNumber());
     }
     printf("\n");
-
+    printf("[out] ")
     for(auto o : output_level_inputs.files){
       printf("%lu.sst ",o->fd.GetNumber());
     }
