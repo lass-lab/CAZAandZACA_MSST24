@@ -427,11 +427,11 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     TEST_SYNC_POINT("LevelCompactionPicker::PickCompactionBySize:0");
     return false;
   }
-  uint64_t zns_free_space;
-  uint64_t zns_free_percent;
+  // uint64_t zns_free_space;
+  // uint64_t zns_free_percent;
   
-  ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
-  printf("%lu %lu\n",zns_free_space,zns_free_percent);
+  // ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
+  // printf("%lu %lu\n",zns_free_space,zns_free_percent);
   start_level_inputs_.clear();
 
   assert(start_level_ >= 0);
@@ -442,13 +442,55 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       vstorage_->FilesByCompactionPri(start_level_);
   const std::vector<FileMetaData*>& level_files =
       vstorage_->LevelFiles(start_level_);
-
+  printf("PickFileToCompact :: start level %d size %lu\n",start_level_,file_size.size());
   unsigned int cmp_idx;
+
+
+// MAX
+  for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
+    int index = file_size[cmp_idx];
+    auto* f = level_files[index];
+    CompactionInputFiles start_i;
+    if(f->being_compacted){
+      continue;
+    }
+    start_i.files.push_back(f);
+    start_i.level=start_level_;
+    if(!compaction_picker_->ExpandInputsToCleanCut(cf_name_,vstorage_,&start_i) 
+        ||compaction_picker_->FilesRangeOverlapWithCompaction({start_i},output_level_) ) 
+    {
+      start_i.clear();
+      continue;
+    }
+
+
+    InternalKey smallest, largest;
+    compaction_picker_->GetRange(start_i, &smallest, &largest);
+
+    CompactionInputFiles output_i;
+    output_i.level=output_level_;
+    vstorage_->GetOverlappingInputs(output_level_,&smallest,&largest,&output_i.files);
+
+    if(!output_i.empty() &&
+        !compaction_picker_->ExpandInputsToCleanCut(cf_name_,vstorage_,&output_i)){
+          start_i.clear();
+          continue;
+    }
+
+    printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
+    for(auto o : output_i.files){
+      printf("%lu.sst ",o->fd.GetNumber());
+    }
+    printf("\n");
+  }
+
+
+
   for (cmp_idx = vstorage_->NextCompactionIndex(start_level_);
        cmp_idx < file_size.size(); cmp_idx++) {
     int index = file_size[cmp_idx];
     auto* f = level_files[index];
-
+    // f->fd.GetNumber();
     // do not pick a file to compact if it is being compacted
     // from n-1 level.
     if (f->being_compacted) {
