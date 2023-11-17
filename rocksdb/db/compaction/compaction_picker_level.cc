@@ -530,7 +530,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     }
     printf("-----------------SELECTED--------------\n");
     printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
-    for(auto o : output_i.files){
+    for(auto o : output_level_inputs.files){
       printf("%lu.sst ",o->fd.GetNumber());
     }
     printf("\n");
