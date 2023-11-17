@@ -851,7 +851,7 @@ class VersionBuilder::Rep {
     }
 
     // Add new table files
-    printf("VersionBuilder::Rep::Apply new file n %lu\n",edit->GetNewFiles().size());
+    // printf("VersionBuilder::Rep::Apply new file n %lu\n",edit->GetNewFiles().size());
     for (const auto& new_file : edit->GetNewFiles()) {
       const int level = new_file.first;
       const FileMetaData& meta = new_file.second;
@@ -879,7 +879,7 @@ class VersionBuilder::Rep {
                           ProcessMutable process_mutable,
                           ProcessBoth process_both) const {
     assert(base_vstorage_);
-    printf("MergeBlobFileMetas");
+    // printf("MergeBlobFileMetas");
     auto base_it = base_vstorage_->GetBlobFileMetaDataLB(first_blob_file);
     const auto base_it_end = base_vstorage_->GetBlobFiles().end();
     if(base_it != base_it_end){
@@ -1038,7 +1038,7 @@ class VersionBuilder::Rep {
   // Merge the blob file metadata from the base version with the changes (edits)
   // applied, and save the result into *vstorage.
   void SaveBlobFilesTo(VersionStorageInfo* vstorage) const {
-    printf("SaveBlobFilesTo\n");
+    // printf("SaveBlobFilesTo\n");
     assert(vstorage);
 
     assert(base_vstorage_);

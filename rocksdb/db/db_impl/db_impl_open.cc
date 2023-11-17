@@ -1733,7 +1733,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
   if (!s.ok()) {
     return s;
   }
-  printf("DBImpl::Open");
+  // printf("DBImpl::Open");
   s = ValidateOptions(db_options, column_families);
   if (!s.ok()) {
     return s;
@@ -1750,7 +1750,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
   }
 
   DBImpl* impl = new DBImpl(db_options, dbname, seq_per_batch, batch_per_txn);
-  printf("DBImpl::Open new DBImpl\n");
+  // printf("DBImpl::Open new DBImpl\n");
   if (!impl->immutable_db_options_.info_log) {
     s = impl->init_logger_creation_s_;
     delete impl;
@@ -1759,7 +1759,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
     assert(impl->init_logger_creation_s_.ok());
   }
   s = impl->env_->CreateDirIfMissing(impl->immutable_db_options_.GetWalDir());
-  printf("DBImpl::Open 1\n");
+  // printf("DBImpl::Open 1\n");
   if (s.ok()) {
     std::vector<std::string> paths;
     for (auto& db_path : impl->immutable_db_options_.db_paths) {
@@ -1976,7 +1976,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
 
     std::vector<ColumnFamilyMetaData> metadata;
     impl->GetAllColumnFamilyMetaData(&metadata);
-    printf("DBImpl::Open 2\n");
+    // printf("DBImpl::Open 2\n");
     std::unordered_map<std::string, uint64_t> known_file_sizes;
     for (const auto& md : metadata) {
       for (const auto& lmd : md.levels) {
@@ -1993,7 +1993,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
         known_file_sizes[name] = bmd.blob_file_size;
       }
     }
-printf("DBImpl::Open 3\n");
+// printf("DBImpl::Open 3\n");
     std::vector<std::string> paths;
     paths.emplace_back(impl->immutable_db_options_.db_paths[0].path);
     for (auto& cf : column_families) {
@@ -2066,7 +2066,7 @@ printf("DBImpl::Open 3\n");
     delete impl;
     *dbptr = nullptr;
   }
-  printf("DBImpl::Open return\n");
+  // printf("DBImpl::Open return\n");
   return s;
 }
 }  // namespace ROCKSDB_NAMESPACE
