@@ -518,7 +518,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
 
-    if(ioptions_.compaction_scheme==BASELINE_COMPACTION||file_candidates.size()==1){
+    if(ioptions_.compaction_scheme==BASELINE_COMPACTION ||
+          file_candidates.size()==1 ||
+          start_level_ == 0){
       // trial move or baseline, return here
       // start_level_inputs_.files.push_back(candidate);
       // printf("It is %s, return here\n",ioptions_.compaction_scheme==BASELINE_COMPACTION ? "baseline compaction" : "trial move");
