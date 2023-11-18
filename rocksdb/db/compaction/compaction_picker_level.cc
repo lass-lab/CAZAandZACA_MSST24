@@ -464,8 +464,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   uint64_t score;
   unsigned int max_cmp_idx = vstorage_->NextCompactionIndex(start_level_);
   int max_index = 0;
-  std::vector<FileMetaData*> max_file_canddiates;
-  max_file_canddiates.clear();
+  std::vector<FileMetaData*> max_file_candiates;
+  max_file_candiates.clear();
   
   for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
 
@@ -507,21 +507,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
         !compaction_picker_->ExpandInputsToCleanCut(cf_name_,vstorage_,&output_i)){
           continue;
     }
-
-
-  
-    if(ioptions_.compaction_scheme==BASELINE_COMPACTION||file_candidates.size()==1){
-      // trial move or baseline, return here
-      // start_level_inputs_.files.push_back(candidate);
-      start_level_inputs_.clear();
-      start_level_inputs_.files=start_i.files;
-      start_level_inputs_.level = start_level_;
-      vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
-      base_index_ = index;
-      return start_level_inputs_.size() > 0;
-    }
     
-    // should be different, original logic not using GetOverlappingInputs at start level.
     files=start_i.files;
     vstorage_->GetOverlappingInputs(start_level_,&smallest,&largest,&files);
     for(auto f : files){
@@ -531,12 +517,29 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       file_candidates.push_back(f->fd.GetNumber());
     }
 
+    printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
+
+    if(ioptions_.compaction_scheme==BASELINE_COMPACTION||file_candidates.size()==1){
+      // trial move or baseline, return here
+      // start_level_inputs_.files.push_back(candidate);
+      printf("It is %s, return here\n",ioptions_.compaction_scheme==BASELINE_COMPACTION ? "baseline compaction" : "trial move");
+      start_level_inputs_.clear();
+      start_level_inputs_.files=start_i.files;
+      start_level_inputs_.level = start_level_;
+      vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
+      base_index_ = index;
+      return start_level_inputs_.size() > 0;
+    }
+    
+    // should be different, original logic not using GetOverlappingInputs at start level.
+
+
 
     score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates);
 
     if(score>max_score){
-      max_file_canddiates.clear();
-      max_file_canddiates=start_i.files;
+      max_file_candiates.clear();
+      max_file_candiates=start_i.files;
       
       max_cmp_idx=cmp_idx;
       max_index=index;
@@ -546,7 +549,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
 
-    printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
+    
     printf("[start] ");
     for(auto s : files){
       printf("%lu.sst ",s->fd.GetNumber());
@@ -560,11 +563,29 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     printf("\n");
     printf("score: %lu\n",score);
   }
+
   start_level_inputs_.clear();
-  start_level_inputs_.files=max_file_canddiates;
+  start_level_inputs_.files=max_file_candiates;
   start_level_inputs_.level = start_level_;
   vstorage_->SetNextCompactionIndex(start_level_, max_cmp_idx);  
   base_index_=max_index;
+
+
+  printf("-----------------SELECTED--------------\n");
+  printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
+  printf("score : %lu\n",max_score);
+  // printf("[start] ");
+  // for(auto s : start_level_inputs_.files){
+  //   printf("%lu.sst ",s->fd.GetNumber());
+  // }
+  // printf("\n");
+  // printf("[out] ");
+  // for(auto o : output_level_inputs.files){
+  //   printf("%lu.sst ",o->fd.GetNumber());
+  // }
+  // printf("\n");
+  printf("-----------------END-------------------\n");
+
 
   return start_level_inputs_.size() > 0;
 
