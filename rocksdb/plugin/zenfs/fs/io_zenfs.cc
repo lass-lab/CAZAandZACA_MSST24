@@ -829,7 +829,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     //     return IOStatus::IOError("positioned append not at write pointer 2");
     //   }
     // }
-    if(buffered){
+    if(false){
       buffer_mtx_.lock();
       s=BufferedWrite(it->content_,it->size_);
       buffer_mtx_.unlock();
