@@ -25,8 +25,8 @@
 #define WRITE_DIRECT_FD 2
 
 
-#define BLKPARTIALRESETZONE	_IOW(0x12, 137, struct blk_zone_range) // 137 NO CACHE FLUSH, 139 CACHE FLUSH
-#define BLKPARTIALRESETZONE_clflush	_IOW(0x12, 139, struct blk_zone_range) // 137 NO CACHE FLUSH, 139 CACHE FLUSH
+#define BLKPARTIALRESETZONE	_IOW(0x12, 137, struct blk_zone_range) // NO CACHE FLUSH
+#define BLKPARTIALRESETZONE_clflush	_IOW(0x12, 139, struct blk_zone_range) // CACHE FLUSH
 #define BLKDUMMYCMD	_IOW(0x12, 138, struct blk_zone_range)
 
 #ifdef BLKPARTIALRESETZONE
@@ -41,7 +41,7 @@ struct blk_zone_range r;  \
 struct blk_zone_range r;  \
     r.sector=(zidx); \
     r.nr_sectors=(n);\
-    ioctl((fd),BLKPARTIALRESETZONE_noclflush,&r );\
+    ioctl((fd),BLKPARTIALRESETZONE_clflush,&r );\
 }
 
 
