@@ -456,13 +456,14 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 // MAX
   // ioptions_.reset_scheme
-  printf("%lu\n",ioptions_.reset_scheme);
+  printf("%lu\n",ioptions_.compaction_scheme);
+  // compaction_picker_->ioptions_.
   // mutable_db_options_.e
   
   uint64_t max_score = 0;
   uint64_t score;
   for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
-    bool is_trialmove=false;
+
     std::vector<uint64_t> file_candidates;
     file_candidates.clear();
 

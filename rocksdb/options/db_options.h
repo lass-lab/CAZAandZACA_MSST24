@@ -108,6 +108,8 @@ struct ImmutableDBOptions {
   std::shared_ptr<CompactionService> compaction_service;
   bool enforce_single_del_contracts;
 
+  uint64_t compaction_scheme;
+
   bool IsWalDirSameAsDBPath() const;
   bool IsWalDirSameAsDBPath(const std::string& path) const;
   const std::string& GetWalDir() const;
