@@ -682,6 +682,6 @@ Compaction* LevelCompactionPicker::PickCompaction(
   //   }
   //   printf("\n");
   // }
-  return ret;
+  // return ret;
 }
 }  // namespace ROCKSDB_NAMESPACE
