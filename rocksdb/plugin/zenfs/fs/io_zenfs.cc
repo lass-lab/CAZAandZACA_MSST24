@@ -591,9 +591,9 @@ void ZoneFile::PushExtent() {
   extent_filepos_ = file_size_;
 }
 
-IOStatus ZoneFile::AllocateNewZone() {
+IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
   Zone* zone;
-  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone);
+  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone,min_capacity);
   // assert(IOStatus::NoSpace("Not enough capacity for append")==IOStatus::NosSpace());
   
   if(zone==nullptr){
@@ -611,7 +611,7 @@ IOStatus ZoneFile::AllocateNewZone() {
 
       // sleep(1);
       usleep(1000 * 1000);
-      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone);
+      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone,min_capacity);
       // zenfs_->ZCUnLock();
       if(zone!=nullptr){
         break;
@@ -649,7 +649,7 @@ IOStatus ZoneFile::BufferedAppend(char* buffer, uint64_t data_size) {
   // printf("@@ Bufferedappend :%u\n",data_size);
   // while(zbd_->GetZCRunning());
   if (active_zone_ == NULL) {
-    s = AllocateNewZone();
+    s = AllocateNewZone(data_size);
     if (!s.ok()) return s;
   }
   std::string filename;
@@ -693,7 +693,7 @@ IOStatus ZoneFile::BufferedAppend(char* buffer, uint64_t data_size) {
         memmove((void*)(buffer), (void*)(buffer + wr_size), left);
       }
       // while(zbd_->GetZCRunning());
-      s = AllocateNewZone();
+      s = AllocateNewZone(data_size);
       if (!s.ok()) return s;
     }
   }
@@ -716,7 +716,7 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
   }
   if (active_zone_ == NULL) {
     // while(zbd_->GetZCRunning());
-    s = AllocateNewZone();
+    s = AllocateNewZone(data_size);
     if (!s.ok()) return s;
   }
 
@@ -759,7 +759,7 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
                 (void*)(sparse_buffer + wr_size), left);
       }
       // while(zbd_->GetZCRunning());
-      s = AllocateNewZone();
+      s = AllocateNewZone(data_size);
       if (!s.ok()) return s;
     }
   }
@@ -861,7 +861,7 @@ IOStatus ZoneFile::Append(void* data, uint64_t data_size) {
   IOStatus s = IOStatus::OK();
   // while(zbd_->GetZCRunning());
   if (!active_zone_) {
-    s = AllocateNewZone();
+    s = AllocateNewZone(data_size);
     if (!s.ok()) return s;
   }
 
@@ -875,7 +875,7 @@ IOStatus ZoneFile::Append(void* data, uint64_t data_size) {
         return s;
       }
       // while(zbd_->GetZCRunning());
-      s = AllocateNewZone();
+      s = AllocateNewZone(data_size);
       if (!s.ok()) return s;
     }
 

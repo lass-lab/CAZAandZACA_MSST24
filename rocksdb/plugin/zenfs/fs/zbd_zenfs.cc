@@ -2077,7 +2077,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
 }
 
 IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& largest, int level,
-                                          Env::WriteLifeTimeHint file_lifetime, IOType io_type, Zone **out_zone) {
+                                          Env::WriteLifeTimeHint file_lifetime, IOType io_type, Zone **out_zone,uint64_t min_capacity) {
   
 
   // RuntimeReset();
@@ -2115,7 +2115,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
   if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
-    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,&allocated_zone);
+    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,&allocated_zone,min_capacity);
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
@@ -2127,7 +2127,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   }
 
   /* Try to fill an already open zone(with the best life time diff) */
-  s = GetBestOpenZoneMatch(file_lifetime, &best_diff, &allocated_zone);
+  s = GetBestOpenZoneMatch(file_lifetime, &best_diff, &allocated_zone,min_capacity);
   if (!s.ok()) {
     PutOpenIOZoneToken();
     return s;
@@ -2172,7 +2172,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
 
       s = AllocateEmptyZone(&allocated_zone);
       if(s.ok()&&allocated_zone==nullptr){
-        s=GetAnyLargestRemainingZone(&allocated_zone,false);
+        s=GetAnyLargestRemainingZone(&allocated_zone,false,min_capacity);
         if(allocated_zone){
           allocated_zone->lifetime_=file_lifetime;
         }
