@@ -449,8 +449,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       vstorage_->FilesByCompactionPri(start_level_);
   const std::vector<FileMetaData*>& level_files =
       vstorage_->LevelFiles(start_level_);
-  printf("---------------------------------------\n");
-  printf("PickFileToCompact(%lu) :: start level %d size %lu\n",ioptions_.compaction_scheme,start_level_,file_size.size());
+  // printf("---------------------------------------\n");
+  // printf("PickFileToCompact(%lu) :: start level %d size %lu\n",ioptions_.compaction_scheme,start_level_,file_size.size());
   unsigned int cmp_idx;
 
 
@@ -516,12 +516,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       file_candidates.push_back(f->fd.GetNumber());
     }
 
-    printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
+    // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
 
     if(ioptions_.compaction_scheme==BASELINE_COMPACTION||file_candidates.size()==1){
       // trial move or baseline, return here
       // start_level_inputs_.files.push_back(candidate);
-      printf("It is %s, return here\n",ioptions_.compaction_scheme==BASELINE_COMPACTION ? "baseline compaction" : "trial move");
+      // printf("It is %s, return here\n",ioptions_.compaction_scheme==BASELINE_COMPACTION ? "baseline compaction" : "trial move");
       start_level_inputs_.clear();
       start_level_inputs_.files=start_i.files;
       start_level_inputs_.level = start_level_;
@@ -549,18 +549,18 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
     
-    printf("[start] ");
-    for(auto s : files){
-      printf("%lu.sst ",s->fd.GetNumber());
-    }
-    printf("\n");
+    // printf("[start] ");
+    // for(auto s : files){
+    //   printf("%lu.sst ",s->fd.GetNumber());
+    // }
+    // printf("\n");
 
-    printf("[out] ");
-    for(auto o : output_i.files){
-      printf("%lu.sst ",o->fd.GetNumber());
-    }
-    printf("\n");
-    printf("score: %lu\n",score);
+    // printf("[out] ");
+    // for(auto o : output_i.files){
+    //   printf("%lu.sst ",o->fd.GetNumber());
+    // }
+    // printf("\n");
+    // printf("score: %lu\n",score);
   }
 
   start_level_inputs_.clear();
@@ -569,22 +569,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   vstorage_->SetNextCompactionIndex(start_level_, max_cmp_idx);  
   base_index_=max_index;
 
-  if(start_level_inputs_.size()){
-    printf("-----------------SELECTED--------------\n");
-    printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
-    printf("score : %lu\n",max_score);
-    // printf("[start] ");
-    // for(auto s : start_level_inputs_.files){
-    //   printf("%lu.sst ",s->fd.GetNumber());
-    // }
-    // printf("\n");
-    // printf("[out] ");
-    // for(auto o : output_level_inputs.files){
-    //   printf("%lu.sst ",o->fd.GetNumber());
-    // }
-    // printf("\n");
-    printf("-----------------END-------------------\n");
-  }
+  // if(start_level_inputs_.size()){
+  //   printf("-----------------SELECTED--------------\n");
+  //   printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
+  //   printf("score : %lu\n",max_score);
+  //   printf("-----------------END-------------------\n");
+  // }
   return start_level_inputs_.size() > 0;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -679,19 +669,19 @@ Compaction* LevelCompactionPicker::PickCompaction(
   LevelCompactionBuilder builder(cf_name, vstorage, earliest_mem_seqno, this,
                                  log_buffer, mutable_cf_options, ioptions_,
                                  mutable_db_options);
-  Compaction* ret= builder.PickCompaction();
-  // return builder.PickCompaction();
-  if(ret!=nullptr){
-    printf("LevelCompactionPicker::PickCompaction :: %lu\n",ret->inputs()->size());
-    for(auto ci : (*ret->inputs())){
-      // for(auto ci2 : ci-)
-      for(auto cif : ci.files){
-        printf("%lu.sst ",cif->fd.GetNumber());
-      }
-      printf(" || ");
-    }
-    printf("\n");
-  }
+  // Compaction* ret= builder.PickCompaction();
+  return builder.PickCompaction();
+  // if(ret!=nullptr){
+  //   printf("LevelCompactionPicker::PickCompaction :: %lu\n",ret->inputs()->size());
+  //   for(auto ci : (*ret->inputs())){
+  //     // for(auto ci2 : ci-)
+  //     for(auto cif : ci.files){
+  //       printf("%lu.sst ",cif->fd.GetNumber());
+  //     }
+  //     printf(" || ");
+  //   }
+  //   printf("\n");
+  // }
   return ret;
 }
 }  // namespace ROCKSDB_NAMESPACE

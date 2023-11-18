@@ -3395,7 +3395,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     GetSnapshotContext(job_context, &snapshot_seqs,
                        &earliest_write_conflict_snapshot, &snapshot_checker);
     assert(is_snapshot_supported_ || snapshots_.empty());
-    printf("BackgroundCompaction:: before struct compaction job : %lu\n",c->inputs()->size());
+    // printf("BackgroundCompaction:: before struct compaction job : %lu\n",c->inputs()->size());
     CompactionJob compaction_job(
         job_context->job_id, c.get(), immutable_db_options_,
         mutable_db_options_, file_options_for_compaction_, versions_.get(),
@@ -3424,16 +3424,16 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     TEST_SYNC_POINT_CALLBACK(
         "DBImpl::BackgroundCompaction:NonTrivial:BeforeRun", nullptr);
     // Should handle erorr?
-    printf("BackgroundCOmpaction :: [%d->%d] input size before run : %lu\n",c->start_level(),output_level,c->inputs()->size());
+    // printf("BackgroundCOmpaction :: [%d->%d] input size before run : %lu\n",c->start_level(),output_level,c->inputs()->size());
 
-    for(auto ci : (*c->inputs())){
-      // for(auto ci2 : ci-)
-      for(auto cif : ci.files){
-        printf("%lu.sst ",cif->fd.GetNumber());
-      }
-      printf(" || ");
-    }
-    printf("\n");
+    // for(auto ci : (*c->inputs())){
+    //   // for(auto ci2 : ci-)
+    //   for(auto cif : ci.files){
+    //     printf("%lu.sst ",cif->fd.GetNumber());
+    //   }
+    //   printf(" || ");
+    // }
+    // printf("\n");
     compaction_job.Run().PermitUncheckedError();
     TEST_SYNC_POINT("DBImpl::BackgroundCompaction:NonTrivial:AfterRun");
     mutex_.Lock();
