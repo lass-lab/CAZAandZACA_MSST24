@@ -450,9 +450,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // printf("PickFileToCompact(%lu) :: start level %d size %lu\n",ioptions_.compaction_scheme,start_level_,file_size.size());
   unsigned int cmp_idx;
 
-  if(ioptions_.compaction_scheme==BASELINE_COMPACTION){
-    goto baseline;
-  }
+
 
 // MAX
   // ioptions_.reset_scheme
@@ -465,7 +463,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   int max_index = 0;
   std::vector<FileMetaData*> max_file_candiates;
   max_file_candiates.clear();
-  
+  if(ioptions_.compaction_scheme==BASELINE_COMPACTION){
+    goto baseline;
+  }
   for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
 
     std::vector<uint64_t> file_candidates;
