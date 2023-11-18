@@ -3211,7 +3211,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
                                        *(c->mutable_cf_options()));
           AddToCompactionQueue(cfd);
           ++unscheduled_compactions_;
-          printf("Not Enough room!! c.reset\n");
+          // printf("Not Enough room!! c.reset\n");
           c.reset();
           // Don't need to sleep here, because BackgroundCallCompaction
           // will sleep if !s.ok()

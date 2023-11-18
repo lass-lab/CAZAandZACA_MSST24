@@ -889,7 +889,7 @@ class VersionBuilder::Rep {
     if(base_it != base_it_end){
       printf("%lu",(*base_it_end)->GetBlobFileNumber());
     }
-    printf("\n");
+    // printf("\n");
 
     auto mutable_it = mutable_blob_file_metas_.lower_bound(first_blob_file);
     const auto mutable_it_end = mutable_blob_file_metas_.end();
