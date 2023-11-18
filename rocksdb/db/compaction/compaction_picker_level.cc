@@ -546,18 +546,19 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
 
-    // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
-    // printf("[start] ");
-    // for(auto s : start_i.files){
-    //   printf("%lu.sst ",s->fd.GetNumber());
-    // }
-    // printf("\n");
+    printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
+    printf("[start] ");
+    for(auto s : files){
+      printf("%lu.sst ",s->fd.GetNumber());
+    }
+    printf("\n");
 
-    // printf("[out] ");
-    // for(auto o : output_i.files){
-    //   printf("%lu.sst ",o->fd.GetNumber());
-    // }
-    // printf("\n");
+    printf("[out] ");
+    for(auto o : output_i.files){
+      printf("%lu.sst ",o->fd.GetNumber());
+    }
+    printf("\n");
+    printf("score: %lu\n",score);
   }
   start_level_inputs_.clear();
   start_level_inputs_.files=max_file_canddiates;

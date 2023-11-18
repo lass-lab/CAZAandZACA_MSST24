@@ -930,7 +930,7 @@ class ZonedBlockDevice {
                                           Env::WriteLifeTimeHint file_lifetime,Zone **zone_out,
                                           uint64_t min_capacity = 0);
   
-  
+  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates);
 
   IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
                                     Zone** zone_out,uint64_t min_capacity);
