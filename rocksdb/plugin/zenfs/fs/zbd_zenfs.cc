@@ -147,7 +147,7 @@ IOStatus Zone::PartialResetToAllInvalidZone(size_t erase_sz){
   if(pad_size){
     new ZoneExtent(start_,pad_size,this);
   }
-  ios = zbd_be_->PartialReset( (zidx_* zbd_be_->GetZoneSize()) ,erase_sz);
+  ios = zbd_be_->PartialReset( (zidx_* zbd_be_->GetZoneSize()) ,erase_sz,false);
   if (ios != IOStatus::OK()) return ios;
   capacity_+=erase_sz;
   wp_-=erase_sz;
@@ -255,7 +255,7 @@ IOStatus Zone::PartialReset(size_t* erase_sz){
 
 
   // printf("@@@@@@@ USER LEVEL PARITAL RESET [%lu] start_ %lu %lu zsize %lu extents size %lu\n",zidx_,start_,erase_size,zbd_be_->GetZoneSize(),zone_extents_.size());
-  IOStatus ios = zbd_be_->PartialReset( (zidx_* zbd_be_->GetZoneSize()) ,erase_size);
+  IOStatus ios = zbd_be_->PartialReset( (zidx_* zbd_be_->GetZoneSize()) ,erase_size,true);
 
   if (ios != IOStatus::OK()){ 
     return ios;

@@ -282,7 +282,7 @@ class ZonedBlockDeviceBackend {
   virtual std::unique_ptr<ZoneList> ListZones() = 0;
   virtual IOStatus Reset(uint64_t start, bool *offline,
                          uint64_t *max_capacity) = 0;
-  virtual IOStatus PartialReset(uint64_t , uint64_t) = 0;
+  virtual IOStatus PartialReset(uint64_t , uint64_t,bool) = 0;
   virtual IOStatus Finish(uint64_t start) = 0;
   virtual IOStatus Close(uint64_t start) = 0;
   virtual int Read(char *buf, int size, uint64_t pos, bool direct) = 0;

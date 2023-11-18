@@ -25,8 +25,8 @@
 #define WRITE_DIRECT_FD 2
 
 
-// #define BLKPARTIALRESETZONE	_IOW(0x12, 137, struct blk_zone_range) // 137 NO CACHE FLUSH, 139 CACHE FLUSH
-#define BLKPARTIALRESETZONE	_IOW(0x12, 139, struct blk_zone_range) // 137 NO CACHE FLUSH, 139 CACHE FLUSH
+#define BLKPARTIALRESETZONE	_IOW(0x12, 137, struct blk_zone_range) // 137 NO CACHE FLUSH, 139 CACHE FLUSH
+#define BLKPARTIALRESETZONE_clflush	_IOW(0x12, 139, struct blk_zone_range) // 137 NO CACHE FLUSH, 139 CACHE FLUSH
 #define BLKDUMMYCMD	_IOW(0x12, 138, struct blk_zone_range)
 
 #ifdef BLKPARTIALRESETZONE
@@ -36,6 +36,14 @@ struct blk_zone_range r;  \
     r.nr_sectors=(n);\
     ioctl((fd),BLKPARTIALRESETZONE,&r );\
 }
+
+#define zbd_circular_partial_reset_clflush(fd,zidx,n) { \
+struct blk_zone_range r;  \
+    r.sector=(zidx); \
+    r.nr_sectors=(n);\
+    ioctl((fd),BLKPARTIALRESETZONE_noclflush,&r );\
+}
+
 
 #endif
 
@@ -71,7 +79,7 @@ class ZbdlibBackend : public ZonedBlockDeviceBackend {
                 unsigned int *max_open_zones,unsigned int* log2_erase_unit_size);
   std::unique_ptr<ZoneList> ListZones();
   IOStatus Reset(uint64_t start, bool *offline, uint64_t *max_capacity);
-  IOStatus PartialReset(uint64_t start, uint64_t erase_size);
+  IOStatus PartialReset(uint64_t start, uint64_t erase_size,bool clflush);
   
   IOStatus Finish(uint64_t start);
   IOStatus Close(uint64_t start);

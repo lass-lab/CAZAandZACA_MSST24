@@ -179,7 +179,7 @@ IOStatus ZbdlibBackend::Reset(uint64_t start, bool *offline,
   return IOStatus::OK();
 }
 //start byte,erasesize(bytes) --> zidx,erasesize(bytes)
-IOStatus ZbdlibBackend::PartialReset(uint64_t start, uint64_t erase_size){  
+IOStatus ZbdlibBackend::PartialReset(uint64_t start, uint64_t erase_size, bool clflush){  
   #ifndef BLKPARTIALRESETZONE
     (void)(start);
     (void)(erase_size);
@@ -190,7 +190,12 @@ IOStatus ZbdlibBackend::PartialReset(uint64_t start, uint64_t erase_size){
   if(erase_size==0){
     return IOStatus::IOError("Erase unit # < 0\n");
   }
-  zbd_circular_partial_reset(write_f_,start,erase_size);
+  if(clflush==true){
+    zbd_circular_partial_reset_clflush(write_f_,start,erase_size);
+  }else{
+    zbd_circular_partial_reset(write_f_,start,erase_size);
+  }
+
   #endif
   return IOStatus::OK();
 }

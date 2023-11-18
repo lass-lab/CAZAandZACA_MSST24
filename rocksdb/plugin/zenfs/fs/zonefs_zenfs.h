@@ -73,7 +73,7 @@ class ZoneFsBackend : public ZonedBlockDeviceBackend {
                 unsigned int *max_open_zones,unsigned int* log2_erase_unit_size);
   std::unique_ptr<ZoneList> ListZones();
   IOStatus Reset(uint64_t start, bool *offline, uint64_t *max_capacity);
-  IOStatus PartialReset(uint64_t , uint64_t ) { return IOStatus::OK(); }
+  IOStatus PartialReset(uint64_t , uint64_t ,bool) { return IOStatus::OK(); }
   IOStatus Finish(uint64_t start);
   IOStatus Close(uint64_t start);
   int Read(char *buf, int size, uint64_t pos, bool direct);
