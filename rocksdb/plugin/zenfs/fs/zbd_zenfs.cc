@@ -1703,7 +1703,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
     if(!target_zone->Acquire()){
       continue;
     }
-    if(target_zone->capacity_<=min_capacity){
+    if(target_zone->capacity_<=min_capacity || target_zone->Full()){
       target_zone->Release();
       continue;
     }
@@ -1919,7 +1919,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
       if(!e->zone_->Acquire()){
         continue;
       }
-      if(e->zone_->capacity_<=min_capacity){
+      if(e->zone_->capacity_<=min_capacity || e->zone_->Full()){
         e->zone_->Release();
         continue;
       }

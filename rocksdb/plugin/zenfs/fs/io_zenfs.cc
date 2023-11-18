@@ -817,6 +817,10 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     return IOStatus::OK();
     // return;
   }
+
+  if(zoneFile_->GetZbd()->GetAllocationScheme()==LIZA){
+    return IOStatus::OK();
+  }
   // zoneFile_->SetSstEnded();
   zoneFile_->fno_=fno_;
   zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
