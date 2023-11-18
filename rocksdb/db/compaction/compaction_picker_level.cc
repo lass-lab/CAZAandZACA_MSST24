@@ -434,11 +434,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     TEST_SYNC_POINT("LevelCompactionPicker::PickCompactionBySize:0");
     return false;
   }
-  // uint64_t zns_free_space;
-  // uint64_t zns_free_percent;
-  
-  // ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
-  // printf("%lu %lu\n",zns_free_space,zns_free_percent);
+
+
   start_level_inputs_.clear();
 
   assert(start_level_ >= 0);
@@ -453,6 +450,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // printf("PickFileToCompact(%lu) :: start level %d size %lu\n",ioptions_.compaction_scheme,start_level_,file_size.size());
   unsigned int cmp_idx;
 
+  if(ioptions_.compaction_scheme==BASELINE_COMPACTION){
+    goto baseline;
+  }
 
 // MAX
   // ioptions_.reset_scheme
@@ -576,7 +576,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   //   printf("-----------------END-------------------\n");
   // }
   return start_level_inputs_.size() > 0;
-
+baseline:
 //////////////////////////////////////////////////////////////////////////////////////////
   for (cmp_idx = vstorage_->NextCompactionIndex(start_level_);
        cmp_idx < file_size.size(); cmp_idx++) {
