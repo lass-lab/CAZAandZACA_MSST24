@@ -1181,6 +1181,8 @@ class FSWritableFile {
   virtual IOStatus CAZAFlushSST(void){
     return IOStatus::OK();
   }
+
+  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates) {}
  protected:
   size_t preallocation_block_size() { return preallocation_block_size_; }
 

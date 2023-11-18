@@ -322,7 +322,7 @@ Compaction* LevelCompactionBuilder::PickCompaction() {
 
   // If it is a L0 -> base level compaction, we need to set up other L0
   // files if needed.
-  // if 0->1
+  // if 0->1 and overlapped l0 in compaction, return nullptr
   if (!SetupOtherL0FilesIfNeeded()) {
     return nullptr;
   }
@@ -455,25 +455,44 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
 // MAX
+  // ioptions_.reset_scheme
+  printf("%lu\n",ioptions_.reset_scheme);
+  // mutable_db_options_.e
+  
+  uint64_t max_score = 0;
+  uint64_t score;
   for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
+    bool is_trialmove=false;
+    std::vector<uint64_t> file_candidates;
+    file_candidates.clear();
+
     int index = file_size[cmp_idx];
-    auto* f = level_files[index];
+    auto* candidate = level_files[index];
     CompactionInputFiles start_i;
-    if(f->being_compacted){
+
+    // if l0 -> l1 compaction
+
+    // else (l1.... -> ln)
+
+
+    if(candidate->being_compacted){
       continue;
     }
-    start_i.files.push_back(f);
+    start_i.files.push_back(candidate);
     start_i.level=start_level_;
     if(!compaction_picker_->ExpandInputsToCleanCut(cf_name_,vstorage_,&start_i) 
         ||compaction_picker_->FilesRangeOverlapWithCompaction({start_i},output_level_) ) 
     {
-      start_i.clear();
       continue;
     }
 
-
     InternalKey smallest, largest;
     compaction_picker_->GetRange(start_i, &smallest, &largest);
+    vstorage_->GetOverlappingInputs(start_level_,&smallest,&largest,&start_i.files);
+
+    for(auto f : start_i.files){
+      file_candidates.push_back(f->fd.GetNumber());
+    }
 
     CompactionInputFiles output_i;
     output_i.level=output_level_;
@@ -484,23 +503,32 @@ bool LevelCompactionBuilder::PickFileToCompact() {
           start_i.clear();
           continue;
     }
-
-    printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
-    printf("[start] ");
-    for(auto s : start_i.files){
-      printf("%lu.sst ",s->fd.GetNumber());
+    for(auto f : output_i.files){
+      file_candidates.push_back(f->fd.GetNumber());
     }
-    printf("\n");
 
-    printf("[out] ");
-    for(auto o : output_i.files){
-      printf("%lu.sst ",o->fd.GetNumber());
+    if(file_candidates.size()==1){
+      // trial move, return here
     }
-    printf("\n");
+
+
+
+    // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
+    // printf("[start] ");
+    // for(auto s : start_i.files){
+    //   printf("%lu.sst ",s->fd.GetNumber());
+    // }
+    // printf("\n");
+
+    // printf("[out] ");
+    // for(auto o : output_i.files){
+    //   printf("%lu.sst ",o->fd.GetNumber());
+    // }
+    // printf("\n");
   }
 
 
-
+////////////////////////////////////
   for (cmp_idx = vstorage_->NextCompactionIndex(start_level_);
        cmp_idx < file_size.size(); cmp_idx++) {
     int index = file_size[cmp_idx];

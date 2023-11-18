@@ -1678,6 +1678,10 @@ DEFINE_uint32(repeat,1,"REPEAT");
 
 DEFINE_uint64(allocation_scheme,0,"0<Tuninig point<100");
 
+DEFINE_uint64(compaction_scheme,0,"0<Tuninig point<100");
+
+
+
 namespace ROCKSDB_NAMESPACE {
 namespace {
 static Status CreateMemTableRepFactory(
@@ -4057,6 +4061,7 @@ class Benchmark {
 
     options.reset_scheme=FLAGS_reset_scheme;
     options.allocation_scheme=FLAGS_allocation_scheme;
+    options.compaction_scheme=FLAGS_compaction_scheme;
     options.partial_reset_scheme=FLAGS_partial_reset_scheme;
     options.zc=FLAGS_zc;
     options.until=FLAGS_until;
