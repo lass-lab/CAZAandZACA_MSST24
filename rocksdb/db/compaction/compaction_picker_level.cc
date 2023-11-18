@@ -217,7 +217,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
     }
   }
   if (!start_level_inputs_.empty()) {
-    printf("SetupInitialFiles return 0\n");
+    // printf("SetupInitialFiles return 0\n");
     return;
   }
 
@@ -450,13 +450,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   const std::vector<FileMetaData*>& level_files =
       vstorage_->LevelFiles(start_level_);
   printf("---------------------------------------\n");
-  printf("PickFileToCompact :: start level %d size %lu\n",start_level_,file_size.size());
+  printf("PickFileToCompact(%lu) :: start level %d size %lu\n",ioptions_.compaction_scheme,start_level_,file_size.size());
   unsigned int cmp_idx;
 
 
 // MAX
   // ioptions_.reset_scheme
-  printf("%lu\n",ioptions_.compaction_scheme);
   // compaction_picker_->ioptions_.
   // mutable_db_options_.e
   
