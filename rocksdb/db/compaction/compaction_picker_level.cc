@@ -519,7 +519,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
 
     if(ioptions_.compaction_scheme==BASELINE_COMPACTION ||
-          (file_candidates.size()==1 &&cmp_idx== vstorage_->NextCompactionIndex(start_level_))||
+          (file_candidates.size()==1 &&cmp_idx==(unsigned int)vstorage_->NextCompactionIndex(start_level_))||
           start_level_ == 0){
       // trial move or baseline, return here
       // start_level_inputs_.files.push_back(candidate);
