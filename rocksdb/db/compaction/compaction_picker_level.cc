@@ -462,6 +462,11 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   
   uint64_t max_score = 0;
   uint64_t score;
+  unsigned int max_cmp_idx;
+  int max_index;
+  std::vector<FileMetaData*> max_file_canddiates;
+  max_file_canddiates.clear();
+  
   for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
 
     std::vector<uint64_t> file_candidates;
@@ -470,6 +475,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     int index = file_size[cmp_idx];
     auto* candidate = level_files[index];
     CompactionInputFiles start_i;
+    std::vector<FileMetaData*> files;
+    start_i.clear();
+    files.clear();
 
     // if l0 -> l1 compaction
 
@@ -489,11 +497,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     InternalKey smallest, largest;
     compaction_picker_->GetRange(start_i, &smallest, &largest);
-    vstorage_->GetOverlappingInputs(start_level_,&smallest,&largest,&start_i.files);
 
-    for(auto f : start_i.files){
-      file_candidates.push_back(f->fd.GetNumber());
-    }
 
     CompactionInputFiles output_i;
     output_i.level=output_level_;
@@ -501,15 +505,43 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     if(!output_i.empty() &&
         !compaction_picker_->ExpandInputsToCleanCut(cf_name_,vstorage_,&output_i)){
-          start_i.clear();
           continue;
+    }
+
+
+  
+    if(ioptions_.compaction_scheme==BASELINE_COMPACTION||file_candidates.size()==1){
+      // trial move or baseline, return here
+      // start_level_inputs_.files.push_back(candidate);
+      start_level_inputs_.clear();
+      start_level_inputs_.files=start_i.files;
+      start_level_inputs_.level = start_level_;
+      vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
+      base_index_ = index;
+      return start_level_inputs_.size() > 0;
+    }
+    
+    // should be different, original logic not using GetOverlappingInputs at start level.
+    files=start_i.files;
+    vstorage_->GetOverlappingInputs(start_level_,&smallest,&largest,&files);
+    for(auto f : files){
+      file_candidates.push_back(f->fd.GetNumber());
     }
     for(auto f : output_i.files){
       file_candidates.push_back(f->fd.GetNumber());
     }
 
-    if(file_candidates.size()==1){
-      // trial move, return here
+
+    score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates);
+
+    if(score>max_score){
+      max_file_canddiates.clear();
+      max_file_canddiates=start_i.files;
+      
+      max_cmp_idx=cmp_idx;
+      max_index=index;
+
+      max_score=score;
     }
 
 
@@ -527,9 +559,15 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // }
     // printf("\n");
   }
+  start_level_inputs_.clear();
+  start_level_inputs_.files=max_file_canddiates;
+  start_level_inputs_.level = start_level_;
+  vstorage_->SetNextCompactionIndex(start_level_, max_cmp_idx);  
+  base_index_=max_index;
 
+  return start_level_inputs_.size() > 0;
 
-////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
   for (cmp_idx = vstorage_->NextCompactionIndex(start_level_);
        cmp_idx < file_size.size(); cmp_idx++) {
     int index = file_size[cmp_idx];
@@ -571,20 +609,20 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       start_level_inputs_.clear();
       continue;
     }
-    printf("-----------------SELECTED--------------\n");
-    printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
+    // printf("-----------------SELECTED--------------\n");
+    // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,f->fd.GetNumber());
 
-    printf("[start] ");
-    for(auto s : start_level_inputs_.files){
-      printf("%lu.sst ",s->fd.GetNumber());
-    }
-    printf("\n");
-    printf("[out] ");
-    for(auto o : output_level_inputs.files){
-      printf("%lu.sst ",o->fd.GetNumber());
-    }
-    printf("\n");
-    printf("-----------------END-------------------\n");
+    // printf("[start] ");
+    // for(auto s : start_level_inputs_.files){
+    //   printf("%lu.sst ",s->fd.GetNumber());
+    // }
+    // printf("\n");
+    // printf("[out] ");
+    // for(auto o : output_level_inputs.files){
+    //   printf("%lu.sst ",o->fd.GetNumber());
+    // }
+    // printf("\n");
+    // printf("-----------------END-------------------\n");
     base_index_ = index;
     break;
   }
