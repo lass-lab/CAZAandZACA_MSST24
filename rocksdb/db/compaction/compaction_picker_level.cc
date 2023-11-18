@@ -462,8 +462,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   
   uint64_t max_score = 0;
   uint64_t score;
-  unsigned int max_cmp_idx;
-  int max_index;
+  unsigned int max_cmp_idx = vstorage_->NextCompactionIndex(start_level_);
+  int max_index = 0;
   std::vector<FileMetaData*> max_file_canddiates;
   max_file_canddiates.clear();
   
