@@ -875,6 +875,7 @@ class ZonedBlockDevice {
   bool ShouldForceZCTriggered(void) { return force_zc_should_triggered_.load(); }
   
   IOStatus ResetAllZonesForForcedNewFileSystem(void);
+  
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) { 
     reset_scheme_=r; 
     allocation_scheme_=allocation_scheme;
@@ -891,6 +892,8 @@ class ZonedBlockDevice {
     }
   }
   IOStatus RuntimeReset(void);
+  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates);
+
   inline bool RuntimeZoneResetDisabled() {return partial_reset_scheme_==RUNTIME_ZONE_RESET_DISABLED; }
   inline bool RuntimeZoneResetOnly() {return partial_reset_scheme_==RUNTIME_ZONE_RESET_ONLY; }
   inline bool PartialResetWithZoneReset() { return (partial_reset_scheme_==PARTIAL_RESET_WITH_ZONE_RESET ); }
@@ -930,7 +933,6 @@ class ZonedBlockDevice {
                                           Env::WriteLifeTimeHint file_lifetime,Zone **zone_out,
                                           uint64_t min_capacity = 0);
   
-  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates);
 
   IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
                                     Zone** zone_out,uint64_t min_capacity);
