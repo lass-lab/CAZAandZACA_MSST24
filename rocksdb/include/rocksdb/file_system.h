@@ -533,6 +533,8 @@ class FileSystem : public Customizable {
 
   virtual void SetResetScheme(uint32_t ,uint32_t, uint64_t, uint64_t, uint64_t,uint64_t) {}
 
+  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ) {}
+
   // Store the last modification time of fname in *file_mtime.
   virtual IOStatus GetFileModificationTime(const std::string& fname,
                                            const IOOptions& options,
@@ -1182,7 +1184,6 @@ class FSWritableFile {
     return IOStatus::OK();
   }
 
-  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates) {}
  protected:
   size_t preallocation_block_size() { return preallocation_block_size_; }
 
@@ -1463,7 +1464,10 @@ class FileSystemWrapper : public FileSystem {
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) {
     target_->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
   }
-
+  
+  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates) {
+    return target_->GetMaxInvalidateCompactionScore(file_candidates);
+  }
   IOStatus GetFileModificationTime(const std::string& fname,
                                    const IOOptions& options,
                                    uint64_t* file_mtime,
@@ -1785,6 +1789,7 @@ class FSWritableFileWrapper : public FSWritableFile {
   void SetMinMaxKeyAndLevel(const Slice& smallest,const Slice& largest,const int level) override {
       target_->SetMinMaxKeyAndLevel(smallest,largest,level);
   }
+
   IOStatus CAZAFlushSST(void){
     return target_->CAZAFlushSST();
   }

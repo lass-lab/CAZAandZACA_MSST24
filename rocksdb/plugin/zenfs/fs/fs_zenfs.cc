@@ -1234,6 +1234,11 @@ void ZenFS::SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,u
 
 }
 
+uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates) {
+  return file_candidates.size();
+}
+
+
 /* Must hold files_mtx_ */
 IOStatus ZenFS::RenameChildNoLock(std::string const& source_dir,
                                   std::string const& dest_dir,
