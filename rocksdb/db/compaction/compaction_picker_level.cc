@@ -461,6 +461,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   uint64_t score;
   unsigned int max_cmp_idx = vstorage_->NextCompactionIndex(start_level_);
   int max_index = 0;
+  bool trial_move = true;
   std::vector<FileMetaData*> max_file_candiates;
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION){
@@ -519,7 +520,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
 
     if(ioptions_.compaction_scheme==BASELINE_COMPACTION ||
-          (file_candidates.size()==1 &&cmp_idx==(unsigned int)vstorage_->NextCompactionIndex(start_level_))||
+          (file_candidates.size()==1 && trial_move )||
           start_level_ == 0){
       // trial move or baseline, return here
       // start_level_inputs_.files.push_back(candidate);
@@ -531,7 +532,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       base_index_ = index;
       return start_level_inputs_.size() > 0;
     }
-    
+    trial_move=false;
     // should be different, original logic not using GetOverlappingInputs at start level.
 
 
