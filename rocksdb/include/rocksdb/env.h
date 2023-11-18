@@ -383,7 +383,9 @@ class Env : public Customizable {
   virtual Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
 
   virtual void SetResetScheme(uint32_t,uint32_t,uint64_t,uint64_t,uint64_t,uint64_t) {}
-  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& )=0;
+  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ){
+    return 0;
+  }
   // Store the last modification time of fname in *file_mtime.
   virtual Status GetFileModificationTime(const std::string& fname,
                                          uint64_t* file_mtime) = 0;
