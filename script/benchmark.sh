@@ -9,7 +9,7 @@ RAW_ZNS_PATH=/sys/block/${RAW_ZNS}/queue/scheduler
 ## Try until db_bench success
 RETRY=1
 
-## Algorithm
+## ALLOCATION_ALGORITHM
 EAGER=0
 LOG=3
 LINEAR=4
@@ -76,23 +76,23 @@ MAX_INVALIDATION_COMPACTION=1
 while :
 do
     FAILED=0
-    # for ALGORITHM in $RUNTIME_ZONE_RESET_ONLY $PARTIAL_RESET_WITH_ZONE_RESET
-    for ALGORITHM in $LIZA $CAZA
+    # for ALLOCATION_ALGORITHM in $RUNTIME_ZONE_RESET_ONLY $PARTIAL_RESET_WITH_ZONE_RESET
+    for ALLOCATION_ALGORITHM in $LIZA $CAZA
     do
         for i in 1 2 3 4 5
         do
-        if [ $ALGORITHM -eq $LIZA ]; then
+        if [ $ALLOCATION_ALGORITHM -eq $LIZA ]; then
             RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/LIZA
-        elif [ $ALGORITHM -eq $CAZA ]; then
+        elif [ $ALLOCATION_ALGORITHM -eq $CAZA ]; then
             RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/CAZA
-        # elif [ $ALGORITHM -eq $RUNTIME_ZONE_RESET_ONLY ]; then
+        # elif [ $ALLOCATION_ALGORITHM -eq $RUNTIME_ZONE_RESET_ONLY ]; then
         #     RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/RUNTIME_ZONE_RESET_ONLY
-        # elif [ $ALGORITHM -eq $PROACTIVE_ZC ]; then
+        # elif [ $ALLOCATION_ALGORITHM -eq $PROACTIVE_ZC ]; then
         #     RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/PROACTIVE_ZC
-        # elif [ $ALGORITHM -eq $RUNTIME_ZONE_RESET_DISABLED ]; then
+        # elif [ $ALLOCATION_ALGORITHM -eq $RUNTIME_ZONE_RESET_DISABLED ]; then
         #     RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/noruntime
         else 
-            echo "No such Algorithm"
+            echo "No such ALLOCATION_ALGORITHM"
             exit
         fi
         
@@ -101,15 +101,15 @@ do
             echo "NO ${RESULT_DIR_PATH}"
             mkdir ${RESULT_DIR_PATH}
         fi
-            for FUNCTION in $BASELINE_COMPACTION $MAX_INVALIDATION_COMPACTION
+            for COMPACTION_ALGORITHM in $BASELINE_COMPACTION $MAX_INVALIDATION_COMPACTION
                 do
-                    if [ $FUNCTION -eq $BASELINE_COMPACTION ]; then
+                    if [ $COMPACTION_ALGORITHM -eq $BASELINE_COMPACTION ]; then
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_BASELINE_${i}.txt
-                    elif [ $FUNCTION -eq $MAX_INVALIDATION_COMPACTION ]; then
+                    elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_MAX_INVALIDATION_${i}.txt
-                    # elif [ $FUNCTION -eq $EXP ]; then
+                    # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
-                    # elif [ $FUNCTION -eq $EAGER ]; then
+                    # elif [ $COMPACTION_ALGORITHM -eq $EAGER ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EAGER_${i}.txt
                     else  
                         echo "error"
@@ -142,7 +142,7 @@ do
                           -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} -subcompactions=${T_SUBCOMPACTION}  \
                           -histogram -seed=1699101730035899  \
                         -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
-                        -allocation_scheme=0 -compaction_scheme=1 > ${RESULT_DIR_PATH}/tmp
+                        -allocation_scheme=${ALLOCATION_ALGORITHM} -compaction_scheme=${COMPACTION_ALGORITHM} > ${RESULT_DIR_PATH}/tmp
                         EC=$?
                         if grep -q "${SIZE} operations;" ${RESULT_DIR_PATH}/tmp; then
                             cat ${RESULT_DIR_PATH}/tmp > ${RESULT_PATH}
