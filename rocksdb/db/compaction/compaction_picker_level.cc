@@ -569,6 +569,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   start_level_inputs_.clear();
   start_level_inputs_.files=max_file_candiates;
   start_level_inputs_.level = start_level_;
+  (void)(max_cmp_idx);
   // vstorage_->SetNextCompactionIndex(start_level_, max_cmp_idx);
   vstorage_->ResetNextCompactionIndex(start_level_);  
   base_index_=max_index;
