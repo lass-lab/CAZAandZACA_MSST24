@@ -1,6 +1,6 @@
 ## PATH
-ROCKSDB_PATH=/home/femu/DeviceSideCircular/rocksdb
-RESULT_DIR_ROOT_PATH=/home/femu/testdata/devicecircular
+ROCKSDB_PATH=/home/femu/CAZA/rocksdb
+RESULT_DIR_ROOT_PATH=/home/femu/access_testdata
 LOG_PATH=~/log
 RAW_ZNS=nvme0n1
 RAW_ZNS_PATH=/sys/block/${RAW_ZNS}/queue/scheduler
@@ -43,45 +43,54 @@ G44=46137344
 G48=50331648
 G52=54525952
 G56=58720256
+G72=75497472
 MINY=$G20
 MINY2=$G24
 SMALL=$G32 # 32
 MED=$G36 # 36
 LARGE=$G40 # 40
-HEAVY=$G56
+HEAVY=$G72
 # 56gb 58720256
 # 48gb 50331648
 # 36gb 37748736
 ## Tuning Point
 T=100
 T_COMPACTION=3
+T_SUBCOMPACTION=4
 T_FLUSH=1
-ZC_KICKS=25
-UNTIL=25
+ZC_KICKS=15
+UNTIL=15
 
 SLOWDOWN_TRIGGER=16
 STOPS_TRIGGER=16
 SIZE=$HEAVY
 # MOTIV_SMALL_ME_256MB_ERASEBLOCK_64MB
 # FAR_LARGE_ME_256MB_ERASEBLOCK_64MB3
+
+LIZA=0
+CAZA=1
+
+BASELINE_COMPACTION=0
+MAX_INVALIDATION_COMPACTION=1
+
 while :
 do
     FAILED=0
     # for ALGORITHM in $RUNTIME_ZONE_RESET_ONLY $PARTIAL_RESET_WITH_ZONE_RESET
-    for ALGORITHM in $RUNTIME_ZONE_RESET_ONLY
+    for ALGORITHM in $LIZA $CAZA
     do
-        for i in LARGE_SE_1GB_1  LARGE_SE_1GB_2  LARGE_SE_1GB_3 LARGE_SE_1GB_4 LARGE_SE_1GB_5
+        for i in 1 2 3 4 5
         do
-        if [ $ALGORITHM -eq $PARTIAL_RESET_BACKGROUND_T_WITH_ZONE_RESET ]; then
-            RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/PARTIAL_RESET_BACKGROUND_T_WITH_ZONE_RESET
-        elif [ $ALGORITHM -eq $PARTIAL_RESET_WITH_ZONE_RESET ]; then
-            RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/PARTIAL_RESET_WITH_ZONE_RESET
-        elif [ $ALGORITHM -eq $RUNTIME_ZONE_RESET_ONLY ]; then
-            RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/RUNTIME_ZONE_RESET_ONLY
-        elif [ $ALGORITHM -eq $PROACTIVE_ZC ]; then
-            RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/PROACTIVE_ZC
-        elif [ $ALGORITHM -eq $RUNTIME_ZONE_RESET_DISABLED ]; then
-            RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/noruntime
+        if [ $ALGORITHM -eq $LIZA ]; then
+            RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/LIZA
+        elif [ $ALGORITHM -eq $CAZA ]; then
+            RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/CAZA
+        # elif [ $ALGORITHM -eq $RUNTIME_ZONE_RESET_ONLY ]; then
+        #     RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/RUNTIME_ZONE_RESET_ONLY
+        # elif [ $ALGORITHM -eq $PROACTIVE_ZC ]; then
+        #     RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/PROACTIVE_ZC
+        # elif [ $ALGORITHM -eq $RUNTIME_ZONE_RESET_DISABLED ]; then
+        #     RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/noruntime
         else 
             echo "No such Algorithm"
             exit
@@ -92,16 +101,16 @@ do
             echo "NO ${RESULT_DIR_PATH}"
             mkdir ${RESULT_DIR_PATH}
         fi
-            for FUNCTION in $LOG $LINEAR $EXP $EAGER
+            for FUNCTION in $BASELINE_COMPACTION $MAX_INVALIDATION_COMPACTION
                 do
-                    if [ $FUNCTION -eq $LOG ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_LOG_${i}.txt
-                    elif [ $FUNCTION -eq $LINEAR ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_LINEAR_${i}.txt
-                    elif [ $FUNCTION -eq $EXP ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
-                    elif [ $FUNCTION -eq $EAGER ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EAGER_${i}.txt
+                    if [ $FUNCTION -eq $BASELINE_COMPACTION ]; then
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_BASELINE_${i}.txt
+                    elif [ $FUNCTION -eq $MAX_INVALIDATION_COMPACTION ]; then
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_MAX_INVALIDATION_${i}.txt
+                    # elif [ $FUNCTION -eq $EXP ]; then
+                    #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
+                    # elif [ $FUNCTION -eq $EAGER ]; then
+                    #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EAGER_${i}.txt
                     else  
                         echo "error"
                     fi
@@ -130,10 +139,10 @@ do
                         echo $RESULT_PATH
                         sudo ${ROCKSDB_PATH}/db_bench \
                         -num=${SIZE} -benchmarks="fillrandom,stats" --fs_uri=zenfs://dev:nvme0n1 -statistics  -value_size=1024 \
-                          -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} \
-                          -level0_stop_writes_trigger=${STOPS_TRIGGER} -level0_slowdown_writes_trigger=${SLOWDOWN_TRIGGER} -histogram  \
-                        -reset_scheme=${FUNCTION} -tuning_point=${T} -partial_reset_scheme=${ALGORITHM} -disable_wal=false \
-                        -zc=${ZC_KICKS} -until=${UNTIL}> ${RESULT_DIR_PATH}/tmp
+                          -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} -subcompactions=${T_SUBCOMPACTION}  \
+                          -histogram -seed=1699101730035899  \
+                        -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
+                        -allocation_scheme=0 -compaction_scheme=1 > ${RESULT_DIR_PATH}/tmp
                         EC=$?
                         if grep -q "${SIZE} operations;" ${RESULT_DIR_PATH}/tmp; then
                             cat ${RESULT_DIR_PATH}/tmp > ${RESULT_PATH}
