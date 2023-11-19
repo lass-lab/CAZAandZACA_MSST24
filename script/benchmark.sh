@@ -104,9 +104,9 @@ do
             for COMPACTION_ALGORITHM in $BASELINE_COMPACTION $MAX_INVALIDATION_COMPACTION
                 do
                     if [ $COMPACTION_ALGORITHM -eq $BASELINE_COMPACTION ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_BASELINE_${i}.txt
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_${i}.txt
                     elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_MAX_INVALIDATION_${i}.txt
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_MAX_INVALIDATION_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EAGER ]; then
