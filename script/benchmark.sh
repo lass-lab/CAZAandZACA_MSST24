@@ -179,4 +179,4 @@ do
 done
 
 sudo /home/femu/dummy2 111 111
-sudo /home/femu/testdata/sendresultmail
+sudo ${RESULT_DIR_ROOT_PATH}/sendresultmail
