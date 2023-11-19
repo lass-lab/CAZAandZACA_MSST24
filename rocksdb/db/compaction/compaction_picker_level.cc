@@ -528,7 +528,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       start_level_inputs_.clear();
       start_level_inputs_.files=start_i.files;
       start_level_inputs_.level = start_level_;
-      vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
+      // vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
+      vstorage_->ResetNextCompactionIndex(start_level_);  
       base_index_ = index;
       return start_level_inputs_.size() > 0;
     }
