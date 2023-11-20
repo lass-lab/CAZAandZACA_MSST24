@@ -535,7 +535,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       base_index_ = index;
       return start_level_inputs_.size() > 0;
     }
-    trial_move=false;
+    // trial_move=false;
     // should be different, original logic not using GetOverlappingInputs at start level.
 
 
