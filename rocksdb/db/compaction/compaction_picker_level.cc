@@ -463,7 +463,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   int max_index = 0;
   // bool trial_move = true;
   std::vector<FileMetaData*> max_file_candiates;
-  uint64_t max_candidate_size = 0;
+  uint64_t min_candidate_size = UINT64_MAX;
   uint64_t candidate_size;
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION){
@@ -557,14 +557,15 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // printf("score: %lf / %lu =  %lf\n",(score),(candidate_size>>20),((double)score/(double)(candidate_size>>20)));
     // if(candidate_size>>20 == 0 )
     // candidate_size = candidate_size>>20 == 0 ? 1 : candidate_size>>20;
-    if(candidate_size>>20!=0){
-      score = ((double)score/(double)(candidate_size>>20));
-    }
+    
+    // if(candidate_size>>20!=0){
+    //   score = ((double)score/(double)(candidate_size>>20));
+    // }
     
 
     if(score>max_score || 
-        (score==max_score && candidate_size>max_candidate_size) 
-        // (score==max_score && candidate->compensated_file_size>max_candidate_size) 
+        (score==max_score && min_candidate_size>candidate_size) 
+        // (score==max_score && candidate->compensated_file_size>min_candidate_size) 
         )
     {
       max_file_candiates.clear();
@@ -572,8 +573,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       
       max_cmp_idx=cmp_idx;
       max_index=index;
-      // max_candidate_size=candidate->compensated_file_size;
-      max_candidate_size=candidate_size;
+      // min_candidate_size=candidate->compensated_file_size;
+      min_candidate_size=candidate_size;
       max_score=score;
     }
 
@@ -591,12 +592,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   vstorage_->ResetNextCompactionIndex(start_level_);  
   base_index_=max_index;
 
-  if(start_level_inputs_.size()){
-    printf("-----------------SELECTED--------------\n");
-    printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
-    printf("score : %lf\n",max_score);
-    printf("-----------------END-------------------\n");
-  }
+  // if(start_level_inputs_.size()){
+  //   printf("-----------------SELECTED--------------\n");
+  //   printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
+  //   printf("score : %lf\n",max_score);
+  //   printf("-----------------END-------------------\n");
+  // }
   return start_level_inputs_.size() > 0;
 baseline:
 //////////////////////////////////////////////////////////////////////////////////////////

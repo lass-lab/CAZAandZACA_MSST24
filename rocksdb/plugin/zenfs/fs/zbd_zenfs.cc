@@ -1449,6 +1449,7 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
   uint64_t zone_size= io_zones[0]->max_capacity_;
   uint64_t zone_score_sum = 0;
   uint64_t sst_in_zone_n = 0;
+  uint64_t zone_score_max = 0;
 
   for(uint64_t fno : file_candidates){
     ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
@@ -1473,11 +1474,16 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
     uint64_t after_invalid_capacity = relative_wp - after_valid_capacity;
     
     
-    if(after_invalid_capacity>zone_size){
-      printf("after_invalid_capacity %lu > zone_size %lu??\n",after_invalid_capacity,zone_size);
+    if(after_invalid_capacity>zone_size){ //error point
+      printf("after_invalid_capacity %lu > zone_size %lu??\n",after_invalid_capacity,zone_size); 
       zone_score[i]=100;
     }else{
+      
       zone_score[i]=(after_invalid_capacity)*100/(relative_wp);
+    }
+
+    if(zone_score[i]>zone_score_max){
+      zone_score_max=zone_score[i];
     }
     
     zone_score_sum+=zone_score[i];
@@ -1490,13 +1496,14 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
 
   // }
   *candidate_size=total_size;
-  
+
   if(sst_in_zone_n==0){
     return 0;
   }
 
-
-  return zone_score_sum/sst_in_zone_n;
+  (void)(zone_score_sum);
+  // return zone_score_sum/sst_in_zone_n;
+  return zone_score_max;
 }
 
 IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& largest,
