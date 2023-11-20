@@ -1489,11 +1489,12 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
   //   }
 
   // }
-
+  *candidate_size=total_size;
+  
   if(sst_in_zone_n==0){
     return 0;
   }
-  *candidate_size=total_size;
+
 
   return zone_score_sum/sst_in_zone_n;
 }
