@@ -544,8 +544,22 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
-    score= ((double)score/(double)(candidate_size>>20));
 
+
+    printf("[start] ");
+    for(auto s : files){
+      printf("%lu.sst ",s->fd.GetNumber());
+    }
+    printf("\n");
+
+    printf("[out] ");
+    for(auto o : output_i.files){
+      printf("%lu.sst ",o->fd.GetNumber());
+    }
+    printf("\n");
+    printf("score: %lf / %lu =  %lf\n",(score),(candidate_size>>20),((double)score/(double)(candidate_size>>20)));
+
+    score= ((double)score/(double)(candidate_size>>20));
     if(score>max_score || 
         (score==max_score && candidate_size>max_candidate_size) 
         // (score==max_score && candidate->compensated_file_size>max_candidate_size) 
@@ -564,18 +578,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
     
-    printf("[start] ");
-    for(auto s : files){
-      printf("%lu.sst ",s->fd.GetNumber());
-    }
-    printf("\n");
 
-    printf("[out] ");
-    for(auto o : output_i.files){
-      printf("%lu.sst ",o->fd.GetNumber());
-    }
-    printf("\n");
-    printf("score: %lf\n",score);
   }
 
   start_level_inputs_.clear();
