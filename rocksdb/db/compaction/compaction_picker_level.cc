@@ -555,7 +555,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // }
     // printf("\n");
     // printf("score: %lf / %lu =  %lf\n",(score),(candidate_size>>20),((double)score/(double)(candidate_size>>20)));
-    score= ((double)score/(double)(candidate_size>>20));
+    // if(candidate_size>>20 == 0 )
+    // candidate_size = candidate_size>>20 == 0 ? 1 : candidate_size>>20;
+    if(candidate_size>>20!=0){
+      score = ((double)score/(double)(candidate_size>>20));
+    }
+    
 
     if(score>max_score || 
         (score==max_score && candidate_size>max_candidate_size) 
