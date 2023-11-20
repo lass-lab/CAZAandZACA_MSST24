@@ -545,14 +545,16 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
     if(score>max_score || 
-        (score==max_score && candidate_size>max_candidate_size) )
+        // (score==max_score && candidate_size>max_candidate_size) 
+        (score==max_score && candidate->compensated_file_size>max_candidate_size) )
     {
       max_file_candiates.clear();
       max_file_candiates=start_i.files;
       
       max_cmp_idx=cmp_idx;
       max_index=index;
-      max_candidate_size=candidate_size;
+      max_candidate_size=candidate->compensated_file_size;
+      // max_candidate_size=candidate_size
       max_score=score;
     }
 
