@@ -533,7 +533,7 @@ class FileSystem : public Customizable {
 
   virtual void SetResetScheme(uint32_t ,uint32_t, uint64_t, uint64_t, uint64_t,uint64_t) {}
 
-  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ) { return 0;};
+  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t * ) { return 0;};
 
   // Store the last modification time of fname in *file_mtime.
   virtual IOStatus GetFileModificationTime(const std::string& fname,
@@ -1465,8 +1465,8 @@ class FileSystemWrapper : public FileSystem {
     target_->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
   }
   
-  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates) {
-    return target_->GetMaxInvalidateCompactionScore(file_candidates);
+  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t* candidate_size) {
+    return target_->GetMaxInvalidateCompactionScore(file_candidates,candidate_size);
   }
   IOStatus GetFileModificationTime(const std::string& fname,
                                    const IOOptions& options,

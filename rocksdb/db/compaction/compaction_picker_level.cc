@@ -463,6 +463,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   int max_index = 0;
   bool trial_move = true;
   std::vector<FileMetaData*> max_file_candiates;
+  uint64_t max_candidate_size = 0;
+  uint64_t candidate_size;
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION){
     goto baseline;
@@ -540,15 +542,17 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
 
-    score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates);
+    score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
-    if(score>max_score){
+    if(score>max_score || 
+        (score==max_score && candidate_size>max_candidate_size) )
+    {
       max_file_candiates.clear();
       max_file_candiates=start_i.files;
       
       max_cmp_idx=cmp_idx;
       max_index=index;
-
+      max_candidate_size=candidate_size;
       max_score=score;
     }
 

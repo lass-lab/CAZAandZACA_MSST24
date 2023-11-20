@@ -383,7 +383,7 @@ class Env : public Customizable {
   virtual Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
 
   virtual void SetResetScheme(uint32_t,uint32_t,uint64_t,uint64_t,uint64_t,uint64_t) {}
-  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ){
+  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t*){
     return 0;
   }
   // Store the last modification time of fname in *file_mtime.
@@ -1487,8 +1487,8 @@ class EnvWrapper : public Env {
     target_.env->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
   }
 
-  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates) override {
-    return target_.env->GetMaxInvalidateCompactionScore(file_candidates);
+  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t* candidate_size) override {
+    return target_.env->GetMaxInvalidateCompactionScore(file_candidates,candidate_size);
   }
 
   Status GetFileModificationTime(const std::string& fname,

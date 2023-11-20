@@ -1439,11 +1439,12 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
 
   return IOStatus::OK();
 }
-uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates){
+uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size){
   // std::vector<std::pair<bool,uint64_t>> zone_score;
   std::vector<bool> is_sst_in_zone(io_zones.size(),false);
   std::vector<uint64_t> sst_in_zone(io_zones.size(),0);
   std::vector<uint64_t> zone_score(io_zones.size(),0);
+  uint64_t total_size = 0;
   uint64_t zidx;
   uint64_t zone_size= io_zones[0]->max_capacity_;
   uint64_t zone_score_sum = 0;
@@ -1466,6 +1467,7 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
     if(is_sst_in_zone[i]==false){
       continue;
     }
+    total_size+=sst_in_zone[i];
     uint64_t relative_wp = io_zones[i]->wp_ - io_zones[i]->start_;
     uint64_t after_valid_capacity= io_zones[i]->used_capacity_ - sst_in_zone[i];
     uint64_t after_invalid_capacity = relative_wp - after_valid_capacity;
@@ -1487,9 +1489,11 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
   //   }
 
   // }
+
   if(sst_in_zone_n==0){
     return 0;
   }
+  *candidate_size=total_size;
   return zone_score_sum/sst_in_zone_n;
 }
 

@@ -892,7 +892,7 @@ class ZonedBlockDevice {
     }
   }
   IOStatus RuntimeReset(void);
-  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates);
+  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size);
 
   inline bool RuntimeZoneResetDisabled() {return partial_reset_scheme_==RUNTIME_ZONE_RESET_DISABLED; }
   inline bool RuntimeZoneResetOnly() {return partial_reset_scheme_==RUNTIME_ZONE_RESET_ONLY; }
