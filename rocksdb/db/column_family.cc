@@ -1461,6 +1461,10 @@ Status ColumnFamilyData::SetOptions(
 #endif  // ROCKSDB_LITE
 
 // REQUIRES: DB mutex held
+// WAL short
+// l0 medium
+// l1 medium
+// l2,l3 extreme
 Env::WriteLifeTimeHint ColumnFamilyData::CalculateSSTWriteHint(int level) {
   if (initial_cf_options_.compaction_style != kCompactionStyleLevel) {
     return Env::WLTH_NOT_SET;
@@ -1468,6 +1472,14 @@ Env::WriteLifeTimeHint ColumnFamilyData::CalculateSSTWriteHint(int level) {
   if (level == 0) {
     return Env::WLTH_MEDIUM;
   }
+  else if(level == 1){
+    return Env::WLTH_MEDIUM;
+  }else if(level == 2){
+    return Env::WLTH_LONG;
+  }else{
+    return Env::WLTH_EXTREME;
+  }
+
   int base_level = current_->storage_info()->base_level();
 
   // L1: medium, L2: long, ...
