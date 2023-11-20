@@ -558,9 +558,10 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // if(candidate_size>>20 == 0 )
     // candidate_size = candidate_size>>20 == 0 ? 1 : candidate_size>>20;
     
-    // if(candidate_size>>20!=0){
-    //   score = ((double)score/(double)(candidate_size>>20));
-    // }
+    candidate_size=candidate->compensated_file_size;
+    if(candidate_size>>20!=0){
+      score = ((double)score/(double)(candidate_size>>20));
+    }
     
 
     if(score>max_score || 
