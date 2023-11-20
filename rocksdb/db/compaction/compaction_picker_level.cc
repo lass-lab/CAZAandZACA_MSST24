@@ -463,7 +463,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   int max_index = 0;
   // bool trial_move = true;
   std::vector<FileMetaData*> max_file_candiates;
-  uint64_t min_candidate_size = UINT64_MAX;
+  uint64_t max_candidate_size = 0;
   uint64_t candidate_size;
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION){
@@ -478,6 +478,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     auto* candidate = level_files[index];
     CompactionInputFiles start_i;
     std::vector<FileMetaData*> files;
+    uint64_t default_SSTABLE_size= (1<<26);
     start_i.clear();
     files.clear();
 
@@ -558,24 +559,26 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // if(candidate_size>>20 == 0 )
     // candidate_size = candidate_size>>20 == 0 ? 1 : candidate_size>>20;
     
-    candidate_size=candidate->compensated_file_size;
-    if(candidate_size>>20!=0){
-      score = ((double)score/(double)(candidate_size>>20));
-    }
-    
+    // candidate_size=candidate->compensated_file_size;
+    // if(candidate_size>>20!=0){
+    //   score = ((double)score/(double)(candidate_size>>20));
+    // }
+    candidate_size=candidate->compensated_file_size/default_SSTABLE_size;
 
-    if(score>max_score || 
-        (score==max_score && min_candidate_size>candidate_size) 
-        // (score==max_score && candidate->compensated_file_size>min_candidate_size) 
-        )
+    if(candidate_size>max_candidate_size ||
+       (candidate_size==max_candidate_size && score>max_score) )
+    // if(score>max_score || 
+    //     (score==max_score && max_candidate_size>candidate_size) 
+    //     // (score==max_score && candidate->compensated_file_size>max_candidate_size) 
+    // )
     {
       max_file_candiates.clear();
       max_file_candiates=start_i.files;
       
       max_cmp_idx=cmp_idx;
       max_index=index;
-      // min_candidate_size=candidate->compensated_file_size;
-      min_candidate_size=candidate_size;
+      // max_candidate_size=candidate->compensated_file_size;
+      max_candidate_size=candidate_size;
       max_score=score;
     }
 
