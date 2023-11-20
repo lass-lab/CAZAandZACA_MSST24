@@ -457,8 +457,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // compaction_picker_->ioptions_.
   // mutable_db_options_.e
   
-  uint64_t max_score = 0;
-  uint64_t score;
+  double max_score = 0.0;
+  double score;
   unsigned int max_cmp_idx = vstorage_->NextCompactionIndex(start_level_);
   int max_index = 0;
   // bool trial_move = true;
@@ -544,6 +544,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
+    score= ((double)score/(double)(candidate_size>>20))
+
     if(score>max_score || 
         (score==max_score && candidate_size>max_candidate_size) 
         // (score==max_score && candidate->compensated_file_size>max_candidate_size) 
@@ -562,18 +564,18 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
     
-    // printf("[start] ");
-    // for(auto s : files){
-    //   printf("%lu.sst ",s->fd.GetNumber());
-    // }
-    // printf("\n");
+    printf("[start] ");
+    for(auto s : files){
+      printf("%lu.sst ",s->fd.GetNumber());
+    }
+    printf("\n");
 
-    // printf("[out] ");
-    // for(auto o : output_i.files){
-    //   printf("%lu.sst ",o->fd.GetNumber());
-    // }
-    // printf("\n");
-    // printf("score: %lu\n",score);
+    printf("[out] ");
+    for(auto o : output_i.files){
+      printf("%lu.sst ",o->fd.GetNumber());
+    }
+    printf("\n");
+    printf("score: %lf\n",score);
   }
 
   start_level_inputs_.clear();
@@ -584,12 +586,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   vstorage_->ResetNextCompactionIndex(start_level_);  
   base_index_=max_index;
 
-  // if(start_level_inputs_.size()){
-  //   printf("-----------------SELECTED--------------\n");
-  //   printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
-  //   printf("score : %lu\n",max_score);
-  //   printf("-----------------END-------------------\n");
-  // }
+  if(start_level_inputs_.size()){
+    printf("-----------------SELECTED--------------\n");
+    printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
+    printf("score : %lf\n",max_score);
+    printf("-----------------END-------------------\n");
+  }
   return start_level_inputs_.size() > 0;
 baseline:
 //////////////////////////////////////////////////////////////////////////////////////////
