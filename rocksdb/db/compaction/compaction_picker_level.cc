@@ -544,7 +544,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
-    score= ((double)score/(double)(candidate_size>>20))
+    score= ((double)score/(double)(candidate_size>>20));
 
     if(score>max_score || 
         (score==max_score && candidate_size>max_candidate_size) 
