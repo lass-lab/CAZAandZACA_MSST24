@@ -1501,6 +1501,9 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
     return 0;
   }
 
+  // if free space high, capacity first
+  // if free space low, invalid score first
+
   (void)(zone_score_sum);
   (void)(zone_score_max);
   return zone_score_sum/sst_in_zone_n;
