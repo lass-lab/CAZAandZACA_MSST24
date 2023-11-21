@@ -563,7 +563,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     
     // candidate_size=candidate->compensated_file_size;
     if(candidate_size>>20!=0){
-      score = ((double)score/(double)(candidate_size>>20));
+      score = ((double)score/(double)(candidate_size>>20))*((double)candidate->compensated_file_size);
     }
 
     // candidate_size=candidate->compensated_file_size/default_SSTABLE_size;
