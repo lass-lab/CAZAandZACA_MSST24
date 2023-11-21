@@ -564,7 +564,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     normalized_candidate_compensate_size=(candidate->compensated_file_size*100)/max_candidate_compensate_size;
     // (void)(normalized_candidate_compensate_size);
 
-    score= score + (normalized_candidate_compensate_size*std::log(zns_free_percent)/std::log(100) )/100;
+    score= score + (normalized_candidate_compensate_size*std::log(zns_free_percent)/std::log(70) )/100;
 
     // printf("[start] ");
     // for(auto s : files){
