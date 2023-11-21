@@ -525,20 +525,19 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     if(ioptions_.compaction_scheme==BASELINE_COMPACTION ||
           // (trial_move &&file_candidates.size()==1  ) ||
           file_candidates.size()==1 ||
-          start_level_ == 0
-          ){
+          output_level_ <=2
+      ){
       // trial move or baseline, return here
       // start_level_inputs_.files.push_back(candidate);
       // printf("It is %s, return here\n",ioptions_.compaction_scheme==BASELINE_COMPACTION ? "baseline compaction" : "trial move");
       start_level_inputs_.clear();
       start_level_inputs_.files=start_i.files;
       start_level_inputs_.level = start_level_;
-      // vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
-      vstorage_->ResetNextCompactionIndex(start_level_);  
+      vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
+      // vstorage_->ResetNextCompactionIndex(start_level_);  
       base_index_ = index;
       return start_level_inputs_.size() > 0;
     }
-    // trial_move=false;
     // should be different, original logic not using GetOverlappingInputs at start level.
 
 
@@ -556,21 +555,25 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // }
     // printf("\n");
     // printf("score: %lf / %lu =  %lf\n",(score),(candidate_size>>20),((double)score/(double)(candidate_size>>20)));
+
+
+
     // if(candidate_size>>20 == 0 )
     // candidate_size = candidate_size>>20 == 0 ? 1 : candidate_size>>20;
     
     // candidate_size=candidate->compensated_file_size;
-    // if(candidate_size>>20!=0){
-    //   score = ((double)score/(double)(candidate_size>>20));
-    // }
-    candidate_size=candidate->compensated_file_size/default_SSTABLE_size;
+    if(candidate_size>>20!=0){
+      score = ((double)score/(double)(candidate_size>>20));
+    }
 
-    if(candidate_size>max_candidate_size ||
-       (candidate_size==max_candidate_size && score>max_score) )
-    // if(score>max_score || 
-    //     (score==max_score && max_candidate_size>candidate_size) 
-    //     // (score==max_score && candidate->compensated_file_size>max_candidate_size) 
-    // )
+    // candidate_size=candidate->compensated_file_size/default_SSTABLE_size;
+
+    // if(candidate_size>max_candidate_size ||
+    //    (candidate_size==max_candidate_size && score>max_score) )
+    if(score>max_score || 
+        (score==max_score && max_candidate_size>candidate_size) 
+        // (score==max_score && candidate->compensated_file_size>max_candidate_size) 
+    )
     {
       max_file_candiates.clear();
       max_file_candiates=start_i.files;
