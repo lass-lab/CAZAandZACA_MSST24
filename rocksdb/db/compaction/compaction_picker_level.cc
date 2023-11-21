@@ -449,7 +449,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // printf("---------------------------------------\n");
   // printf("PickFileToCompact(%lu) :: start level %d size %lu\n",ioptions_.compaction_scheme,start_level_,file_size.size());
   unsigned int cmp_idx;
-
+  
 
 
 // MAX
@@ -472,10 +472,11 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   uint64_t zns_free_percent=100;
   // GetFileSystem()->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
-
+  // mutable_cf_options_.level0_slowdown_writes_trigger;
+  // mutable_cf_options_.
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION
-    || zns_free_percent>=25
+    // || zns_free_percent>=25
     ){
     goto baseline;
   }
@@ -544,11 +545,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       start_level_inputs_.clear();
       start_level_inputs_.files=start_i.files;
       start_level_inputs_.level = start_level_;
-      if(output_level_<=2){
-        vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
-      }else{
+      // if(output_level_<=1){
+      //   vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
+      // }else{
         vstorage_->ResetNextCompactionIndex(start_level_);  
-      }
+      // }
+      // vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
       base_index_ = index;
       return start_level_inputs_.size() > 0;
     }
@@ -558,10 +560,10 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
-    if(max_candidate_compensate_size==0){
-      max_candidate_compensate_size=candidate->compensated_file_size;
-    }
-    normalized_candidate_compensate_size=(candidate->compensated_file_size*100)/max_candidate_compensate_size;
+    // if(max_candidate_compensate_size==0){
+    //   max_candidate_compensate_size=candidate->compensated_file_size;
+    // }
+    // normalized_candidate_compensate_size=(candidate->compensated_file_size*100)/max_candidate_compensate_size;
     (void)(normalized_candidate_compensate_size);
 
     // score= score + (normalized_candidate_compensate_size*std::log(zns_free_percent)/std::log(50) )/100;
@@ -592,7 +594,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // if(candidate_size>max_candidate_compensate_size ||
     //    (candidate_size==max_candidate_compensate_size && score>max_score) )
-    if(score>max_score 
+    if(score==100
     // ||     (score==max_score && max_candidate_compensate_size>candidate_size) 
         // (score==max_score && candidate->compensated_file_size>max_candidate_compensate_size) 
     )
@@ -605,6 +607,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       // max_candidate_compensate_size=candidate->compensated_file_size;
       // max_candidate_compensate_size=candidate_size;
       max_score=score;
+      break;
     }
 
 
@@ -612,7 +615,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     
 
   }
-
+  if(max_score!=100){
+    goto baseline;
+  }
   start_level_inputs_.clear();
   start_level_inputs_.files=max_file_candiates;
   start_level_inputs_.level = start_level_;
