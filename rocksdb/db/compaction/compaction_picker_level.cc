@@ -457,7 +457,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // compaction_picker_->ioptions_.
   // mutable_db_options_.e
   
-  uint64_t max_score = 0.0;
+  uint64_t max_score = 0;
   uint64_t score;
   unsigned int max_cmp_idx = vstorage_->NextCompactionIndex(start_level_);
   int max_index = 0;
@@ -596,7 +596,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // if(candidate_size>max_candidate_compensate_size ||
     //    (candidate_size==max_candidate_compensate_size && score>max_score) )
-    if(score==100
+    if(score>=zns_free_percent
     // ||     (score==max_score && max_candidate_compensate_size>candidate_size) 
         // (score==max_score && candidate->compensated_file_size>max_candidate_compensate_size) 
     )
@@ -609,7 +609,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       // max_candidate_compensate_size=candidate->compensated_file_size;
       // max_candidate_compensate_size=candidate_size;
       max_score=score;
-      break;
+      // break;
     }
 
 
@@ -617,7 +617,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     
 
   }
-  if(max_score!=100){
+  if(max_score<zns_free_percent){
     goto baseline;
   }
   start_level_inputs_.clear();

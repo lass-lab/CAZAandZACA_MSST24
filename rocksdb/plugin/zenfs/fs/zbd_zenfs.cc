@@ -1506,8 +1506,8 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
 
   (void)(zone_score_sum);
   (void)(zone_score_max);
-  // return zone_score_sum/sst_in_zone_n;
-  return zone_score_max;
+  return zone_score_sum/sst_in_zone_n;
+  // return zone_score_max;
 }
 
 IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& largest,
