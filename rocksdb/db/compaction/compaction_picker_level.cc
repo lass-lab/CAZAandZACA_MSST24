@@ -478,7 +478,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     auto* candidate = level_files[index];
     CompactionInputFiles start_i;
     std::vector<FileMetaData*> files;
-    uint64_t default_SSTABLE_size= (1<<26);
+    // uint64_t default_SSTABLE_size= (1<<26);
     start_i.clear();
     files.clear();
 
