@@ -476,7 +476,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // mutable_cf_options_.
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION
-    // || zns_free_percent>=25
+    || zns_free_percent>=25
     ){
     goto baseline;
   }
@@ -596,7 +596,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // if(candidate_size>max_candidate_compensate_size ||
     //    (candidate_size==max_candidate_compensate_size && score>max_score) )
-    if(score>=zns_free_percent
+    if(score>=zns_free_percent && score>max_score
     // ||     (score==max_score && max_candidate_compensate_size>candidate_size) 
         // (score==max_score && candidate->compensated_file_size>max_candidate_compensate_size) 
     )
