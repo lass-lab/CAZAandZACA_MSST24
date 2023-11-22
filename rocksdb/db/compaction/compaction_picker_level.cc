@@ -542,8 +542,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       continue;
     }
 
-    if(ioptions_.compaction_scheme==BASELINE_COMPACTION ||
-          // file_candidates.size()==1 
+    if(ioptions_.compaction_scheme==BASELINE_COMPACTION
+          // || file_candidates.size()==1 
          || output_level_<=1
       ){
       // trial move or baseline, return here
