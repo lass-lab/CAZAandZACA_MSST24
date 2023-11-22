@@ -72,7 +72,7 @@ CAZA=1
 
 BASELINE_COMPACTION=0
 MAX_INVALIDATION_COMPACTION=1
-
+MAX_COMPACTION_KICK=30
 while :
 do
     FAILED=0
@@ -142,7 +142,8 @@ do
                           -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} -subcompactions=${T_SUBCOMPACTION}  \
                           -histogram -seed=1699101730035899  \
                         -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
-                        -allocation_scheme=${ALLOCATION_ALGORITHM} -compaction_scheme=${COMPACTION_ALGORITHM} > ${RESULT_DIR_PATH}/tmp
+                        -allocation_scheme=${ALLOCATION_ALGORITHM} -compaction_scheme=${COMPACTION_ALGORITHM} \
+                        -max_compaction_kick=${MAX_COMPACTION_KICK} > ${RESULT_DIR_PATH}/tmp
                         EC=$?
                         if grep -q "${SIZE} operations;" ${RESULT_DIR_PATH}/tmp; then
                             cat ${RESULT_DIR_PATH}/tmp > ${RESULT_PATH}
