@@ -453,12 +453,14 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
 // MAX
-  // ioptions_.reset_scheme
-  // compaction_picker_->ioptions_.
-  // mutable_db_options_.e
-  
   uint64_t max_score = 0;
+  uint64_t max_file_size_score = 0;
+  uint64_t max_invalidation_ratio_score = 0;
+
+  uint64_t file_size_score;
+  uint64_t invalidation_ratio_score;
   uint64_t score;
+
   unsigned int max_cmp_idx = vstorage_->NextCompactionIndex(start_level_);
   int max_index = 0;
   // bool trial_move = true;
@@ -558,7 +560,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
 
-    score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
+    invalidation_ratio_score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
     if(max_candidate_compensate_size==0){
       max_candidate_compensate_size=candidate->compensated_file_size;
@@ -567,8 +569,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     normalized_candidate_compensate_size=(candidate->compensated_file_size*100)/max_candidate_compensate_size;
     (void)(max_candidate_compensate_size);
     (void)(normalized_candidate_compensate_size);
+    file_size_score=(normalized_candidate_compensate_size*zns_free_percent)/100;
 
-    score= score + (normalized_candidate_compensate_size*zns_free_percent)/100;
+    score = invalidation_ratio_score + file_size_score;
 
 
     // printf("[start] ");
@@ -596,7 +599,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // if(candidate_size>max_candidate_compensate_size ||
     //    (candidate_size==max_candidate_compensate_size && score>max_score) )
-    if(score>=zns_free_percent && score>max_score
+    if(score>max_score ||
+        (score == max_score && file_size_score>max_file_size_score )
     // ||     (score==max_score && max_candidate_compensate_size>candidate_size) 
         // (score==max_score && candidate->compensated_file_size>max_candidate_compensate_size) 
     )
@@ -608,6 +612,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       max_index=index;
       // max_candidate_compensate_size=candidate->compensated_file_size;
       // max_candidate_compensate_size=candidate_size;
+      max_file_size_score=file_size_score;
+      max_invalidation_ratio_score=invalidation_ratio_score;
       max_score=score;
       // break;
     }
@@ -617,9 +623,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     
 
   }
-  if(max_score<zns_free_percent){
-    goto baseline;
-  }
+  // if(max_score<zns_free_percent){
+  //   goto baseline;
+  // }
   start_level_inputs_.clear();
   start_level_inputs_.files=max_file_candiates;
   start_level_inputs_.level = start_level_;
