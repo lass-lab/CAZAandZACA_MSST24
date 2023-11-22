@@ -478,7 +478,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // mutable_cf_options_.
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION
-    || zns_free_percent>=25
+    || zns_free_percent>=25 ||
+    output_level_ <=2
     ){
     goto baseline;
   }
