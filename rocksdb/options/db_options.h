@@ -109,6 +109,7 @@ struct ImmutableDBOptions {
   bool enforce_single_del_contracts;
 
   uint64_t compaction_scheme;
+  uint64_t max_compaction_kick;
 
   bool IsWalDirSameAsDBPath() const;
   bool IsWalDirSameAsDBPath(const std::string& path) const;

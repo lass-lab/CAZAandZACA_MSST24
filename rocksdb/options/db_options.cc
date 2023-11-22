@@ -761,7 +761,8 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
       lowest_used_cache_tier(options.lowest_used_cache_tier),
       compaction_service(options.compaction_service),
       enforce_single_del_contracts(options.enforce_single_del_contracts),
-      compaction_scheme(options.compaction_scheme) {
+      compaction_scheme(options.compaction_scheme),
+      max_compaction_kick(options.max_compaction_kick) {
   fs = env->GetFileSystem();
   clock = env->GetSystemClock().get();
   logger = info_log.get();

@@ -671,6 +671,8 @@ struct DBOptions {
   uint32_t reset_scheme;
   uint64_t allocation_scheme;
   uint64_t compaction_scheme;
+  uint64_t max_compaction_kick;
+
   uint32_t partial_reset_scheme;
 
   uint64_t tuning_point;
