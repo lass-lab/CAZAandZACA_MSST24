@@ -569,6 +569,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     normalized_candidate_compensate_size=(candidate->compensated_file_size*100)/max_candidate_compensate_size;
     (void)(max_candidate_compensate_size);
     (void)(normalized_candidate_compensate_size);
+    (void)(max_invalidation_ratio_score);
     file_size_score=(normalized_candidate_compensate_size*zns_free_percent)/100;
 
     score = invalidation_ratio_score + file_size_score;
