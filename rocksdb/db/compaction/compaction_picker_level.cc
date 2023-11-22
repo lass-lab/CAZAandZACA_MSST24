@@ -538,8 +538,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
 
+    if(file_candidates.size()==1 ){
+      continue;
+    }
+
     if(ioptions_.compaction_scheme==BASELINE_COMPACTION ||
-          file_candidates.size()==1 
+          // file_candidates.size()==1 
          || output_level_<=1
       ){
       // trial move or baseline, return here
