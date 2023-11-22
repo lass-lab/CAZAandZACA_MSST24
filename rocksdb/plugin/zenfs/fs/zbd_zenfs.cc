@@ -1063,7 +1063,11 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
       }else if(total_full_erase_unit_written>0){
         reclaimed_invalid+=total_full_erase_unit_written;
         erase_size_.fetch_add(total_full_erase_unit_written);
-        reset_status = z->PartialResetToAllInvalidZone(total_full_erase_unit_written);
+        if(total_full_erase_unit_written==z->max_capacity_){
+          reset_status = z->Reset();
+        }else{
+          reset_status = z->PartialResetToAllInvalidZone(total_full_erase_unit_written);
+        }
       }else{
         goto no_reset;
       }

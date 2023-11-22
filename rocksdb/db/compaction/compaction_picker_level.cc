@@ -476,7 +476,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // mutable_cf_options_.
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION
-    || zns_free_percent>=25
+    // || zns_free_percent>=25
     ){
     goto baseline;
   }
@@ -548,7 +548,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       // if(output_level_<=1){
       //   vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
       // }else{
-        vstorage_->ResetNextCompactionIndex(start_level_);  
+      vstorage_->ResetNextCompactionIndex(start_level_);  
       // }
       // vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
       base_index_ = index;
@@ -560,15 +560,15 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
-    // if(max_candidate_compensate_size==0){
-    //   max_candidate_compensate_size=candidate->compensated_file_size;
-    // }
+    if(max_candidate_compensate_size==0){
+      max_candidate_compensate_size=candidate->compensated_file_size;
+    }
 
-    // normalized_candidate_compensate_size=(candidate->compensated_file_size*100)/max_candidate_compensate_size;
+    normalized_candidate_compensate_size=(candidate->compensated_file_size*100)/max_candidate_compensate_size;
     (void)(max_candidate_compensate_size);
     (void)(normalized_candidate_compensate_size);
 
-    // score= score + (normalized_candidate_compensate_size*std::log(zns_free_percent)/std::log(50) )/100;
+    score= score + (normalized_candidate_compensate_size*zns_free_percent)/100;
 
 
     // printf("[start] ");
