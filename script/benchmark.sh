@@ -72,12 +72,12 @@ CAZA=1
 
 BASELINE_COMPACTION=0
 MAX_INVALIDATION_COMPACTION=1
-MAX_COMPACTION_KICK=30
+MAX_COMPACTION_KICK=100
 while :
 do
     FAILED=0
     # for ALLOCATION_ALGORITHM in $RUNTIME_ZONE_RESET_ONLY $PARTIAL_RESET_WITH_ZONE_RESET
-    for ALLOCATION_ALGORITHM in $LIZA $CAZA
+    for ALLOCATION_ALGORITHM in $CAZA
     do
         for i in 1 2 3 4 5
         do
@@ -101,12 +101,12 @@ do
             echo "NO ${RESULT_DIR_PATH}"
             mkdir ${RESULT_DIR_PATH}
         fi
-            for COMPACTION_ALGORITHM in $BASELINE_COMPACTION $MAX_INVALIDATION_COMPACTION
+            for COMPACTION_ALGORITHM in $MAX_INVALIDATION_COMPACTION
                 do
                     if [ $COMPACTION_ALGORITHM -eq $BASELINE_COMPACTION ]; then
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_${i}.txt
                     elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_MAX_INVALIDATION_${i}.txt
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_MAX_INVALIDATION_${MAX_COMPACTION_KICK}_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EAGER ]; then
