@@ -460,7 +460,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   uint64_t file_size_score;
   uint64_t invalidation_ratio_score;
   double score;
-
+  bool selected= false;
   unsigned int max_cmp_idx = vstorage_->NextCompactionIndex(start_level_);
   int max_index = 0;
   // bool trial_move = true;
@@ -538,12 +538,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
 
-    // if(file_candidates.size()==1 ){
-    //   continue;
-    // }
+    if(file_candidates.size()==1 ){
+      continue;
+    }
 
     if(ioptions_.compaction_scheme==BASELINE_COMPACTION
-          || file_candidates.size()==1 
+          // || file_candidates.size()==1 
          || output_level_<=1
       ){
       // trial move or baseline, return here
@@ -617,7 +617,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     {
       max_file_candiates.clear();
       max_file_candiates=start_i.files;
-      
+      selected=true;
       max_cmp_idx=cmp_idx;
       max_index=index;
       // max_candidate_compensate_size=candidate->compensated_file_size;
@@ -636,21 +636,23 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   // if(max_score<zns_free_percent){
   //   goto baseline;
   // }
-  start_level_inputs_.clear();
-  start_level_inputs_.files=max_file_candiates;
-  start_level_inputs_.level = start_level_;
-  (void)(max_cmp_idx);
-  // vstorage_->SetNextCompactionIndex(start_level_, max_cmp_idx);
-  vstorage_->ResetNextCompactionIndex(start_level_);  
-  base_index_=max_index;
+  if(selected==true){
+    start_level_inputs_.clear();
+    start_level_inputs_.files=max_file_candiates;
+    start_level_inputs_.level = start_level_;
+    (void)(max_cmp_idx);
+    // vstorage_->SetNextCompactionIndex(start_level_, max_cmp_idx);
+    vstorage_->ResetNextCompactionIndex(start_level_);  
+    base_index_=max_index;
 
-  // if(start_level_inputs_.size()){
-  //   printf("-----------------SELECTED--------------\n");
-  //   printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
-  //   printf("score : %lf\n",max_score);
-  //   printf("-----------------END-------------------\n");
-  // }
-  return start_level_inputs_.size() > 0;
+    // if(start_level_inputs_.size()){
+    //   printf("-----------------SELECTED--------------\n");
+    //   printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
+    //   printf("score : %lf\n",max_score);
+    //   printf("-----------------END-------------------\n");
+    // }
+    return start_level_inputs_.size() > 0;
+  }
 baseline:
 //////////////////////////////////////////////////////////////////////////////////////////
   for (cmp_idx = vstorage_->NextCompactionIndex(start_level_);
