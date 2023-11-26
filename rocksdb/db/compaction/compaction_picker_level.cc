@@ -479,7 +479,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION
     || zns_free_percent>=ioptions_.max_compaction_kick 
-    || output_level_ <=2
+    || output_level_ <=1
     ){
     goto baseline;
   }
@@ -542,25 +542,25 @@ bool LevelCompactionBuilder::PickFileToCompact() {
       continue;
     }
 
-    if(ioptions_.compaction_scheme==BASELINE_COMPACTION
-          // || file_candidates.size()==1 
-         || output_level_<=1
-      ){
-      // trial move or baseline, return here
-      // start_level_inputs_.files.push_back(candidate);
-      // printf("It is %s, return here\n",ioptions_.compaction_scheme==BASELINE_COMPACTION ? "baseline compaction" : "trial move");
-      start_level_inputs_.clear();
-      start_level_inputs_.files=start_i.files;
-      start_level_inputs_.level = start_level_;
-      // if(output_level_<=1){
-      //   vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
-      // }else{
-      vstorage_->ResetNextCompactionIndex(start_level_);  
-      // }
-      // vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
-      base_index_ = index;
-      return start_level_inputs_.size() > 0;
-    }
+    // if(ioptions_.compaction_scheme==BASELINE_COMPACTION
+    //       // || file_candidates.size()==1 
+    //      || output_level_<=1
+    //   ){
+    //   // trial move or baseline, return here
+    //   // start_level_inputs_.files.push_back(candidate);
+    //   // printf("It is %s, return here\n",ioptions_.compaction_scheme==BASELINE_COMPACTION ? "baseline compaction" : "trial move");
+    //   start_level_inputs_.clear();
+    //   start_level_inputs_.files=start_i.files;
+    //   start_level_inputs_.level = start_level_;
+    //   // if(output_level_<=1){
+    //   //   vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
+    //   // }else{
+    //   vstorage_->ResetNextCompactionIndex(start_level_);  
+    //   // }
+    //   // vstorage_->SetNextCompactionIndex(start_level_, cmp_idx);
+    //   base_index_ = index;
+    //   return start_level_inputs_.size() > 0;
+    // }
     // should be different, original logic not using GetOverlappingInputs at start level.
 
 
@@ -580,7 +580,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // file_size_score=(normalized_candidate_compensate_size*std::log(zns_free_percent)*100)/std::log(100);
 
-    score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
+    // score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
     score=(double)(invalidation_ratio_score)*(double)(candidate->compensated_file_size>>20)/(double)(candidate_size>>20);
     // score = invalidation_ratio_score + file_size_score*2;
 
