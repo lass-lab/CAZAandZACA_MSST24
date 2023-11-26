@@ -483,8 +483,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     ){
     goto baseline;
   }
-  for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
-
+  // for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
+  for(cmp_idx= 0;cmp_idx<file_size.size();cmp_idx++){
     std::vector<uint64_t> file_candidates;
     file_candidates.clear();
 
@@ -580,8 +580,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // file_size_score=(normalized_candidate_compensate_size*std::log(zns_free_percent)*100)/std::log(100);
 
-    // score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
-    score=(double)(invalidation_ratio_score)*(double)(candidate->compensated_file_size>>20)/(double)(candidate_size>>20);
+    score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
+    // score=(double)(invalidation_ratio_score)*(double)(candidate->compensated_file_size>>20)/(double)(candidate_size>>20);
     // score = invalidation_ratio_score + file_size_score*2;
 
 
@@ -643,7 +643,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     start_level_inputs_.level = start_level_;
     (void)(max_cmp_idx);
     // vstorage_->SetNextCompactionIndex(start_level_, max_cmp_idx);
-    vstorage_->ResetNextCompactionIndex(start_level_);  
+    // vstorage_->ResetNextCompactionIndex(start_level_);  
     base_index_=max_index;
 
     // if(start_level_inputs_.size()){
