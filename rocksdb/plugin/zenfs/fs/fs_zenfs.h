@@ -374,21 +374,19 @@ class ZenFS : public FileSystemWrapper {
                         const IOOptions& /*options*/, uint64_t* diskfree,
                         uint64_t* free_percent,
                         IODebugContext* /*dbg*/) override {
-loop:
+// loop:
     // uint64_t fr;
     if(diskfree!=nullptr){
       *diskfree = zbd_->GetFreeSpace();
-    }else{ // if nullptr
-      goto ret;
     }
-    // fr = zbd_->GetFreePercent(*diskfree);
-    // if(ZC_not_working>2){
+    // else{ // if nullptr
     //   goto ret;
     // }
-    if(zbd_->GetZCRunning() ){
-      sleep(1);
-      goto loop;
-    }
+
+    // if(zbd_->GetZCRunning() ){
+    //   sleep(1);
+    //   goto loop;
+    // }
 ret:
     *free_percent=free_percent_;
     
