@@ -387,7 +387,7 @@ class ZenFS : public FileSystemWrapper {
     //   sleep(1);
     //   goto loop;
     // }
-ret:
+// ret:
     *free_percent=free_percent_;
     
     return IOStatus::OK();      
