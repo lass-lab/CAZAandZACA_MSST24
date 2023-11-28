@@ -1414,6 +1414,9 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
   // printf("GetBestOpenZonematch %d %u",file_lifetime,min_capacity);
   for (const auto z : io_zones) {
     // printf("1 : [%d]\n",i);
+    if(z->lifetime_==Env::WLTH_NOT_SET || z->lifetime_==Env::WLTH_NONE){
+      continue;
+    }
     if (z->Acquire()) {
       if ((z->used_capacity_ > 0) && !z->IsFull() &&
           z->capacity_ >= min_capacity) {
@@ -2157,28 +2160,28 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
 
   // Holding allocated_zone if != nullptr
 
-  if (best_diff >= LIFETIME_DIFF_COULD_BE_WORSE) {
+  if (allocated_zone==nullptr) {
     bool got_token = GetActiveIOZoneTokenIfAvailable();
 
     /* If we did not get a token, try to use the best match, even if the life
      * time diff not good but a better choice than to finish an existing zone
      * and open a new one
      */
-    if (allocated_zone != nullptr) {
-      if (!got_token && best_diff == LIFETIME_DIFF_COULD_BE_WORSE) {
-        Debug(logger_,
-              "Allocator: avoided a finish by relaxing lifetime diff "
-              "requirement\n");
-      } else {
-        allocated_zone->Release();
-        if (!s.ok()) {
-          PutOpenIOZoneToken();
-          if (got_token) PutActiveIOZoneToken();
-          return s;
-        }
-        allocated_zone = nullptr;
-      }
-    }
+    // if (allocated_zone != nullptr) {
+    //   if (!got_token && best_diff == LIFETIME_DIFF_COULD_BE_WORSE) {
+    //     Debug(logger_,
+    //           "Allocator: avoided a finish by relaxing lifetime diff "
+    //           "requirement\n");
+    //   } else {
+    //     allocated_zone->Release();
+    //     if (!s.ok()) {
+    //       PutOpenIOZoneToken();
+    //       if (got_token) PutActiveIOZoneToken();
+    //       return s;
+    //     }
+    //     allocated_zone = nullptr;
+    //   }
+    // }
 
     /* If we haven't found an open zone to fill, open a new zone */
     if (allocated_zone == nullptr) {
