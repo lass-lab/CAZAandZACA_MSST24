@@ -39,6 +39,13 @@ bool LevelCompactionPicker::NeedsCompaction(
       return true;
     }
   }
+  uint64_t zns_free_percent=100;
+  ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
+  
+  for(ioptions_.max_compaction_kick>=zns_free_percent &&
+      ioptions_.compaction_scheme==MAX_INVALIDATION_COMPACTION){
+    return true;
+  }
   return false;
 }
 
@@ -167,12 +174,15 @@ void LevelCompactionBuilder::PickFileToCompact(
 
 void LevelCompactionBuilder::SetupInitialFiles() {
   // Find the compactions by size on all levels.
+  uint64_t zns_free_percent=100;
+  ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
+  
   bool skipped_l0_to_base = false;
   for (int i = 0; i < compaction_picker_->NumberLevels() - 1; i++) {
     start_level_score_ = vstorage_->CompactionScore(i);
     start_level_ = vstorage_->CompactionScoreLevel(i);
     assert(i == 0 || start_level_score_ <= vstorage_->CompactionScore(i - 1));
-    if (start_level_score_ >= 1) {
+    if (start_level_score_ >= 1 || ioptions_.max_compaction_kick >= zns_free_percent) {
       if (skipped_l0_to_base && start_level_ == vstorage_->base_level()) {
         // If L0->base_level compaction is pending, don't schedule further
         // compaction from base level. Otherwise L0->base_level compaction
