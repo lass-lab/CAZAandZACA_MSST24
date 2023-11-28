@@ -30,11 +30,11 @@ bool DBImpl::EnoughRoomForCompaction(
     bool* sfm_reserved_compact_space, LogBuffer* log_buffer) {
   // Check if we have enough room to do the compaction
   bool enough_room = true;
-  uint64_t zns_free_percent;
-  immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
-  if(zns_free_percent<=immutable_db_options_.zc_kick){
-    return false;
-  }
+  // uint64_t zns_free_percent;
+  // immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
+  // if(zns_free_percent<=immutable_db_options_.zc_kick){
+  //   return false;
+  // }
 #ifndef ROCKSDB_LITE
   auto sfm = static_cast<SstFileManagerImpl*>(
       immutable_db_options_.sst_file_manager.get());
@@ -2463,7 +2463,8 @@ void DBImpl::MaybeScheduleFlushOrCompaction() {
   auto bg_job_limits = GetBGJobLimits();
   bool is_flush_pool_empty =
       env_->GetBackgroundThreads(Env::Priority::HIGH) == 0;
-
+  GetFileSystem()->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
+  
   while (!is_flush_pool_empty && unscheduled_flushes_ > 0 &&
          bg_flush_scheduled_ < bg_job_limits.max_flushes) {
     bg_flush_scheduled_++;
@@ -2598,6 +2599,11 @@ ColumnFamilyData* DBImpl::PickCompactionFromQueue(
   assert(*token == nullptr);
   autovector<ColumnFamilyData*> throttled_candidates;
   ColumnFamilyData* cfd = nullptr;
+  // uint64_t zns_free_percent;
+  // immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
+  // if(zns_free_percent<immutable_db_options_.zc_kick){
+  //   return nullptr;
+  // }
   while (!compaction_queue_.empty()) {
     auto first_cfd = *compaction_queue_.begin();
     compaction_queue_.pop_front();
