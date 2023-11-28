@@ -973,6 +973,7 @@ class FSWritableFile {
 
   virtual ~FSWritableFile() {}
   uint64_t fno_;
+  int level_ = 0;
   // Append data to the end of the file
   // Note: A WriteableFile object must support either Append or
   // PositionedAppend, so the users cannot mix the two.

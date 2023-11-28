@@ -147,7 +147,7 @@ class ZoneFile {
   IOStatus CAZAAppend(const char* data, uint32_t size,bool positioned,uint64_t offset);
   std::vector<SSTBuffer*>* GetSSTBuffers(void) { return &sst_buffers_; }
 
-  IOStatus SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime);
+  IOStatus SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime, int level =0);
   void SetIOType(IOType io_type);
   std::string GetFilename();
   time_t GetFileModificationTime();

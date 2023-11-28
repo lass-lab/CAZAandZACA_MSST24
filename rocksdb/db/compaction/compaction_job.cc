@@ -2297,6 +2297,7 @@ Status CompactionJob::OpenCompactionOutputFile(
         /*enable_hash=*/paranoid_file_checks_);
   }
   writable_file->fno_=sub_compact->current_output()->meta.fd.GetNumber();
+  writable_file->level_=sub_compact->compaction->output_level();
   writable_file->SetIOPriority(GetRateLimiterPriority());
   writable_file->SetWriteLifeTimeHint(write_hint_);
   FileTypeSet tmp_set = db_options_.checksum_handoff_file_types;

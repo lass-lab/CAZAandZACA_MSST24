@@ -1035,11 +1035,29 @@ IOStatus ZoneFile::RemoveLinkName(const std::string& linkf) {
   return IOStatus::OK();
 }
 
-IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime) {
-  lifetime_ = lifetime;
+IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime, int level) {
+  // lifetime_ = lifetime;
   // if(linkfiles_.size()){
   //   printf("SetWriteLifeTimeHint : %s %d\n",linkfiles_[0].c_str(),lifetime);
   // }
+  switch (level)
+  {
+  case 0:
+    /* fall through */
+  case 1:
+    lifetime_=Env::WLTH_SHORT;
+    break;
+  case 2:
+    lifetime_=Env::WLTH_MEDIUM;
+    break;
+  case 3:
+    lifetime_=Env::WLTH_LONG;
+    break;
+  default:
+    lifetime_=Env::WLTH_EXTREME;
+    break;
+  }
+  printf("%d -> %d",level,lifetime_);
   
   return IOStatus::OK();
 }
@@ -1371,7 +1389,7 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
 }
 
 void ZonedWritableFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) {
-  zoneFile_->SetWriteLifeTimeHint(hint);
+  zoneFile_->SetWriteLifeTimeHint(hint,level_);
 }
 
 IOStatus ZonedSequentialFile::Read(size_t n, const IOOptions& /*options*/,
