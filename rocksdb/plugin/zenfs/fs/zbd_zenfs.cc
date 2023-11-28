@@ -777,8 +777,8 @@ unsigned int GetLifeTimeDiff(Env::WriteLifeTimeHint zone_lifetime,
     }
   }
 
-  if (zone_lifetime > file_lifetime) return zone_lifetime - file_lifetime;
-  if (zone_lifetime == file_lifetime) return LIFETIME_DIFF_COULD_BE_WORSE;
+  if (zone_lifetime >= file_lifetime) return zone_lifetime - file_lifetime;
+  else return file_lifetime-zone_lifetime;
 
   return LIFETIME_DIFF_NOT_GOOD;
 }
@@ -1419,7 +1419,7 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
           z->capacity_ >= min_capacity) {
                 // printf("2 : [%d]\n",i);
         unsigned int diff = GetLifeTimeDiff(z->lifetime_, file_lifetime);
-        if (diff <= best_diff) {
+        if (diff < best_diff) {
           if (allocated_zone != nullptr) {
             allocated_zone->Release();
           }
@@ -2065,14 +2065,15 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
-    s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
 
+    s=AllocateEmptyZone(out_zone); 
     if (s.ok() && (*out_zone) != nullptr) {
       Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+      (*out_zone)->lifetime_=file_lifetime;
       break;
     }
-    s=AllocateEmptyZone(out_zone); 
 
+    s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
     if(s.ok()&&(*out_zone)!=nullptr){
       Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
       break;

@@ -187,7 +187,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
     start_level_score_ = vstorage_->CompactionScore(i);
     start_level_ = vstorage_->CompactionScoreLevel(i);
     assert(i == 0 || start_level_score_ <= vstorage_->CompactionScore(i - 1));
-    if (start_level_score_ >= 1 || (run_max_compaction)) {
+    if (start_level_score_ >= 1 || (run_max_compaction) ) {
       if (skipped_l0_to_base && start_level_ == vstorage_->base_level()) {
         // If L0->base_level compaction is pending, don't schedule further
         // compaction from base level. Otherwise L0->base_level compaction

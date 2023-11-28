@@ -1037,6 +1037,7 @@ IOStatus ZoneFile::RemoveLinkName(const std::string& linkf) {
 
 IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime, int level) {
   // lifetime_ = lifetime;
+  (void)(lifetime);
   // if(linkfiles_.size()){
   //   printf("SetWriteLifeTimeHint : %s %d\n",linkfiles_[0].c_str(),lifetime);
   // }
