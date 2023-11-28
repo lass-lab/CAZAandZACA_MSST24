@@ -374,7 +374,7 @@ class ZenFS : public FileSystemWrapper {
                         const IOOptions& /*options*/, uint64_t* diskfree,
                         uint64_t* free_percent,
                         IODebugContext* /*dbg*/) override {
-// loop:
+loop:
     // uint64_t fr;
     if(diskfree!=nullptr){
       *diskfree = zbd_->GetFreeSpace();
@@ -387,7 +387,7 @@ class ZenFS : public FileSystemWrapper {
       sleep(1);
       goto loop;
     }
-// ret:
+ret:
     *free_percent=free_percent_;
     
     return IOStatus::OK();      
