@@ -181,7 +181,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
   ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
   
   bool run_max_compaction = (ioptions_.max_compaction_kick >= zns_free_percent && 
-                              ioptions_.max_compaction_kick==MAX_INVALIDATION_COMPACTION)
+                              ioptions_.max_compaction_kick==MAX_INVALIDATION_COMPACTION);
   bool skipped_l0_to_base = false;
   for (int i = 0; i < compaction_picker_->NumberLevels() - 1; i++) {
     start_level_score_ = vstorage_->CompactionScore(i);
