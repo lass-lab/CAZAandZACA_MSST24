@@ -42,10 +42,13 @@ bool LevelCompactionPicker::NeedsCompaction(
   uint64_t zns_free_percent=100;
   ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
   
-  for(ioptions_.max_compaction_kick>=zns_free_percent &&
-      ioptions_.compaction_scheme==MAX_INVALIDATION_COMPACTION){
+  if(ioptions_.max_compaction_kick >= zns_free_percent &&
+      ioptions_.compaction_scheme == MAX_INVALIDATION_COMPACTION 
+    )
+  {
     return true;
   }
+
   return false;
 }
 
