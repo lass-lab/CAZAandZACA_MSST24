@@ -379,14 +379,14 @@ class ZenFS : public FileSystemWrapper {
     if(diskfree!=nullptr){
       *diskfree = zbd_->GetFreeSpace();
     }
-    // else{ // if nullptr
-    //   goto ret;
-    // }
+    else{ // if nullptr
+      goto ret;
+    }
 
-    // if(zbd_->GetZCRunning() ){
-    //   sleep(1);
-    //   goto loop;
-    // }
+    if(zbd_->GetZCRunning() ){
+      sleep(1);
+      goto loop;
+    }
 // ret:
     *free_percent=free_percent_;
     
