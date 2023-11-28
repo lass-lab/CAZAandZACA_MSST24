@@ -1058,7 +1058,7 @@ IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime, int lev
     lifetime_=Env::WLTH_EXTREME;
     break;
   }
-  printf("%d -> %d",level,lifetime_);
+  // printf("%d -> %d\n",level,lifetime_);
   
   return IOStatus::OK();
 }
