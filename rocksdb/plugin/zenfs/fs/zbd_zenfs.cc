@@ -1490,7 +1490,7 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
       zone_score_max=zone_score[i];
     }
     
-    zone_score_sum+=zone_score[i];
+    zone_score_sum+=zone_score[i]*zone_score[i];
     sst_in_zone_n++;
   }
   // for(size_t i = 0; i<zone_score.size(); i++){
