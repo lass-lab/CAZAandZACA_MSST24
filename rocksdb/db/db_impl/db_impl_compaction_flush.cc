@@ -30,6 +30,11 @@ bool DBImpl::EnoughRoomForCompaction(
     bool* sfm_reserved_compact_space, LogBuffer* log_buffer) {
   // Check if we have enough room to do the compaction
   bool enough_room = true;
+  uint64_t zns_free_percent;
+  immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
+  if(zns_free_percent<=immutable_db_options_.zc_kick){
+    return false;
+  }
 #ifndef ROCKSDB_LITE
   auto sfm = static_cast<SstFileManagerImpl*>(
       immutable_db_options_.sst_file_manager.get());
@@ -59,6 +64,8 @@ bool DBImpl::EnoughRoomForCompaction(
                      "Cancelled compaction because not enough room");
     RecordTick(stats_, COMPACTION_CANCELLED, 1);
   }
+
+  
   return enough_room;
 }
 
