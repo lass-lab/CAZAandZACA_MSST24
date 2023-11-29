@@ -398,6 +398,7 @@ class ZonedBlockDevice {
     long long us;
     size_t copied;
     bool forced;
+    std::vector<int> levels_files_timelapse;
   };
   std::vector<ZCStat> zc_timelapse_;
   // std::vector<uint64_t> zc_copied_timelapse_;
@@ -705,7 +706,7 @@ class ZonedBlockDevice {
 
     // db_ptr_->SameLevelFileList
 
-    zc_timelapse_.push_back({zc_z,s,e,us,copied,forced});
+    zc_timelapse_.push_back({zc_z,s,e,us,copied,forced,db_ptr_->NumLevelsFiles()});
   }
   void AddTimeLapse(int T);
 

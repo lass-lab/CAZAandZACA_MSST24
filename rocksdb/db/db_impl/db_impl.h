@@ -330,7 +330,7 @@ class DBImpl : public DB {
   
   // using DB::SameLevelFileList;
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list) override;
-  virtual int NumLevelFiles(int level) override;
+  virtual std::vector<int> NumLevelsFiles(void) override;
 
 
   virtual const Comparator* GetDefaultICMP(void) override;
