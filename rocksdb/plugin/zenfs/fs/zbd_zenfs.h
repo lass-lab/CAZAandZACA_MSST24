@@ -907,6 +907,11 @@ class ZonedBlockDevice {
     compaction_stats_[output_level].input_size_output_level_.fetch_add(input_size_output_level);
     compaction_stats_[output_level].output_size_.fetch_add(output_size);
     compaction_stats_[output_level].compaction_triggered_.fetch_add(1);
+    if(start_level+1 != output_level){
+      if(!(start_level == 0 && output_level==0) ){
+        printf("error ? %d %d\n",start_level,output_level);
+      }
+    }
   }
 
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) { 
