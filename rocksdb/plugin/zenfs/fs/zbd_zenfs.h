@@ -520,19 +520,20 @@ class ZonedBlockDevice {
 
     size_t candidate_ratio_;
 
-    std::vector<int> num_file_levels_;
+    std::vector<int> num_files_levels_;
 
 
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
-            uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, size_t candidate_ratio, std::vector<int> num_file_levels)
+            uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, size_t candidate_ratio, std::vector<int> num_files_levels)
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
-          , T_(T), RT_(rt), candidate_ratio_(candidate_ratio),num_file_levels_(num_file_levels) {
+          , T_(T), RT_(rt), candidate_ratio_(candidate_ratio) {
       if((rc+rc_zc)==0){
         R_wp_= 100;
       }else{
         R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
       }
+      num_files_levels_=num_files_levels;
     }
     void PrintStat(void){
       //   Sec    | Free |  RC |  RCZ |  RCP  | R_wp  |      Twp   |   erase_sz   |      erase_sz_zc |   p_er_sz      |
