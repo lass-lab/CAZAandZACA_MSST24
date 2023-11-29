@@ -537,7 +537,10 @@ class ZonedBlockDevice {
     }
     void PrintStat(void){
       //   Sec    | Free |  RC |  RCZ |  RCP  | R_wp  |      Twp   |   erase_sz   |      erase_sz_zc |   p_er_sz      |
-      printf("[%4d] | %3ld  | %3ld |  %3ld | [%3ld] | [ %4ld] | [ %4ld ] | [ %10ld ] | [ %10ld ] | [ %10ld ] |", 
+      // printf("[%4d] | %3ld  | %3ld |  %3ld | [%3ld] | [ %4ld] | [ %4ld ] | [ %10ld ] | [ %10ld ] | [ %10ld ] |", 
+      //           T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
+      //        R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20));
+            printf("%4d\t%3ld\t%3ld\t%3ld\t%3ld\t%4ld\t%4ld\t%10ld\t%10ld\t%10ld\t", 
                 T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
              R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20));
       for(int n : num_files_levels_){
