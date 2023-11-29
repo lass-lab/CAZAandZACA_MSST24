@@ -3451,7 +3451,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     compaction_job.Run().PermitUncheckedError();
     TEST_SYNC_POINT("DBImpl::BackgroundCompaction:NonTrivial:AfterRun");
     mutex_.Lock();
-    InternalStats::CompactionStats compaction_stats=compaction_job.GetCompactionStats();
+    // InternalStats::CompactionStats compaction_stats=compaction_job.GetCompactionStats();
 
 
     status = compaction_job.Install(*c->mutable_cf_options());
