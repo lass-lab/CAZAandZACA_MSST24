@@ -752,20 +752,37 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   // printf("avg. compaction input size : %lu MB (= %lu/%lu)\n",(total_compaction_input_size_.load()>>20)/compaction_triggered_.load()
   //                                                         ,total_compaction_input_size_.load()>>20,compaction_triggered_.load());
   // }else printf("no compaction triggered\n");
+
+  uint64_t sum_in_is = 0;
+  uint64_t sum_in_os = 0;
+  uint64_t sum_out_s = 0;
+  uint64_t sum_triggered = 0;
   for(int l = 0;l<10;l++){
     CompactionStats* cstat=&compaction_stats_[l];
     uint64_t in_is=cstat->input_size_input_level_.load();
     uint64_t in_os=cstat->input_size_output_level_.load();
     uint64_t out_s=cstat->output_size_.load();
     uint64_t triggered=cstat->compaction_triggered_.load();
+
+
+    sum_in_is+=in_is;
+    sum_in_os+=in_os;
+    sum_out_s+=out_s;
+    sum_triggered+=triggered;
     printf("LEVEL %d :: ",l);
     if(cstat->compaction_triggered_.load()==0){
       printf("\n");
       continue;
     }
+
     printf("%lu,%lu -> %lu(%lu%%) // %lu triggered\n",(
             (in_is>>20)/triggered),((in_os>>20)/triggered),
             ((out_s>>20)/triggered),((in_is+in_os)*100/out_s) ,triggered);
+  }
+  if(sum_triggered){
+    printf("AVG.   :: %lu,%lu -> %lu(%lu%%) // %lu triggered\n",(
+            (sum_in_is>>20)/sum_triggered),((sum_in_os>>20)/sum_triggered),
+            ((sum_out_s>>20)/sum_triggered),((sum_in_is+sum_in_is)*100/sum_out_s) ,sum_triggered);
   }
 
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
