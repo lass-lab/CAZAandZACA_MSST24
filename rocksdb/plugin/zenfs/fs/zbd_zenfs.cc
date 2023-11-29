@@ -763,9 +763,9 @@ ZonedBlockDevice::~ZonedBlockDevice() {
       printf("\n");
       continue;
     }
-    printf("%lu,%lu -> %lu // %lu triggered\n",(
+    printf("%lu,%lu -> %lu(%lu%) // %lu triggered\n",(
             in_is/triggered),(in_os/triggered),
-            (out_s/triggered),triggered);
+            (out_s/triggered),((in_is+in_os)*100/out_s) ,triggered);
   }
 
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());

@@ -919,7 +919,7 @@ Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
   VersionStorageInfo::LevelSummaryStorage tmp;
   auto vstorage = cfd->current()->storage_info();
   const auto& stats = compaction_stats_;
-  cfd->ioptions()->fs->StatsAverageCompactionInputSize(stats.bytes_read_non_output_levels);
+
   // stats.bytes_read_non_output_levels
   double read_write_amp = 0.0;
   double write_amp = 0.0;
@@ -932,7 +932,11 @@ Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
       stats.bytes_read_output_level + bytes_read_non_output_and_blob;
   const uint64_t bytes_written_all =
       stats.bytes_written + stats.bytes_written_blob;
-
+  cfd->ioptions()->fs->StatsAverageCompactionInputSize(compact_->compaction->start_level(),
+                                                    compact_->compaction->output_level(),
+                                                  bytes_read_non_output_and_blob,
+                                                  stats.bytes_read_output_level,
+                                                  bytes_written_all);
   if (bytes_read_non_output_and_blob > 0) {
     read_write_amp = (bytes_written_all + bytes_read_all) /
                      static_cast<double>(bytes_read_non_output_and_blob);
