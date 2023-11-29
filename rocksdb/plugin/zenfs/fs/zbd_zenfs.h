@@ -524,7 +524,7 @@ class ZonedBlockDevice {
 
 
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
-            uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, size_t candidate_ratio, std::vector<int>& num_file_levels)
+            uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, size_t candidate_ratio, std::vector<int> num_file_levels)
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
           , T_(T), RT_(rt), candidate_ratio_(candidate_ratio),num_file_levels_(num_file_levels) {
