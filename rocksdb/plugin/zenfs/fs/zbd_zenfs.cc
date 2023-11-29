@@ -779,7 +779,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
             (in_is>>20)/triggered),((in_os>>20)/triggered),
             ((out_s>>20)/triggered),((in_is+in_os)*100/out_s) ,triggered);
   }
-  if(sum_triggered){
+  if(sum_triggered!=0 && sum_out_s!=0 ){
     printf("AVG.   :: %lu,%lu -> %lu(%lu%%) // %lu triggered\n",(
             (sum_in_is>>20)/sum_triggered),((sum_in_os>>20)/sum_triggered),
             ((sum_out_s>>20)/sum_triggered),((sum_in_is+sum_in_is)*100/sum_out_s) ,sum_triggered);
