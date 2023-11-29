@@ -919,7 +919,8 @@ Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
   VersionStorageInfo::LevelSummaryStorage tmp;
   auto vstorage = cfd->current()->storage_info();
   const auto& stats = compaction_stats_;
-
+  cfd->ioptions().fs->StatsAverageCompactionInputSize(stats.bytes_read_non_output_levels);
+  // stats.bytes_read_non_output_levels
   double read_write_amp = 0.0;
   double write_amp = 0.0;
   double bytes_read_per_sec = 0;
@@ -953,7 +954,7 @@ Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
       "[%s] compacted to: %s, MB/sec: %.1f rd, %.1f wr, level %d, "
 
       "files in(%d, %d) out(%d +%d blob) "
-      
+
       "MB in(%.1f, %.1f +%.1f blob) out(%.1f +%.1f blob), "
       "read-write-amplify(%.1f) write-amplify(%.1f) %s, records in: %" PRIu64
       ", records dropped: %" PRIu64 " output_compression: %s\n",

@@ -749,7 +749,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("READ LOCK OVERHEAD %llu\n",read_lock_overhead_sum);
   // printf("runtime reset latency : %llu(ms)\n",runtime_reset_latency_.load()/1000);
   if(compaction_triggered_.load()){
-  printf("avg. compaction input size : %lu MB (= %lu/%lu)",total_compaction_input_size_.load()>>20/compaction_triggered_.load()
+  printf("avg. compaction input size : %lu MB (= %lu/%lu)\n",(total_compaction_input_size_.load()>>20)/compaction_triggered_.load()
                                                           ,total_compaction_input_size_.load()>>20,compaction_triggered_.load());
   }else printf("no compaction triggered\n");
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());

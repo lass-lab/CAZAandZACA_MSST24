@@ -206,7 +206,7 @@ bool SstFileManagerImpl::EnoughRoomForCompaction(
     //   return false;
     // }
   // }
-  fs_->StatsAverageCompactionInputSize(size_added_by_compaction);
+  // fs_->StatsAverageCompactionInputSize(size_added_by_compaction);
   cur_compactions_reserved_size_ += size_added_by_compaction;
   // Take a snapshot of cur_compactions_reserved_size_ for when we encounter
   // a NoSpace error.
