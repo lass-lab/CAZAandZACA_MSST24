@@ -700,7 +700,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("FAR STAT :: Time Lapse\n");
   //   T       fr      rc   rc_zc p_rc  Rwp     Twp   erase_sz   p_er_sz
   printf(
-      "Sec    | Free |  RC |  RCZ |  RCP  | R_wp    |   Twp    |   erase_sz     |      erase_sz_zc |   p_er_sz    |  Stall  |      Cause         |\n");
+      "Sec    | Free |  RC |  RCZ |  RCP  | R_wp    |   Twp    |   erase_sz     |    erase_sz_zc |   p_er_sz      |\n");
   for(size_t i=0;i<far_stats_.size();i++){
     far_stats_[i].PrintStat();
     // write_stall_timelapse_[i].PrintStat();
