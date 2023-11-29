@@ -179,7 +179,7 @@ bool SstFileManagerImpl::EnoughRoomForCompaction(
         TableFileName(cfd->ioptions()->cf_paths, inputs[0][0]->fd.GetNumber(),
                       inputs[0][0]->fd.GetPathId());
     uint64_t free_space = 0,free_percent=0;
-    Status s = fs_->GetFreeSpace(fn, IOOptions(), &free_space, &free_percent,nullptr);
+    Status s = fs_->GetFreeSpace(fn, IOOptions(), nullptr, &free_percent,nullptr);
     // printf("Free space %ld!!!\n\n ",free_space);
     s.PermitUncheckedError();  // TODO: Check the status
     // needed_headroom is based on current size reserved by compactions,
@@ -190,7 +190,7 @@ bool SstFileManagerImpl::EnoughRoomForCompaction(
     if (compaction_buffer_size_ == 0) {
       needed_headroom += reserved_disk_buffer_;
     }
-    if ((free_space < needed_headroom + size_added_by_compaction) || free_percent < 20) {
+    if (free_percent < 20) {
       // We hit the condition of not enough disk space
       ROCKS_LOG_ERROR(logger_,
                       "free space [%" PRIu64
@@ -206,7 +206,7 @@ bool SstFileManagerImpl::EnoughRoomForCompaction(
     //   return false;
     // }
   // }
-
+  fs_->StatsAverageCompactionInputSize(size_added_by_compaction);
   cur_compactions_reserved_size_ += size_added_by_compaction;
   // Take a snapshot of cur_compactions_reserved_size_ for when we encounter
   // a NoSpace error.

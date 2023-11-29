@@ -105,6 +105,7 @@ class CompactionJob {
 
   // Return the IO status
   IOStatus io_status() const { return io_status_; }
+  InternalStats::CompactionStats* GetCompactionStats(void) { return &compaction_stats_; }
 
  protected:
   struct SubcompactionState;

@@ -540,6 +540,10 @@ class ZonedBlockDevice {
   };
 
   std::vector<FARStat> far_stats_;
+
+  std::atomic<uint64_t> total_compaction_input_size_{0};
+  std::atomic<uint64_t> compaction_triggered_{0};
+
  public:
   uint64_t ZONE_CLEANING_KICKING_POINT=40;
   std::atomic<bool> migrating_{false};
@@ -876,6 +880,13 @@ class ZonedBlockDevice {
   
   IOStatus ResetAllZonesForForcedNewFileSystem(void);
   
+  void StatsAverageCompactionInputSize(uint64_t input_size){
+  //     std::atomic<uint64_t> total_compaction_input_size_{0};
+  // std::atomic<uint64_t> compaction_triggered_{0};
+    total_compaction_input_size_.fetch_add(input_size);
+    compaction_triggered_.fetch_add(1);
+  }
+
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) { 
     reset_scheme_=r; 
     allocation_scheme_=allocation_scheme;

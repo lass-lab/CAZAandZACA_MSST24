@@ -3447,11 +3447,16 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     //   printf(" || ");
     // }
     // printf("\n");
+    
     compaction_job.Run().PermitUncheckedError();
     TEST_SYNC_POINT("DBImpl::BackgroundCompaction:NonTrivial:AfterRun");
     mutex_.Lock();
+    InternalStats::CompactionStats compaction_stats=compaction_job.GetCompactionStats();
+
 
     status = compaction_job.Install(*c->mutable_cf_options());
+ 
+
     io_s = compaction_job.io_status();
     if (status.ok()) {
       InstallSuperVersionAndScheduleWork(c->column_family_data(),

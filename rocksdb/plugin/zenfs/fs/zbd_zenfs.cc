@@ -747,7 +747,11 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("TOTAL I/O BLOCKING TIME(ms) %llu\n",io_blocking_ms_sum);
   printf("TOTAL ERASED AT RZR DEVICE VIEW : %lu(MB)\n",(wasted_wp_.load()+erase_size_.load())>>20 );
   printf("READ LOCK OVERHEAD %llu\n",read_lock_overhead_sum);
-  printf("runtime reset latency : %llu(ms)\n",runtime_reset_latency_.load()/1000);
+  // printf("runtime reset latency : %llu(ms)\n",runtime_reset_latency_.load()/1000);
+  if(compaction_triggered_.load()){
+  printf("avg. compaction input size : %lu MB (= %lu/%lu)",total_compaction_input_size_.load()>>20/compaction_triggered_.load()
+                                                          ,total_compaction_input_size_.load()>>20,compaction_triggered_.load());
+  }else printf("no compaction triggered\n");
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
 
   printf("============================================================\n\n");

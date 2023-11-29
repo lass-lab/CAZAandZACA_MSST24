@@ -383,6 +383,8 @@ class Env : public Customizable {
   virtual Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
 
   virtual void SetResetScheme(uint32_t,uint32_t,uint64_t,uint64_t,uint64_t,uint64_t) {}
+
+  virtual void StatsAverageCompactionInputSize(uint64_t) {}
   virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t*){
     return 0;
   }
@@ -1485,6 +1487,10 @@ class EnvWrapper : public Env {
   }
   void SetResetScheme(uint32_t r, uint32_t partial_reset_scheme, uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) override {
     target_.env->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
+  }
+
+  void StatsAverageCompactionInputSize(uint64_t input_size){
+    target_.env->StatsAverageCompactionInputSize(input_size);
   }
 
   uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t* candidate_size) override {
