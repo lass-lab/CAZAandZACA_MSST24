@@ -757,7 +757,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     uint64_t in_is=cstat->input_size_input_level_.load()>>20;
     uint64_t in_os=cstat->input_size_output_level_.load()>>20;
     uint64_t out_s=cstat->output_size_.load()>>20;
-    uint64_t triggered=cstat->compactino_triggered_.load();
+    uint64_t triggered=cstat->compaction_triggered_.load();
     printf("LEVEL %d :: ",l);
     if(cstat->compaction_triggered_.load()==0){
       printf("\n");
