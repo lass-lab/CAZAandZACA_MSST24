@@ -4342,7 +4342,7 @@ void DB::SameLevelFileList(int , std::vector<uint64_t>& ){
   std::cout<<"DB::AdjcanetFileLIst not Supported\n";
 }
 
-std::vector<int> DB::NumLevelsFiles(void) { return -1; }
+std::vector<int> DB::NumLevelsFiles(void) { return std::vector<int>(0); }
 
 const Comparator* DB::GetDefaultICMP(void) { return nullptr;}
 
