@@ -703,7 +703,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
       "Sec    | Free |  RC |  RCZ |  RCP  | R_wp  |      Twp   |   erase_sz   |      erase_sz_zc |   p_er_sz      |  Stall  |      Cause         |\n");
   for(size_t i=0;i<far_stats_.size();i++){
     far_stats_[i].PrintStat();
-    write_stall_timelapse_[i].PrintStat();
+    // write_stall_timelapse_[i].PrintStat();
   }
 
   printf("============================================================\n");
@@ -846,60 +846,60 @@ IOStatus ZonedBlockDevice::AllocateMetaZone(Zone **out_meta_zone) {
   return IOStatus::NoSpace("Out of metadata zones");
 }
 void ZonedBlockDevice::AddTimeLapse(int T) {
-  size_t reclaimable= 0;
-  size_t written = 0;
-  size_t candidate_ratio;
-  size_t candidate_valid= 0;
-  size_t candidate_valid_ratio;
+  // size_t reclaimable= 0;
+  // size_t written = 0;
+  // size_t candidate_ratio;
+  // size_t candidate_valid= 0;
+  // size_t candidate_valid_ratio;
 
-  size_t no_candidate_valid=0;
-  size_t no_candidate_valid_ratio;
+  // size_t no_candidate_valid=0;
+  // size_t no_candidate_valid_ratio;
 
-  for(auto z : io_zones){
-    written+=z->wp_-z->start_;
-    if(z->IsFull()){
-      candidate_valid+=z->used_capacity_;
-      reclaimable+=z->max_capacity_;
-    }else{ // no candidate;
-      no_candidate_valid+=z->used_capacity_;
-    }
-  }
-  if(written){
-    candidate_ratio=(reclaimable*100/written);
-  }else{
-    candidate_ratio=0;
-  }
+  // for(auto z : io_zones){
+  //   written+=z->wp_-z->start_;
+  //   if(z->IsFull()){
+  //     candidate_valid+=z->used_capacity_;
+  //     reclaimable+=z->max_capacity_;
+  //   }else{ // no candidate;
+  //     no_candidate_valid+=z->used_capacity_;
+  //   }
+  // }
+  // if(written){
+  //   candidate_ratio=(reclaimable*100/written);
+  // }else{
+  //   candidate_ratio=0;
+  // }
 
-  if(reclaimable){ // candidate
-    candidate_valid_ratio=(candidate_valid*100)/reclaimable;
-  }else{
-    candidate_valid_ratio=0;
-  }
+  // if(reclaimable){ // candidate
+  //   candidate_valid_ratio=(candidate_valid*100)/reclaimable;
+  // }else{
+  //   candidate_valid_ratio=0;
+  // }
 
-  if(written-reclaimable>0){ // no candidate
-    no_candidate_valid_ratio=(no_candidate_valid*100)/(written-reclaimable);
-  }else{
-    no_candidate_valid_ratio=0;
-  }
-  candidate_ratio_sum_+=candidate_ratio;
-  candidate_valid_ratio_sum_+=candidate_valid_ratio;
-  no_candidate_valid_ratio_sum_+=no_candidate_valid_ratio;
-  if(before_zc_){
-    candidate_ratio_sum_before_zc_+=candidate_ratio;
-    candidate_valid_ratio_sum_before_zc_+=candidate_valid_ratio;
-    no_candidate_valid_ratio_sum_before_zc_+=no_candidate_valid_ratio;
-    before_zc_T_=T;
-    if(cur_free_percent_<ZONE_CLEANING_KICKING_POINT){
-      before_zc_=false;
-    }
-  }
+  // if(written-reclaimable>0){ // no candidate
+  //   no_candidate_valid_ratio=(no_candidate_valid*100)/(written-reclaimable);
+  // }else{
+  //   no_candidate_valid_ratio=0;
+  // }
+  // candidate_ratio_sum_+=candidate_ratio;
+  // candidate_valid_ratio_sum_+=candidate_valid_ratio;
+  // no_candidate_valid_ratio_sum_+=no_candidate_valid_ratio;
+  // if(before_zc_){
+  //   candidate_ratio_sum_before_zc_+=candidate_ratio;
+  //   candidate_valid_ratio_sum_before_zc_+=candidate_valid_ratio;
+  //   no_candidate_valid_ratio_sum_before_zc_+=no_candidate_valid_ratio;
+  //   before_zc_T_=T;
+  //   if(cur_free_percent_<ZONE_CLEANING_KICKING_POINT){
+  //     before_zc_=false;
+  //   }
+  // }
 
 
 
   far_stats_.emplace_back(cur_free_percent_, 
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
           erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
-                wasted_wp_.load() , T, reset_threshold_arr_[cur_free_percent_],GetZoneSize(),candidate_ratio);
+                wasted_wp_.load() , T, reset_threshold_arr_[cur_free_percent_],GetZoneSize(),db_ptr_->NumLevelsFiles());
 }
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
     T++;

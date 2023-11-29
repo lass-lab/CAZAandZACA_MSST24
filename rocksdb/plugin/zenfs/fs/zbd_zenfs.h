@@ -398,7 +398,7 @@ class ZonedBlockDevice {
     long long us;
     size_t copied;
     bool forced;
-    std::vector<int> levels_files_timelapse;
+    // std::vector<int> levels_files_timelapse;
   };
   std::vector<ZCStat> zc_timelapse_;
   // std::vector<uint64_t> zc_copied_timelapse_;
@@ -520,12 +520,14 @@ class ZonedBlockDevice {
 
     size_t candidate_ratio_;
 
+    std::vector<int> num_file_levels_;
+
 
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
-            uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, size_t candidate_ratio)
+            uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, size_t candidate_ratio, std::vector<int>& num_file_levels)
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
-          , T_(T), RT_(rt), candidate_ratio_(candidate_ratio) {
+          , T_(T), RT_(rt), candidate_ratio_(candidate_ratio),num_file_levels_(num_file_levels) {
       if((rc+rc_zc)==0){
         R_wp_= 100;
       }else{
@@ -537,6 +539,10 @@ class ZonedBlockDevice {
       printf("[%4d] | %3ld  | %3ld |  %3ld | [%3ld] | [ %4ld ] | [ %3ld ] | [ %10ld ] | [ %10ld ] | [ %10ld ] |", 
                 T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
              R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20));
+      for(int n : num_file_levels_){
+        printf("%d\t",n);
+      }
+      printf("\n");
     }
   };
 
@@ -706,7 +712,7 @@ class ZonedBlockDevice {
 
     // db_ptr_->SameLevelFileList
 
-    zc_timelapse_.push_back({zc_z,s,e,us,copied,forced,db_ptr_->NumLevelsFiles()});
+    zc_timelapse_.push_back({zc_z,s,e,us,copied,forced});
   }
   void AddTimeLapse(int T);
 
