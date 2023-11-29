@@ -770,7 +770,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     sum_out_s+=out_s;
     sum_triggered+=triggered;
     printf("LEVEL %d :: ",l);
-    if(cstat->compaction_triggered_.load()==0){
+    if(triggered==0 || out_s == 0){
       printf("\n");
       continue;
     }
