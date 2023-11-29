@@ -533,9 +533,9 @@ class ZonedBlockDevice {
     }
     void PrintStat(void){
       //   Sec    | Free |  RC |  RCZ |  RCP  | R_wp  |      Twp   |   erase_sz   |      erase_sz_zc |   p_er_sz      |
-      printf("[%4d] | %3ld  | %3ld |  %3ld | [%3ld] | [ %3ld ] | [ %3ld ] | [ %10ld ] | [ %10ld ] | [ %10ld ] | [ %10ld ] | %3lu  |", 
+      printf("[%4d] | %3ld  | %3ld |  %3ld | [%3ld] | [ %4ld ] | [ %3ld ] | [ %10ld ] | [ %10ld ] | [ %10ld ] |", 
                 T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
-             R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(erase_size_proactive_zc_>>20) ,(partial_erase_size_>>20),candidate_ratio_);
+             R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20));
     }
   };
 
@@ -702,6 +702,9 @@ class ZonedBlockDevice {
     if(forced==true){
       force_zc_should_triggered_.store(false);
     }
+
+    // db_ptr_->SameLevelFileList
+
     zc_timelapse_.push_back({zc_z,s,e,us,copied,forced});
   }
   void AddTimeLapse(int T);
@@ -978,7 +981,7 @@ class ZonedBlockDevice {
   
   void AdjacentFileList(Slice& smallest,Slice& largest, int level, std::vector<uint64_t>& fno_list);
   void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
-
+  // int NumLevelFiles(int level);
   IOStatus AllocateSameLevelFilesZone(Slice& smallest, Slice& largest ,
                                       const std::vector<uint64_t>& fno_list,Zone** zone_out,
                                       uint64_t min_capacity);

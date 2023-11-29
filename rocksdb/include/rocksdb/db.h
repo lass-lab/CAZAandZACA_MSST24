@@ -382,6 +382,7 @@ class DB {
 
   virtual void AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
+  virtual int NumLevelFiles(int level);
   virtual const Comparator* GetDefaultICMP(void);
   
   // Release and deallocate a column family handle. A column family is only

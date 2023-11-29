@@ -2925,6 +2925,10 @@ void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list){
   }
 }
 
+int DBImpl::NumLevelFiles(int level) {
+  return vstorage->NumLevelFiles(level);
+}
+
 const Comparator* DBImpl::GetDefaultICMP(void){
   return versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info()->InternalComparator();
 }
@@ -4330,6 +4334,8 @@ void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
 void DB::SameLevelFileList(int , std::vector<uint64_t>& ){
   std::cout<<"DB::AdjcanetFileLIst not Supported\n";
 }
+
+int DB::NumLevelFiles(int) { return -1; }
 
 const Comparator* DB::GetDefaultICMP(void) { return nullptr;}
 

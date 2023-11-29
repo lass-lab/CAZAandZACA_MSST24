@@ -330,6 +330,9 @@ class DBImpl : public DB {
   
   // using DB::SameLevelFileList;
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list) override;
+  virtual int NumLevelFiles(int level) override;
+
+
   virtual const Comparator* GetDefaultICMP(void) override;
   // Returns false if key doesn't exist in the database and true if it may.
   // If value_found is not passed in as null, then return the value if found in
