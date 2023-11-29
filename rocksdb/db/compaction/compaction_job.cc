@@ -919,7 +919,7 @@ Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
   VersionStorageInfo::LevelSummaryStorage tmp;
   auto vstorage = cfd->current()->storage_info();
   const auto& stats = compaction_stats_;
-  cfd->ioptions().fs->StatsAverageCompactionInputSize(stats.bytes_read_non_output_levels);
+  cfd->ioptions()->fs->StatsAverageCompactionInputSize(stats.bytes_read_non_output_levels);
   // stats.bytes_read_non_output_levels
   double read_write_amp = 0.0;
   double write_amp = 0.0;
