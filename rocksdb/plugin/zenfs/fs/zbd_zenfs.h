@@ -527,13 +527,13 @@ class ZonedBlockDevice {
             uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels)
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
-          , T_(T), RT_(rt), candidate_ratio_(candidate_ratio) {
+          , T_(T), RT_(rt), num_files_levels_(num_files_levels) {
       if((rc+rc_zc)==0){
         R_wp_= 100;
       }else{
         R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
       }
-      num_files_levels_=num_files_levels;
+      // num_files_levels_=num_files_levels;
     }
     void PrintStat(void){
       //   Sec    | Free |  RC |  RCZ |  RCP  | R_wp  |      Twp   |   erase_sz   |      erase_sz_zc |   p_er_sz      |
