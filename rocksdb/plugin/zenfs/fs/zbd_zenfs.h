@@ -539,10 +539,19 @@ class ZonedBlockDevice {
     }
   };
 
+  struct CompactionStats{
+    std::atomic<uint64_t> input_size_input_level_{0};
+    std::atomic<uint64_t> input_size_output_level_{0};
+    std::atomic<uint64_t> output_size_{0};
+    std::atomic<uint64_t> compaction_triggered_{0};
+  };
+
+  CompactionStats compaction_stats_[10];
   std::vector<FARStat> far_stats_;
 
-  std::atomic<uint64_t> total_compaction_input_size_{0};
-  std::atomic<uint64_t> compaction_triggered_{0};
+  // std::atomic<uint64_t> intral0_compaction_input_size_{0};
+  // std::atomic<uint64_t> intral0_compaction_output_size_{0};
+  // std::atomic<uint64_t> intral0_compaction_triggered_{0};
 
  public:
   uint64_t ZONE_CLEANING_KICKING_POINT=40;
@@ -880,11 +889,24 @@ class ZonedBlockDevice {
   
   IOStatus ResetAllZonesForForcedNewFileSystem(void);
   
-  void StatsAverageCompactionInputSize(uint64_t input_size){
+  void StatsAverageCompactionInputSize(int start_level, int output_level,
+                            uint64_t input_size_input_level, uint64_t input_size_output_level,
+                            uint64_t output_size){
   //     std::atomic<uint64_t> total_compaction_input_size_{0};
   // std::atomic<uint64_t> compaction_triggered_{0};
-    total_compaction_input_size_.fetch_add(input_size);
-    compaction_triggered_.fetch_add(1);
+    // if(start_level==0 && output_level==0){
+    //   intral0_compaction_input_size_.fetch_add((input_size_input_level+input_size_output_level));
+    //   intral0_compaction_output_size_.fetch_add(output_size);
+    //   intral0_compaction_triggered_.fetch_add(1);
+    // }else{
+    //   compaction_stats_[]
+    // }
+    // total_compaction_input_size_.fetch_add(input_size);
+    // compaction_triggered_.fetch_add(1);
+    compaction_stats_[output_level].input_size_input_level_.fetch_add(input_size_input_level);
+    compaction_stats_[output_level].input_size_output_level_.fetch_add(input_size_output_level);
+    compaction_stats_[output_level].output_size_.fetch_add(output_size);
+    compaction_stats_[output_level].compaction_triggered_.fetch_add(1);
   }
 
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) { 

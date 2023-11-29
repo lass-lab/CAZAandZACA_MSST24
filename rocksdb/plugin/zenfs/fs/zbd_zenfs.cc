@@ -748,12 +748,28 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("TOTAL ERASED AT RZR DEVICE VIEW : %lu(MB)\n",(wasted_wp_.load()+erase_size_.load())>>20 );
   printf("READ LOCK OVERHEAD %llu\n",read_lock_overhead_sum);
   // printf("runtime reset latency : %llu(ms)\n",runtime_reset_latency_.load()/1000);
-  if(compaction_triggered_.load()){
-  printf("avg. compaction input size : %lu MB (= %lu/%lu)\n",(total_compaction_input_size_.load()>>20)/compaction_triggered_.load()
-                                                          ,total_compaction_input_size_.load()>>20,compaction_triggered_.load());
-  }else printf("no compaction triggered\n");
-  printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
+  // if(compaction_triggered_.load()){
+  // printf("avg. compaction input size : %lu MB (= %lu/%lu)\n",(total_compaction_input_size_.load()>>20)/compaction_triggered_.load()
+  //                                                         ,total_compaction_input_size_.load()>>20,compaction_triggered_.load());
+  // }else printf("no compaction triggered\n");
+  for(int l = 0;l<10;l++){
+    CompactionStats* cstat=&compaction_stats_[l];
+    uint64_t in_is=cstat->input_size_input_level_.load()>>20;
+    uint64_t in_os=cstat->input_size_output_level_.load()>>20;
+    uint64_t out_s=cstat->output_size_.load()>>20;
+    uint64_t triggered=cstat->compactino_triggered_.load();
+    printf("LEVEL %d :: ",l);
+    if(cstat->compaction_triggered_.load()==0){
+      printf("\n");
+      continue;
+    }
+    printf("%lu,%lu -> %lu // %lu triggered\n",(
+            in_is/triggered),(in_os/triggered),
+            (out_s/triggered),triggered);
+  }
 
+  printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
+  
   printf("============================================================\n\n");
 
   for (const auto z : meta_zones) {

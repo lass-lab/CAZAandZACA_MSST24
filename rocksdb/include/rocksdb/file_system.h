@@ -533,7 +533,7 @@ class FileSystem : public Customizable {
 
   virtual void SetResetScheme(uint32_t ,uint32_t, uint64_t, uint64_t, uint64_t,uint64_t) {}
 
-  virtual void StatsAverageCompactionInputSize(uint64_t )  {}
+  virtual void StatsAverageCompactionInputSize(int,int,uint64_t,uint64_t,uint64_t )  {}
 
   virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t * ) { return 0;};
 
@@ -1468,8 +1468,11 @@ class FileSystemWrapper : public FileSystem {
     target_->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
   }
 
-  void StatsAverageCompactionInputSize(uint64_t input_size){
-    target_->StatsAverageCompactionInputSize(input_size);
+  void StatsAverageCompactionInputSize(int start_level, int output_level,
+                            uint64_t input_size_input_level, uint64_t input_size_output_level,
+                            uint64_t output_size){
+    target_->StatsAverageCompactionInputSize(start_level,output_level,
+                    input_size_input_level,input_size_output_level,output_size);
   }
   
   uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t* candidate_size) {
