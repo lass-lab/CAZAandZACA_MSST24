@@ -2175,6 +2175,7 @@ class Stats {
   }
 
   void StopAfterCompaction(){
+    printf("StopAfterCompaction\n");
     finish_after_compaction_ = clock_->NowMicros();
     seconds_after_compaction_ = (finish_after_compaction_ - start_) * 1e-6;
   }
