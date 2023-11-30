@@ -2100,7 +2100,13 @@ class Stats {
   uint64_t start_ = 0;
   uint64_t sine_interval_;
   uint64_t finish_;
+
+  uint64_t finish_after_compaction_;
+
   double seconds_;
+
+  double seconds_after_compaction_;
+
   uint64_t done_;
   uint64_t last_report_done_;
   uint64_t next_report_;
@@ -2165,6 +2171,11 @@ class Stats {
   void Stop() {
     finish_ = clock_->NowMicros();
     seconds_ = (finish_ - start_) * 1e-6;
+  }
+
+  void StopAfterCompaction(){
+    finish_after_compaction_ = clock_->NowMicros();
+    seconds_after_compaction_ = (finish_after_compaction_ - start_) * 1e-6;
   }
 
   void AddMessage(Slice msg) {
@@ -2347,7 +2358,10 @@ class Stats {
     if (done_ < 1) done_ = 1;
 
     std::string extra;
+    std::string extra_2;
     double elapsed = (finish_ - start_) * 1e-6;
+
+    double elapsed_after_compaction = (finish_after_compaction_ - start_) * 1e-6;
     if (bytes_ > 0) {
       // Rate is computed on actual elapsed time, not the sum of per-thread
       // elapsed times.
@@ -2355,15 +2369,22 @@ class Stats {
       snprintf(rate, sizeof(rate), "%6.1f MB/s",
                (bytes_ / 1048576.0) / elapsed);
       extra = rate;
+
+      char rate_2[100];
+      snprintf(rate, sizeof(rate_2), "%6.1f MB/s",
+               (bytes_ / 1048576.0) / elapsed_after_compaction);
+      extra_2 = rate;
+
     }
     AppendWithSpace(&extra, message_);
     double throughput = (double)done_/elapsed;
+    double throughput_after_compaction = (double)done_/elapsed_after_compaction;
 
     fprintf(stdout,
-            "%-12s : %11.3f micros/op %ld ops/sec %.3f seconds %" PRIu64
-            " operations;%s%s\n",
+            "%-12s : %11.3f micros/op %ld ops/sec %.3f(%.3f) seconds %" PRIu64
+            " operations;%s%s (%s)\n",
             name.ToString().c_str(), seconds_ * 1e6 / done_, (long)throughput,
-            elapsed, done_, (extra.empty() ? "" : " "), extra.c_str());
+            elapsed,elapsed_after_compaction, done_, (extra.empty() ? "" : " "), extra.c_str(),extra_2.c_str());
     if (FLAGS_histogram) {
       for (auto it = hist_.begin(); it != hist_.end(); ++it) {
         fprintf(stdout, "Microseconds per %s:\n%s\n",
@@ -3806,7 +3827,7 @@ class Benchmark {
     perf_context.EnablePerLevelPerfContext();
     thread->stats.Start(thread->tid);
     (arg->bm->*(arg->method))(thread);
-    thread->stats.Stop();
+    thread->stats.StopAfterCompaction();
 
     {
       MutexLock l(&shared->mu);
@@ -5352,6 +5373,7 @@ class Benchmark {
       }
     }
     printf("Writerandom ALL DONE\n");
+    thread->stats.Stop();
     printf("WAIT FOR COMPACTION\n");
     std::vector<double> compaction_score ;
     bool during_compaction = false;
@@ -5362,8 +5384,8 @@ class Benchmark {
       sleep(1);
       compaction_score = db->LevelsCompactionScore();
       for(double score : compaction_score){
-        printf("%lf\n",score);
-        if(score>0.99){
+        // printf("%lf\n",score);
+        if(score>=1){
           during_compaction=true;
           // break;
         }
