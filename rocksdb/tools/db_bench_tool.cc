@@ -5372,7 +5372,7 @@ class Benchmark {
 
     compaction_score = db->LevelsCompactionScore();
     for(double score : compaction_score){
-      printf("%lf\n",s),
+      printf("%lf\n",score),
     }
     // while(during_compaction){
     //   during_compaction=false;
