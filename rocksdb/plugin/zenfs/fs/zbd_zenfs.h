@@ -525,11 +525,15 @@ class ZonedBlockDevice {
     std::vector<double> compaction_scores_;
 
 
+    std::vector<uint64_t> levels_size_;
+
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
-            uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels, std::vector<double> compaction_scores)
+            uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels, 
+            std::vector<double> compaction_scores, std::vector<uint64_t> levels_size)
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
-          , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores) {
+          , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
+          levels_size_(levels_size) {
       if((rc+rc_zc)==0){
         R_wp_= 100;
       }else{
@@ -548,9 +552,13 @@ class ZonedBlockDevice {
       for(int n : num_files_levels_){
         printf("%d\t",n);
       }
-      printf("|\t");
+      printf("|score\t");
       for(double s : compaction_scores_){
         printf("%lf\t",s);
+      }
+      printf("|size\t");
+      for(uint64_t s : levels_size_){
+        printf("%lu\t",s);
       }
       printf("\n");
     }

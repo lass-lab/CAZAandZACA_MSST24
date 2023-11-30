@@ -2945,6 +2945,23 @@ std::vector<double> DBImpl::LevelsCompactionScore(void){
   return versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info()->GetCompactionScores();
 }
 
+std::vector<uint64_t> DBImpl::LevelsSize(void){
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+  std::vector<uint64_t> ret;
+  ret.clear();
+  for(int level =0 ; level<6;level++){
+    const std::vector<FileMetaData*>& level_files =
+        vstorage->LevelFiles(level);
+    uint64_t sum = 0;
+    for(auto f: level_files){
+      sum+= f->compensated_file_size;
+    }
+    ret.push_back(sum);
+  }
+
+  return ret;
+}
+
 const Comparator* DBImpl::GetDefaultICMP(void){
   return versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info()->InternalComparator();
 }
@@ -4353,6 +4370,7 @@ void DB::SameLevelFileList(int , std::vector<uint64_t>& ){
 
 std::vector<int> DB::NumLevelsFiles(void) { return std::vector<int>(0); }
 std::vector<double> DB::LevelsCompactionScore(void) { return std::vector<double>(0); }
+std::vector<uint64_t> DB::LevelsSize(void) { return std::vector<uint64_t>(0); }
 const Comparator* DB::GetDefaultICMP(void) { return nullptr;}
 
 

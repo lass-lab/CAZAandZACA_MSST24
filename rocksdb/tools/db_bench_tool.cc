@@ -5420,10 +5420,10 @@ class Benchmark {
 
     } while (during_compaction);
 
-    compaction_score = db->LevelsCompactionScore();
-    for(double score : compaction_score){
-      printf("%lf\n",score);
-    }
+    // compaction_score = db->LevelsCompactionScore();
+    // for(double score : compaction_score){
+    //   printf("%lf\n",score);
+    // }
     // thread->stats.StopAfterCompaction();
     if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
       fprintf(stdout,
