@@ -2169,6 +2169,7 @@ class Stats {
   }
 
   void Stop() {
+    printf("Stop!!\n");
     finish_ = clock_->NowMicros();
     seconds_ = (finish_ - start_) * 1e-6;
   }
@@ -5377,6 +5378,7 @@ class Benchmark {
     printf("Writerandom ALL DONE\n");
     thread->stats.Stop();
     printf("WAIT FOR COMPACTION\n");
+
     std::vector<double> compaction_score ;
     bool during_compaction = false;
     DB* db = db_.db;
@@ -5399,7 +5401,7 @@ class Benchmark {
     for(double score : compaction_score){
       printf("%lf\n",score);
     }
-
+    thread->stats.StopAfterCompaction()
     if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
       fprintf(stdout,
               "Number of unique keys inserted: %" PRIu64
