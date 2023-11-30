@@ -5361,8 +5361,8 @@ class Benchmark {
       during_compaction=false;
       sleep(1);
       compaction_score = db->LevelsCompactionScore();
-      for(double s : compaction_score){
-        if(s>0.99){
+      for(double score : compaction_score){
+        if(score>0.99){
           during_compaction=true;
           break;
         }
@@ -5370,8 +5370,8 @@ class Benchmark {
 
     } while (during_compaction);
 
-    std::vector<double> compaction_score = db->LevelsCompactionScore();
-    for(double s : compaction_score){
+    compaction_score = db->LevelsCompactionScore();
+    for(double score : compaction_score){
       printf("%lf\n",s),
     }
     // while(during_compaction){
