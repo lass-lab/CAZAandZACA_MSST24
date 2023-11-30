@@ -1682,7 +1682,7 @@ DEFINE_uint64(compaction_scheme,0,"0<Tuninig point<100");
 
 DEFINE_uint64(max_compaction_kick,25,"0<Tuninig point<100");
 
-
+DEFINE_bool(wait_for_compactions,false,"true or false");
 
 
 namespace ROCKSDB_NAMESPACE {
@@ -5399,27 +5399,31 @@ class Benchmark {
     printf("Writerandom ALL DONE\n");
     thread->stats.Stop();
     thread->stats.AddBytes(bytes);
-    thread->stats.Report(Slice("before compaction"),false);
-    printf("WAIT FOR COMPACTION\n");
 
-    std::vector<double> compaction_score ;
-    bool during_compaction = false;
-    DB* db = db_.db;
-    do
-    {
-      during_compaction=false;
-      sleep(1);
-      compaction_score = db->LevelsCompactionScore();
-      for(double score : compaction_score){
-        // printf("%lf\n",score);
-        if(score>=1.0){
-          during_compaction=true;
-          // break;
+    if(FLAGS_wait_for_compactions){
+      thread->stats.Report(Slice("before compaction"),false);
+
+      
+      printf("WAIT FOR COMPACTION\n");
+
+      std::vector<double> compaction_score ;
+      bool during_compaction = false;
+      DB* db = db_.db;
+      do
+      {
+        during_compaction=false;
+        sleep(1);
+        compaction_score = db->LevelsCompactionScore();
+        for(double score : compaction_score){
+          // printf("%lf\n",score);
+          if(score>=1.0){
+            during_compaction=true;
+            // break;
+          }
         }
-      }
 
-    } while (during_compaction);
-
+      } while (during_compaction);
+    }
     // compaction_score = db->LevelsCompactionScore();
     // for(double score : compaction_score){
     //   printf("%lf\n",score);
