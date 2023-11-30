@@ -3846,7 +3846,7 @@ class Benchmark {
     perf_context.EnablePerLevelPerfContext();
     thread->stats.Start(thread->tid);
     (arg->bm->*(arg->method))(thread);
-    thread->stats.StopAfterCompaction();
+    // thread->stats.StopAfterCompaction();
 
     {
       MutexLock l(&shared->mu);
