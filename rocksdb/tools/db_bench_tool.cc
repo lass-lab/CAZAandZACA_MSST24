@@ -2356,7 +2356,7 @@ class Stats {
     bytes_ += n;
   }
 
-  void Report(const Slice& name) {
+  void Report(const Slice& name, bool report_all=true) {
     // Pretend at least one op was done in case we are running a benchmark
     // that does not call FinishedOps().
     if (done_ < 1) done_ = 1;
@@ -2406,6 +2406,9 @@ class Stats {
     //         (long)throughput, (long)throughput_after_compaction,
     //         elapsed,elapsed_after_compaction, 
     //         done_, (extra.empty() ? "" : " "), extra.c_str(),extra_2.c_str());
+    if(!report_all){
+      return;
+    }
     if (FLAGS_histogram) {
       for (auto it = hist_.begin(); it != hist_.end(); ++it) {
         fprintf(stdout, "Microseconds per %s:\n%s\n",
@@ -3935,7 +3938,7 @@ class Benchmark {
     for (int i = 0; i < n; i++) {
       merge_stats.Merge(arg[i].thread->stats);
     }
-    merge_stats.Report(name);
+    merge_stats.Report(name,true);
 
     for (int i = 0; i < n; i++) {
       delete arg[i].thread;
@@ -5396,7 +5399,7 @@ class Benchmark {
     printf("Writerandom ALL DONE\n");
     thread->stats.Stop();
     thread->stats.AddBytes(bytes);
-    thread->stats.Report(Slice("before compaction   :"));
+    thread->stats.Report(Slice("before compaction"),false);
     printf("WAIT FOR COMPACTION\n");
 
     std::vector<double> compaction_score ;
