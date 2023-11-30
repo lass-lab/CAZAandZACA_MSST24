@@ -2381,10 +2381,12 @@ class Stats {
     double throughput_after_compaction = (double)done_/elapsed_after_compaction;
 
     fprintf(stdout,
-            "%-12s : %11.3f micros/op %ld ops/sec %.3f(%.3f) seconds %" PRIu64
+            "%-12s : %11.3f micros/op %ld(%ld) ops/sec %.3f(%.3f) seconds %" PRIu64
             " operations;%s%s (%s)\n",
-            name.ToString().c_str(), seconds_ * 1e6 / done_, (long)throughput,
-            elapsed,elapsed_after_compaction, done_, (extra.empty() ? "" : " "), extra.c_str(),extra_2.c_str());
+            name.ToString().c_str(), seconds_ * 1e6 / done_, 
+            (long)throughput, (long)throughput_after_compaction,
+            elapsed,elapsed_after_compaction, 
+            done_, (extra.empty() ? "" : " "), extra.c_str(),extra_2.c_str());
     if (FLAGS_histogram) {
       for (auto it = hist_.begin(); it != hist_.end(); ++it) {
         fprintf(stdout, "Microseconds per %s:\n%s\n",
