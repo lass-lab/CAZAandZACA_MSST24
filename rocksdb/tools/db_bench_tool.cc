@@ -5395,6 +5395,7 @@ class Benchmark {
     }
     printf("Writerandom ALL DONE\n");
     thread->stats.Stop();
+    thread->stats.Report(Slice("fillrandom   :"));
     printf("WAIT FOR COMPACTION\n");
 
     std::vector<double> compaction_score ;
@@ -5407,7 +5408,7 @@ class Benchmark {
       compaction_score = db->LevelsCompactionScore();
       for(double score : compaction_score){
         // printf("%lf\n",score);
-        if(score>=1){
+        if(score>=1.0){
           during_compaction=true;
           // break;
         }
