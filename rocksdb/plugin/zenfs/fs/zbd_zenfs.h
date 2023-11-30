@@ -548,7 +548,7 @@ class ZonedBlockDevice {
       for(int n : num_files_levels_){
         printf("%d\t",n);
       }
-      printf("|");
+      printf("|\t");
       for(double s : compaction_scores_){
         printf("%lf\t",s);
       }
