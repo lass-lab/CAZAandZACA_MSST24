@@ -3702,8 +3702,8 @@ uint64_t VersionStorageInfo::MaxNextLevelOverlappingBytes() {
 uint64_t VersionStorageInfo::MaxBytesForLevel(int level) const {
   // Note: the result for level zero is not really used since we set
   // the level-0 compaction threshold based on number of files.
-  for(int i = 0; i<level_max_bytes_.size();i++){
-    printf("%d : %lu\n",level_max_bytes_[i]>>20);
+  for(size_t i = 0; i<level_max_bytes_.size();i++){
+    printf("%lu : %lu\n",i,level_max_bytes_[i]>>20);
   }
 
   assert(level >= 0);
