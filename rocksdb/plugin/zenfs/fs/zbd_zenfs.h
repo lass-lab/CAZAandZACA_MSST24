@@ -558,7 +558,7 @@ class ZonedBlockDevice {
       }
       printf("|size\t");
       for(uint64_t s : levels_size_){
-        printf("%lu\t",s);
+        printf("%lu\t",(s>>20));
       }
       printf("\n");
     }
