@@ -5401,7 +5401,7 @@ class Benchmark {
     for(double score : compaction_score){
       printf("%lf\n",score);
     }
-    thread->stats.StopAfterCompaction()
+    thread->stats.StopAfterCompaction();
     if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
       fprintf(stdout,
               "Number of unique keys inserted: %" PRIu64
