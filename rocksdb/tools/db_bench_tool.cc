@@ -5395,7 +5395,7 @@ class Benchmark {
     }
     printf("Writerandom ALL DONE\n");
     thread->stats.Stop();
-    thread->stats.Report(Slice("fillrandom   :"));
+    thread->stats.Report(Slice("hihi   :"));
     printf("WAIT FOR COMPACTION\n");
 
     std::vector<double> compaction_score ;
