@@ -2935,6 +2935,15 @@ std::vector<int> DBImpl::NumLevelsFiles(void) {
   }
   return ret;
 }
+std::vector<double> DBImpl::LevelsCompactionScore(void){
+  // std::vector<double> ret;
+  // auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+
+  // for(int i = 0; i< 6;i++){
+  //   ret.push_back(vstorage->NumLevelFiles(i));
+  // }
+  return versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info()->GetCompactionScores();
+}
 
 const Comparator* DBImpl::GetDefaultICMP(void){
   return versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info()->InternalComparator();
@@ -4343,7 +4352,7 @@ void DB::SameLevelFileList(int , std::vector<uint64_t>& ){
 }
 
 std::vector<int> DB::NumLevelsFiles(void) { return std::vector<int>(0); }
-
+std::vector<double> DB::LevelsCompactionScore(void) { return std::vector<double>(0); }
 const Comparator* DB::GetDefaultICMP(void) { return nullptr;}
 
 
