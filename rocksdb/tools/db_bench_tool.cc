@@ -2364,7 +2364,7 @@ class Stats {
     std::string extra;
     std::string extra_2;
     double elapsed = (finish_ - start_) * 1e-6;
-
+    StopAfterCompaction();
     double elapsed_after_compaction = (finish_after_compaction_ - start_) * 1e-6;
     if (bytes_ > 0) {
       // Rate is computed on actual elapsed time, not the sum of per-thread
