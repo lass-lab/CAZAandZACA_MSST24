@@ -5352,6 +5352,46 @@ class Benchmark {
       }
     }
     printf("Writerandom ALL DONE\n");
+    printf("WAIT FOR COMPACTION\n");
+    std::vector<double> compaction_score ;
+    bool during_compaction = false;
+    DB* db = db_.db;
+    do
+    {
+      during_compaction=false;
+      sleep(1);
+      compaction_score = db->LevelsCompactionScore();
+      for(double s : compaction_score){
+        if(s>0.99){
+          during_compaction=true;
+          break;
+        }
+      }
+
+    } while (during_compaction);
+
+    std::vector<double> compaction_score = db->LevelsCompactionScore();
+    for(double s : compaction_score){
+      printf("%lf\n",s),
+    }
+    // while(during_compaction){
+    //   during_compaction=false;
+    //   DB* db = db_.db;
+    //   std::vector<double> compaction_score = db->LevelsCompactionScore();
+    //   for(double s : compaction_score){
+    //     if(s>0.99){
+    //       during_compaction=true;
+    //       break;
+    //     }
+    //   }
+    //   if(during_compaction){
+    //     continue;
+    //   }
+
+    //   break;
+    // }
+
+
     if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
       fprintf(stdout,
               "Number of unique keys inserted: %" PRIu64
