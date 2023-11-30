@@ -2163,6 +2163,8 @@ class Stats {
     seconds_ += other.seconds_;
     if (other.start_ < start_) start_ = other.start_;
     if (other.finish_ > finish_) finish_ = other.finish_;
+    
+    if(other.finish_after_compaction_ < finish_after_compaction_) finish_ =other.finish_after_compaction_;
 
     // Just keep the messages from one thread.
     if (message_.empty()) message_ = other.message_;
