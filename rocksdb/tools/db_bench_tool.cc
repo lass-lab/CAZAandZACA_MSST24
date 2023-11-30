@@ -2382,7 +2382,7 @@ class Stats {
     }
     AppendWithSpace(&extra, message_);
     double throughput = (double)done_/elapsed;
-    double throughput_after_compaction = (double)done_/elapsed_after_compaction;
+    // double throughput_after_compaction = (double)done_/elapsed_after_compaction;
 
 
     fprintf(stdout,
