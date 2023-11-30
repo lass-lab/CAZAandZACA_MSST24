@@ -2171,13 +2171,13 @@ class Stats {
   }
 
   void Stop() {
-    printf("Stop!!\n");
+    // printf("Stop!!\n");
     finish_ = clock_->NowMicros();
     seconds_ = (finish_ - start_) * 1e-6;
   }
 
   void StopAfterCompaction(){
-    printf("StopAfterCompaction\n");
+    // printf("StopAfterCompaction\n");
     finish_after_compaction_ = clock_->NowMicros();
     seconds_after_compaction_ = (finish_after_compaction_ - start_) * 1e-6;
   }
