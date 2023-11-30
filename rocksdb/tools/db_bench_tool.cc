@@ -5362,9 +5362,10 @@ class Benchmark {
       sleep(1);
       compaction_score = db->LevelsCompactionScore();
       for(double score : compaction_score){
+        printf("%lf\n",score);
         if(score>0.99){
           during_compaction=true;
-          break;
+          // break;
         }
       }
 
