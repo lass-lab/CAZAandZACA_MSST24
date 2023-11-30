@@ -2392,13 +2392,13 @@ class Stats {
             seconds_ * 1e6 / done_, 
             (long)throughput,
             elapsed, done_, (extra.empty() ? "" : " "), extra.c_str());
-    fprintf(stdout,
-            "%-12s : %11.3f micros/op %ld ops/sec %.3f seconds %" PRIu64
-            " operations;%s%s\n",
-            name.ToString().c_str(), 
-            throughput_after_compaction * 1e6 / done_, 
-            (long)throughput_after_compaction,
-            elapsed_after_compaction, done_, (extra_2.empty() ? "" : " "), extra_2.c_str());
+    // fprintf(stdout,
+    //         "%-12s : %11.3f micros/op %ld ops/sec %.3f seconds %" PRIu64
+    //         " operations;%s%s\n",
+    //         name.ToString().c_str(), 
+    //         throughput_after_compaction * 1e6 / done_, 
+    //         (long)throughput_after_compaction,
+    //         elapsed_after_compaction, done_, (extra_2.empty() ? "" : " "), extra_2.c_str());
     // fprintf(stdout,
     //         "%-12s : %11.3f micros/op %ld(%ld) ops/sec %.3f(%.3f) seconds %" PRIu64
     //         " operations;%s%s (%s)\n",
@@ -5395,7 +5395,8 @@ class Benchmark {
     }
     printf("Writerandom ALL DONE\n");
     thread->stats.Stop();
-    thread->stats.Report(Slice("hihi   :"));
+    thread->stats.AddBytes(bytes);
+    thread->stats.Report(Slice("before compaction   :"));
     printf("WAIT FOR COMPACTION\n");
 
     std::vector<double> compaction_score ;
@@ -5420,7 +5421,7 @@ class Benchmark {
     for(double score : compaction_score){
       printf("%lf\n",score);
     }
-    thread->stats.StopAfterCompaction();
+    // thread->stats.StopAfterCompaction();
     if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
       fprintf(stdout,
               "Number of unique keys inserted: %" PRIu64
@@ -5432,7 +5433,7 @@ class Benchmark {
               ".\nNumber of 'disposable entry delete': %" PRIu64 "\n",
               num_written, num_selective_deletes);
     }
-    thread->stats.AddBytes(bytes);
+    // thread->stats.AddBytes(bytes);
   }
 
   Status DoDeterministicCompact(ThreadState* thread,
