@@ -2100,7 +2100,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     }
 
     if(allocation_scheme_!=LIZA){
-      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,std::vector<uint64_t>(0),min_capacity);
+      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,min_capacity);
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
         // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
