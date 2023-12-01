@@ -167,7 +167,8 @@ Status BuildTable(
       std::string sst(".sst");
       if(std::equal(sst.rbegin(),sst.rend(),fname.rbegin())){
         file->level_=tboptions.level_at_creation;
-        builder->SetFileNumber(meta->fd.GetNumber());
+        // builder->SetFileNumber(meta->fd.GetNumber());
+        file->fno_=meta->fd.GetNumber();
         file->input_fno_.clear();
       }
       file->SetWriteLifeTimeHint(write_hint);
@@ -178,7 +179,6 @@ Status BuildTable(
           tmp_set.Contains(FileType::kTableFile), false));
 
       builder = NewTableBuilder(tboptions, file_writer.get());
-
     }
 
     MergeHelper merge(

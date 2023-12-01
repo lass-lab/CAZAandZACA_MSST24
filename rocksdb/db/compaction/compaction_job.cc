@@ -2313,14 +2313,16 @@ Status CompactionJob::OpenCompactionOutputFile(
 
   
   writable_file->input_fno_.clear();
-  // if(compact_->compaction->immutable_options()->input_aware_scheme==1){
-  //   const std::vector<CompactionInputFiles>* inputs = compact_->compaction->inputs();
-  //   for(auto ci :(*inputs) ){
-  //     for(auto f : ci.files){
-  //       writable_file->input_fno_.push_back(f->fd.GetNumber());
-  //     }
-  //   }
-  // }
+  if(compact_->compaction->immutable_options()->input_aware_scheme==1){
+    const std::vector<CompactionInputFiles>* inputs = compact_->compaction->inputs();
+    for(auto ci :(*inputs) ){
+      for(auto f : ci.files){
+        writable_file->input_fno_.push_back(f->fd.GetNumber());
+      }
+    }
+  }
+
+
   // }
   // writable_file->input_fno_=sub_compact->compaction->inputs();
 
