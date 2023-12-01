@@ -764,7 +764,8 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
       compaction_scheme(options.compaction_scheme),
       max_compaction_kick(options.max_compaction_kick),
       zc_kick(options.zc),
-      enable_intraL0_compaction(options.enable_intraL0_compaction) {
+      enable_intraL0_compaction(options.enable_intraL0_compaction),
+      max_compaction_start_level(options.max_compaction_start_level) {
   fs = env->GetFileSystem();
   clock = env->GetSystemClock().get();
   logger = info_log.get();

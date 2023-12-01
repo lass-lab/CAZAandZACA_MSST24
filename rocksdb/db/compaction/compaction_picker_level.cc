@@ -495,7 +495,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   max_file_candiates.clear();
   if(ioptions_.compaction_scheme==BASELINE_COMPACTION
     || zns_free_percent>=ioptions_.max_compaction_kick 
-    || output_level_ <=2
+    || start_level_ <ioptions_.max_compaction_start_level
     ){
     goto baseline;
   }

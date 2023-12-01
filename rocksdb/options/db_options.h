@@ -110,9 +110,11 @@ struct ImmutableDBOptions {
 
   uint64_t compaction_scheme;
   uint64_t max_compaction_kick;
+
   uint64_t zc_kick;
   bool enable_intraL0_compaction;
 
+  int max_compaction_start_level;
   bool IsWalDirSameAsDBPath() const;
   bool IsWalDirSameAsDBPath(const std::string& path) const;
   const std::string& GetWalDir() const;
