@@ -1395,9 +1395,11 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
 }
 
 void ZonedWritableFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) {
-  zoneFile_->fno_=fno_;
-  zoneFile_->input_fno_=input_fno_;
-  zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+  if(zoneFile->is_sst_){
+    zoneFile_->fno_=fno_;
+    zoneFile_->input_fno_=input_fno_;
+    zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+  }
   zoneFile_->SetWriteLifeTimeHint(hint,level_);
 }
 
