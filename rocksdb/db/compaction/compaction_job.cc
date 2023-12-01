@@ -2002,7 +2002,6 @@ Status CompactionJob::FinishCompactionOutputFile(
     const std::vector<CompactionInputFiles>* inputs = compact_->compaction->inputs();
     for(auto ci :(*inputs) ){
       for(auto f : ci.files){
-        // printf("")
         sub_compact->outfile->writable_file()->input_fno_.push_back(f->fd.GetNumber());
       }
     }

@@ -117,6 +117,7 @@ class ZoneFile {
  public:
   bool is_sst_ = false;
   uint64_t fno_;
+  std::vector<uint64_t> input_fno_;
   Slice smallest_;
   Slice largest_;
   int level_;

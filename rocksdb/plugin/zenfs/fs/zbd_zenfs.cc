@@ -1563,7 +1563,7 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
 
 IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& largest,
                                                         int level,Env::WriteLifeTimeHint file_lifetime, 
-                                                        Zone **zone_out, uint64_t min_capacity){
+                                                        Zone **zone_out, std::vector<uint64_t>& input_fno,uint64_t min_capacity){
   
   /////////////////////////////// CAZA
   if(allocation_scheme_==LIZA){
@@ -1582,6 +1582,9 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   std::vector<uint64_t> fno_list;
   uint64_t max_score=0;
   uint64_t max_invalid_data=0;
+  for(uint64_t fno : input_fno){
+    DeleteSSTFileforZBDNoLock(fno);
+  }
 
 
   // zone valid overlapping capacity
@@ -1597,6 +1600,10 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
 
     for (auto fno : fno_list){
+      // auto it=std::find(input_fno.begin(),input_fno.end(),fno);
+      // if(it!=input_fno.end()){
+      //   continue;
+      // }
       ZoneFile* zFile= GetSSTZoneFileInZBDNoLock(fno);
       if(zFile==nullptr){
         continue;
@@ -2095,7 +2102,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     }
 
     if(allocation_scheme_!=LIZA){
-      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,min_capacity);
+      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,std::vector<uint64_t>(0),min_capacity);
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
         // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
@@ -2146,7 +2153,8 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
 }
 
 IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& largest, int level,
-                                          Env::WriteLifeTimeHint file_lifetime, IOType io_type, Zone **out_zone,uint64_t min_capacity) {
+                                          Env::WriteLifeTimeHint file_lifetime, IOType io_type, 
+                                          Zone **out_zone,std::vector<uint64_t>& input_fno_,uint64_t min_capacity) {
   
 
   // RuntimeReset();
@@ -2184,7 +2192,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
   if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
-    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,&allocated_zone,min_capacity);
+    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,&allocated_zone,input_fno_,min_capacity);
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
