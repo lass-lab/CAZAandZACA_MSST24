@@ -55,9 +55,9 @@ HEAVY=$G72
 # 36gb 37748736
 ## Tuning Point
 T=100
-T_COMPACTION=3
-T_SUBCOMPACTION=4
-T_FLUSH=1
+T_COMPACTION=4
+T_SUBCOMPACTION=8
+T_FLUSH=8
 ZC_KICKS=20
 UNTIL=20
 
@@ -72,12 +72,18 @@ CAZA=1
 
 BASELINE_COMPACTION=0
 MAX_INVALIDATION_COMPACTION=1
+
 MAX_COMPACTION_KICK=100
+MAX_COMPACTION_START_LEVEL=1
+
+INPUT_AWARE_SCHEME=0
+
+
 while :
 do
     FAILED=0
     # for ALLOCATION_ALGORITHM in $RUNTIME_ZONE_RESET_ONLY $PARTIAL_RESET_WITH_ZONE_RESET
-    for ALLOCATION_ALGORITHM in $CAZA
+    for ALLOCATION_ALGORITHM in $CAZA $LIZA
     do
         for i in 1 2 3 4 5
         do
@@ -140,9 +146,10 @@ do
                         sudo ${ROCKSDB_PATH}/db_bench \
                         -num=${SIZE} -benchmarks="fillrandom,stats" --fs_uri=zenfs://dev:nvme0n1 -statistics  -value_size=1024 \
                           -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} -subcompactions=${T_SUBCOMPACTION}  \
-                          -histogram -seed=1699101730035899  \
+                          -histogram -seed=1699101730035899  -wait_for_compactions=false -enable_intraL0_compaction=false \
                         -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
-                        -allocation_scheme=${ALLOCATION_ALGORITHM} -compaction_scheme=${COMPACTION_ALGORITHM} \
+                        -allocation_scheme=${ALLOCATION_ALGORITHM}  -compaction_scheme=${COMPACTION_ALGORITHM} \
+                         -max_compaction_start_level=${MAX_COMPACTION_START_LEVEL} -input_aware_scheme=${INPUT_AWARE_SCHEME}  \
                         -max_compaction_kick=${MAX_COMPACTION_KICK} > ${RESULT_DIR_PATH}/tmp
                         EC=$?
                         if grep -q "${SIZE} operations;" ${RESULT_DIR_PATH}/tmp; then
