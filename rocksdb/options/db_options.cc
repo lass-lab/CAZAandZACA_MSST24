@@ -762,7 +762,7 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
       compaction_service(options.compaction_service),
       enforce_single_del_contracts(options.enforce_single_del_contracts),
       compaction_scheme(options.compaction_scheme),
-      input_aware_scheme,(options.input_aware_scheme)
+      input_aware_scheme(options.input_aware_scheme),
       max_compaction_kick(options.max_compaction_kick),
       zc_kick(options.zc),
       enable_intraL0_compaction(options.enable_intraL0_compaction),
