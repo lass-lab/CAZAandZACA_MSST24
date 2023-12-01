@@ -1999,8 +1999,7 @@ Status CompactionJob::FinishCompactionOutputFile(
     StopWatch sw(db_options_.clock, stats_, COMPACTION_OUTFILE_SYNC_MICROS);
     // compact_->compaction->inputs();
     sub_compact->outfile->writable_file()->input_fno_.clear();
-    std::vector<CompactionInputFiles>* inputs = compact_->compaction->inputs();
-    
+    const std::vector<CompactionInputFiles>* inputs = compact_->compaction->inputs();
     for(auto ci :(*inputs) ){
       for(auto f : ci){
         // printf("")
