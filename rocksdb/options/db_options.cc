@@ -763,7 +763,8 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
       enforce_single_del_contracts(options.enforce_single_del_contracts),
       compaction_scheme(options.compaction_scheme),
       max_compaction_kick(options.max_compaction_kick),
-      zc_kick(options.zc) {
+      zc_kick(options.zc),
+      enable_intraL0_compaction(options.enable_intraL0_compaction) {
   fs = env->GetFileSystem();
   clock = env->GetSystemClock().get();
   logger = info_log.get();

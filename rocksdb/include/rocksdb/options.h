@@ -679,6 +679,7 @@ struct DBOptions {
 
   uint64_t zc;
   uint64_t until;
+  bool enable_intraL0_compaction;
   // The periodicity when obsolete files get deleted. The default
   // value is 6 hours. The files that get out of scope by compaction
   // process will still get automatically delete on every compaction,

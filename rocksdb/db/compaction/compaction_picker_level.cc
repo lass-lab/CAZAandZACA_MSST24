@@ -750,7 +750,10 @@ bool LevelCompactionBuilder::PickIntraL0Compaction() {
     // resort to L0->L0 compaction yet.
     return false;
   }
-  return false;
+  // return false;
+  if(!ioptions_.enable_intraL0_compaction){
+    return false;
+  }
   return FindIntraL0Compaction(level_files, kMinFilesForIntraL0Compaction,
                                std::numeric_limits<uint64_t>::max(),
                                mutable_cf_options_.max_compaction_bytes,

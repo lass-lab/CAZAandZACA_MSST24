@@ -1684,6 +1684,8 @@ DEFINE_uint64(max_compaction_kick,25,"0<Tuninig point<100");
 
 DEFINE_bool(wait_for_compactions,false,"true or false");
 
+DEFINE_bool(enable_intraL0_compaction,true,"true or false");
+
 
 namespace ROCKSDB_NAMESPACE {
 namespace {
@@ -4112,6 +4114,7 @@ class Benchmark {
     options.compaction_scheme=FLAGS_compaction_scheme;
     options.max_compaction_kick = FLAGS_max_compaction_kick;
     options.partial_reset_scheme=FLAGS_partial_reset_scheme;
+    options.enable_intraL0_compaction = FLAGS_enable_intraL0_compaction;
     options.zc=FLAGS_zc;
     options.until=FLAGS_until;
     options.tuning_point=FLAGS_tuning_point;
