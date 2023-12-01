@@ -1563,7 +1563,7 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
 
 IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& largest,
                                                         int level,Env::WriteLifeTimeHint file_lifetime, 
-                                                        Zone **zone_out, std::vector<uint64_t>& input_fno,uint64_t min_capacity){
+                                                        Zone **zone_out,uint64_t min_capacity){
   
   /////////////////////////////// CAZA
   if(allocation_scheme_==LIZA){
@@ -1582,9 +1582,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   std::vector<uint64_t> fno_list;
   uint64_t max_score=0;
   uint64_t max_invalid_data=0;
-  for(uint64_t fno : input_fno){
-    DeleteSSTFileforZBDNoLock(fno);
-  }
+
 
 
   // zone valid overlapping capacity
@@ -2172,6 +2170,10 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
       tag = ZENFS_NON_WAL_IO_ALLOC_LATENCY;
     }
   }
+  for(uint64_t fno : input_fno){
+    DeleteSSTFileforZBDNoLock(fno);
+  }
+  
 
   ZenFSMetricsLatencyGuard guard(metrics_, tag, Env::Default());
   metrics_->ReportQPS(ZENFS_IO_ALLOC_QPS, 1);
@@ -2192,7 +2194,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
   if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
-    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,&allocated_zone,input_fno_,min_capacity);
+    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,&allocated_zone,min_capacity);
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
