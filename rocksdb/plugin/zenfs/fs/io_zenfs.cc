@@ -593,7 +593,7 @@ void ZoneFile::PushExtent() {
 
 IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
   Zone* zone;
-  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone,min_capacity);
+  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno ,&zone,min_capacity);
   // assert(IOStatus::NoSpace("Not enough capacity for append")==IOStatus::NosSpace());
   
   if(zone==nullptr){
@@ -610,9 +610,10 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
       // zenfs_->ZCLock();
 
       // sleep(1);
-      usleep(1000 * 1000);
-      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone,min_capacity);
+     
+      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,std::vector<uint64_t>(0),&zone,min_capacity);
       // zenfs_->ZCUnLock();
+      usleep(1000 * 1000);
       if(zone!=nullptr){
         break;
       }
@@ -822,9 +823,9 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     return IOStatus::OK();
   }
   // zoneFile_->SetSstEnded();
-  zoneFile_->fno_=fno_;
+  // zoneFile_->fno_=fno_;
   // zoneFile_->input_fno_=input_fno_;
-  zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+  // zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
   for(uint64_t fno : input_fno_){
     zoneFile_->GetZbd()->DeleteSSTFileforZBDNoLock(fno);
   }
@@ -1394,6 +1395,9 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
 }
 
 void ZonedWritableFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) {
+  zoneFile_->fno_=fno_;
+  zoneFile_->input_fno_=input_fno_;
+  zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
   zoneFile_->SetWriteLifeTimeHint(hint,level_);
 }
 

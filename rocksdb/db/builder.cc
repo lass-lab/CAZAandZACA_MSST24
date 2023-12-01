@@ -164,6 +164,10 @@ Status BuildTable(
       FileTypeSet tmp_set = ioptions.checksum_handoff_file_types;
       file->SetIOPriority(io_priority);
       file->level_=tboptions.level_at_creation;
+      if(std::equal(sst.rbegin(),sst.rend(),fname.rbegin())){
+        // builder->rep_->file->writable_file()->fno_=meta->fd.GetNumber();      
+        builder->SetFileNumber(meta->fd.GetNumber());
+      }
       file->SetWriteLifeTimeHint(write_hint);
       file_writer.reset(new WritableFileWriter(
           std::move(file), fname, file_options, ioptions.clock, io_tracer,
@@ -173,10 +177,7 @@ Status BuildTable(
 
       builder = NewTableBuilder(tboptions, file_writer.get());
       std::string sst(".sst");
-      if(std::equal(sst.rbegin(),sst.rend(),fname.rbegin())){
-        // builder->rep_->file->writable_file()->fno_=meta->fd.GetNumber();      
-        builder->SetFileNumber(meta->fd.GetNumber());
-      }
+
     }
 
     MergeHelper merge(

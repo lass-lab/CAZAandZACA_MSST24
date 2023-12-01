@@ -1998,13 +1998,6 @@ Status CompactionJob::FinishCompactionOutputFile(
   if (s.ok()) {
     StopWatch sw(db_options_.clock, stats_, COMPACTION_OUTFILE_SYNC_MICROS);
     // compact_->compaction->inputs();
-    sub_compact->outfile->writable_file()->input_fno_.clear();
-    const std::vector<CompactionInputFiles>* inputs = compact_->compaction->inputs();
-    for(auto ci :(*inputs) ){
-      for(auto f : ci.files){
-        sub_compact->outfile->writable_file()->input_fno_.push_back(f->fd.GetNumber());
-      }
-    }
 
     io_s = sub_compact->outfile->Sync(db_options_.use_fsync);
   }
@@ -2317,6 +2310,20 @@ Status CompactionJob::OpenCompactionOutputFile(
   }
   writable_file->fno_=sub_compact->current_output()->meta.fd.GetNumber();
   writable_file->level_=sub_compact->compaction->output_level();
+
+  
+  writable_file->input_fno_.clear();
+  if(compact_->compaction->immutable_options()->input_aware_scheme==1){{
+    const std::vector<CompactionInputFiles>* inputs = compact_->compaction->inputs();
+    for(auto ci :(*inputs) ){
+      for(auto f : ci.files){
+        writable_file->input_fno_.push_back(f->fd.GetNumber());
+      }
+    }
+  }
+  // }
+  // writable_file->input_fno_=sub_compact->compaction->inputs();
+
   writable_file->SetIOPriority(GetRateLimiterPriority());
   writable_file->SetWriteLifeTimeHint(write_hint_);
   FileTypeSet tmp_set = db_options_.checksum_handoff_file_types;

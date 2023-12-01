@@ -109,6 +109,9 @@ struct ImmutableDBOptions {
   bool enforce_single_del_contracts;
 
   uint64_t compaction_scheme;
+
+  uint64_t input_aware_scheme;
+
   uint64_t max_compaction_kick;
 
   uint64_t zc_kick;

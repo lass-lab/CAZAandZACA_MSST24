@@ -1688,6 +1688,8 @@ DEFINE_bool(enable_intraL0_compaction,true,"true or false");
 
 DEFINE_int32(max_compaction_start_level,2,"start level");
 
+DEFINE_uint64(input_aware_scheme,0,"input_aware_scheme");
+
 namespace ROCKSDB_NAMESPACE {
 namespace {
 static Status CreateMemTableRepFactory(
@@ -4117,6 +4119,7 @@ class Benchmark {
     options.partial_reset_scheme=FLAGS_partial_reset_scheme;
     options.enable_intraL0_compaction = FLAGS_enable_intraL0_compaction;
     options.max_compaction_start_level = FLAGS_max_compaction_start_level;
+    options.input_aware_scheme=FLAGS_input_aware_scheme;
     options.zc=FLAGS_zc;
     options.until=FLAGS_until;
     options.tuning_point=FLAGS_tuning_point;
