@@ -1449,7 +1449,7 @@ IOStatus ZonedBlockDevice::GetAnyLargestRemainingZone(Zone** zone_out,bool force
 // }
 
 IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
-    Env::WriteLifeTimeHint file_lifetime, unsigned int *best_diff_out,std::vector<uint64_t>& input_fno,
+    Env::WriteLifeTimeHint file_lifetime, unsigned int *best_diff_out,std::vector<uint64_t> input_fno,
     Zone **zone_out, uint64_t min_capacity) {
   unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
   Zone *allocated_zone = nullptr;
@@ -2113,7 +2113,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   (void)(largest);
   (void)(level);
   
-  std::vector<uint64_t> no_input_fno_(0);
+  //  no_input_fno_(0);
   while(CalculateCapacityRemain()>min_capacity){
     if((*run_gc_worker_)==false){
       migrating_=false;
@@ -2129,7 +2129,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       }
     }
 
-    s=GetBestOpenZoneMatch(file_lifetime, &best_diff,no_input_fno_ ,out_zone, min_capacity);
+    s=GetBestOpenZoneMatch(file_lifetime, &best_diff,std::vector<uint64_t>() ,out_zone, min_capacity);
     
 
 

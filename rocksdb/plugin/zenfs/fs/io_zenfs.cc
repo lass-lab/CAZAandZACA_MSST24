@@ -595,7 +595,8 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
   Zone* zone;
   IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_ ,&zone,min_capacity);
   // assert(IOStatus::NoSpace("Not enough capacity for append")==IOStatus::NosSpace());
-  std::vector<uint64_t> no_input_fno_(0);
+  //  no_input_fno_(0);
+  input_fno_.clear();
   if(zone==nullptr){
     // clock_t start=clock();
     int start=zenfs_->GetMountTime();
@@ -611,7 +612,7 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
 
       // sleep(1);
      
-      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,no_input_fno_,&zone,min_capacity);
+      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_,&zone,min_capacity);
       // zenfs_->ZCUnLock();
       usleep(1000 * 1000);
       if(zone!=nullptr){
