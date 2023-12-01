@@ -164,6 +164,7 @@ Status BuildTable(
       FileTypeSet tmp_set = ioptions.checksum_handoff_file_types;
       file->SetIOPriority(io_priority);
       file->level_=tboptions.level_at_creation;
+      std::string sst(".sst");
       if(std::equal(sst.rbegin(),sst.rend(),fname.rbegin())){
         // builder->rep_->file->writable_file()->fno_=meta->fd.GetNumber();      
         builder->SetFileNumber(meta->fd.GetNumber());
@@ -176,7 +177,6 @@ Status BuildTable(
           tmp_set.Contains(FileType::kTableFile), false));
 
       builder = NewTableBuilder(tboptions, file_writer.get());
-      std::string sst(".sst");
 
     }
 
