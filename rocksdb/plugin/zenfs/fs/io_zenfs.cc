@@ -593,7 +593,7 @@ void ZoneFile::PushExtent() {
 
 IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
   Zone* zone;
-  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno ,&zone,min_capacity);
+  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_ ,&zone,min_capacity);
   // assert(IOStatus::NoSpace("Not enough capacity for append")==IOStatus::NosSpace());
   
   if(zone==nullptr){
