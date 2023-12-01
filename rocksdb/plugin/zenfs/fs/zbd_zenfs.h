@@ -684,7 +684,7 @@ class ZonedBlockDevice {
 
   IOStatus AllocateIOZone(bool is_sst,Slice& smallest, Slice& largest ,int level,
                             Env::WriteLifeTimeHint file_lifetime, IOType io_type,
-                          Zone **out_zone ,std::vector<uint64_t>& input_fno,uint64_t min_capacity);
+                          Zone **out_zone ,uint64_t min_capacity);
   
   void SetZoneAllocationFailed() { zone_allocation_state_=false; }
   bool IsZoneAllocationFailed(){ return zone_allocation_state_==false; }

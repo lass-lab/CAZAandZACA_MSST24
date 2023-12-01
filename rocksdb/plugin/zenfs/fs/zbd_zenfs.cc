@@ -2154,7 +2154,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
 
 IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& largest, int level,
                                           Env::WriteLifeTimeHint file_lifetime, IOType io_type, 
-                                          Zone **out_zone,std::vector<uint64_t>& input_fno,uint64_t min_capacity) {
+                                          Zone **out_zone,uint64_t min_capacity) {
   
 
   // RuntimeReset();
@@ -2172,9 +2172,9 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
       tag = ZENFS_NON_WAL_IO_ALLOC_LATENCY;
     }
   }
-  for(uint64_t fno : input_fno){
-    DeleteSSTFileforZBDNoLock(fno);
-  }
+  // for(uint64_t fno : input_fno){
+  //   DeleteSSTFileforZBDNoLock(fno);
+  // }
   
 
   ZenFSMetricsLatencyGuard guard(metrics_, tag, Env::Default());

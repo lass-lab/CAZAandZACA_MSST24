@@ -593,7 +593,7 @@ void ZoneFile::PushExtent() {
 
 IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
   Zone* zone;
-  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone,input_fno_,min_capacity);
+  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone,min_capacity);
   // assert(IOStatus::NoSpace("Not enough capacity for append")==IOStatus::NosSpace());
   
   if(zone==nullptr){
@@ -611,7 +611,7 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
 
       // sleep(1);
       usleep(1000 * 1000);
-      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone,input_fno_,min_capacity);
+      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_, &zone,min_capacity);
       // zenfs_->ZCUnLock();
       if(zone!=nullptr){
         break;
@@ -823,8 +823,12 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   }
   // zoneFile_->SetSstEnded();
   zoneFile_->fno_=fno_;
-  zoneFile_->input_fno_=input_fno_;
+  // zoneFile_->input_fno_=input_fno_;
   zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+  for(uint64_t fno : input_fno_){
+    zoneFile_->GetZbd()->DeleteSSTFileforZBDNoLock(fno);
+  }
+
   std::vector<SSTBuffer*>* sst_buffers=zoneFile_->GetSSTBuffers();
 
   for(auto it : *sst_buffers){
@@ -850,7 +854,6 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     }
     delete it;
   }
-  zoneFile_->input_fno_.clear();
   input_fno_.clear();
   return s;
 }
