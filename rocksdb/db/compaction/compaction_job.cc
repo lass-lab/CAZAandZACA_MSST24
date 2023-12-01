@@ -2000,10 +2000,10 @@ Status CompactionJob::FinishCompactionOutputFile(
     // compact_->compaction->inputs();
     sub_compact->outfile->writable_file()->input_fno_.clear();
     for( auto ci : compact_->compaction->inputs()){
-      for(auto f : ci){
-        // printf("")
-        sub_compact->outfile->writable_file()->input_fno_.push_back(f->fd.GetNumber());
-      }
+      // for(auto f : ci){
+      //   // printf("")
+      //   sub_compact->outfile->writable_file()->input_fno_.push_back(f->fd.GetNumber());
+      // }
     }
 
     io_s = sub_compact->outfile->Sync(db_options_.use_fsync);
