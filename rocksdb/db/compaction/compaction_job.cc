@@ -2313,7 +2313,7 @@ Status CompactionJob::OpenCompactionOutputFile(
 
   
   writable_file->input_fno_.clear();
-  if(compact_->compaction->immutable_options()->input_aware_scheme==1){{
+  if(compact_->compaction->immutable_options()->input_aware_scheme==1){
     const std::vector<CompactionInputFiles>* inputs = compact_->compaction->inputs();
     for(auto ci :(*inputs) ){
       for(auto f : ci.files){
