@@ -1896,6 +1896,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
           if(l_idx<r_idx){
             zFile=GetSSTZoneFileInZBDNoLock(fno_list[l_idx]);
             if(zFile==nullptr){
+              l_idx--;
               continue;
             }
             s=GetNearestZoneFromZoneFile(zFile,&allocated_zone,min_capacity);
@@ -1911,6 +1912,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
           if(r_idx<fno_list_sz){
             zFile=GetSSTZoneFileInZBDNoLock(fno_list[r_idx]);
             if(zFile==nullptr){
+              r_idx++;
               continue;
             }
             s=GetNearestZoneFromZoneFile(zFile,&allocated_zone,min_capacity);
