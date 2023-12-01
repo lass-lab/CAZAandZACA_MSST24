@@ -826,7 +826,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   // zoneFile_->SetSstEnded();
   // zoneFile_->fno_=fno_;
   // zoneFile_->input_fno_=input_fno_;
-  // zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+  zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
   for(uint64_t fno : input_fno_){
     zoneFile_->GetZbd()->DeleteSSTFileforZBDNoLock(fno);
   }
