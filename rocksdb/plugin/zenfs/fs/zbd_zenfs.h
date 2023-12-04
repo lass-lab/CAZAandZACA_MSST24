@@ -931,10 +931,10 @@ class ZonedBlockDevice {
   // std::vector<uint64_t> sst_file_size_else_;
   // std::mutex sst_file_size_else_lock_;
     if(is_last_file){
-      std::lock_guard<std:mutex> lg(sst_file_size_last_lock_);
+      std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
       sst_file_size_last_.emplace_back(output_level,file_size);
     }else{
-      std::lock_guard<std:mutex> lg(sst_file_size_else_lock_);
+      std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
       sst_file_size_else_.emplace_back(output_level,file_size);
     }
   }
