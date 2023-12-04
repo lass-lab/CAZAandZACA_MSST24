@@ -583,8 +583,8 @@ class ZonedBlockDevice {
       }
       printf("|l1l2triggered\t");
       // printf("%lu\t",l1l2_compaction_triggered_);
-      for(auto cstate : _compaction_stats_){
-        printf("%lu\t",(cstate.compaction_triggered_));
+      for(auto trigger : compaction_triggered_){
+        printf("%lu\t",(trigger));
       }
       printf("\n");
 
