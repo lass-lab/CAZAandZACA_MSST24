@@ -537,7 +537,7 @@ class ZonedBlockDevice {
 
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
             uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels, 
-            std::vector<double> compaction_scores, std::vector<uint64_t> levels_size,uint64_T l1l2_compaction_triggered)
+            std::vector<double> compaction_scores, std::vector<uint64_t> levels_size,uint64_t l1l2_compaction_triggered)
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
           , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
