@@ -384,7 +384,7 @@ class Env : public Customizable {
 
   virtual void SetResetScheme(uint32_t,uint32_t,uint64_t,uint64_t,uint64_t,uint64_t) {}
 
-  virtual void StatsCompactionFileSize(bool,int,uint64_t);
+  virtual void StatsCompactionFileSize(bool,int,uint64_t) {}
 
   virtual void StatsAverageCompactionInputSize(int,int,uint64_t,uint64_t,uint64_t) {}
   virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t*){
