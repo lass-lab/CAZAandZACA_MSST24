@@ -1606,9 +1606,11 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
         next_key = &c_iter->key();
       }
       CompactionIterationStats range_del_out_stats;
-      sub_compact->compaction->immutable_options()->fs->
-      printf("FinishCompactionOutputFile in the loop (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
-                                                                    sub_compact->builder->FileSize());
+      
+      sub_compact->compaction->immutable_options()->fs->StatsCompactionFileSize(false,sub_compact->compaction->output_level(),sub_compact->builder->FileSize());
+
+      // printf("FinishCompactionOutputFile in the loop (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
+      //                                                               sub_compact->builder->FileSize());
       status = FinishCompactionOutputFile(input->status(), sub_compact,
                                           &range_del_agg, &range_del_out_stats,
                                           next_key);
@@ -1679,8 +1681,10 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
   // close the output file.
   if (sub_compact->builder != nullptr) {
     CompactionIterationStats range_del_out_stats;
-            printf("FinishCompactionOutputFile (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
-                                                                    sub_compact->builder->FileSize());
+    sub_compact->compaction->immutable_options()->fs->StatsCompactionFileSize(true,sub_compact->compaction->output_level(),sub_compact->builder->FileSize());
+
+            // printf("FinishCompactionOutputFile (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
+            //                                                         sub_compact->builder->FileSize());
     Status s = FinishCompactionOutputFile(status, sub_compact, &range_del_agg,
                                           &range_del_out_stats);
 

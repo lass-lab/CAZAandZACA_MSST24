@@ -479,9 +479,9 @@ class ZonedBlockDevice {
   int max_nr_active_io_zones_;
   int max_nr_open_io_zones_;
 
-  std::vector<uint64_t> sst_file_size_last_;
+  std::vector<std::pair<int,uint64_t>> sst_file_size_last_;
   std::mutex sst_file_size_last_lock_;
-  std::vector<uint64_t> sst_file_size_else_;
+  std::vector<std::pair<int,uint64_t>> sst_file_size_else_;
   std::mutex sst_file_size_else_lock_;
   
 
@@ -925,17 +925,17 @@ class ZonedBlockDevice {
   
   IOStatus ResetAllZonesForForcedNewFileSystem(void);
   
-  void StatsCompactionFileSize(bool is_last_file, uint64_t file_size){
+  void StatsCompactionFileSize(bool is_last_file, int output_level,uint64_t file_size){
   // std::vector<uint64_t> sst_file_size_last_;
   // std::mutex sst_file_size_last_lock_;
   // std::vector<uint64_t> sst_file_size_else_;
   // std::mutex sst_file_size_else_lock_;
     if(last_file){
       std::lock_guard<std:mutex> lg(sst_file_size_last_lock_);
-      sst_file_size_last_.push_back(file_size);
+      sst_file_size_last_.emplace_back(output_level,file_size);
     }else{
       std::lock_guard<std:mutex> lg(sst_file_size_else_lock_);
-      sst_file_size_else_.push_back(file_size);
+      sst_file_size_else_.emplace_back(output_level,file_size);
     }
   }
   void StatsAverageCompactionInputSize(int start_level, int output_level,

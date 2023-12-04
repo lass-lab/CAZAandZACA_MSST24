@@ -793,6 +793,59 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   
   printf("============================================================\n\n");
 
+  // std::vector<uint64_t> sst_file_size_last_;
+  // std::mutex sst_file_size_last_lock_;
+  // std::vector<uint64_t> sst_file_size_else_;
+  // std::mutex sst_file_size_else_lock_;
+  // for()
+  
+  printf("============last sst files================\n");
+  {
+    std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
+    for(auto size : sst_file_size_last_){
+      if(size.first==1){
+        continue;
+      }
+      printf("%lu\t",size.second>>20);
+    }
+  }
+  printf("\n");
+  printf("============else sst files================\n");
+  {
+    std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
+    for(auto size : sst_file_size_else_){
+      if(size.first==1){
+        continue;
+      }
+      printf("%lu\t",size.second>>20);
+    }
+  }
+  printf("==========================================\n");
+
+  printf("============last sst files(l1)================\n");
+  {
+    std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
+    for(auto size : sst_file_size_last_){
+      if(size.first!=1){
+        continue;
+      }
+      printf("%lu\t",size.second>>20);
+    }
+  }
+  printf("\n");
+  printf("============else sst files(l1)================\n");
+  {
+    std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
+    for(auto size : sst_file_size_else_){
+      if(size.first!=1){
+        continue;
+      }
+      printf("%lu\t",size.second>>20);
+    }
+  }
+  printf("==========================================\n");
+
+
   for (const auto z : meta_zones) {
     delete z;
   }
