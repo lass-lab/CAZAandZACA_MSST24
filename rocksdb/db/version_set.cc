@@ -2578,9 +2578,11 @@ void VersionStorageInfo::ComputeCompensatedSizes() {
         // compensation logic might introduce unwanted effet which changes the
         // shape of LSM tree.
         if (file_meta->num_deletions * 2 >= file_meta->num_entries) {
+          
           file_meta->compensated_file_size +=
               (file_meta->num_deletions * 2 - file_meta->num_entries) *
               average_value_size * kDeletionWeightOnCompaction;
+          printf("file_meta->num_deletions * 2 >= file_meta->num_entries ? %lu \n",(file_meta->compensated_file_size>>20));
         }
       }
     }
