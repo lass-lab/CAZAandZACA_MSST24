@@ -1606,6 +1606,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
         next_key = &c_iter->key();
       }
       CompactionIterationStats range_del_out_stats;
+      sub_compact->compaction->immutable_options()->fs->
       printf("FinishCompactionOutputFile in the loop (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
                                                                     sub_compact->builder->FileSize());
       status = FinishCompactionOutputFile(input->status(), sub_compact,

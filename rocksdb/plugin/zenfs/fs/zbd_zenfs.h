@@ -479,6 +479,12 @@ class ZonedBlockDevice {
   int max_nr_active_io_zones_;
   int max_nr_open_io_zones_;
 
+  std::vector<uint64_t> sst_file_size_last_;
+  std::mutex sst_file_size_last_lock_;
+  std::vector<uint64_t> sst_file_size_else_;
+  std::mutex sst_file_size_else_lock_;
+  
+
   std::shared_ptr<ZenFSMetrics> metrics_;
   uint64_t cur_free_percent_ = 100;
   void EncodeJsonZone(std::ostream &json_stream,
@@ -919,6 +925,19 @@ class ZonedBlockDevice {
   
   IOStatus ResetAllZonesForForcedNewFileSystem(void);
   
+  void StatsCompactionFileSize(bool is_last_file, uint64_t file_size){
+  // std::vector<uint64_t> sst_file_size_last_;
+  // std::mutex sst_file_size_last_lock_;
+  // std::vector<uint64_t> sst_file_size_else_;
+  // std::mutex sst_file_size_else_lock_;
+    if(last_file){
+      std::lock_guard<std:mutex> lg(sst_file_size_last_lock_);
+      sst_file_size_last_.push_back(file_size);
+    }else{
+      std::lock_guard<std:mutex> lg(sst_file_size_else_lock_);
+      sst_file_size_else_.push_back(file_size);
+    }
+  }
   void StatsAverageCompactionInputSize(int start_level, int output_level,
                             uint64_t input_size_input_level, uint64_t input_size_output_level,
                             uint64_t output_size){

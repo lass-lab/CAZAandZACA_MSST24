@@ -532,7 +532,7 @@ class FileSystem : public Customizable {
                                IODebugContext* dbg) = 0;
 
   virtual void SetResetScheme(uint32_t ,uint32_t, uint64_t, uint64_t, uint64_t,uint64_t) {}
-
+  virtual void StatsCompactionFileSize(bool,uint64_t) {}
   virtual void StatsAverageCompactionInputSize(int,int,uint64_t,uint64_t,uint64_t )  {}
 
   virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t * ) { return 0;};
@@ -1467,6 +1467,9 @@ class FileSystemWrapper : public FileSystem {
 
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) {
     target_->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
+  }
+  void StatsCompactionFileSize(bool is_last_file,uint64_t file_size){
+    target_->StatsCompactionFileSize(is_last_file,file_size);
   }
 
   void StatsAverageCompactionInputSize(int start_level, int output_level,

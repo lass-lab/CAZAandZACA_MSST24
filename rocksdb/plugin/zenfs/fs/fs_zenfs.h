@@ -503,6 +503,11 @@ ret:
     zbd_->SetDBPtr(ptr);
   }
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) override;
+  
+  void StatsCompactionFileSize(bool is_last_file,uint64_t file_size) override {
+    zbd_->StatsCompactionFileSize(is_last_file,file_size);
+  }
+
   void StatsAverageCompactionInputSize(int start_level, int output_level,
                             uint64_t input_size_input_level, uint64_t input_size_output_level,
                             uint64_t output_size) override {
