@@ -959,7 +959,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
                 wasted_wp_.load() , T, reset_threshold_arr_[cur_free_percent_],
                 GetZoneSize(),db_ptr_ ? db_ptr_->NumLevelsFiles() : std::vector<int>(0),
                 db_ptr_ ? db_ptr_->LevelsCompactionScore() : std::vector<double>(0),
-                db_ptr_ ? db_ptr_->LevelsSize() : std::vector<uint64_t>(0),compaction_stats_[1].compaction_triggered_);
+                db_ptr_ ? db_ptr_->LevelsSize() : std::vector<uint64_t>(0),compaction_stats_[2].compaction_triggered_);
 }
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
     T++;
