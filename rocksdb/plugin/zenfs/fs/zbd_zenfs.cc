@@ -799,51 +799,51 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   // std::mutex sst_file_size_else_lock_;
   // for()
   
-  printf("============last sst files================\n");
-  {
-    std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
-    for(auto size : sst_file_size_last_){
-      if(size.first==1){
-        continue;
-      }
-      printf("%lu\t",size.second>>20);
-    }
-  }
-  printf("\n");
-  printf("============else sst files================\n");
-  {
-    std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
-    for(auto size : sst_file_size_else_){
-      if(size.first==1){
-        continue;
-      }
-      printf("%lu\t",size.second>>20);
-    }
-  }
-  printf("==========================================\n");
+  // printf("============last sst files================\n");
+  // {
+  //   std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
+  //   for(auto size : sst_file_size_last_){
+  //     if(size.first==1){
+  //       continue;
+  //     }
+  //     printf("%lu\t",size.second>>20);
+  //   }
+  // }
+  // printf("\n");
+  // printf("============else sst files================\n");
+  // {
+  //   std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
+  //   for(auto size : sst_file_size_else_){
+  //     if(size.first==1){
+  //       continue;
+  //     }
+  //     printf("%lu\t",size.second>>20);
+  //   }
+  // }
+  // printf("==========================================\n");
 
-  printf("============last sst files(l1)================\n");
-  {
-    std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
-    for(auto size : sst_file_size_last_){
-      if(size.first!=1){
-        continue;
-      }
-      printf("%lu\t",size.second>>20);
-    }
-  }
-  printf("\n");
-  printf("============else sst files(l1)================\n");
-  {
-    std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
-    for(auto size : sst_file_size_else_){
-      if(size.first!=1){
-        continue;
-      }
-      printf("%lu\t",size.second>>20);
-    }
-  }
-  printf("==========================================\n");
+  // printf("============last sst files(l1)================\n");
+  // {
+  //   std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
+  //   for(auto size : sst_file_size_last_){
+  //     if(size.first!=1){
+  //       continue;
+  //     }
+  //     printf("%lu\t",size.second>>20);
+  //   }
+  // }
+  // printf("\n");
+  // printf("============else sst files(l1)================\n");
+  // {
+  //   std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
+  //   for(auto size : sst_file_size_else_){
+  //     if(size.first!=1){
+  //       continue;
+  //     }
+  //     printf("%lu\t",size.second>>20);
+  //   }
+  // }
+  // printf("==========================================\n");
 
 
   for (const auto z : meta_zones) {
@@ -959,7 +959,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
                 wasted_wp_.load() , T, reset_threshold_arr_[cur_free_percent_],
                 GetZoneSize(),db_ptr_ ? db_ptr_->NumLevelsFiles() : std::vector<int>(0),
                 db_ptr_ ? db_ptr_->LevelsCompactionScore() : std::vector<double>(0),
-                db_ptr_ ? db_ptr_->LevelsSize() : std::vector<uint64_t>(0) );
+                db_ptr_ ? db_ptr_->LevelsSize() : std::vector<uint64_t>(0),compaction_stats_[1].compaction_triggered_);
 }
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
     T++;
