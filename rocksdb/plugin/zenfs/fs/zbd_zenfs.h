@@ -541,7 +541,8 @@ class ZonedBlockDevice {
     std::vector<uint64_t> levels_size_;
 
     // uint64_t l1l2_compaction_triggered_;
-    CompactionStats _compaction_stats_[10];
+    // CompactionStats _compaction_stats_[10];
+    uint64_t compaction_triggered_[10];
 
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
             uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels, 
@@ -557,7 +558,7 @@ class ZonedBlockDevice {
         R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
       }
       for(int i = 0 ; i <10;i++){
-        _compaction_stats_[i]=compaction_stats[i];
+        compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
       }
       // num_files_levels_=num_files_levels;
     }
