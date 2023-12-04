@@ -506,7 +506,14 @@ class ZonedBlockDevice {
     kNoRuntimeLinear = 8,
     kLazyExponential = 9
   };
-
+  struct CompactionStats{
+    std::atomic<uint64_t> input_size_input_level_{0};
+    std::atomic<uint64_t> input_size_output_level_{0};
+    std::atomic<uint64_t> output_size_{0};
+    std::atomic<uint64_t> compaction_triggered_{0};
+  };
+  
+  CompactionStats compaction_stats_[10];
   struct FARStat{
 
     uint64_t free_percent_;
@@ -533,15 +540,17 @@ class ZonedBlockDevice {
 
     std::vector<uint64_t> levels_size_;
 
-    uint64_t l1l2_compaction_triggered_;
+    // uint64_t l1l2_compaction_triggered_;
+    CompactionStats _compaction_stats_[10];
 
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
             uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels, 
-            std::vector<double> compaction_scores, std::vector<uint64_t> levels_size,uint64_t l1l2_compaction_triggered)
+            std::vector<double> compaction_scores, std::vector<uint64_t> levels_size,
+            CompactionStats compaction_stats[10])
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
           , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
-          levels_size_(levels_size),l1l2_compaction_triggered_(l1l2_compaction_triggered) {
+          levels_size_(levels_size),_compaction_stats_(compaction_stats) {
       if((rc+rc_zc)==0){
         R_wp_= 100;
       }else{
@@ -569,20 +578,17 @@ class ZonedBlockDevice {
         printf("%lu\t",(s>>20));
       }
       printf("|l1l2triggered\t");
-      printf("%lu\t",l1l2_compaction_triggered_);
+      // printf("%lu\t",l1l2_compaction_triggered_);
+      for(auto cstate : _compaction_stats_){
+        printf("%lu\t",(cstate.compaction_triggered_));
+      }
       printf("\n");
 
     }
   };
 
-  struct CompactionStats{
-    std::atomic<uint64_t> input_size_input_level_{0};
-    std::atomic<uint64_t> input_size_output_level_{0};
-    std::atomic<uint64_t> output_size_{0};
-    std::atomic<uint64_t> compaction_triggered_{0};
-  };
 
-  CompactionStats compaction_stats_[10];
+
   std::vector<FARStat> far_stats_;
 
   // std::atomic<uint64_t> intral0_compaction_input_size_{0};
