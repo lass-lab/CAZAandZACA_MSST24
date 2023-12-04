@@ -550,11 +550,14 @@ class ZonedBlockDevice {
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
           , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
-          levels_size_(levels_size),_compaction_stats_(compaction_stats) {
+          levels_size_(levels_size) {
       if((rc+rc_zc)==0){
         R_wp_= 100;
       }else{
         R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
+      }
+      for(int i = 0 ; i <10;i++){
+        _compaction_stats_[i]=compaction_stats[i];
       }
       // num_files_levels_=num_files_levels;
     }
