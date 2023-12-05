@@ -1664,7 +1664,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
     }
     auto extents=zFile->GetExtents();
     for(ZoneExtent* extent : extents){
-      zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+      uint64_t zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
       is_input_in_zone[zidx]=true;
     }
   }
