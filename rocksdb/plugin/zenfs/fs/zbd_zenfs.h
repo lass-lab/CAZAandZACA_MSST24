@@ -1034,20 +1034,23 @@ class ZonedBlockDevice {
 
 
   IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
-                                          Env::WriteLifeTimeHint file_lifetime,Zone **zone_out,
+                                          Env::WriteLifeTimeHint file_lifetime, ,Zone **zone_out, std::vector<uint64_t> input_fno
                                           uint64_t min_capacity = 0);
   
 
-  IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
+  IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,std::vector<bool>& is_input_in_zone
                                     Zone** zone_out,uint64_t min_capacity);
   
   void AdjacentFileList(Slice& smallest,Slice& largest, int level, std::vector<uint64_t>& fno_list);
   void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
   // int NumLevelFiles(int level);
   IOStatus AllocateSameLevelFilesZone(Slice& smallest, Slice& largest ,
-                                      const std::vector<uint64_t>& fno_list,Zone** zone_out,
+                                      const std::vector<uint64_t>& fno_list,
+                                      std::vector<bool>& is_input_in_zone,
+                                      Zone** zone_out,
                                       uint64_t min_capacity);
-  IOStatus GetNearestZoneFromZoneFile(ZoneFile* zFile,Zone** zone_out,
+  IOStatus GetNearestZoneFromZoneFile(ZoneFile* zFile,std::vector<bool>& is_input_in_zone,
+                                      Zone** zone_out,
                                       uint64_t min_capacity);
 
   inline uint64_t LazyLog(uint64_t sz,uint64_t fr,uint64_t T);

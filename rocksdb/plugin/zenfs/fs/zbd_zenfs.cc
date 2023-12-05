@@ -1635,6 +1635,7 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
 
 IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& largest,
                                                         int level,Env::WriteLifeTimeHint file_lifetime, 
+                                                        std::vector<uint64_t> input_fno,
                                                         Zone **zone_out,uint64_t min_capacity){
   
   /////////////////////////////// CAZA
@@ -1655,7 +1656,18 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   uint64_t max_score=0;
   uint64_t max_invalid_data=0;
 
-
+  std::vector<bool> is_input_in_zone(io_zones.size(),false);
+  for(uint64_t fno : input_fno){
+    ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
+    if(zFile==nullptr){
+      continue;
+    }
+    auto extents=zFile->GetExtents();
+    for(ZoneExtent* extent : extents){
+      zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+      is_input_in_zone[zidx]=true;
+    }
+  }
 
   // zone valid overlapping capacity
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
@@ -1691,6 +1703,9 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
   if(!no_near_level_files){
     for(size_t i=ZENFS_META_ZONES+ZENFS_SPARE_ZONES;i<zone_score.size();i++){
+      if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]==true){
+        continue;
+      }
       cur_score=zone_score[i];
       target_zone=io_zones[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES];
       cur_invalid_data=(target_zone->wp_-target_zone->start_) - target_zone->used_capacity_;
@@ -1755,7 +1770,7 @@ l0:
     zone_score.clear();
     zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
     SameLevelFileList(0,fno_list);
-    s = AllocateMostL0FilesZone(zone_score,fno_list,&allocated_zone,
+    s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
                                 min_capacity);
     if(allocated_zone!=nullptr){
       // printf("CAZA 2.1\n");
@@ -1766,7 +1781,7 @@ l0:
     zone_score.clear();
     zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
     SameLevelFileList(level,fno_list);
-    s = AllocateSameLevelFilesZone(smallest,largest,fno_list,&allocated_zone,
+    s = AllocateSameLevelFilesZone(smallest,largest,fno_list,is_input_in_zone,&allocated_zone,
                                   min_capacity);
     if(allocated_zone!=nullptr){
       //  printf("CAZA 2.2\n");
@@ -1809,6 +1824,7 @@ l0:
 
 IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,
                                                     std::vector<uint64_t>& fno_list,
+                                                    std::vector<bool>& is_input_in_zone,
                                                     Zone** zone_out,
                                                     uint64_t min_capacity){
   Zone* allocated_zone=nullptr;
@@ -1839,6 +1855,9 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
   }
 
   for(size_t i =ZENFS_META_ZONES+ZENFS_SPARE_ZONES; i<zone_score.size(); i++){
+    if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
+      continue;
+    }
     cur_score=zone_score[i];
     target_zone=io_zones[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES];
     if(cur_score == 0){
@@ -1880,7 +1899,8 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
 
 
 IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& largest ,
-                                    const std::vector<uint64_t>& fno_list,Zone** zone_out,
+                                    const std::vector<uint64_t>& fno_list,std::vector<bool>& is_input_in_zone,
+                                    Zone** zone_out,
                                     uint64_t min_capacity){
   Zone* allocated_zone = nullptr;
   IOStatus s;
@@ -1900,7 +1920,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
     if(fno_list_sz==1) {
          zFile=GetSSTZoneFileInZBDNoLock(fno_list[0]);
          if(zFile!=nullptr){
-            s=GetNearestZoneFromZoneFile(zFile,&allocated_zone,min_capacity);
+            s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
          }
          if(!s.ok()){
           return s;
@@ -1933,7 +1953,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
           if(zFile==nullptr){
             continue;
           }
-          s=GetNearestZoneFromZoneFile(zFile,&allocated_zone,min_capacity);
+          s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
           if(!s.ok()){
             return s;
           }
@@ -1949,7 +1969,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
           if(zFile==nullptr){
             continue;
           }
-          s=GetNearestZoneFromZoneFile(zFile,&allocated_zone,min_capacity);
+          s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
           if(!s.ok()){
             return s;
           }
@@ -1971,7 +1991,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
               l_idx--;
               continue;
             }
-            s=GetNearestZoneFromZoneFile(zFile,&allocated_zone,min_capacity);
+            s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
             if(!s.ok()){
               return s;
             }
@@ -1987,7 +2007,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
               r_idx++;
               continue;
             }
-            s=GetNearestZoneFromZoneFile(zFile,&allocated_zone,min_capacity);
+            s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
             if(!s.ok()){
               return s;
             }
@@ -2056,13 +2076,16 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
     db_ptr_->SameLevelFileList(level,fno_list);
   }
 
-  IOStatus ZonedBlockDevice::GetNearestZoneFromZoneFile(ZoneFile* zFile,Zone** zone_out,
+  IOStatus ZonedBlockDevice::GetNearestZoneFromZoneFile(ZoneFile* zFile,std::vector<bool>& is_input_in_zone,
+                                                        Zone** zone_out,
                                                         uint64_t min_capacity){
     IOStatus s;
     auto extents = zFile->GetExtents();
     Zone* allocated_zone=nullptr;
     for(auto e : extents){
-
+      if(is_input_in_zone[e->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
+        continue;
+      }
       if(!e->zone_->Acquire()){
         continue;
       }
@@ -2174,7 +2197,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     }
 
     if(allocation_scheme_!=LIZA){
-      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,out_zone,min_capacity);
+      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),out_zone,min_capacity);
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
         // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
@@ -2269,7 +2292,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
   if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
-    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,&allocated_zone,min_capacity);
+    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,input_fno,&allocated_zone,min_capacity);
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
