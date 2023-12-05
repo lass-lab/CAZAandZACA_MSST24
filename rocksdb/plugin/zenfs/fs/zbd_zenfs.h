@@ -1034,7 +1034,7 @@ class ZonedBlockDevice {
 
 
   IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
-                                          Env::WriteLifeTimeHint file_lifetime, ,Zone **zone_out, std::vector<uint64_t> input_fno
+                                          Env::WriteLifeTimeHint file_lifetime ,Zone **zone_out, std::vector<uint64_t> input_fno
                                           uint64_t min_capacity = 0);
   
 
