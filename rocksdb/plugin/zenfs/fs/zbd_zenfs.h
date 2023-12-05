@@ -1039,7 +1039,8 @@ class ZonedBlockDevice {
                                           uint64_t min_capacity = 0);
   
 
-  IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,std::vector<bool>& is_input_in_zone
+  IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
+                                    std::vector<bool>& is_input_in_zone,
                                     Zone** zone_out,uint64_t min_capacity);
   
   void AdjacentFileList(Slice& smallest,Slice& largest, int level, std::vector<uint64_t>& fno_list);
