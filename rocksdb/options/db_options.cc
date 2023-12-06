@@ -453,7 +453,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
                // Parse the input value as an Env
                auto old_env = static_cast<Env**>(addr);  // Get the old value
                Env* new_env = *old_env;                  // Set new to old
-               Status s = Env::CreateFromString(opts, "zenfs://dev:nvme0n1",
+               Status s = Env::CreateFromString(opts, value,
                                                 &new_env);  // Update new value
                if (s.ok()) {                                // It worked
                  *old_env = new_env;  // Update the old one
