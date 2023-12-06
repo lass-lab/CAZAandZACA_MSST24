@@ -909,7 +909,7 @@ Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
                                        : value;
 
     if (opt_ptr == nullptr) {
-      return Status::NotFound("Could not find option", opt_name);
+      return Status::NotFound("Could not find option 4 ", opt_name);
     } else if (parse_func_ != nullptr) {
       ConfigOptions copy = config_options;
       copy.invoke_prepare_options = false;
