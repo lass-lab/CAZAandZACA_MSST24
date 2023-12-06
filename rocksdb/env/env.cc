@@ -706,6 +706,14 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
     guard->reset(uniq.release());
     *result = env;
   }
+
+  std::shared_ptr<FileSystem> fs;
+  std::string fs_uri = "zenfs://dev:nvme0n1";
+  status = FileSystem::CreateFromString(config_options, fs_uri, &fs);
+  if (status.ok()) {
+    guard->reset(new CompositeEnvWrapper(*result, fs));
+    *result = guard->get();
+  }
   return status;
 }
 
