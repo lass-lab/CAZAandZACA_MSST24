@@ -559,6 +559,10 @@ static std::unordered_map<std::string, OptionTypeInfo>
          {offsetof(struct ImmutableDBOptions, enforce_single_del_contracts),
           OptionType::kBoolean, OptionVerificationType::kNormal,
           OptionTypeFlags::kNone}},
+        {"max_compaction_kick",
+         {offsetof(struct ImmutableDBOptions, max_compaction_kick),
+          OptionType::kUInt64T, OptionVerificationType::kNormal,
+          OptionTypeFlags::kNone}},  
 };
 
 const std::string OptionsHelper::kDBOptionsName = "DBOptions";
