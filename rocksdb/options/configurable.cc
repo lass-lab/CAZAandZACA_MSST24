@@ -140,7 +140,7 @@ Status Configurable::ConfigureFromMap(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
-  printf("ConfigureFromMap\n");
+  // printf("ConfigureFromMap\n");
   return ConfigureOptions(config_options, opts_map, unused);
 }
 
