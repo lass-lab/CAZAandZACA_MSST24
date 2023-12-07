@@ -585,7 +585,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
           OptionType::kUInt64T, OptionVerificationType::kNormal,
           OptionTypeFlags::kNone}},  
         {"zc",
-         {offsetof(struct ImmutableDBOptions, zc),
+         {offsetof(struct ImmutableDBOptions, zc_kicks),
           OptionType::kUInt64T, OptionVerificationType::kNormal,
           OptionTypeFlags::kNone}},  
 
