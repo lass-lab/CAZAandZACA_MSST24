@@ -284,7 +284,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
                             immutable_db_options_.partial_reset_scheme,
                             immutable_db_options_.tuning_point,
                             immutable_db_options_.allocation_scheme,
-                            immutable_db_options.compaction_scheme);
+                            immutable_db_options_.compaction_scheme);
   // fs_->reset_scheme_= immutable_db_options_.reset_scheme;
   fs_->SetResetScheme(immutable_db_options_.reset_scheme,immutable_db_options_.partial_reset_scheme,immutable_db_options_.tuning_point,
                         immutable_db_options_.zc_kicks,immutable_db_options_.until,immutable_db_options_.allocation_scheme);
