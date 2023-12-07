@@ -679,6 +679,7 @@ class DBOptionsConfigurable : public MutableDBConfigurable {
       copy.env = Env::Default();
       immutable_ = ImmutableDBOptions(copy);
     }
+    printf("db_immutable_options_type_info %lu\n",db_immutable_options_type_info.size())
     RegisterOptions(&immutable_, &db_immutable_options_type_info);
   }
 
