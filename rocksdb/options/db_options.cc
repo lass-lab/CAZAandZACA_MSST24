@@ -807,10 +807,15 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
       lowest_used_cache_tier(options.lowest_used_cache_tier),
       compaction_service(options.compaction_service),
       enforce_single_del_contracts(options.enforce_single_del_contracts),
+      reset_scheme(options.reset_scheme),
+      partial_reset_scheme(options.partial_reset_scheme),
+      tuning_point(options.tuning_point),
       compaction_scheme(options.compaction_scheme),
+      allocation_scheme(options.allocation_scheme),
       input_aware_scheme(options.input_aware_scheme),
       max_compaction_kick(options.max_compaction_kick),
       zc_kick(options.zc),
+      until(options.until),
       enable_intraL0_compaction(options.enable_intraL0_compaction),
       max_compaction_start_level(options.max_compaction_start_level) {
   fs = env->GetFileSystem();

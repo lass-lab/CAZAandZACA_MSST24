@@ -108,13 +108,24 @@ struct ImmutableDBOptions {
   std::shared_ptr<CompactionService> compaction_service;
   bool enforce_single_del_contracts;
 
-  uint64_t compaction_scheme;
 
+///////////////////////////////
+
+  uint64_t reset_scheme;
+  uint64_t partial_reset_scheme;
+  uint64_t tuning_point;
+
+
+  uint64_t compaction_scheme;
+  uint64_t allocation_scheme;
+  
   uint64_t input_aware_scheme;
 
   uint64_t max_compaction_kick;
 
   uint64_t zc_kick;
+  uint64_t until;
+
   bool enable_intraL0_compaction;
 
   int max_compaction_start_level;
