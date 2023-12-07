@@ -162,7 +162,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
       env_(initial_db_options_.env),
       io_tracer_(std::make_shared<IOTracer>()),
       immutable_db_options_(initial_db_options_),
-      fs_(options.env->GetFileSystem().get() io_tracer_),
+      fs_(options.env->GetFileSystem().get(), io_tracer_),
       mutable_db_options_(initial_db_options_),
       stats_(immutable_db_options_.stats),
       mutex_(stats_, immutable_db_options_.clock, DB_MUTEX_WAIT_MICROS,
@@ -907,6 +907,7 @@ void DBImpl::PersistStats() {
       wo.low_pri = true;
       wo.no_slowdown = true;
       wo.sync = false;
+
       s = Write(wo, &batch);
     }
     if (!s.ok()) {
