@@ -2185,8 +2185,11 @@ IOStatus ZenFS::MigrateFileExtents(
 
     // s = zbd_->TakeMigrateZone(&target_zone, zfile->GetWriteLifeTimeHint(),
     //                           ext->length_,&run_gc_worker_);
+    // if(!zfile->IsSST()){
+    //   zfile->level
+    // }
       s = zbd_->TakeMigrateZone(zfile->smallest_,zfile->largest_,zfile->level_, &target_zone, zfile->GetWriteLifeTimeHint(),
-                              ext->length_,&run_gc_worker_);
+                              ext->length_,&run_gc_worker_,zfile->IsSST());
     if(!run_gc_worker_){
       return IOStatus::OK();
     }

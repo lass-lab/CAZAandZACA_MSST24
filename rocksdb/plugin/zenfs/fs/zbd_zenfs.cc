@@ -2172,7 +2172,8 @@ IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
 //                                            bool* run_gc_worker_) {
 IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int level,Zone **out_zone,
                                            Env::WriteLifeTimeHint file_lifetime,
-                                           uint64_t min_capacity, bool* run_gc_worker_) {
+                                           uint64_t min_capacity, bool* run_gc_worker_,
+                                           bool is_sst) {
   std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
   if((*run_gc_worker_)==false){
       migrating_=false;
@@ -2196,7 +2197,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       return IOStatus::OK();
     }
 
-    if(allocation_scheme_!=LIZA){
+    if(allocation_scheme_!=LIZA&&is_sst){
       AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),out_zone,min_capacity);
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);

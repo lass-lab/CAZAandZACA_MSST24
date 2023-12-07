@@ -842,7 +842,7 @@ class ZonedBlockDevice {
   //                          uint64_t min_capacity,bool* run_gc_worker_);
   IOStatus TakeMigrateZone(Slice& smallest,Slice& largest, int level,Zone **out_zone,
                                            Env::WriteLifeTimeHint file_lifetime,
-                                           uint64_t min_capacity,bool* run_gc_worker_);
+                                           uint64_t min_capacity,bool* run_gc_worker_,bool is_sst);
   uint64_t CalculateProperReclaimedZoneN(void){
     size_t zone_percentage=100/io_zones.size();
     size_t to_be_reclaimed_ratio=(ZONE_CLEANING_KICKING_POINT+5)-cur_free_percent_;
