@@ -923,6 +923,8 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
     return {WriteStallCondition::kDelayed,
             WriteStallCause::kPendingCompactionBytes};
   }
+
+
   return {WriteStallCondition::kNormal, WriteStallCause::kNone};
 }
 
@@ -943,7 +945,7 @@ WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
         *ioptions());
     write_stall_condition = write_stall_condition_and_cause.first;
     auto write_stall_cause = write_stall_condition_and_cause.second;
-
+    printf("%d %d\n",write_stall_condition,write_stall_cause);
     bool was_stopped = write_controller->IsStopped();
     bool needed_delay = write_controller->NeedsDelay();
     if(write_stall_condition == WriteStallCondition::kStopped &&
