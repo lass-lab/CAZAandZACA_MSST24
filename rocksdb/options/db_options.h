@@ -118,12 +118,12 @@ struct ImmutableDBOptions {
 
   uint64_t compaction_scheme;
   uint64_t allocation_scheme;
-  
+
   uint64_t input_aware_scheme;
 
   uint64_t max_compaction_kick;
 
-  uint64_t zc_kick;
+  uint64_t zc_kicks;
   uint64_t until;
 
   bool enable_intraL0_compaction;

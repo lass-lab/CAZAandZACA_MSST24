@@ -814,7 +814,7 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
       allocation_scheme(options.allocation_scheme),
       input_aware_scheme(options.input_aware_scheme),
       max_compaction_kick(options.max_compaction_kick),
-      zc_kick(options.zc),
+      zc_kicks(options.zc),
       until(options.until),
       enable_intraL0_compaction(options.enable_intraL0_compaction),
       max_compaction_start_level(options.max_compaction_start_level) {
