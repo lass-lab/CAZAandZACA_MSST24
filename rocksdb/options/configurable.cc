@@ -21,7 +21,7 @@ void Configurable::RegisterOptions(
     const std::string& name, void* opt_ptr,
     const std::unordered_map<std::string, OptionTypeInfo>* type_map) {
   RegisteredOptions opts;
-  printf("Configurable::RegisterOptions %s?\n",name.c_str());
+  // printf("Configurable::RegisterOptions %s?\n",name.c_str());
   opts.name = name;
 #ifndef ROCKSDB_LITE
   opts.type_map = type_map;
@@ -133,7 +133,7 @@ const OptionTypeInfo* ConfigurableHelper::FindOption(
 Status Configurable::ConfigureFromMap(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opts_map) {
-  printf("Configurable::ConfigureFromMap %lu %lu\n",options_.size(),options_.size() ? options_[0].type_map->size(): 0);
+  // printf("Configurable::ConfigureFromMap %lu %lu\n",options_.size(),options_.size() ? options_[0].type_map->size(): 0);
   Status s = ConfigureFromMap(config_options, opts_map, nullptr);
   return s;
 }
@@ -334,10 +334,10 @@ Status ConfigurableHelper::ConfigureSomeOptions(
       const auto opt_info =
           OptionTypeInfo::Find(opt_name, type_map, &elem_name);
       if (opt_info == nullptr) {  // Did not find the option.  Skip it
-        printf("skip it ? %s\n",opt_name.c_str());
+        // printf("skip it ? %s\n",opt_name.c_str());
         ++it;
       } else {
-        printf("found it ! %s %s\n",opt_name.c_str(),opt_value.c_str());
+        // printf("found it ! %s %s\n",opt_name.c_str(),opt_value.c_str());
         Status s = ConfigureOption(config_options, configurable, *opt_info,
                                    opt_name, elem_name, opt_value, opt_ptr);
         if (s.IsNotFound()) {
