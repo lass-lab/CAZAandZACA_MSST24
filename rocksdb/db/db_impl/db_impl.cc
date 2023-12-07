@@ -247,7 +247,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   // WriteUnprepared, which should use seq_per_batch_.
   assert(batch_per_txn_ || seq_per_batch_);
   // TODO: Check for an error here
-  immutable_db_options_.fs=options.env->file_system_.get();
+  immutable_db_options_.fs=options.env->file_system_;
   env_->GetAbsolutePath(dbname, &db_absolute_path_).PermitUncheckedError();
   fs_->SetDBPtr(this);
   // Reserve ten files or so for other uses and give the rest to TableCache.
