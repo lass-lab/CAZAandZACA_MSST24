@@ -1437,6 +1437,7 @@ const OptionTypeInfo* OptionTypeInfo::Find(
     *elem_name = opt_name;                   // Return the name
     return &(iter->second);  // Return the contents of the iterator
   } else {
+    printf("OptionTypeInfo::Find cannot find opt_name %s\n",opt_name.c_str());
     auto idx = opt_name.find(".");              // Look for a separator
     if (idx > 0 && idx != std::string::npos) {  // We found a separator
       auto siter =
