@@ -1729,6 +1729,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
                     const std::vector<ColumnFamilyDescriptor>& column_families,
                     std::vector<ColumnFamilyHandle*>* handles, DB** dbptr,
                     const bool seq_per_batch, const bool batch_per_txn) {
+                      printf("DBImpl::Open\n");
   Status s = ValidateOptionsByTable(db_options, column_families);
   if (!s.ok()) {
     return s;
@@ -1748,8 +1749,9 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
     max_write_buffer_size =
         std::max(max_write_buffer_size, cf.options.write_buffer_size);
   }
-
+  printf("new dbimpl? 0\n");
   DBImpl* impl = new DBImpl(db_options, dbname, seq_per_batch, batch_per_txn);
+  printf("new dbimpl? 1\n");
   // printf("DBImpl::Open new DBImpl\n");
   if (!impl->immutable_db_options_.info_log) {
     s = impl->init_logger_creation_s_;

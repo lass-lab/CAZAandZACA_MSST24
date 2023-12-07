@@ -8553,7 +8553,7 @@ int db_bench_tool(int argc, char** argv) {
     fprintf(stderr, "Error: --env_uri and --fs_uri are mutually exclusive\n");
     exit(1);
   }
-  printf("fs_uri : %s\n",FLAGS_fs_uri.c_str());
+  // printf("fs_uri : %s\n",FLAGS_fs_uri.c_str());
   if (env_opts == 1) {
     Status s = Env::CreateFromUri(config_options, FLAGS_env_uri, FLAGS_fs_uri,
                                   &FLAGS_env, &env_guard);
