@@ -189,7 +189,7 @@ DBOptions BuildDBOptions(const ImmutableDBOptions& immutable_db_options,
 
   options.max_compaction_kick=immutable_db_options.max_compaction_kick;
   options.max_compaction_start_level=immutable_db_options.max_compaction_start_level;
-  options.input_aware_scheme=immutable_db_options.input_aware_scheme
+  options.input_aware_scheme=immutable_db_options.input_aware_scheme;
   options.compaction_scheme=immutable_db_options.compaction_scheme;
   options.until=immutable_db_options.until;
   options.zc=immutable_db_options.zc_kicks;
