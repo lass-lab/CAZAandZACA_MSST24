@@ -671,6 +671,7 @@ class DBOptionsConfigurable : public MutableDBConfigurable {
     // The ImmutableDBOptions currently requires the env to be non-null.  Make
     // sure it is
     if (opts.env != nullptr) {
+      // printf("DBOptionsConfigurable!=nullptr\n");
       immutable_ = ImmutableDBOptions(opts);
     } else {
       DBOptions copy = opts;
@@ -715,8 +716,9 @@ std::unique_ptr<Configurable> DBOptionsAsConfigurable(
 std::unique_ptr<Configurable> DBOptionsAsConfigurable(
     const DBOptions& opts,
     const std::unordered_map<std::string, std::string>* opt_map) {
+  printf("DBOptionsAsConfigurable2 opt map ptr %p\n",opt_map);
   std::unique_ptr<Configurable> ptr(new DBOptionsConfigurable(opts, opt_map));
-  printf("DBOptionsAsConfigurable2\n");
+  printf("%p\n",opt_map);
   return ptr;
 }
 #endif  // ROCKSDB_LITE
