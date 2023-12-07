@@ -21,6 +21,7 @@ void Configurable::RegisterOptions(
     const std::string& name, void* opt_ptr,
     const std::unordered_map<std::string, OptionTypeInfo>* type_map) {
   RegisteredOptions opts;
+  printf("Configurable::RegisterOptions %s\n",name.c_str());
   opts.name = name;
 #ifndef ROCKSDB_LITE
   opts.type_map = type_map;
