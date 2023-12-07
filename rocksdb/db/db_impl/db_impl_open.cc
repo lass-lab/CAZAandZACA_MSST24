@@ -1581,7 +1581,7 @@ Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr) {
   db_options.env->file_system_=options.env->file_system_;
   ColumnFamilyOptions cf_options(options);
   std::vector<ColumnFamilyDescriptor> column_families;
-  printf("DB::Open line1579\n");
+  // printf("DB::Open line1579\n");
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   if (db_options.persist_stats_to_disk) {
