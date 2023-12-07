@@ -1764,7 +1764,7 @@ Status DBImpl::DelayWrite(uint64_t num_bytes,
       // Notify write_thread_ about the stall so it can setup a barrier and
       // fail any pending writers with no_slowdown
       write_thread_.BeginWriteStall();
-      printf("DBImpl::DelayWrite here?\n");
+      // printf("DBImpl::DelayWrite here?\n");
       TEST_SYNC_POINT("DBImpl::DelayWrite:Wait");
       bg_cv_.Wait();
       write_thread_.EndWriteStall();
