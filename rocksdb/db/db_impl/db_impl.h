@@ -1261,7 +1261,7 @@ class DBImpl : public DB {
   const DBOptions initial_db_options_;
   Env* const env_;
   std::shared_ptr<IOTracer> io_tracer_;
-  const ImmutableDBOptions immutable_db_options_;
+  ImmutableDBOptions immutable_db_options_;
   FileSystemPtr fs_;
   MutableDBOptions mutable_db_options_;
   Statistics* stats_;
