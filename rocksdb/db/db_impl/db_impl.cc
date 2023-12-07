@@ -278,7 +278,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   if (write_buffer_manager_) {
     wbm_stall_.reset(new WBMStallInterface());
   }
-  printf("open :: reset scheme :: %d %d\n",immutable_db_options_.reset_scheme,immutable_db_options_.reset_scheme);
+  printf("open :: reset scheme :: %lu %lu\n",immutable_db_options_.reset_scheme,immutable_db_options_.reset_scheme);
   printf("reclaim until %lu~%lu\n",immutable_db_options_.zc,immutable_db_options_.until);
   // fs_->reset_scheme_= immutable_db_options_.reset_scheme;
   fs_->SetResetScheme(immutable_db_options_.reset_scheme,immutable_db_options_.partial_reset_scheme,immutable_db_options_.tuning_point,
