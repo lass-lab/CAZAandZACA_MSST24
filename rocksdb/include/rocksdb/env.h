@@ -673,11 +673,12 @@ class Env : public Customizable {
   const std::shared_ptr<SystemClock>& GetSystemClock() const;
 
   // If you're adding methods here, remember to add them to EnvWrapper too.
+  ThreadStatusUpdater* thread_status_updater_;
   std::shared_ptr<FileSystem> file_system_;
  protected:
   // The pointer to an internal structure that will update the
   // status of each thread.
-  ThreadStatusUpdater* thread_status_updater_;
+  
 
   // Pointer to the underlying FileSystem implementation
   
