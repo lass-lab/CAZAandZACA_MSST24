@@ -723,14 +723,18 @@ Status Env::CreateFromUri(const ConfigOptions& config_options,
   *result = config_options.env;
   if (env_uri.empty() && fs_uri.empty()) {
     // Neither specified.  Use the default
+    printf("CreateFromUri0\n");
     guard->reset();
     return Status::OK();
   } else if (!env_uri.empty() && !fs_uri.empty()) {
     // Both specified.  Cannot choose.  Return Invalid
+    printf("CreateFromUri1\n");
     return Status::InvalidArgument("cannot specify both fs_uri and env_uri");
   } else if (fs_uri.empty()) {  // Only have an ENV URI.  Create an Env from it
+  printf("CreateFromUri2\n");
     return CreateFromString(config_options, env_uri, result, guard);
   } else {
+    printf("CreateFromUri3\n");
     std::shared_ptr<FileSystem> fs;
     Status s = FileSystem::CreateFromString(config_options, fs_uri, &fs);
     if (s.ok()) {
