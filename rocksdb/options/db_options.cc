@@ -670,6 +670,7 @@ class DBOptionsConfigurable : public MutableDBConfigurable {
       : MutableDBConfigurable(MutableDBOptions(opts), map), db_options_(opts) {
     // The ImmutableDBOptions currently requires the env to be non-null.  Make
     // sure it is
+    printf("DBOptionsConfigurable : zc: %lu\n",opts.zc);
     if (opts.env != nullptr) {
       // printf("DBOptionsConfigurable!=nullptr\n");
       immutable_ = ImmutableDBOptions(opts);
