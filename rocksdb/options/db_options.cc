@@ -601,6 +601,10 @@ static std::unordered_map<std::string, OptionTypeInfo>
          {offsetof(struct Options, reset_scheme),
           OptionType::kUInt64T, OptionVerificationType::kNormal,
           OptionTypeFlags::kNone}},  
+        {"allocation_scheme",
+         {offsetof(struct Options, allocation_scheme),
+          OptionType::kUInt64T, OptionVerificationType::kNormal,
+          OptionTypeFlags::kNone}},  
 };
 
 const std::string OptionsHelper::kDBOptionsName = "DBOptions";
