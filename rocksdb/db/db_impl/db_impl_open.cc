@@ -1578,7 +1578,7 @@ Status DBImpl::WriteLevel0TableForRecovery(int job_id, ColumnFamilyData* cfd,
 
 Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr) {
   DBOptions db_options(options);
-  db_options.env->file_system_=options.env->GetFileSystem().get();
+  db_options.env->file_system_=options.env->file_system_;
   ColumnFamilyOptions cf_options(options);
   std::vector<ColumnFamilyDescriptor> column_families;
   printf("DB::Open line1579\n");
