@@ -301,8 +301,9 @@ Status RocksDBOptionsParser::Parse(const ConfigOptions& config_options_in,
     } else {
       std::string name;
       std::string value;
-      printf("%s %s\n",name.c_str(),value.c_str());
+
       s = ParseStatement(&name, &value, line, line_num);
+            printf("%s %s\n",name.c_str(),value.c_str());
       if (!s.ok()) {
         return s;
       }
