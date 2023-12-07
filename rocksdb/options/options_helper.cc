@@ -730,8 +730,9 @@ Status GetDBOptionsFromMap(
     DBOptions* new_options) {
   assert(new_options);
   *new_options = base_options;
-  printf("GetDBOptionsFromMap\n");
+  
   auto config = DBOptionsAsConfigurable(base_options);
+ printf("GetDBOptionsFromMap\n")
   Status s = ConfigureFromMap<DBOptions>(config_options, opts_map,
                                          OptionsHelper::kDBOptionsName,
                                          config.get(), new_options);

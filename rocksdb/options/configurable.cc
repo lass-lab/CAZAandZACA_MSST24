@@ -132,6 +132,7 @@ const OptionTypeInfo* ConfigurableHelper::FindOption(
 Status Configurable::ConfigureFromMap(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opts_map) {
+  printf("Configurable::ConfigureFromMap %lu %lu\n",options_.size(),options_.size() ? options_[0].type_map->size(): 0);
   Status s = ConfigureFromMap(config_options, opts_map, nullptr);
   return s;
 }
