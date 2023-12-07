@@ -1729,7 +1729,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
                     const std::vector<ColumnFamilyDescriptor>& column_families,
                     std::vector<ColumnFamilyHandle*>* handles, DB** dbptr,
                     const bool seq_per_batch, const bool batch_per_txn) {
-                      printf("DBImpl::Open\n");
+  printf("DBImpl::Open %p\n",db_options.env->GetFileSystem().get());
   Status s = ValidateOptionsByTable(db_options, column_families);
   if (!s.ok()) {
     return s;
@@ -1749,7 +1749,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
     max_write_buffer_size =
         std::max(max_write_buffer_size, cf.options.write_buffer_size);
   }
-  printf("new dbimpl? 0\n");
+  printf("new dbimpl? 0 %p\n",db_options.env->GetFileSystem().get());
   DBImpl* impl = new DBImpl(db_options, dbname, seq_per_batch, batch_per_txn);
   printf("new dbimpl? 1\n");
   // printf("DBImpl::Open new DBImpl\n");
