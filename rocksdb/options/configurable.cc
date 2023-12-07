@@ -337,7 +337,7 @@ Status ConfigurableHelper::ConfigureSomeOptions(
         printf("skip it ? %s\n",opt_name.c_str());
         ++it;
       } else {
-        printf("found it ! %s\n",opt_name.c_str());
+        printf("found it ! %s %s\n",opt_name.c_str(),opt_value.c_str());
         Status s = ConfigureOption(config_options, configurable, *opt_info,
                                    opt_name, elem_name, opt_value, opt_ptr);
         if (s.IsNotFound()) {
