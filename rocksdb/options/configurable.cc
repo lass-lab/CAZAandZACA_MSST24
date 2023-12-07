@@ -268,7 +268,7 @@ Status ConfigurableHelper::ConfigureOptions(
     std::unordered_map<std::string, std::string>* unused) {
   std::unordered_map<std::string, std::string> remaining = opts_map;
   Status s = Status::OK();
-  printf("ConfigurableHelper::ConfigureOptions\n");
+  // printf("ConfigurableHelper::ConfigureOptions\n");
   if (!opts_map.empty()) {
 #ifndef ROCKSDB_LITE
     for (const auto& iter : configurable.options_) {
@@ -321,7 +321,7 @@ Status ConfigurableHelper::ConfigureSomeOptions(
   Status notsup = Status::OK();  // The last NotSupported result (if any)
   std::string elem_name;
   int found = 1;
-  printf("ConfigurableHelper::ConfigureSomeOptions\n");
+  // printf("ConfigurableHelper::ConfigureSomeOptions\n");
   std::unordered_set<std::string> unsupported;
   // While there are unused properties and we processed at least one,
   // go through the remaining unused properties and attempt to configure them.
