@@ -718,7 +718,7 @@ std::unique_ptr<Configurable> DBOptionsAsConfigurable(
 std::unique_ptr<Configurable> DBOptionsAsConfigurable(
     const DBOptions& opts,
     const std::unordered_map<std::string, std::string>* opt_map) {
-  printf("DBOptionsAsConfigurable2 opt map ptr %p\n",opt_map);
+  // printf("DBOptionsAsConfigurable2 opt map ptr %p\n",opt_map);
   std::unique_ptr<Configurable> ptr(new DBOptionsConfigurable(opts, opt_map));
   printf("%p\n",opt_map);
   return ptr;
