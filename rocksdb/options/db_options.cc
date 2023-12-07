@@ -712,7 +712,7 @@ class DBOptionsConfigurable : public MutableDBConfigurable {
 std::unique_ptr<Configurable> DBOptionsAsConfigurable(
     const MutableDBOptions& opts) {
   std::unique_ptr<Configurable> ptr(new MutableDBConfigurable(opts));
-  printf("DBOptionsAsConfigurable1 \n");
+  // printf("DBOptionsAsConfigurable1 \n");
   return ptr;
 }
 std::unique_ptr<Configurable> DBOptionsAsConfigurable(
@@ -720,7 +720,7 @@ std::unique_ptr<Configurable> DBOptionsAsConfigurable(
     const std::unordered_map<std::string, std::string>* opt_map) {
   // printf("DBOptionsAsConfigurable2 opt map ptr %p\n",opt_map);
   std::unique_ptr<Configurable> ptr(new DBOptionsConfigurable(opts, opt_map));
-  printf("%p\n",opt_map);
+  // printf("%p\n",opt_map);
   return ptr;
 }
 #endif  // ROCKSDB_LITE
