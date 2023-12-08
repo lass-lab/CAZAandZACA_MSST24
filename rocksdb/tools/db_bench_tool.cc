@@ -3779,8 +3779,10 @@ class Benchmark {
         // printf("DEBUG1 ===================\n");
       }
       if (post_process_method != nullptr) {
+        printf("post_process_method?\n");
         (this->*post_process_method)();
       }
+      printf("post_process_method??\n");
     }
 
     if (secondary_update_thread_) {
