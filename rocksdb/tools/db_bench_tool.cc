@@ -3761,7 +3761,7 @@ class Benchmark {
         if (num_repeat > 1) {
           printf("Running benchmark for %d times\n", num_repeat);
         }
-        printf("DEBUG1 ===================\n");
+        // printf("DEBUG1 ===================\n");
         CombinedStats combined_stats;
         for (int i = 0; i < num_repeat; i++) {
           Stats stats = RunBenchmark(num_threads, name, method);
@@ -3776,7 +3776,7 @@ class Benchmark {
         if (num_repeat > 1) {
           combined_stats.ReportFinal(name);
         }
-        printf("DEBUG1 ===================\n");
+        // printf("DEBUG1 ===================\n");
       }
       if (post_process_method != nullptr) {
         (this->*post_process_method)();
@@ -3791,14 +3791,18 @@ class Benchmark {
 
 #ifndef ROCKSDB_LITE
     if (name != "replay" && FLAGS_trace_file != "") {
+      printf("EndTrace?\n");
       Status s = db_.db->EndTrace();
+      printf("EndTrace?\n");
       if (!s.ok()) {
         fprintf(stderr, "Encountered an error ending the trace, %s\n",
                 s.ToString().c_str());
       }
     }
     if (!FLAGS_block_cache_trace_file.empty()) {
+      printf("EndBlockCacheTrace?\n");
       Status s = db_.db->EndBlockCacheTrace();
+      printf("EndBlockCacheTrace?\n");
       if (!s.ok()) {
         fprintf(stderr,
                 "Encountered an error ending the block cache tracing, %s\n",
