@@ -845,7 +845,12 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   //   }
   // }
   // printf("==========================================\n");
-
+  // db_ptr_-
+  if(db_ptr_){
+    std::string stats;
+    db_ptr_->GetProperty("rocksdb.stats",&stats);
+    printf("%s\n",stats.c_str());
+  }
 
   for (const auto z : meta_zones) {
     delete z;

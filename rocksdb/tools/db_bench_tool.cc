@@ -3767,15 +3767,13 @@ class Benchmark {
           Stats stats = RunBenchmark(num_threads, name, method);
           combined_stats.AddStats(stats);
           if (FLAGS_confidence_interval_only) {
-            printf("combined_stats.ReportWithConfidenceIntervals\n");
+            // printf("combined_stats.ReportWithConfidenceIntervals\n");
             combined_stats.ReportWithConfidenceIntervals(name);
           } else {
-            printf("combined_stats.Report(name);\n");
             combined_stats.Report(name);
           }
         }
         if (num_repeat > 1) {
-          printf("combined_stats.ReportFinal(name)\n");
           combined_stats.ReportFinal(name);
         }
         // printf("DEBUG1 ===================\n");
@@ -3788,18 +3786,18 @@ class Benchmark {
     }
 ///////////////////////////// under here
     if (secondary_update_thread_) {
-      printf("secondary_update_thread_?\n");
+      // printf("secondary_update_thread_?\n");
       secondary_update_stopped_.store(1, std::memory_order_relaxed);
       secondary_update_thread_->join();
       secondary_update_thread_.reset();
-      printf("secondary_update_thread_??\n");
+      // printf("secondary_update_thread_??\n");
     }
 
 #ifndef ROCKSDB_LITE
     if (name != "replay" && FLAGS_trace_file != "") {
-      printf("EndTrace?\n");
+      // printf("EndTrace?\n");
       Status s = db_.db->EndTrace();
-      printf("EndTrace?\n");
+      // printf("EndTrace?\n");
       if (!s.ok()) {
         fprintf(stderr, "Encountered an error ending the trace, %s\n",
                 s.ToString().c_str());
