@@ -3803,6 +3803,7 @@ class Benchmark {
                 s.ToString().c_str());
       }
     }
+    printf("==============================\n");
     if (!FLAGS_block_cache_trace_file.empty()) {
       printf("EndBlockCacheTrace?\n");
       Status s = db_.db->EndBlockCacheTrace();
