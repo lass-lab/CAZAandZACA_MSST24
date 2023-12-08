@@ -909,6 +909,7 @@ IOStatus ZonedBlockDevice::AllocateMetaZone(Zone **out_meta_zone) {
   return IOStatus::NoSpace("Out of metadata zones");
 }
 void ZonedBlockDevice::AddTimeLapse(int T) {
+  (void)(T);
   // size_t reclaimable= 0;
   // size_t written = 0;
   // size_t candidate_ratio;
