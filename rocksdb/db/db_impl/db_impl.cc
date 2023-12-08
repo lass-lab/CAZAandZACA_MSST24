@@ -2970,7 +2970,7 @@ std::vector<uint64_t> DBImpl::LevelsSize(void){
   }
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
 
-  if(!vstorage.get){
+  if(!vstorage){
     return ret;
   }
   for(int level =0 ; level<6;level++){
