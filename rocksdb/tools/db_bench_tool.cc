@@ -3779,16 +3779,18 @@ class Benchmark {
         // printf("DEBUG1 ===================\n");
       }
       if (post_process_method != nullptr) {
-        printf("post_process_method?\n");
+        // printf("post_process_method?\n");
         (this->*post_process_method)();
       }
-      printf("post_process_method??\n");
+      // printf("post_process_method??\n");
     }
-
+///////////////////////////// under here
     if (secondary_update_thread_) {
+      printf("secondary_update_thread_?\n");
       secondary_update_stopped_.store(1, std::memory_order_relaxed);
       secondary_update_thread_->join();
       secondary_update_thread_.reset();
+      printf("secondary_update_thread_??\n");
     }
 
 #ifndef ROCKSDB_LITE
