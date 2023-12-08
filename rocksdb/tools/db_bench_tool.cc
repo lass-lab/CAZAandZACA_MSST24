@@ -3234,6 +3234,7 @@ class Benchmark {
     char* start = const_cast<char*>(key->data());
     char* pos = start;
     if (keys_per_prefix_ > 0) {
+      printf("not here,right?\n");
       int64_t num_prefix = num_keys / keys_per_prefix_;
       int64_t prefix = v % num_prefix;
       int bytes_to_fill = std::min(prefix_size_, 8);
@@ -3259,7 +3260,9 @@ class Benchmark {
     } else {
       memcpy(pos, static_cast<void*>(&v), bytes_to_fill);
     }
+    
     pos += bytes_to_fill;
+    printf("key size %d bytes to fill : %d pos-start %d\n",bytes_to_fill,key_size_,(int)pos-start)
     if (key_size_ > pos - start) {
       memset(pos, '0', key_size_ - (pos - start));
     }
