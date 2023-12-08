@@ -2963,11 +2963,14 @@ std::vector<double> DBImpl::LevelsCompactionScore(void){
 }
 
 std::vector<uint64_t> DBImpl::LevelsSize(void){
-
-  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   std::vector<uint64_t> ret;
   ret.clear();
-  if(!vstorage){
+  if(versions_.get()==nullptr){
+    return ret;
+  }
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+
+  if(!vstorage.get){
     return ret;
   }
   for(int level =0 ; level<6;level++){
