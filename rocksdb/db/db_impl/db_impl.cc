@@ -763,6 +763,11 @@ Status DBImpl::CloseImpl() { return CloseHelper(); }
 
 DBImpl::~DBImpl() {
   // TODO: remove this.
+  // if(){
+  std::string stats;
+  GetProperty("rocksdb.stats",&stats);
+  printf("~DBImpl\n%s\n",stats.c_str());
+  // }
   init_logger_creation_s_.PermitUncheckedError();
 
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);
