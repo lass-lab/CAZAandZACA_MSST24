@@ -663,6 +663,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     total_copied+=zc_timelapse_[i].copied;
     rc_zc += zc_z;
   }
+  
   printf("Total ZC Copied (MB) :: %lu(%lu), Recaimed by ZC :: %lu \n",
          BYTES_TO_MB(total_copied),(gc_bytes_written_.load())>>20, rc_zc);
   printf("============================================================\n\n");

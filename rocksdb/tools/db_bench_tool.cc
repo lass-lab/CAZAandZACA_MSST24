@@ -3761,7 +3761,7 @@ class Benchmark {
         if (num_repeat > 1) {
           printf("Running benchmark for %d times\n", num_repeat);
         }
-
+        printf("DEBUG1 ===================\n");
         CombinedStats combined_stats;
         for (int i = 0; i < num_repeat; i++) {
           Stats stats = RunBenchmark(num_threads, name, method);
@@ -3769,12 +3769,14 @@ class Benchmark {
           if (FLAGS_confidence_interval_only) {
             combined_stats.ReportWithConfidenceIntervals(name);
           } else {
+            
             combined_stats.Report(name);
           }
         }
         if (num_repeat > 1) {
           combined_stats.ReportFinal(name);
         }
+        printf("DEBUG1 ===================\n");
       }
       if (post_process_method != nullptr) {
         (this->*post_process_method)();
@@ -3804,7 +3806,7 @@ class Benchmark {
       }
     }
 #endif  // ROCKSDB_LITE
-
+//////////////////////////////////////////////////////////////////
     if (FLAGS_statistics) {
       fprintf(stdout, "STATISTICS:\n%s\n", dbstats->ToString().c_str());
     }
