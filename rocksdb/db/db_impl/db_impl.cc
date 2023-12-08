@@ -765,11 +765,12 @@ DBImpl::~DBImpl() {
   // TODO: remove this.
   // if(){
   std::string stats;
+  if(immutable_db_options_.is_db_bench==false){ // this is YCSB
   GetProperty("rocksdb.stats",&stats);
   printf("==============================~DBImpl=========================\n");
   printf("%s\n",stats.c_str());
   printf("==============================~DBImpl=========================\n");
-  // }
+  }
   init_logger_creation_s_.PermitUncheckedError();
 
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);

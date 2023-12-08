@@ -1690,6 +1690,7 @@ DEFINE_int32(max_compaction_start_level,2,"start level");
 
 DEFINE_uint64(input_aware_scheme,0,"input_aware_scheme");
 
+
 namespace ROCKSDB_NAMESPACE {
 namespace {
 static Status CreateMemTableRepFactory(
@@ -4134,6 +4135,7 @@ class Benchmark {
     options.zc=FLAGS_zc;
     options.until=FLAGS_until;
     options.tuning_point=FLAGS_tuning_point;
+    options.is_db_bench=true;
     options.dump_malloc_stats = FLAGS_dump_malloc_stats;
     options.stats_dump_period_sec =
         static_cast<unsigned int>(FLAGS_stats_dump_period_sec);
@@ -4143,6 +4145,7 @@ class Benchmark {
     options.stats_history_buffer_size =
         static_cast<size_t>(FLAGS_stats_history_buffer_size);
     options.avoid_flush_during_recovery = FLAGS_avoid_flush_during_recovery;
+
 
     options.compression_opts.level = FLAGS_compression_level;
     options.compression_opts.max_dict_bytes = FLAGS_compression_max_dict_bytes;

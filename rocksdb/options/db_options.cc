@@ -823,7 +823,8 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
       zc_kicks(options.zc),
       until(options.until),
       enable_intraL0_compaction(options.enable_intraL0_compaction),
-      max_compaction_start_level(options.max_compaction_start_level) {
+      max_compaction_start_level(options.max_compaction_start_level),
+      is_db_bench(options.is_db_bench) {
   fs = env->GetFileSystem();
   clock = env->GetSystemClock().get();
   logger = info_log.get();

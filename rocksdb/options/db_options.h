@@ -129,6 +129,9 @@ struct ImmutableDBOptions {
   bool enable_intraL0_compaction;
 
   int max_compaction_start_level;
+
+  bool is_db_bench;
+
   bool IsWalDirSameAsDBPath() const;
   bool IsWalDirSameAsDBPath(const std::string& path) const;
   const std::string& GetWalDir() const;
