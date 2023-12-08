@@ -2965,20 +2965,11 @@ std::vector<double> DBImpl::LevelsCompactionScore(void){
 std::vector<uint64_t> DBImpl::LevelsSize(void){
   std::vector<uint64_t> ret;
   ret.clear();
-  // if(versions_.get()==nullptr){
-  //   return ret;
-  // }
-  return ret;
-  // if()
-  // auto cfset=versions_->GetColumnFamilySet();
-  // auto cfd=cfset->GetDefault();
-  // auto version=cfd->current();
-  // auto stora
-  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
-
-  if(!vstorage){
+  if(versions_.get()==nullptr){
     return ret;
   }
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+
   for(int level =0 ; level<6;level++){
     const std::vector<FileMetaData*>& level_files =
         vstorage->LevelFiles(level);

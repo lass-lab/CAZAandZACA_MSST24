@@ -959,13 +959,13 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
 
 
 
-  far_stats_.emplace_back(cur_free_percent_, 
-          reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
-          erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
-                wasted_wp_.load() , T, reset_threshold_arr_[cur_free_percent_],
-                GetZoneSize(),db_ptr_ ? db_ptr_->NumLevelsFiles() : std::vector<int>(0),
-                db_ptr_ ? db_ptr_->LevelsCompactionScore() : std::vector<double>(0),
-                db_ptr_ ? db_ptr_->LevelsSize() : std::vector<uint64_t>(0),compaction_stats_);
+  // far_stats_.emplace_back(cur_free_percent_, 
+  //         reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
+  //         erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
+  //               wasted_wp_.load() , T, reset_threshold_arr_[cur_free_percent_],
+  //               GetZoneSize(),db_ptr_ ? db_ptr_->NumLevelsFiles() : std::vector<int>(0),
+  //               db_ptr_ ? db_ptr_->LevelsCompactionScore() : std::vector<double>(0),
+  //               db_ptr_ ? db_ptr_->LevelsSize() : std::vector<uint64_t>(0),compaction_stats_);
 }
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
     T++;
