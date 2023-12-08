@@ -766,7 +766,9 @@ DBImpl::~DBImpl() {
   // if(){
   std::string stats;
   GetProperty("rocksdb.stats",&stats);
-  printf("~DBImpl\n%s\n",stats.c_str());
+  printf("==============================~DBImpl=========================\n");
+  printf("%s\n",stats.c_str());
+  printf("==============================~DBImpl=========================\n");
   // }
   init_logger_creation_s_.PermitUncheckedError();
 
