@@ -3262,7 +3262,8 @@ class Benchmark {
     }
     
     pos += bytes_to_fill;
-    printf("key size %d bytes to fill : %d pos-start %d\n",bytes_to_fill,key_size_,(int)(pos-start));
+    // key size 8 bytes to fill : 16 pos-start 8
+    // printf("key size %d bytes to fill : %d pos-start %d\n",bytes_to_fill,key_size_,(int)(pos-start));
     if (key_size_ > pos - start) {
       memset(pos, '0', key_size_ - (pos - start));
     }
