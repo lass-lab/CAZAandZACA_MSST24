@@ -3767,13 +3767,15 @@ class Benchmark {
           Stats stats = RunBenchmark(num_threads, name, method);
           combined_stats.AddStats(stats);
           if (FLAGS_confidence_interval_only) {
+            printf("combined_stats.ReportWithConfidenceIntervals\n");
             combined_stats.ReportWithConfidenceIntervals(name);
           } else {
-            
+            printf("combined_stats.Report(name);\n");
             combined_stats.Report(name);
           }
         }
         if (num_repeat > 1) {
+          printf("combined_stats.ReportFinal(name)\n");
           combined_stats.ReportFinal(name);
         }
         // printf("DEBUG1 ===================\n");
@@ -3803,7 +3805,7 @@ class Benchmark {
                 s.ToString().c_str());
       }
     }
-    printf("==============================\n");
+    // printf("==============================\n"); ////////// upper from here
     if (!FLAGS_block_cache_trace_file.empty()) {
       printf("EndBlockCacheTrace?\n");
       Status s = db_.db->EndBlockCacheTrace();
