@@ -825,7 +825,7 @@ class ZonedBlockDevice {
         //   return;
         // }
         if(zone_!=nullptr){
-          if(zone->zbd_->RuntimeZoneResetOnly()){
+          if(zone_->zbd_->RuntimeZoneResetOnly()){
             zone_=nullptr;
             return;
           }
