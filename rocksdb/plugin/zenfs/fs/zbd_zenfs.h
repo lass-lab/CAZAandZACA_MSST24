@@ -181,7 +181,7 @@ private:
 
 
 class Zone {
-  ZonedBlockDevice *zbd_;
+
   ZonedBlockDeviceBackend *zbd_be_;
   std::mutex zone_lock_;
   
@@ -191,6 +191,7 @@ class Zone {
   explicit Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
                 std::unique_ptr<ZoneList> &zones, uint64_t idx,
                 unsigned int log2_erase_unit_size);
+  ZonedBlockDevice *zbd_;
   uint64_t start_; // absolute value, not changed
   uint64_t capacity_; /* remaining capacity, variable */
   uint64_t max_capacity_; // not changed
@@ -800,10 +801,11 @@ class ZonedBlockDevice {
         ReadUnLockZone();
       }
       void ReadLockZone(Zone* zone){
-        if(RuntimeZoneResetOnly()){
+
+        if(zone==nullptr){
           return;
         }
-        if(zone==nullptr){
+        if(zone->zbd_->RuntimeZoneResetOnly()){
           return;
         }
         zone_=zone;
@@ -819,10 +821,13 @@ class ZonedBlockDevice {
         zone_->zone_extents_lock_.unlock();
       }
       void ReadUnLockZone(void){
-        if(RuntimeZoneResetOnly()){
-          return;
-        }
+        // if(RuntimeZoneResetOnly()){
+        //   return;
+        // }
         if(zone_!=nullptr){
+          if(zone->zbd_->RuntimeZoneResetOnly()){
+            return;
+          }
            zone_->zone_readers_.fetch_sub(1);
         }
         zone_=nullptr;
