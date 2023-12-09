@@ -181,7 +181,7 @@ private:
 
 
 class Zone {
-
+  ZonedBlockDevice *zbd_;
   ZonedBlockDeviceBackend *zbd_be_;
   std::mutex zone_lock_;
   
@@ -191,7 +191,7 @@ class Zone {
   explicit Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
                 std::unique_ptr<ZoneList> &zones, uint64_t idx,
                 unsigned int log2_erase_unit_size);
-  ZonedBlockDevice *zbd_;
+
   uint64_t start_; // absolute value, not changed
   uint64_t capacity_; /* remaining capacity, variable */
   uint64_t max_capacity_; // not changed
@@ -220,7 +220,7 @@ class Zone {
   static bool SortByResetCount(Zone* za,Zone* zb){
     return za->reset_count_ < zb->reset_count_;
   }
-
+  inline ZonedBlockDevice* GetZBD(void) { return zbd_;}
   IOStatus Reset();
   IOStatus PartialReset(size_t* erase_sz);
   IOStatus PartialResetToAllInvalidZone(size_t erase_sz);
@@ -805,7 +805,7 @@ class ZonedBlockDevice {
         if(zone==nullptr){
           return;
         }
-        if(zone->zbd_->RuntimeZoneResetOnly()){
+        if(zone->GetZBD()->RuntimeZoneResetOnly()){
           return;
         }
         zone_=zone;
@@ -825,7 +825,7 @@ class ZonedBlockDevice {
         //   return;
         // }
         if(zone_!=nullptr){
-          if(zone_->zbd_->RuntimeZoneResetOnly()){
+          if(zone_->GetZBD()->RuntimeZoneResetOnly()){
             zone_=nullptr;
             return;
           }
