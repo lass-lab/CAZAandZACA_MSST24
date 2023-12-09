@@ -1103,6 +1103,72 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
 }
 
 
+// IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
+//   // size_t total_invalid=0;
+//   // size_t reclaimed_invalid=0;
+
+//   IOStatus reset_status=IOStatus::OK();
+//   if(cur_free_percent_>=99){
+//     return reset_status;
+//   }
+  
+
+//   for (size_t i =0;i<io_zones.size();i++) {
+//     const auto z = io_zones[i];
+//     if(is_reseted[i]){
+//       continue;
+//     }
+//     if(z->IsEmpty()){
+//       continue;
+//     }
+//     if(z->IsUsed()){
+//       continue;
+//     }
+//     if ( z->Acquire() ) {
+//       if(z->IsEmpty()){
+//           z->Release();
+//           continue;
+//       }
+//       if(z->IsUsed()){
+//           z->Release();
+//           continue;
+//       }
+
+
+//       bool full = z->IsFull();
+//       total_invalid=(z->wp_ - z->start_);
+//       // printf("total invalid %lu end erase unit wrttien %lu total_full_erase_unit written %lu erase unit size %lu\n",total_invalid,end_erase_unit_written,total_full_erase_unit_written,erase_unit_size);
+//       // if(end_erase_unit_written>reset_threshold_){ //eu
+//       // printf("end")
+//       // }
+//       // 
+//       if(total_invalid>reset_threshold_arr_[cur_free_percent_]){
+//         goto no_reset;
+//       }
+//       erase_size_.fetch_add(total_invalid);
+//       wasted_wp_.fecth_add(z->max_capacity_ - total_invalid);
+//       // printf("end erase written  : %lu rt %lu is_end_erase_unit_should_be_erased %d\n",end_erase_unit_written,reset_threshold_,is_end_erase_unit_should_be_erased);
+//       reset_status = z->Reset();
+
+
+//       if (!reset_status.ok()) return reset_status;
+//         is_reseted[i]=true;
+//         reset_count_.fetch_add(1);
+//         z->reset_count_++;
+//         // 
+
+//         // clock_t end=clock();
+// no_reset:
+//         if (!full&&z->IsEmpty()) { // not full -> empty
+//           PutActiveIOZoneToken();
+//         } 
+//         z->Release();
+//     }
+//   }
+ 
+//   return IOStatus::OK();
+// }
+
 
 IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   // clock_t reset_latency{0};
