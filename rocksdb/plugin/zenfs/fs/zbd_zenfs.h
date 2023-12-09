@@ -800,6 +800,9 @@ class ZonedBlockDevice {
         ReadUnLockZone();
       }
       void ReadLockZone(Zone* zone){
+        if(RuntimeZoneResetOnly()){
+          return;
+        }
         if(zone==nullptr){
           return;
         }
@@ -816,6 +819,9 @@ class ZonedBlockDevice {
         zone_->zone_extents_lock_.unlock();
       }
       void ReadUnLockZone(void){
+        if(RuntimeZoneResetOnly()){
+          return;
+        }
         if(zone_!=nullptr){
            zone_->zone_readers_.fetch_sub(1);
         }
