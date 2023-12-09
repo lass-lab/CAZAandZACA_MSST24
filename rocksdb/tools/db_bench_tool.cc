@@ -7268,7 +7268,7 @@ class Benchmark {
     while (!duration.Done(1)) {
       k++;
       if(k%100000==0){
-        printf("CUREENT : %d\n",k);
+        // printf("CUREENT : %d\n",k);
       }
       DB* db = SelectDB(thread);
       GenerateKeyFromInt(thread->rand.Next() % FLAGS_num, FLAGS_num, &key);
@@ -7277,7 +7277,10 @@ class Benchmark {
         get_weight = FLAGS_readwritepercent;
         put_weight = 100 - get_weight;
       }
+
+
       if (get_weight > 0) {
+        printf("get\n");
         // do all the gets first
         Slice ts;
         if (user_timestamp_size_ > 0) {
@@ -7297,6 +7300,7 @@ class Benchmark {
         reads_done++;
         thread->stats.FinishedOps(nullptr, db, 1, kRead);
       } else  if (put_weight > 0) {
+        printf("put\n");
         // then do all the corresponding number of puts
         // for all the gets we have done earlier
         Status s;
