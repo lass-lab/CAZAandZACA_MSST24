@@ -7280,7 +7280,7 @@ class Benchmark {
 
 
       if (get_weight > 0) {
-        printf("get\n");
+        // printf("get\n");
         // do all the gets first
         Slice ts;
         if (user_timestamp_size_ > 0) {
@@ -7300,7 +7300,7 @@ class Benchmark {
         reads_done++;
         thread->stats.FinishedOps(nullptr, db, 1, kRead);
       } else  if (put_weight > 0) {
-        printf("put\n");
+        // printf("put\n");
         // then do all the corresponding number of puts
         // for all the gets we have done earlier
         Status s;
