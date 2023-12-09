@@ -1112,6 +1112,7 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
     if (ends_with(fname, ".log")) {
       zoneFile->SetIOType(IOType::kWAL);
       zoneFile->SetSparse(!file_opts.use_direct_writes);
+      zoneFile->is_wal_=true;
     } else {
       zoneFile->SetIOType(IOType::kUnknown);
     }

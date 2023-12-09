@@ -116,6 +116,7 @@ class ZoneFile {
   FileSystemWrapper* zenfs_;
  public:
   bool is_sst_ = false;
+  bool is_wal_ = false;
   uint64_t fno_;
   std::vector<uint64_t> input_fno_;
   Slice smallest_;

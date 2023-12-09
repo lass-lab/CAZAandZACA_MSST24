@@ -1048,6 +1048,10 @@ IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime, int lev
   // if(linkfiles_.size()){
   //   printf("SetWriteLifeTimeHint : %s %d\n",linkfiles_[0].c_str(),lifetime);
   // }
+  if(is_wal_){
+    lifetime_=Env::WLTH_SHORT;
+    return;
+  }
   switch (level)
   {
   case 0:
