@@ -1154,7 +1154,7 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
       if(reset_scheme_==kEager){
         is_end_erase_unit_should_be_erased=true;
       }else{
-      is_end_erase_unit_should_be_erased=(erase_unit_size-end_erase_unit_written) < reset_threshold_arr_[cur_free_percent_];
+        is_end_erase_unit_should_be_erased=(erase_unit_size-end_erase_unit_written) < reset_threshold_arr_[cur_free_percent_];
       }
 
       // printf("end erase written  : %lu rt %lu is_end_erase_unit_should_be_erased %d\n",end_erase_unit_written,reset_threshold_,is_end_erase_unit_should_be_erased);

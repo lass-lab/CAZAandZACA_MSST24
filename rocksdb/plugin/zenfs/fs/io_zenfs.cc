@@ -1050,7 +1050,7 @@ IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime, int lev
   // }
   if(is_wal_){
     lifetime_=Env::WLTH_SHORT;
-    return;
+    return IOStatus::OK();
   }
   switch (level)
   {
