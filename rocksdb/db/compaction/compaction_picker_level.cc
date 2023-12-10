@@ -507,10 +507,10 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     int index = file_size[cmp_idx];
     auto* candidate = level_files[index];
     CompactionInputFiles start_i;
-    std::vector<FileMetaData*> files;
+    // std::vector<FileMetaData*> files;
     // uint64_t default_SSTABLE_size= (1<<26);
     start_i.clear();
-    files.clear();
+    // files.clear();
 
 
 
@@ -543,11 +543,11 @@ bool LevelCompactionBuilder::PickFileToCompact() {
           continue;
     }
     
-    files=start_i.files;
-    vstorage_->GetOverlappingInputs(start_level_,&smallest,&largest,&files);
-    for(auto f : files){
-      file_candidates.push_back(f->fd.GetNumber());
-    }
+    // files=start_i.files;
+    // vstorage_->GetOverlappingInputs(start_level_,&smallest,&largest,&files);
+    // for(auto f : files){
+    //   file_candidates.push_back(f->fd.GetNumber());
+    // }
     for(auto f : output_i.files){
       file_candidates.push_back(f->fd.GetNumber());
     }
