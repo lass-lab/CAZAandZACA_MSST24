@@ -5423,7 +5423,7 @@ class Benchmark {
       }
     }
     printf("Writerandom ALL DONE\n");
-    thread->stats.Stop();
+    // thread->stats.Stop();
     thread->stats.AddBytes(bytes);
 
     if(FLAGS_wait_for_compactions){
