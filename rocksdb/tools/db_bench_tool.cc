@@ -2185,7 +2185,6 @@ class Stats {
   }
 
   void StopAfterCompaction(){
-    // printf("StopAfterCompaction\n");
     finish_after_compaction_ = clock_->NowMicros();
     seconds_after_compaction_ = (finish_after_compaction_ - start_) * 1e-6;
   }
@@ -2364,16 +2363,13 @@ class Stats {
     bytes_ += n;
   }
 
-  void Report(const Slice& name, bool report_all=true) {
+  void Report(const Slice& name) {
     // Pretend at least one op was done in case we are running a benchmark
     // that does not call FinishedOps().
     if (done_ < 1) done_ = 1;
 
     std::string extra;
-    std::string extra_2;
     double elapsed = (finish_ - start_) * 1e-6;
-    StopAfterCompaction();
-    double elapsed_after_compaction = (finish_after_compaction_ - start_) * 1e-6;
     if (bytes_ > 0) {
       // Rate is computed on actual elapsed time, not the sum of per-thread
       // elapsed times.
@@ -2381,42 +2377,15 @@ class Stats {
       snprintf(rate, sizeof(rate), "%6.1f MB/s",
                (bytes_ / 1048576.0) / elapsed);
       extra = rate;
-
-      char rate_2[100];
-      snprintf(rate, sizeof(rate_2), "%6.1f MB/s",
-               (bytes_ / 1048576.0) / elapsed_after_compaction);
-      extra_2 = rate;
-
     }
     AppendWithSpace(&extra, message_);
     double throughput = (double)done_/elapsed;
-    // double throughput_after_compaction = (double)done_/elapsed_after_compaction;
 
-// readrandomwriterandom :       0.000 micros/op 22738 ops/sec 3652.297 seconds 83047219 operations; ( reads:8304730 writes:74742489 total:83047219 found:2827366)
     fprintf(stdout,
             "%-12s : %11.3f micros/op %ld ops/sec %.3f seconds %" PRIu64
             " operations;%s%s\n",
-            name.ToString().c_str(), 
-            seconds_ * 1e6 / done_, 
-            (long)throughput,
+            name.ToString().c_str(), seconds_ * 1e6 / done_, (long)throughput,
             elapsed, done_, (extra.empty() ? "" : " "), extra.c_str());
-    // fprintf(stdout,
-    //         "%-12s : %11.3f micros/op %ld ops/sec %.3f seconds %" PRIu64
-    //         " operations;%s%s\n",
-    //         name.ToString().c_str(), 
-    //         throughput_after_compaction * 1e6 / done_, 
-    //         (long)throughput_after_compaction,
-    //         elapsed_after_compaction, done_, (extra_2.empty() ? "" : " "), extra_2.c_str());
-    // fprintf(stdout,
-    //         "%-12s : %11.3f micros/op %ld(%ld) ops/sec %.3f(%.3f) seconds %" PRIu64
-    //         " operations;%s%s (%s)\n",
-    //         name.ToString().c_str(), seconds_ * 1e6 / done_, 
-    //         (long)throughput, (long)throughput_after_compaction,
-    //         elapsed,elapsed_after_compaction, 
-    //         done_, (extra.empty() ? "" : " "), extra.c_str(),extra_2.c_str());
-    if(!report_all){
-      return;
-    }
     if (FLAGS_histogram) {
       for (auto it = hist_.begin(); it != hist_.end(); ++it) {
         fprintf(stdout, "Microseconds per %s:\n%s\n",
@@ -5442,30 +5411,30 @@ class Benchmark {
     // thread->stats.Stop();
     
 
-    if(FLAGS_wait_for_compactions){
-      thread->stats.Report(Slice("before compaction"),false);
+    // if(FLAGS_wait_for_compactions){
+    //   thread->stats.Report(Slice("before compaction"),false);
 
       
-      printf("WAIT FOR COMPACTION\n");
+    //   printf("WAIT FOR COMPACTION\n");
 
-      std::vector<double> compaction_score ;
-      bool during_compaction = false;
-      DB* db = db_.db;
-      do
-      {
-        during_compaction=false;
-        sleep(1);
-        compaction_score = db->LevelsCompactionScore();
-        for(double score : compaction_score){
-          // printf("%lf\n",score);
-          if(score>=1.0){
-            during_compaction=true;
-            // break;
-          }
-        }
+    //   std::vector<double> compaction_score ;
+    //   bool during_compaction = false;
+    //   DB* db = db_.db;
+    //   do
+    //   {
+    //     during_compaction=false;
+    //     sleep(1);
+    //     compaction_score = db->LevelsCompactionScore();
+    //     for(double score : compaction_score){
+    //       // printf("%lf\n",score);
+    //       if(score>=1.0){
+    //         during_compaction=true;
+    //         // break;
+    //       }
+    //     }
 
-      } while (during_compaction);
-    }
+    //   } while (during_compaction);
+    // }
 
     if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
       fprintf(stdout,
