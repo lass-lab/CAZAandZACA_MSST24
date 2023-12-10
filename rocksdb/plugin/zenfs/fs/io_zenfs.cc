@@ -197,7 +197,7 @@ void ZoneFile::EncodeJson(std::ostream& json_stream) {
 Status ZoneFile::DecodeFrom(Slice* input) {
   uint32_t tag = 0;
   std::string filename;
-  uint64_t align=0;
+  // uint64_t align=0;
   GetFixed32(input, &tag);
   if (tag != kFileID || !GetFixed64(input, &file_id_))
     return Status::Corruption("ZoneFile", "File ID missing");
