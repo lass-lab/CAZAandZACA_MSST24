@@ -3944,7 +3944,7 @@ class Benchmark {
     for (int i = 0; i < n; i++) {
       merge_stats.Merge(arg[i].thread->stats);
     }
-    merge_stats.Report(name,true);
+    merge_stats.Report(name);
 
     for (int i = 0; i < n; i++) {
       delete arg[i].thread;
