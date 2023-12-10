@@ -2144,7 +2144,7 @@ class Stats {
     bytes_ = 0;
     seconds_ = 0;
     start_ = clock_->NowMicros();
-    printf("Start :: %lu",start_);
+    // printf("Start :: %lu\n",start_);
     sine_interval_ = clock_->NowMicros();
     finish_ = start_;
     last_report_finish_ = start_;
@@ -2392,7 +2392,7 @@ class Stats {
     double throughput = (double)done_/elapsed;
     // double throughput_after_compaction = (double)done_/elapsed_after_compaction;
 
-
+// readrandomwriterandom :       0.000 micros/op 22738 ops/sec 3652.297 seconds 83047219 operations; ( reads:8304730 writes:74742489 total:83047219 found:2827366)
     fprintf(stdout,
             "%-12s : %11.3f micros/op %ld ops/sec %.3f seconds %" PRIu64
             " operations;%s%s\n",
@@ -3772,8 +3772,21 @@ class Benchmark {
         // printf("DEBUG1 ===================\n");
         CombinedStats combined_stats;
         for (int i = 0; i < num_repeat; i++) {
+          // uint64_t custom_start=clock_->NowMicros();
           Stats stats = RunBenchmark(num_threads, name, method);
+    //       uint64_t custom_end=clock_->NowMicros();
+    //       double elapsed_seconds = (custom_end - custom_start) * 1e-6;
+    //       printf("througput : %lf\n",(double)done_/elapsed_seconds);
+    // fprintf(stdout,
+    //         "====== %11.3f micros/op %ld ops/sec %.3f seconds %" PRIu64
+    //         " operations;%s%s === \n",
+            
+    //         seconds_ * 1e6 / done_, 
+    //         (long)throughput,
+    //         elapsed, done_, (extra.empty() ? "" : " "), );
+          
           combined_stats.AddStats(stats);
+
           if (FLAGS_confidence_interval_only) {
             // printf("combined_stats.ReportWithConfidenceIntervals\n");
             combined_stats.ReportWithConfidenceIntervals(name);
@@ -3875,7 +3888,7 @@ class Benchmark {
     perf_context.EnablePerLevelPerfContext();
     thread->stats.Start(thread->tid);
     (arg->bm->*(arg->method))(thread);
-    // thread->stats.StopAfterCompaction();
+    thread->stats.Stop();
 
     {
       MutexLock l(&shared->mu);
@@ -5425,9 +5438,9 @@ class Benchmark {
         // s=Status::OK();
       }
     }
-    printf("Writerandom ALL DONE\n");
+    // printf("Writerandom ALL DONE\n");
     // thread->stats.Stop();
-    thread->stats.AddBytes(bytes);
+    
 
     if(FLAGS_wait_for_compactions){
       thread->stats.Report(Slice("before compaction"),false);
@@ -5453,11 +5466,7 @@ class Benchmark {
 
       } while (during_compaction);
     }
-    // compaction_score = db->LevelsCompactionScore();
-    // for(double score : compaction_score){
-    //   printf("%lf\n",score);
-    // }
-    // thread->stats.StopAfterCompaction();
+
     if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
       fprintf(stdout,
               "Number of unique keys inserted: %" PRIu64
@@ -5469,7 +5478,7 @@ class Benchmark {
               ".\nNumber of 'disposable entry delete': %" PRIu64 "\n",
               num_written, num_selective_deletes);
     }
-    // thread->stats.AddBytes(bytes);
+    thread->stats.AddBytes(bytes);
   }
 
   Status DoDeterministicCompact(ThreadState* thread,
