@@ -231,19 +231,19 @@ Status ZoneFile::DecodeFrom(Slice* input) {
           delete extent;
           return s;
         }
-        extent->zone_ = zbd_->GetIOZone(extent->start_);
+        // extent->zone_ = zbd_->GetIOZone(extent->start_);
         
-        if (!extent->zone_){
-          printf("%lu\n\n",extent->start_);
-          return Status::Corruption("ZoneFile", "Invalid zone extent");
-        }
-        // push at here
-        extent->zone_->PushExtent(extent);
-        align=(extent->length_+extent->header_size_)%4096;
-        if(align){
-          extent->pad_size_=4096-align;
-        }
-        extent->zone_->used_capacity_ += extent->length_;
+        // if (!extent->zone_){
+        //   printf("%lu\n\n",extent->start_);
+        //   return Status::Corruption("ZoneFile", "Invalid zone extent");
+        // }
+        // // push at here
+        // extent->zone_->PushExtent(extent);
+        // align=(extent->length_+extent->header_size_)%4096;
+        // if(align){
+        //   extent->pad_size_=4096-align;
+        // }
+        // extent->zone_->used_capacity_ += extent->length_;
         extents_.push_back(extent);
         break;
       case kModificationTime:
