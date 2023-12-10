@@ -1728,7 +1728,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   std::vector<uint64_t> fno_list;
   uint64_t max_score=0;
   uint64_t max_invalid_data=0;
-
+  printf("caza worksd?\n");
   std::vector<bool> is_input_in_zone(io_zones.size(),false);
   for(uint64_t fno : input_fno){
     ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
