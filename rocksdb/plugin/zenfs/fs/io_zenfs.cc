@@ -233,8 +233,10 @@ Status ZoneFile::DecodeFrom(Slice* input) {
         }
         extent->zone_ = zbd_->GetIOZone(extent->start_);
         
-        if (!extent->zone_)
+        if (!extent->zone_){
+          printf("%lu\n\n",extent->start_);
           return Status::Corruption("ZoneFile", "Invalid zone extent");
+        }
         // push at here
         extent->zone_->PushExtent(extent);
         align=(extent->length_+extent->header_size_)%4096;

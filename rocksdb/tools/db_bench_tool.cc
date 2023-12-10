@@ -3334,7 +3334,7 @@ class Benchmark {
   }
 
   void Run() {
-    printf("hello@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@run\n");
+    // printf("hello@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@run\n");
     if (!SanityCheck()) {
       ErrorExit();
     }
