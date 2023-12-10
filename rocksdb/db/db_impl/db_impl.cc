@@ -282,12 +282,13 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   }
   // printf("DBImpl::DBImpl open :: reset scheme :: %lu\n",immutable_db_options_.reset_scheme);
   printf("reclaim until %lu~%lu\n",immutable_db_options_.zc_kicks,immutable_db_options_.until);
-  printf("reset_scheme %lu partial_reset_scheme %lu tuning_point %lu allocation_scheme %lu compaction_scheme %lu\n",
+  printf("reset_scheme %lu partial_reset_scheme %lu tuning_point %lu allocation_scheme %lu compaction_scheme %lu input_aware_scheme %lu\n",
                             immutable_db_options_.reset_scheme,
                             immutable_db_options_.partial_reset_scheme,
                             immutable_db_options_.tuning_point,
                             immutable_db_options_.allocation_scheme,
-                            immutable_db_options_.compaction_scheme);
+                            immutable_db_options_.compaction_scheme,
+                            immutable_db_options_.input_aware_scheme);
   // fs_->reset_scheme_= immutable_db_options_.reset_scheme;
   fs_->SetResetScheme(immutable_db_options_.reset_scheme,immutable_db_options_.partial_reset_scheme,immutable_db_options_.tuning_point,
                         immutable_db_options_.zc_kicks,immutable_db_options_.until,immutable_db_options_.allocation_scheme);
