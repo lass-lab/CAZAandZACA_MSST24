@@ -2134,6 +2134,7 @@ class Stats {
   }
 
   void Start(int id) {
+    
     id_ = id;
     next_report_ = FLAGS_stats_interval ? FLAGS_stats_interval : 100;
     last_op_finish_ = start_;
@@ -2143,6 +2144,7 @@ class Stats {
     bytes_ = 0;
     seconds_ = 0;
     start_ = clock_->NowMicros();
+    printf("Start :: %lu",start_);
     sine_interval_ = clock_->NowMicros();
     finish_ = start_;
     last_report_finish_ = start_;
