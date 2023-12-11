@@ -2369,6 +2369,7 @@ class Stats {
     if (done_ < 1) done_ = 1;
 
     std::string extra;
+    finish_=clock_->NowMicros();
     double elapsed = (finish_ - start_) * 1e-6;
     if (bytes_ > 0) {
       // Rate is computed on actual elapsed time, not the sum of per-thread
@@ -3742,6 +3743,7 @@ class Benchmark {
         CombinedStats combined_stats;
         for (int i = 0; i < num_repeat; i++) {
           // uint64_t custom_start=clock_->NowMicros();
+          combined_stats.Start();
           Stats stats = RunBenchmark(num_threads, name, method);
     //       uint64_t custom_end=clock_->NowMicros();
     //       double elapsed_seconds = (custom_end - custom_start) * 1e-6;

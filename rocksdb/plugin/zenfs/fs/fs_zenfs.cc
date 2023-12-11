@@ -499,7 +499,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   //   z->Release();
   // }
   
-  zbd_->SetZCRunning(false);
+  // zbd_->SetZCRunning(false);
   // zc_lock_.unlock();
   // zbd_->ExchangeSpareZone(migrate_zones_);
 
