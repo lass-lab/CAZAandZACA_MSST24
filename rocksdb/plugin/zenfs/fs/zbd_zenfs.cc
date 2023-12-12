@@ -908,6 +908,12 @@ IOStatus ZonedBlockDevice::AllocateMetaZone(Zone **out_meta_zone) {
   Error(logger_, "Out of metadata zones, we should go to read only now.");
   return IOStatus::NoSpace("Out of metadata zones");
 }
+
+void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno){
+
+
+  
+}
 void ZonedBlockDevice::AddTimeLapse(int T) {
   (void)(T);
   // size_t reclaimable= 0;

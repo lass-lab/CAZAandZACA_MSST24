@@ -538,7 +538,14 @@ void CompactionJob::Prepare() {
   assert(c->column_family_data() != nullptr);
   assert(c->column_family_data()->current()->storage_info()->NumLevelFiles(
              compact_->compaction->level()) > 0);
-
+  // c->inputs();
+  std::vector<uint64_t> compaction_inputs_fno;
+  for(auto c_inputs : (*c->inputs())){
+    for(auto input : (c_inputs.files)){
+      compaction_inputs_fno.push_back(input->fd.GetNumber());
+    }
+  }
+  c->immutable_options()->fs->StatsSSTsinSameZone(compaction_inputs_fno);
   write_hint_ =
       c->column_family_data()->CalculateSSTWriteHint(c->output_level());
   bottommost_level_ = c->bottommost_level();

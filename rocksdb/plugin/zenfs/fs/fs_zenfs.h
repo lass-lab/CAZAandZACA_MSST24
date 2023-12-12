@@ -504,7 +504,10 @@ ret:
     zbd_->SetDBPtr(ptr);
   }
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) override;
-  
+  void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno) override {
+    zbd_->StatsSSTsinSameZone(compaction_inputs_fno);
+  }
+
   void StatsCompactionFileSize(bool is_last_file,int output_level,uint64_t file_size) override {
     zbd_->StatsCompactionFileSize(is_last_file,output_level,file_size);
   }

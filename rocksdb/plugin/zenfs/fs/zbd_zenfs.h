@@ -1009,6 +1009,7 @@ class ZonedBlockDevice {
       CalculateResetThreshold(f);
     }
   }
+  void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno);
   IOStatus RuntimeReset(void);
   uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size);
 
