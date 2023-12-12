@@ -979,10 +979,10 @@ void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno){
   // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
   score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
   {
-    std::lock_guard<std::mutex> lg(same_level_score_mutex_);
-    same_level_score_.push_back(score);
-    // same_level_score_for_timelapse_.clear();
-    same_level_score_for_timelapse_=same_level_score_;
+    std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
+    same_zone_score_.push_back(score);
+    // same_zone_score_for_timelapse_.clear();
+    same_zone_score_for_timelapse_=same_zone_score_;
   }
 }
 void ZonedBlockDevice::AddTimeLapse(int T) {

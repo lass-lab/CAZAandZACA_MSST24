@@ -547,13 +547,13 @@ class ZonedBlockDevice {
     // CompactionStats _compaction_stats_[10];
     uint64_t compaction_triggered_[10];
 
-    double avg_same_level_score_ = 0.0;
+    double avg_same_zone_score_ = 0.0;
 
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
             uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels, 
             std::vector<double> compaction_scores, std::vector<uint64_t> levels_size,
             CompactionStats* compaction_stats,
-            std::vector<double> same_level_score_for_timelapse )
+            std::vector<double> same_zone_score_for_timelapse )
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
           , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
@@ -567,12 +567,12 @@ class ZonedBlockDevice {
         compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
       }
       double sum_score=0;
-      size_t score_n=same_level_score_for_timelapse.size();
+      size_t score_n=same_zone_score_for_timelapse.size();
       if(score_n>0){
-        for(double score : same_level_score_for_timelapse){
+        for(double score : same_zone_score_for_timelapse){
           sum_score+=score;
         }
-        avg_same_level_score_=sum_score/score_n;
+        avg_same_zone_score_=sum_score/score_n;
       }
       // num_files_levels_=num_files_levels;
     }
@@ -584,7 +584,7 @@ class ZonedBlockDevice {
             printf("%4d\t%3ld\t%3ld\t%3ld\t%3ld\t%4ld\t%4ld\t%10ld\t%10ld\t%10ld\t%.4lf\t", 
                 T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
              R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20),
-             avg_same_level_score_);
+             avg_same_zone_score_);
       for(int n : num_files_levels_){
         printf("%d\t",n);
       }
@@ -609,9 +609,9 @@ class ZonedBlockDevice {
 
 
   std::vector<FARStat> far_stats_;
-  std::mutex same_level_score_mutex_;
-  std::vector<double> same_level_score_;
-  std::vector<double> same_level_score_for_timelapse;
+  std::mutex same_zone_score_mutex_;
+  std::vector<double> same_zone_score_;
+  std::vector<double> same_zone_score_for_timelapse_;
   // std::atomic<uint64_t> intral0_compaction_input_size_{0};
   // std::atomic<uint64_t> intral0_compaction_output_size_{0};
   // std::atomic<uint64_t> intral0_compaction_triggered_{0};
