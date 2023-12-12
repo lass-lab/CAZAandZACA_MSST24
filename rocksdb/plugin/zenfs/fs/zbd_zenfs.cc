@@ -789,7 +789,19 @@ ZonedBlockDevice::~ZonedBlockDevice() {
             (sum_in_is>>20)/sum_triggered),((sum_in_os>>20)/sum_triggered),
             ((sum_out_s>>20)/sum_triggered),((sum_in_is+sum_in_os)*100/sum_out_s) ,sum_triggered);
   }
-
+  {  
+    std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
+    double sum_score=0.0;
+    double avg_same_zone_score_;
+    size_t score_n=same_zone_score_.size();
+    if(score_n>0){
+      for(double score : same_zone_score_){
+            sum_score+=score;
+      }
+      avg_same_zone_score_=sum_score/score_n;
+    }
+    printf("samezone score : %.2lf",avg_same_zone_score_);
+  }
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
   printf("============================================================\n\n");
