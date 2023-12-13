@@ -1611,16 +1611,19 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
            (sub_compact->compaction->output_level() != 0 &&
             sub_compact->ShouldStopBefore(
                 c_iter->key(), sub_compact->current_output_file_size))
-          || (sub_compact->compaction->output_level() >=2 &&
+          || (cut_once==true&&sub_compact->compaction->output_level() >=2 &&
               sub_compact->compaction->immutable_options()->allocation_scheme==1
               && vstorage->IsThereOverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&cur_key)
-              && cut_once==true)
+              )
 
             ) &&
           sub_compact->builder != nullptr
           ) {
+            if(cut_once){
+              printf("Cut once : ")
+            }
             cut_once=false;
-            printf("output file ended %lu\n",sub_compact->current_output_file_size);
+            // printf("output file ended %lu\n",sub_compact->current_output_file_size);
         // (2) this key belongs to the next file. For historical reasons, the
         // iterator status after advancing will be given to
         // FinishCompactionOutputFile().
