@@ -1775,7 +1775,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
       continue;
     }
     if(sst_in_zone[i]!=0){
-      printf("%lu\n",sst_in_zone>>20);
+      printf("%lu\n",sst_in_zone[i]>>20);
     }
     sst_in_zone_square+=(sst_in_zone[i]*sst_in_zone[i]);
   }
