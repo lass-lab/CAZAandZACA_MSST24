@@ -351,7 +351,9 @@ void ZoneFile::ClearExtents() {
       continue;
     }
     Zone* zone = (*e)->zone_;
-
+    if(!zone){
+      continue;
+    }
     assert(zone && zone->used_capacity_ >= (*e)->length_);
     if(zone->used_capacity_<(*e)->length_){
       printf("clearextents Error here@@@");
