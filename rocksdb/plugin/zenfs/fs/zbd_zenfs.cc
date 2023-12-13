@@ -994,7 +994,7 @@ void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno){
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     same_zone_score_.push_back(score);
     // same_zone_score_for_timelapse_.clear();
-    same_zone_score_for_timelapse_=same_zone_score_;
+    // same_zone_score_for_timelapse_=same_zone_score_;
   }
 }
 void ZonedBlockDevice::AddTimeLapse(int T) {
@@ -1047,7 +1047,12 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
   //   }
   // }
 
-
+  {
+    std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
+    // same_zone_score_.push_back(score);
+    // same_zone_score_for_timelapse_.clear();
+    same_zone_score_for_timelapse_=same_zone_score_;
+  }
 
   far_stats_.emplace_back(cur_free_percent_, 
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
