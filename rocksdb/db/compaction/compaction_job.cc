@@ -1522,15 +1522,20 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
 
   // const Slice* const start = sub_compact->start;
   // const Slice* const end = sub_compact->end;
-  InternalKey tmp_key;
-  tmp_key.DecodeFrom((*start));
-  auto vstorage = cfd->current()->storage_info();
-  bool should_form_left_short_lived_sst
+  bool should_form_left_short_lived_sst=false;
+  bool should_form_right_short_lived_sst=false;
+  if(start!=nullptr&&end!=nullptr&&sub_compact->compaction->output_level()>=2){
+    InternalKey tmp_key;
+    tmp_key.DecodeFrom((*start));
+    auto vstorage = cfd->current()->storage_info();
+    should_form_left_short_lived_sst
+          =vstorage->OverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&tmp_key);
+    InternalKey upper_level_largest=tmp_key;
+    tmp_key.DecodeFrom((*end));
+    should_form_right_short_lived_sst
         =vstorage->OverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&tmp_key);
-  InternalKey upper_level_largest=tmp_key;
-  tmp_key.DecodeFrom((*end));
-  bool should_form_right_short_lived_sst
-      =vstorage->OverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&tmp_key);
+  }
+
   while (status.ok() && !cfd->IsDropped() && c_iter->Valid()) {
     // Invariant: c_iter.status() is guaranteed to be OK if c_iter->Valid()
     // returns true.
