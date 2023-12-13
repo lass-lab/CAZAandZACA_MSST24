@@ -800,7 +800,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
       }
       avg_same_zone_score_=sum_score/score_n;
     }
-    printf("samezone score : %.2lf",avg_same_zone_score_);
+    printf("samezone score : %.2lf\n",avg_same_zone_score_);
   }
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
@@ -1769,7 +1769,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
   (768^2 + 256 ^2) ÷ (1024^2) × 0.5= 0.3125 
   */
   for(size_t i =0; i < io_zones.size(); i ++){
-    if(sst_in_zone[i]*sst_in_zone[i] > io_zones[0]->max_capacity_ - (1<<25) ){
+    if(sst_in_zone[i] > io_zones[0]->max_capacity_ - (1<<22) ){
       score += (sst_in_zone[i] /total_size);
       total_size-=sst_in_zone[i];
       continue;
