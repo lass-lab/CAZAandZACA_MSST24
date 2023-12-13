@@ -1597,7 +1597,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
 
       // }
       InternalKey cur_key;
-      cur_key.DecodeFrom(c_iter->key());
+      cur_key.DecodeFrom(c_iter->user_key());
       auto vstorage = cfd->current()->storage_info();
       
       // versions_
