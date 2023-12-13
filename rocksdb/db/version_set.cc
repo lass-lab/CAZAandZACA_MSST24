@@ -3401,6 +3401,18 @@ bool VersionStorageInfo::OverlapInLevel(int level,
                                largest_user_key);
 }
 
+bool VersionStorageInfo::IsThereOverlappingInputsAtUppperLevel(int level,InternalKey* _key){
+  std::vector<FileMetaData*> inputs;
+  GetOverlappingInputs(level,_key,_key,&inputs);
+  for(auto f : inputs){
+    if(!f->being_compacted){
+      printf("yes there is it !!\n");
+      return true;
+    }
+  }
+  return false;
+}
+
 // Store in "*inputs" all files in "level" that overlap [begin,end]
 // If hint_index is specified, then it points to a file in the
 // overlapping range.
@@ -3521,6 +3533,7 @@ void VersionStorageInfo::GetCleanInputsWithinInterval(
 // if within_range is set, then only store the maximum clean inputs
 // within range [begin, end]. "clean" means there is a boundary
 // between the files in "*inputs" and the surrounding files
+
 void VersionStorageInfo::GetOverlappingInputsRangeBinarySearch(
     int level, const InternalKey* begin, const InternalKey* end,
     std::vector<FileMetaData*>* inputs, int hint_index, int* file_index,

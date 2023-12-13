@@ -210,6 +210,8 @@ class VersionStorageInfo {
   // Return idx'th highest score
   double CompactionScore(int idx) const { return compaction_score_[idx]; }
   std::vector<double> GetCompactionScores(void) {return compaction_score_; }
+  bool IsThereOverlappingInputsAtUppperLevel(int level,InternalKey* _key);
+
   void GetOverlappingInputs(
       int level, const InternalKey* begin,  // nullptr means before all keys
       const InternalKey* end,               // nullptr means after all keys

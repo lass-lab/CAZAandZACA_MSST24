@@ -1593,14 +1593,33 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
       break;
     }
     if (!output_file_ended && c_iter->Valid()) {
-      if (((partitioner.get() &&
+      // if(sub_compact->compaction->immutable_options()->allocation_scheme==1){
+
+      // }
+      InternalKey cur_key;
+      cur_key.DecodeFrom(c_iter->key());
+      auto vstorage = cfd->current()->storage_info();
+      
+      // versions_
+      if (
+        (
+          (partitioner.get() &&
             partitioner->ShouldPartition(PartitionerRequest(
                 last_key_for_partitioner, c_iter->user_key(),
                 sub_compact->current_output_file_size)) == kRequired) ||
+
            (sub_compact->compaction->output_level() != 0 &&
             sub_compact->ShouldStopBefore(
-                c_iter->key(), sub_compact->current_output_file_size))) &&
-          sub_compact->builder != nullptr) {
+                c_iter->key(), sub_compact->current_output_file_size))
+          || (sub_compact->compaction->output_level() >=2 &&
+              sub_compact->compaction->immutable_options()->allocation_scheme==1
+              && vstorage->IsThereOverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&cur_key)
+            )
+
+            ) &&
+          sub_compact->builder != nullptr
+          
+          ) {
         // (2) this key belongs to the next file. For historical reasons, the
         // iterator status after advancing will be given to
         // FinishCompactionOutputFile().
