@@ -1064,6 +1064,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
     // same_zone_score_.push_back(score);
     // same_zone_score_for_timelapse_.clear();
     same_zone_score_for_timelapse_=same_zone_score_;
+    invalidate_score_for_timelapse_=invalidate_score_;
   }
 
   far_stats_.emplace_back(cur_free_percent_, 
@@ -1073,7 +1074,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
                 GetZoneSize(),db_ptr_ ? db_ptr_->NumLevelsFiles() : std::vector<int>(0),
                 db_ptr_ ? db_ptr_->LevelsCompactionScore() : std::vector<double>(0),
                 db_ptr_ ? db_ptr_->LevelsSize() : std::vector<uint64_t>(0),compaction_stats_,
-                same_zone_score_for_timelapse_);
+                same_zone_score_for_timelapse_,invalidate_score_for_timelapse_);
 }
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
     T++;
@@ -1783,9 +1784,9 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
       total_size-=sst_in_zone[i];
       continue;
     }
-    if(sst_in_zone[i]!=0){
-      printf("%lu\n",sst_in_zone[i]>>20);
-    }
+    // if(sst_in_zone[i]!=0){
+    //   printf("%lu\n",sst_in_zone[i]>>20);
+    // }
     sst_in_zone_square+=(sst_in_zone[i]*sst_in_zone[i]);
   }
   // score += sum(sst_in_zone^2) /(total_size^2) * (total_size/initial_total_size)
@@ -1796,7 +1797,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
     // score+= (sst_in_zone_square/initial_total_size);
     score+= (double(sst_in_zone_square/total_size)/(double)initial_total_size);
   }
-  printf("score : %lf     \n",score);
+  // printf("score : %lf     \n",score);
   return score;
 }
 
