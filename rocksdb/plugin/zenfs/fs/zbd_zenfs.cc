@@ -1689,7 +1689,7 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
     }
     auto extents=zFile->GetExtents();
     for(ZoneExtent* extent : extents){
-      uint64_t zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+      zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
       is_input_in_zone[zidx]=true;
     }
   }
