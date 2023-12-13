@@ -1910,7 +1910,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   uint64_t max_invalid_data=0;
   // printf("caza worksd?\n");
   std::vector<bool> is_input_in_zone(io_zones.size(),false);
-
+  (void)(input_fno);
 
 
   // for(uint64_t fno : input_fno){
