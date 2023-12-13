@@ -1524,13 +1524,15 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
   // const Slice* const end = sub_compact->end;
   bool should_form_left_short_lived_sst=false;
   bool should_form_right_short_lived_sst=false;
+  auto vstorage = cfd->current()->storage_info();
+  InternalKey upper_level_largest;
   if(start!=nullptr&&end!=nullptr&&sub_compact->compaction->output_level()>=2){
     InternalKey tmp_key;
     tmp_key.DecodeFrom((*start));
-    auto vstorage = cfd->current()->storage_info();
+    
     should_form_left_short_lived_sst
           =vstorage->OverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&tmp_key);
-    InternalKey upper_level_largest=tmp_key;
+    upper_level_largest=tmp_key;
     tmp_key.DecodeFrom((*end));
     should_form_right_short_lived_sst
         =vstorage->OverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&tmp_key);
