@@ -800,7 +800,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
       }
       avg_same_zone_score=sum_score/score_n;
     }
-    printf("samezone score : %.2lf\n",avg_same_zone_score);
+    printf("samezone score : %.5lf\n",avg_same_zone_score);
   }
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
