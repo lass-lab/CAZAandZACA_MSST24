@@ -1081,7 +1081,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
     uint64_t invalid_size = (z->wp_ -z->start_) - z->used_capacity_;
 
     if(z->wp_ - z->start_){
-      ratio = (double)(invalid_size/(double)(z-)>wp_ -z->start_));
+      ratio = (double)(invalid_size/(double)(z->wp_ -z->start_));
     }else{
       ratio = 0.0;
     }
