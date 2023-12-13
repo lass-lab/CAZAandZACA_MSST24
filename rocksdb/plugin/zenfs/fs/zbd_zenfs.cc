@@ -1744,7 +1744,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
     ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
     auto extents=zFile->GetExtents();
     for(ZoneExtent* extent : extents){
-      zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+      uint64_t zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
       // is_sst_in_zone[zidx]=true;
       sst_in_zone[zidx]+=extent->length_;
       total_size+=extent->length_;

@@ -580,7 +580,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // should be different, original logic not using GetOverlappingInputs at start level.
 
 
-
+    candidate_size=0;
     invalidation_ratio_score=ioptions_.fs->GetMaxInvalidateCompactionScore(file_candidates,&candidate_size);
 
     if(max_candidate_compensate_size==0){
@@ -593,9 +593,13 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     (void)(max_invalidation_ratio_score);
     // (void)(file_size_score);
     file_size_score=(normalized_candidate_compensate_size*zns_free_percent)/100;
-
+    if(candidate_size==0){
+      score=invalidation_ratio_score;
+    }else{
+      score=invalidation_ratio_score/candidate_size;
+    }
     // file_size_score=(normalized_candidate_compensate_size*std::log(zns_free_percent)*100)/std::log(100);
-    score=invalidation_ratio_score;
+    
     // score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
     // score=(double)(invalidation_ratio_score);
     // score=(double)(invalidation_ratio_score)*(double)(candidate->compensated_file_size>>20)/(double)(candidate_size>>20);
