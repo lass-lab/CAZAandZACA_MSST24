@@ -1653,7 +1653,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           InternalKey cur_key;
           cur_key.DecodeFrom(c_iter->key());
           InternalKey input_level_smallest= (*files)[0]->smallest;
-          InternalKeyComparator* icmp = vstorage->InternalComparator();
+          const InternalKeyComparator* icmp = vstorage->InternalComparator();
           // icmp.Compare()
           InternalKey input_level_largest = (*files)[files->size()-1]->largest;
           if(should_form_left_short_lived_sst &&
