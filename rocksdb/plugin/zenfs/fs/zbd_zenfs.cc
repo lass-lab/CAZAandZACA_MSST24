@@ -2395,28 +2395,61 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
                                                         uint64_t min_capacity){
     IOStatus s;
     auto extents = zFile->GetExtents();
-    Zone* allocated_zone=nullptr;
+    // Zone* allocated_zone=nullptr;
+    std::vector<std::pair<uint64_t,uint64_t>> zone_score(io_zones.size(),{0,0});
+    (void)(is_input_in_zone);
+
     for(auto e : extents){
-      if(is_input_in_zone[e->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
-        continue;
-      }
-      if(!e->zone_->Acquire()){
-        continue;
-      }
-      if(e->zone_->capacity_<=min_capacity || e->zone_->IsFull()){
-        e->zone_->Release();
-        continue;
-      }
-      // if(e->zone_->IsFull()){
-      //   e->zone_->Release();
-      //   continue;
-      // }
-      allocated_zone=e->zone_;
-      break;
+      uint64_t zidx= e->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+      zone_score[zidx].second=zidx;
+      zone_score[zidx].first+=e->length_;
     }
 
-    *zone_out=allocated_zone;
-    return IOStatus::OK();
+    std::sort(zone_score.rbegin(),zone_score.rend());
+
+    for(auto zscore : zone_score){
+
+      uint64_t score=zscore.first;
+      uint64_t zidx = zscore.second;
+      printf("zscore : %lu zidx %lu",score>>20,zidx);
+      if(score==0){
+        return IOStatus::OK();
+      }
+      Zone* z = io_zones[zidx]; 
+
+      if(!z->Acquire()){
+        continue;
+      }
+      if(z->capacity_<=min_capacity || z->IsFull()){
+        z->Release();
+        continue;
+      }
+      printf("return %lu\n",zidx_);
+      *zone_out=io_zones[zidx];
+      return IOStatus::OK();
+    }
+
+    // for(auto e : extents){
+    //   if(is_input_in_zone[e->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
+    //     continue;
+    //   }
+    //   if(!e->zone_->Acquire()){
+    //     continue;
+    //   }
+    //   if(e->zone_->capacity_<=min_capacity || e->zone_->IsFull()){
+    //     e->zone_->Release();
+    //     continue;
+    //   }
+    //   // if(e->zone_->IsFull()){
+    //   //   e->zone_->Release();
+    //   //   continue;
+    //   // }
+    //   allocated_zone=e->zone_;
+    //   break;
+    // }
+
+    // *zone_out=allocated_zone;
+    // return IOStatus::OK();
   }
 
 IOStatus ZonedBlockDevice::AllocateEmptyZone(Zone **zone_out) {
