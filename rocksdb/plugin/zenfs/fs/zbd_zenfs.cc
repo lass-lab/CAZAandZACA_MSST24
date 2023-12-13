@@ -1779,7 +1779,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
   // score += sum(sst_in_zone^2) /(total_size^2) * (total_size/initial_total_size)
   // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
   // printf("before score : %.2lf , sst_in_zone_square %lu , total size %lu, init_total size %lu\n",
-          score,sst_in_zone_square,total_size,initial_total_size);
+          // score,sst_in_zone_square,total_size,initial_total_size);
   if(total_size>0 && initial_total_size> 0){
     // score+= (sst_in_zone_square/initial_total_size);
     score+= (double(sst_in_zone_square/total_size)/(double)initial_total_size);
