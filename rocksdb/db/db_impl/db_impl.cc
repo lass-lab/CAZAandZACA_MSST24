@@ -2943,6 +2943,9 @@ void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list){
   auto files=vstorage->LevelFiles(level);
 
   for(const auto f: files){
+    if(f->being_compacted){
+      continue;
+    }
     fno_list.push_back(f->fd.GetNumber());
   }
 }
