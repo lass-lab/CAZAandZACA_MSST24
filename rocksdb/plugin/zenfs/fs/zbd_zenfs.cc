@@ -1802,7 +1802,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
   (768^2 + 256 ^2) ÷ (1024^2) × 0.5= 0.3125 
   */
   for(size_t i =0; i < io_zones.size(); i ++){
-    if(sst_in_zone[i] > io_zones[i]->wp_ - io_zones[i]->used_capacity_ - (1<<22) ){
+    if(sst_in_zone[i] > io_zones[i]->max_capacity_ - (1<<22) ){
       score += ((double)sst_in_zone[i] /(double)initial_total_size);
       total_size-=sst_in_zone[i];
       continue;
