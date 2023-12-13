@@ -608,7 +608,6 @@ class ZonedBlockDevice {
         printf("%lu\t",(s>>20));
       }
       printf("|l1l2triggered\t");
-      // printf("%lu\t",l1l2_compaction_triggered_);
       for(auto trigger : compaction_triggered_){
         printf("%lu\t",(trigger));
       }
