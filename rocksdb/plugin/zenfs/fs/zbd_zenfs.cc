@@ -2394,6 +2394,8 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
                                                         Zone** zone_out,
                                                         uint64_t min_capacity){
     // IOStatus s;
+
+    
     auto extents = zFile->GetExtents();
     // Zone* allocated_zone=nullptr;
     std::vector<std::pair<uint64_t,uint64_t>> zone_score(io_zones.size(),{0,0});
