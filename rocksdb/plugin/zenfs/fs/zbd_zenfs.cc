@@ -2393,7 +2393,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
   IOStatus ZonedBlockDevice::GetNearestZoneFromZoneFile(ZoneFile* zFile,std::vector<bool>& is_input_in_zone,
                                                         Zone** zone_out,
                                                         uint64_t min_capacity){
-    IOStatus s;
+    // IOStatus s;
     auto extents = zFile->GetExtents();
     // Zone* allocated_zone=nullptr;
     std::vector<std::pair<uint64_t,uint64_t>> zone_score(io_zones.size(),{0,0});
@@ -2424,7 +2424,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
         z->Release();
         continue;
       }
-      printf("return %lu\n",zidx_);
+      printf("return %lu\n",zidx);
       *zone_out=io_zones[zidx];
       return IOStatus::OK();
     }
