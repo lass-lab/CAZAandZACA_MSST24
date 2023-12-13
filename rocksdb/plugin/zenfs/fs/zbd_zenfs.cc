@@ -792,15 +792,21 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   {  
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     double sum_score=0.0;
-    double avg_same_zone_score;
+    double sum_inval_score=0.0;
+    double avg_same_zone_score,avg_inval_score;
     size_t score_n=same_zone_score_.size();
     if(score_n>0){
       for(double score : same_zone_score_){
             sum_score+=score;
       }
       avg_same_zone_score=sum_score/score_n;
+      for(double score : invalidate_score_){
+        sum_inval_score+=score;
+      }
+      avg_inval_score=sum_inval_score/score_n;
     }
-    printf("samezone score : %.5lf\n",avg_same_zone_score);
+    printf("samezone score : %lf\n",avg_same_zone_score);
+    printf("invalidate score %lf\n",avg_inval_score);
   }
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
@@ -990,9 +996,12 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   // // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
   // score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
   double score = GetMaxSameZoneScore(compaction_inputs_fno);
+  uint64_t none;
+  double inval_score = GetMaxInvalidateCompactionScore(compaction_inputs_fno,&none,true);
   {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     same_zone_score_.push_back(score);
+    invalidate_score_.push_back(inval_score);
     // same_zone_score_for_timelapse_.clear();
     // same_zone_score_for_timelapse_=same_zone_score_;
   }
@@ -1915,18 +1924,18 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   }  
 
   if(level==1){
-    fno_list.clear();
-    zone_score.clear();
-    zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
-    SameLevelFileList(0,fno_list);
-    s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
-                                min_capacity);
+    // fno_list.clear();
+    // zone_score.clear();
+    // zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
+    // SameLevelFileList(0,fno_list);
+    // s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
+    //                             min_capacity);
 
-    if(allocated_zone!=nullptr){
-      // printf("CAZA 1 \n");
-      *zone_out=allocated_zone;
-      return IOStatus::OK();
-    }
+    // if(allocated_zone!=nullptr){
+    //   // printf("CAZA 1 \n");
+    //   *zone_out=allocated_zone;
+    //   return IOStatus::OK();
+    // }
   }
 
   {
