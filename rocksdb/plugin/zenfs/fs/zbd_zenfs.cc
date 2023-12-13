@@ -2416,7 +2416,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
       uint64_t zidx = zscore.second;
       printf("zscore : %lu zidx %lu",score>>20,zidx);
       if(score==0){
-        return IOStatus::OK();
+        break;
       }
       Zone* z = io_zones[zidx]; 
 
@@ -2452,7 +2452,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
     // }
 
     // *zone_out=allocated_zone;
-    // return IOStatus::OK();
+    return IOStatus::OK();
   }
 
 IOStatus ZonedBlockDevice::AllocateEmptyZone(Zone **zone_out) {
