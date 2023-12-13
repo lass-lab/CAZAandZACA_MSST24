@@ -792,15 +792,15 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   {  
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     double sum_score=0.0;
-    double avg_same_zone_score_;
+    double avg_same_zone_score;
     size_t score_n=same_zone_score_.size();
     if(score_n>0){
       for(double score : same_zone_score_){
             sum_score+=score;
       }
-      avg_same_zone_score_=sum_score/score_n;
+      avg_same_zone_score=sum_score/score_n;
     }
-    printf("samezone score : %.2lf\n",avg_same_zone_score_);
+    printf("samezone score : %.2lf\n",avg_same_zone_score);
   }
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
@@ -1778,13 +1778,13 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
   }
   // score += sum(sst_in_zone^2) /(total_size^2) * (total_size/initial_total_size)
   // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
-  printf("before score : %.2lf , sst_in_zone_square %lu , total size %lu, init_total size %lu\n",
+  // printf("before score : %.2lf , sst_in_zone_square %lu , total size %lu, init_total size %lu\n",
           score,sst_in_zone_square,total_size,initial_total_size);
   if(total_size>0 && initial_total_size> 0){
     // score+= (sst_in_zone_square/initial_total_size);
     score+= (double(sst_in_zone_square/total_size)/(double)initial_total_size);
   }
-  printf("score : %.2lf     \n",score);
+  // printf("score : %.2lf     \n",score);
   return score;
 }
 
