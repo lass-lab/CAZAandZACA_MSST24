@@ -531,7 +531,7 @@ class FileSystem : public Customizable {
                                const IOOptions& options, uint64_t* file_size,
                                IODebugContext* dbg) = 0;
 
-  virtual void SetResetScheme(uint32_t ,uint32_t, uint64_t, uint64_t, uint64_t,uint64_t) {}
+  virtual void SetResetScheme(uint32_t ,uint32_t, uint64_t, uint64_t, uint64_t,uint64_t,std::vector<uint64_t>&) {}
   virtual void StatsSSTsinSameZone(std::vector<uint64_t>& ) {}
 
 
@@ -1468,8 +1468,9 @@ class FileSystemWrapper : public FileSystem {
     return target_->GetFileSize(f, options, s, dbg);
   }
 
-  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) {
-    target_->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
+  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme,
+                      std::vector<uint64_t>& other_options) {
+    target_->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme,other_options);
   }
 
   void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno) override {

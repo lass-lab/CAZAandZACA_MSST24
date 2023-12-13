@@ -995,6 +995,8 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   // }
   // // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
   // score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
+
+
   double score = GetMaxSameZoneScore(compaction_inputs_fno);
   uint64_t none;
   double inval_score = GetMaxInvalidateCompactionScore(compaction_inputs_fno,&none,true);
@@ -1904,17 +1906,17 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
 
 
-  for(uint64_t fno : input_fno){
-    ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
-    if(zFile==nullptr){
-      continue;
-    }
-    auto extents=zFile->GetExtents();
-    for(ZoneExtent* extent : extents){
-      uint64_t zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
-      is_input_in_zone[zidx]=true;
-    }
-  }
+  // for(uint64_t fno : input_fno){
+  //   ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
+  //   if(zFile==nullptr){
+  //     continue;
+  //   }
+  //   auto extents=zFile->GetExtents();
+  //   for(ZoneExtent* extent : extents){
+  //     uint64_t zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+  //     is_input_in_zone[zidx]=true;
+  //   }
+  // }
 
   // zone valid overlapping capacity
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
@@ -1955,6 +1957,9 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       if(zFile==nullptr){
         continue;
       }
+      if(zFile->selected_as_input_){
+        continue;
+      }
       auto extents=zFile->GetExtents();
       for(auto extent: extents){
         if(!extent->zone_->IsFull()){
@@ -1971,6 +1976,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]==true){
         continue;
       }
+      
       cur_score=zone_score[i];
       target_zone=io_zones[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES];
       cur_invalid_data=(target_zone->wp_-target_zone->start_) - target_zone->used_capacity_;
@@ -2104,8 +2110,12 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
       if(zFile==nullptr){
         continue;
       }
+      if(zFile->selected_as_input_){
+        continue;
+      }
       auto extents=zFile->GetExtents();
       for(auto e : extents){
+        
         if(!e->zone_->IsFull()){
           zone_score[e->zone_->zidx_]+=e->length_;
           no_same_level_files=false;
@@ -2184,7 +2194,9 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
     if(fno_list_sz==1) {
          zFile=GetSSTZoneFileInZBDNoLock(fno_list[0]);
          if(zFile!=nullptr){
-            s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
+            if(!zFile->selected_as_input_){
+              s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
+            }
          }
          if(!s.ok()){
           return s;
@@ -2196,6 +2208,9 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
     for(idx=0;idx< fno_list_sz;idx++){
       zFile=GetSSTZoneFileInZBDNoLock(fno_list[idx]);
       if(zFile==nullptr){
+        continue;
+      }
+      if(zFile->selected_as_input_){
         continue;
       }
       int res=icmp->Compare(largest,zFile->smallest_);
@@ -2217,6 +2232,9 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
           if(zFile==nullptr){
             continue;
           }
+          if(zFile->selected_as_input_){
+            continue;
+          }
           s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
           if(!s.ok()){
             return s;
@@ -2231,6 +2249,9 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
       for(auto it = fno_list.rbegin();it!=fno_list.rend();it++){
           zFile=GetSSTZoneFileInZBDNoLock(*it);
           if(zFile==nullptr){
+            continue;
+          }
+          if(zFile->selected_as_input_){
             continue;
           }
           s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
@@ -2255,6 +2276,10 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
               l_idx--;
               continue;
             }
+            if(zFile->selected_as_input_){
+              l_idx--;
+              continue;
+            }
             s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
             if(!s.ok()){
               return s;
@@ -2269,6 +2294,10 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
             zFile=GetSSTZoneFileInZBDNoLock(fno_list[r_idx]);
             if(zFile==nullptr){
               r_idx++;
+              continue;
+            }
+            if(zFile->selected_as_input_){
+              r_idx--;
               continue;
             }
             s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);

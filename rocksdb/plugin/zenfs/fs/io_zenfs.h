@@ -115,6 +115,7 @@ class ZoneFile {
   std::atomic<int> readers_{0};
   FileSystemWrapper* zenfs_;
  public:
+
   bool is_sst_ = false;
   bool is_wal_ = false;
   uint64_t fno_;
@@ -125,7 +126,7 @@ class ZoneFile {
 
   std::vector<ZoneExtent*> extents_;
   static const uint64_t SPARSE_HEADER_SIZE = 8;
-
+  bool selected_as_input_ = false;
   ZoneFile(ZonedBlockDevice* zbd, uint64_t file_id_,
                     MetadataWriter* metadata_writer,FileSystemWrapper* zenfs);
 

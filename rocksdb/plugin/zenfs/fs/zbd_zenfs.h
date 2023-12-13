@@ -1020,16 +1020,19 @@ class ZonedBlockDevice {
     // }
   }
 
-  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) { 
+  void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme,
+                    std::vector<uint64_t>& other_options) { 
     reset_scheme_=r; 
     allocation_scheme_=allocation_scheme;
     partial_reset_scheme_=partial_reset_scheme;
     tuning_point_=T;
+    input_aware_scheme_ = other_options[0];
     if(zc!=0){
       zc_until_set_=true;
       zc_=zc;
       until_=until;
     }
+
     
     for(uint64_t f=0;f<=100;f++){
       CalculateResetThreshold(f);

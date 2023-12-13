@@ -382,7 +382,8 @@ class Env : public Customizable {
   // Store the size of fname in *file_size.
   virtual Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
 
-  virtual void SetResetScheme(uint32_t,uint32_t,uint64_t,uint64_t,uint64_t,uint64_t) {}
+  virtual void SetResetScheme(uint32_t,uint32_t,uint64_t,uint64_t,uint64_t,uint64_t,
+                              std::vector<uint64_t>& ) {}
 
   virtual void StatsSSTsinSameZone(std::vector<uint64_t>& ) {}
 
@@ -1490,8 +1491,9 @@ class EnvWrapper : public Env {
   Status GetFileSize(const std::string& f, uint64_t* s) override {
     return target_.env->GetFileSize(f, s);
   }
-  void SetResetScheme(uint32_t r, uint32_t partial_reset_scheme, uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme) override {
-    target_.env->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme);
+  void SetResetScheme(uint32_t r, uint32_t partial_reset_scheme, uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme,
+                      std::vector<uint64_t>& other_options) override {
+    target_.env->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme,other_options);
   }
   void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno) override {
     target_.env->StatsSSTsinSameZone(compaction_inputs_fno);
