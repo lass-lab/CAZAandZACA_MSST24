@@ -1891,6 +1891,9 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   uint64_t max_invalid_data=0;
   // printf("caza worksd?\n");
   std::vector<bool> is_input_in_zone(io_zones.size(),false);
+
+
+
   for(uint64_t fno : input_fno){
     ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
     if(zFile==nullptr){
@@ -1905,13 +1908,25 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 
   // zone valid overlapping capacity
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
+
   std::vector<uint64_t> zone_score(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
   if(level==0){
     goto l0;
   }  
 
-  {
+  if(level==1){
+    fno_list.clear();
+    zone_score.clear();
+    zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
+    SameLevelFileList(0,fno_list);
+    s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
+                                min_capacity);
+  }
 
+  {
+    fno_list.clear();
+    zone_score.clear();
+    zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
     AdjacentFileList(smallest, largest, level, fno_list);
 
 
@@ -1998,7 +2013,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 l0:
   // return IOStatus::OK();
 // if level 0, most level 0 zone
-  if(level==0 || level==100){
+  if(level==0 || level==1 ||level==100){
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
     zone_score.clear();
@@ -2006,9 +2021,9 @@ l0:
     SameLevelFileList(0,fno_list);
     s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
                                 min_capacity);
-    if(allocated_zone!=nullptr){
-      // printf("CAZA 2.1\n");
-    }
+    // if(allocated_zone!=nullptr){
+    //   // printf("CAZA 2.1\n");
+    // }
   }else{ // if other level, same level but near key-sstfile zone
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
@@ -2043,7 +2058,6 @@ l0:
   if(allocated_zone!=nullptr){
     *zone_out=allocated_zone;
     allocated_zone->lifetime_ = file_lifetime;
-    // return s;
   }
 
 
