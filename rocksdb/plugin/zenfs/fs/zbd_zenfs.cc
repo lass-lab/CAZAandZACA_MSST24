@@ -921,7 +921,7 @@ IOStatus ZonedBlockDevice::AllocateMetaZone(Zone **out_meta_zone) {
   return IOStatus::NoSpace("Out of metadata zones");
 }
 
-void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno){
+void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno){
 /*
 128
 128
