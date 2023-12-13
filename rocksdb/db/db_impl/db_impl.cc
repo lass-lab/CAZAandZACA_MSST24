@@ -2915,25 +2915,25 @@ void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_
   largest.DecodeFrom(l);
   smallest.DecodeFrom(s);
   // printf("ajacent 1\n");
+  if(level==0){
+    printf("no!!\n");
+  }
   vstorage->GetOverlappingInputs(level+1,&smallest,&largest,&higher_output_level_inputs.files);
   // printf("ajacent 2\n");
-  if(level>0){
-    level--;
-  }
-  // printf("ajacent 3\n");
-  vstorage->GetOverlappingInputs(level,&smallest,&largest,&lower_output_level_inputs.files);
-// printf("ajacent 4\n");
   for(const auto& f : higher_output_level_inputs.files){
     if(!f->being_compacted){
       fno_list.push_back(f->fd.GetNumber());
     }
   }
-
-  for(const auto&f : lower_output_level_inputs.files){
-    if(!f->being_compacted){
-      fno_list.push_back(f->fd.GetNumber());
+  if(level>2){ // if level 1, all level 0 is overlapped. to much overlapped
+    vstorage->GetOverlappingInputs(level-1,&smallest,&largest,&lower_output_level_inputs.files);
+    for(const auto&f : lower_output_level_inputs.files){
+      if(!f->being_compacted){
+        fno_list.push_back(f->fd.GetNumber());
+      }
     }
   }
+
   return;
 }
 

@@ -1802,7 +1802,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
   (768^2 + 256 ^2) ÷ (1024^2) × 0.5= 0.3125 
   */
   for(size_t i =0; i < io_zones.size(); i ++){
-    if(sst_in_zone[i] > io_zones[0]->max_capacity_ - (1<<22) ){
+    if(sst_in_zone[i] > io_zones[i]->wp_ - io_zones[i]->used_capacity_ - (1<<22) ){
       score += ((double)sst_in_zone[i] /(double)initial_total_size);
       total_size-=sst_in_zone[i];
       continue;
@@ -2056,7 +2056,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 l0:
   // return IOStatus::OK();
 // if level 0, most level 0 zone
-  if(level==0 || level==1 ||level==100){
+  if(level==0 ||level==100){
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
     zone_score.clear();
