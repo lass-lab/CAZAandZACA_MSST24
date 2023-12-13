@@ -2414,7 +2414,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
 
       uint64_t score=zscore.first;
       uint64_t zidx = zscore.second;
-      printf("zscore : %lu zidx %lu",score>>20,zidx);
+      printf("zscore : %lu zidx %lu\n",score>>20,zidx);
       if(score==0){
         break;
       }
