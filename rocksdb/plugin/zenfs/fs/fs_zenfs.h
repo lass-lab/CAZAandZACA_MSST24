@@ -385,7 +385,7 @@ loop:
     }
 
     if(zbd_->GetZCRunning() ){
-      // sleep(1);
+      sleep(1);
       goto loop;
     }
 ret:
