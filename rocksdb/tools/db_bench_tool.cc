@@ -3743,7 +3743,7 @@ class Benchmark {
         CombinedStats combined_stats;
         for (int i = 0; i < num_repeat; i++) {
           // uint64_t custom_start=clock_->NowMicros();
-          combined_stats.Start();
+          // combined_stats.Start();
           Stats stats = RunBenchmark(num_threads, name, method);
     //       uint64_t custom_end=clock_->NowMicros();
     //       double elapsed_seconds = (custom_end - custom_start) * 1e-6;
