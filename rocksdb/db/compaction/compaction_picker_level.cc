@@ -474,7 +474,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   uint64_t max_invalidation_ratio_score = 0;
 
   uint64_t file_size_score;
-  uint64_t invalidation_ratio_score;
+  double invalidation_ratio_score;
   double score;
   bool selected= false;
   unsigned int max_cmp_idx = vstorage_->NextCompactionIndex(start_level_);
@@ -595,8 +595,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     file_size_score=(normalized_candidate_compensate_size*zns_free_percent)/100;
 
     // file_size_score=(normalized_candidate_compensate_size*std::log(zns_free_percent)*100)/std::log(100);
-
-    score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
+    score=invalidation_ratio_score;
+    // score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
     // score=(double)(invalidation_ratio_score);
     // score=(double)(invalidation_ratio_score)*(double)(candidate->compensated_file_size>>20)/(double)(candidate_size>>20);
     // score = invalidation_ratio_score + file_size_score*2;

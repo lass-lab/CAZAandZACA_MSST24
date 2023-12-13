@@ -947,22 +947,21 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
 (42.6^2)*3/(128*128)
 0.33
 */
-  uint64_t total_size=0,initial_total_size;
-  uint64_t sst_in_zone_square = 0;
-  double score = 0.0;
-  // uint64_t avg_score = GetMaxInvalidateCompactionScore(compaction_inputs_fno,&total_size,true);
-  std::vector<uint64_t> sst_in_zone(io_zones.size(),0);
-  for(uint64_t fno : compaction_inputs_fno){
-    ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
-    auto extents=zFile->GetExtents();
-    for(ZoneExtent* extent : extents){
-      zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
-      // is_sst_in_zone[zidx]=true;
-      sst_in_zone[zidx]+=extent->length_;
-      total_size+=extent->length_;
-    }
-  }
-  initial_total_size=total_size;
+  // uint64_t total_size=0,initial_total_size;
+  // uint64_t sst_in_zone_square = 0;
+  // double score = 0.0;
+  // std::vector<uint64_t> sst_in_zone(io_zones.size(),0);
+  // for(uint64_t fno : compaction_inputs_fno){
+  //   ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
+  //   auto extents=zFile->GetExtents();
+  //   for(ZoneExtent* extent : extents){
+  //     zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+  //     // is_sst_in_zone[zidx]=true;
+  //     sst_in_zone[zidx]+=extent->length_;
+  //     total_size+=extent->length_;
+  //   }
+  // }
+  // initial_total_size=total_size;
   /*
   2048
   1024 -> 0.5
@@ -980,16 +979,17 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   256
   (768^2 + 256 ^2) ÷ (1024^2) × 0.5= 0.3125 
   */
-  for(size_t i ; i < io_zones.size(); i ++){
-    if(sst_in_zone[i]*sst_in_zone[i] > io_zones[0].max_capacity_ - (1<<25) ){
-      score += (sst_in_zone[i] /total_size);
-      total_size-=sst_in_zone[i];
-      continue;
-    }
-    sst_in_zone_square+=sst_in_zone[i]*sst_in_zone[i];
-  }
-  // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
-  score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
+  // for(size_t i ; i < io_zones.size(); i ++){
+  //   if(sst_in_zone[i]*sst_in_zone[i] > io_zones[0].max_capacity_ - (1<<25) ){
+  //     score += (sst_in_zone[i] /total_size);
+  //     total_size-=sst_in_zone[i];
+  //     continue;
+  //   }
+  //   sst_in_zone_square+=sst_in_zone[i]*sst_in_zone[i];
+  // }
+  // // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
+  // score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
+  double score = GetMaxSameZoneScore(compaction_inputs_fno)
   {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     same_zone_score_.push_back(score);
@@ -997,6 +997,9 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
     // same_zone_score_for_timelapse_=same_zone_score_;
   }
 }
+
+
+
 void ZonedBlockDevice::AddTimeLapse(int T) {
   (void)(T);
   // size_t reclaimable= 0;
@@ -1729,6 +1732,54 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
 
   return IOStatus::OK();
 }
+
+double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_inputs_fno){
+  uint64_t total_size=0,initial_total_size;
+  uint64_t sst_in_zone_square = 0;
+  double score = 0.0;
+  // uint64_t avg_score = GetMaxInvalidateCompactionScore(compaction_inputs_fno,&total_size,true);
+  std::vector<uint64_t> sst_in_zone(io_zones.size(),0);
+  for(uint64_t fno : compaction_inputs_fno){
+    ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
+    auto extents=zFile->GetExtents();
+    for(ZoneExtent* extent : extents){
+      zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+      // is_sst_in_zone[zidx]=true;
+      sst_in_zone[zidx]+=extent->length_;
+      total_size+=extent->length_;
+    }
+  }
+  initial_total_size=total_size;
+  /*
+  2048
+  1024 -> 0.5
+  512
+  512
+
+  (512*512 + 512*512) / (1024*1024) * 0.5
+
+
+  1024 -> 0.5
+  1024 -> 0.5
+
+  1024 -> 0.5
+  768
+  256
+  (768^2 + 256 ^2) ÷ (1024^2) × 0.5= 0.3125 
+  */
+  for(size_t i ; i < io_zones.size(); i ++){
+    if(sst_in_zone[i]*sst_in_zone[i] > io_zones[0].max_capacity_ - (1<<25) ){
+      score += (sst_in_zone[i] /total_size);
+      total_size-=sst_in_zone[i];
+      continue;
+    }
+    sst_in_zone_square+=sst_in_zone[i]*sst_in_zone[i];
+  }
+  // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
+  score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
+  return score;
+}
+
 uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size,bool stats){
   // std::vector<std::pair<bool,uint64_t>> zone_score;
   std::vector<bool> is_sst_in_zone(io_zones.size(),false);
