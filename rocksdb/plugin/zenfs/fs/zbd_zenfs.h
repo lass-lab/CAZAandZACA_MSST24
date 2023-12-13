@@ -496,6 +496,7 @@ class ZonedBlockDevice {
   uint32_t reset_scheme_;
   uint64_t allocation_scheme_;
   uint32_t partial_reset_scheme_;
+  uint64_t input_aware_scheme_;
   uint64_t tuning_point_;
   enum {
     kEager = 0,

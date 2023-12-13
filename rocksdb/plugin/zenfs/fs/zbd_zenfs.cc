@@ -995,7 +995,14 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   // }
   // // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
   // score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
-
+  if(input_aware_scheme_ == 1){
+    for(auto fno : compaction_inputs_fno){
+      auto zFile  = GetSSTZoneFileInZBDNoLock(fno);
+      if(!zFile){
+        zFile->selected_as_input_= true;
+      }
+    }
+  }
 
   double score = GetMaxSameZoneScore(compaction_inputs_fno);
   uint64_t none;
