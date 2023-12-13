@@ -1076,9 +1076,16 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
     invalidate_score_for_timelapse_=invalidate_score_;
   }
   double ratio_sum = 0.0;
+  double ratio;
   for(auto z : io_zones){
     uint64_t invalid_size = (z->wp_ -z->start_) - z->used_capacity_;
-    double ratio = (invalid_size/(z->wp_-z->start_));
+
+    if(z->wp_ -z->start_){
+      ratio = (invalid_size/(z->wp_ -z->start_));
+    }else{
+      ratio = 0.0;
+    }
+    
     ratio_sum+=ratio;
   }
   double avg_invalid_ratio = ratio_sum/(io_zones.size());
