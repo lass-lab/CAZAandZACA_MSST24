@@ -3401,19 +3401,29 @@ bool VersionStorageInfo::OverlapInLevel(int level,
                                largest_user_key);
 }
 
-bool VersionStorageInfo::IsThereOverlappingInputsAtUppperLevel(int level,InternalKey* _key){
+bool VersionStorageInfo::OverlappingInputsAtUppperLevel(int level,InternalKey* _key){
   std::vector<FileMetaData*> inputs;
   if(level<=1){
-    printf("error %d\n@@@@@@@@@@",level);
+    return false;
   }
+  bool ret=false;
+  // InternalKeyComparator* icmp=internal_comparator_;
   GetOverlappingInputs((level-1),_key,_key,&inputs);
   for(auto f : inputs){
     if(!f->being_compacted){
       // printf("yes there is it !!\n");
-      return true;
+      // return true;
+      if(ret==false){
+        (*_key)=f->largest;
+      }
+      
+      if(internal_comparator_->Compare((*_key),f->largest)>0 ){
+        (*_key)=f->largest;
+      }
+      ret=true;
     }
   }
-  return false;
+  return ret;
 }
 
 // Store in "*inputs" all files in "level" that overlap [begin,end]

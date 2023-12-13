@@ -1333,7 +1333,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     assert(comp_status == CompactionServiceJobStatus::kUseLocal);
   }
 #endif  // !ROCKSDB_LITE
-
+  
   uint64_t prev_cpu_micros = db_options_.clock->CPUMicros();
 
   ColumnFamilyData* cfd = sub_compact->compaction->column_family_data();
@@ -1519,7 +1519,18 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           ? nullptr
           : sub_compact->compaction->CreateSstPartitioner();
   std::string last_key_for_partitioner;
-  bool cut_once= true;
+
+  // const Slice* const start = sub_compact->start;
+  // const Slice* const end = sub_compact->end;
+  InternalKey tmp_key;
+  tmp_key.DecodeFrom((*start));
+  auto vstorage = cfd->current()->storage_info();
+  bool should_form_left_short_lived_sst
+        =vstorage->OverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&tmp_key);
+  InternalKey upper_level_largest=tmp_key;
+  tmp_key.DecodeFrom((*end));
+  bool should_form_right_short_lived_sst
+      =vstorage->OverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&tmp_key);
   while (status.ok() && !cfd->IsDropped() && c_iter->Valid()) {
     // Invariant: c_iter.status() is guaranteed to be OK if c_iter->Valid()
     // returns true.
@@ -1596,9 +1607,8 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
       // if(sub_compact->compaction->immutable_options()->allocation_scheme==1){
 
       // }
-      InternalKey cur_key;
-      cur_key.DecodeFrom(c_iter->key());
-      auto vstorage = cfd->current()->storage_info();
+
+      // auto vstorage = cfd->current()->storage_info();
       
       // versions_
       if (
@@ -1611,24 +1621,71 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
            (sub_compact->compaction->output_level() != 0 &&
             sub_compact->ShouldStopBefore(
                 c_iter->key(), sub_compact->current_output_file_size))
-          || (cut_once==true&&sub_compact->compaction->output_level() >=2 &&
-              sub_compact->compaction->immutable_options()->allocation_scheme==1
-              && vstorage->IsThereOverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&cur_key)
-              )
+          // || (cut_once_left==true && sub_compact->compaction->output_level() >=2 &&
+          //     sub_compact->compaction->immutable_options()->allocation_scheme==1 &&
+          //     vstorage->ShouldCutShortLivedSST(sub_compact->compaction->output_level(),&cur_key,true)  )
+          // || (cut_once_left==false && cut_once_right==true&&sub_compact->compaction->output_level() >=2 &&
+          //     sub_compact->compaction->immutable_options()->allocation_scheme==1
+          //     && vstorage->ShouldCutShortLivedSST(sub_compact->compaction->output_level(),&cur_key,false)
+              // )
 
             ) &&
           sub_compact->builder != nullptr
           ) {
-            if(cut_once){
-              printf("Cut once : ")
-            }
-            cut_once=false;
-            // printf("output file ended %lu\n",sub_compact->current_output_file_size);
+
         // (2) this key belongs to the next file. For historical reasons, the
         // iterator status after advancing will be given to
         // FinishCompactionOutputFile().
         output_file_ended = true;
       }
+    /*
+    both : my smallest always smaller than largest, my largest is always larger than smallest
+
+    left side shortest : my smallest is larger than smallest
+
+    right side : my largest is smaller than largest
+    */
+
+
+      if(sub_compact->compaction->output_level() >=2 &&
+          sub_compact->compaction->immutable_options()->allocation_scheme==1){
+          auto files =  sub_compact->compaction->inputs(0);
+          InternalKey cur_key;
+          cur_key.DecodeFrom(c_iter->key());
+          InternalKey input_level_smallest= (*files)[0]->smallest;
+          InternalKeyComparator* icmp = vstorage->InternalComparator();
+          // icmp.Compare()
+          InternalKey input_level_largest = (*files)[files->size()-1]->largest;
+          if(should_form_left_short_lived_sst &&
+          // cur_key>overlapping_level_largest
+          icmp->Compare(cur_key,upper_level_largest)>0
+          )
+          {
+            should_form_left_short_lived_sst=false;
+            output_file_ended=true;
+          }
+
+          if(should_form_right_short_lived_sst &&should_form_left_short_lived_sst==false 
+          && icmp->Compare(cur_key,input_level_largest)>0
+            //  cur_key>input_level_largest
+            
+          ){
+            should_form_right_short_lived_sst=false;
+            output_file_ended=true;
+          }
+      }
+
+      // if(output_file_ended==false&&
+      //     sub_compact->compaction->output_level() >=2 && 
+      //     sub_compact->compaction->immutable_options()->allocation_scheme==1){
+      //   if(cut_once_left==true){
+
+      //   }
+      //   if(cut_once_right==true){
+
+      //   }
+      // }
+
     }
     if (output_file_ended) {
       const Slice* next_key = nullptr;
@@ -1639,8 +1696,8 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
       
       sub_compact->compaction->immutable_options()->fs->StatsCompactionFileSize(false,sub_compact->compaction->output_level(),sub_compact->builder->FileSize());
 
-      // printf("FinishCompactionOutputFile in the loop (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
-      //                                                               sub_compact->builder->FileSize());
+      printf("FinishCompactionOutputFile in the loop (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
+                                                                    sub_compact->builder->FileSize());
       status = FinishCompactionOutputFile(input->status(), sub_compact,
                                           &range_del_agg, &range_del_out_stats,
                                           next_key);
