@@ -1620,6 +1620,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           sub_compact->builder != nullptr
           
           ) {
+            printf("output file ended %lu>>20\n",sub_compact->current_output_file_size);
         // (2) this key belongs to the next file. For historical reasons, the
         // iterator status after advancing will be given to
         // FinishCompactionOutputFile().

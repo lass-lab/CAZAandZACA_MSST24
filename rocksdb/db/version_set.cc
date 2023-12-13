@@ -3409,7 +3409,7 @@ bool VersionStorageInfo::IsThereOverlappingInputsAtUppperLevel(int level,Interna
   GetOverlappingInputs((level-1),_key,_key,&inputs);
   for(auto f : inputs){
     if(!f->being_compacted){
-      printf("yes there is it !!\n");
+      // printf("yes there is it !!\n");
       return true;
     }
   }
