@@ -1075,7 +1075,13 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
     same_zone_score_for_timelapse_=same_zone_score_;
     invalidate_score_for_timelapse_=invalidate_score_;
   }
-
+  double ratio_sum = 0.0;
+  for(auto z : io_zones){
+    uint64_t invalid_size = z->wp_ - z->used_capacity_;
+    double ratio = (invalid_size/z->max_capacity_)
+    ratio_sum+=ratio;
+  }
+  double avg_invalid_ratio = ratio_sum/(io_zones.size());
   far_stats_.emplace_back(cur_free_percent_, 
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
           erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
@@ -1083,7 +1089,8 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
                 GetZoneSize(),db_ptr_ ? db_ptr_->NumLevelsFiles() : std::vector<int>(0),
                 db_ptr_ ? db_ptr_->LevelsCompactionScore() : std::vector<double>(0),
                 db_ptr_ ? db_ptr_->LevelsSize() : std::vector<uint64_t>(0),compaction_stats_,
-                same_zone_score_for_timelapse_,invalidate_score_for_timelapse_);
+                same_zone_score_for_timelapse_,invalidate_score_for_timelapse_,
+                avg_invalid_ratio);
 }
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
     T++;
