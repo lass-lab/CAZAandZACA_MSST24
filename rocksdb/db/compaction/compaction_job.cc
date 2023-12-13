@@ -1519,7 +1519,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           ? nullptr
           : sub_compact->compaction->CreateSstPartitioner();
   std::string last_key_for_partitioner;
-
+  bool cut_once= true;
   while (status.ok() && !cfd->IsDropped() && c_iter->Valid()) {
     // Invariant: c_iter.status() is guaranteed to be OK if c_iter->Valid()
     // returns true.
@@ -1597,7 +1597,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
 
       // }
       InternalKey cur_key;
-      cur_key.DecodeFrom(c_iter->user_key());
+      cur_key.DecodeFrom(c_iter->key());
       auto vstorage = cfd->current()->storage_info();
       
       // versions_
@@ -1614,13 +1614,13 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           || (sub_compact->compaction->output_level() >=2 &&
               sub_compact->compaction->immutable_options()->allocation_scheme==1
               && vstorage->IsThereOverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&cur_key)
-            )
+              && cut_once==true)
 
             ) &&
           sub_compact->builder != nullptr
-          
           ) {
-            printf("output file ended %lu>>20\n",sub_compact->current_output_file_size);
+            cut_once=false;
+            printf("output file ended %lu\n",sub_compact->current_output_file_size);
         // (2) this key belongs to the next file. For historical reasons, the
         // iterator status after advancing will be given to
         // FinishCompactionOutputFile().
