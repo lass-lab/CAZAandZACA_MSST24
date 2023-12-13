@@ -1921,6 +1921,12 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
     SameLevelFileList(0,fno_list);
     s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
                                 min_capacity);
+
+    if(allocated_zone!=nullptr){
+      // printf("CAZA 1 \n");
+      *zone_out=allocated_zone;
+      return IOStatus::OK();
+    }
   }
 
   {
