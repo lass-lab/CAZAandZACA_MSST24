@@ -301,6 +301,9 @@ Status ZoneFile::MergeUpdate(std::shared_ptr<ZoneFile> update, bool replace) {
   for (long unsigned int i = 0; i < update_extents.size(); i++) {
     ZoneExtent* extent = update_extents[i];
     Zone* zone = extent->zone_;
+    if(!zone){
+      continue;
+    }
     zone->used_capacity_ += extent->length_;
     printf("ZoneFile::MergeUpdate :: %lu %lu\n",extent->start_, extent->length_);
     new_ext=new ZoneExtent(extent->start_, extent->length_, nullptr,filename);
