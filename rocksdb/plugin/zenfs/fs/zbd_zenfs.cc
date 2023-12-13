@@ -2431,7 +2431,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
       *zone_out=io_zones[zidx];
       return IOStatus::OK();
     }
-
+    printf("cannotget T.T\n");
     // for(auto e : extents){
     //   if(is_input_in_zone[e->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
     //     continue;
