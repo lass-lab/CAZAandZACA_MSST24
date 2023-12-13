@@ -1536,6 +1536,12 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     tmp_key.DecodeFrom((*end));
     should_form_right_short_lived_sst
         =vstorage->OverlappingInputsAtUppperLevel(sub_compact->compaction->output_level(),&tmp_key);
+    if(should_form_left_short_lived_sst){
+      printf("should_form_left_short_lived_sst\n");
+    }
+    if(should_form_right_short_lived_sst){
+      printf("should_form_right_short_lived_sst\n");
+    }
   }
 
   while (status.ok() && !cfd->IsDropped() && c_iter->Valid()) {
@@ -1670,7 +1676,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           {
             should_form_left_short_lived_sst=false;
             output_file_ended=true;
-                        printf("left side (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
+            printf("left side (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
                                                                     sub_compact->builder->FileSize());
           }
 
@@ -1681,7 +1687,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           ){
             should_form_right_short_lived_sst=false;
             output_file_ended=true;
-              printf("right side (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
+            printf("right side (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
                                                                     sub_compact->builder->FileSize());
           }
       }
