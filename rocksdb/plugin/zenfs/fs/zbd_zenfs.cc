@@ -2203,13 +2203,13 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
          if(zFile!=nullptr){
             if(!zFile->selected_as_input_){
               s=GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
+              if(!s.ok()){
+                return s;
+              }    
+              *zone_out=allocated_zone;
+              return s;
             }
          }
-         if(!s.ok()){
-          return s;
-         }
-         *zone_out=allocated_zone;
-         return s;
     }
     // fno_list is increasing order : db/version_set.h line 580
     for(idx=0;idx< fno_list_sz;idx++){
@@ -2593,7 +2593,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
   if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
-    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,input_fno,&allocated_zone,min_capacity);
+    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),&allocated_zone,min_capacity);
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
