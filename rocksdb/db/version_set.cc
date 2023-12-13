@@ -3404,7 +3404,7 @@ bool VersionStorageInfo::OverlapInLevel(int level,
 bool VersionStorageInfo::IsThereOverlappingInputsAtUppperLevel(int level,InternalKey* _key){
   std::vector<FileMetaData*> inputs;
   if(level<=1){
-    printf("error %d\n@@@@@@@@@@",level),
+    printf("error %d\n@@@@@@@@@@",level);
   }
   GetOverlappingInputs((level-1),_key,_key,&inputs);
   for(auto f : inputs){
