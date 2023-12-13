@@ -989,7 +989,7 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   // }
   // // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
   // score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
-  double score = GetMaxSameZoneScore(compaction_inputs_fno)
+  double score = GetMaxSameZoneScore(compaction_inputs_fno);
   {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     same_zone_score_.push_back(score);
@@ -1688,7 +1688,7 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
     }
     auto extents=zFile->GetExtents();
     for(ZoneExtent* extent : extents){
-      zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+      uint64_t zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
       is_input_in_zone[zidx]=true;
     }
   }
@@ -1768,7 +1768,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
   (768^2 + 256 ^2) ÷ (1024^2) × 0.5= 0.3125 
   */
   for(size_t i ; i < io_zones.size(); i ++){
-    if(sst_in_zone[i]*sst_in_zone[i] > io_zones[0].max_capacity_ - (1<<25) ){
+    if(sst_in_zone[i]*sst_in_zone[i] > io_zones[0]->max_capacity_ - (1<<25) ){
       score += (sst_in_zone[i] /total_size);
       total_size-=sst_in_zone[i];
       continue;
