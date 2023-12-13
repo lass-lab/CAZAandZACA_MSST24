@@ -1670,6 +1670,8 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           {
             should_form_left_short_lived_sst=false;
             output_file_ended=true;
+                        printf("left side (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
+                                                                    sub_compact->builder->FileSize());
           }
 
           if(should_form_right_short_lived_sst &&should_form_left_short_lived_sst==false 
@@ -1679,6 +1681,8 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
           ){
             should_form_right_short_lived_sst=false;
             output_file_ended=true;
+              printf("right side (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
+                                                                    sub_compact->builder->FileSize());
           }
       }
 
@@ -1703,8 +1707,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
       
       sub_compact->compaction->immutable_options()->fs->StatsCompactionFileSize(false,sub_compact->compaction->output_level(),sub_compact->builder->FileSize());
 
-      printf("FinishCompactionOutputFile in the loop (%d) : fs  %lu\n",sub_compact->compaction->output_level(),
-                                                                    sub_compact->builder->FileSize());
+
       status = FinishCompactionOutputFile(input->status(), sub_compact,
                                           &range_del_agg, &range_del_out_stats,
                                           next_key);
