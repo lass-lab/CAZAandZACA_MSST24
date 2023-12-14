@@ -1069,7 +1069,7 @@ class ZonedBlockDevice {
     std::vector<std::pair<uint64_t,uint64_t>> ret;
     ret.clear();
     for(uint64_t index = 0 ; index < zone_score.size() ; index++){
-      ret.push_back({zone_score[i],index});
+      ret.push_back( { zone_score[index], index });
     }
     std::sort(ret.rbegin(),ret.rend());
     return ret;
