@@ -2925,14 +2925,14 @@ void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_
       fno_list.push_back(f->fd.GetNumber());
     }
   }
-  if(level>2){ // if level 1, all level 0 is overlapped. to much overlapped
+  // if(level>2){ // if level 1, all level 0 is overlapped. to much overlapped
     vstorage->GetOverlappingInputs(level-1,&smallest,&largest,&lower_output_level_inputs.files);
     for(const auto&f : lower_output_level_inputs.files){
       if(!f->being_compacted){
         fno_list.push_back(f->fd.GetNumber());
       }
     }
-  }
+  // }
 
   return;
 }
