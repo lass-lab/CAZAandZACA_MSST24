@@ -609,7 +609,7 @@ class ZonedBlockDevice {
       //        R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20));
             printf("%4d\t%3ld\t%3ld\t%3ld\t%3ld\t%4ld\t%4ld\t%10ld\t%10ld\t%10ld\t%.4lf\t%.4lf\t%.4lf\t", 
                 T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
-             R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20),
+             R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20)
              ,avg_invalid_ratio_);
       for(int i = 0 ; i < 5 ; i++){
         printf("%.4lf\n",avg_same_zone_score_[i]);
