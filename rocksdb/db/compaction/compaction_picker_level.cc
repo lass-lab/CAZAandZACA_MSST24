@@ -598,6 +598,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     }else{
       score=invalidation_ratio_score/candidate_size;
     }
+    printf("score %lf\n",score);
     // file_size_score=(normalized_candidate_compensate_size*std::log(zns_free_percent)*100)/std::log(100);
     
     // score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
