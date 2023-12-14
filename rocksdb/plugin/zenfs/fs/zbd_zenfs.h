@@ -581,7 +581,7 @@ class ZonedBlockDevice {
         for(double score : inval_score_for_timelapse[i]){
           sum_score+=score;
         }
-        avg_inval_score_[i]=inval_score_for_timelapse->size() ? 
+        avg_inval_score_[i]=inval_score_for_timelapse[i].size() ? 
                       sum_score/inval_score_for_timelapse[i].size() : 0.0;
       }
       
@@ -612,10 +612,10 @@ class ZonedBlockDevice {
              R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20)
              ,avg_invalid_ratio_);
       for(int i = 0 ; i < 5 ; i++){
-        printf("%.4lf\n",avg_same_zone_score_[i]);
+        printf("%.4lf\t",avg_same_zone_score_[i]);
       }
       for(int i = 0 ; i < 5 ; i++){
-        printf("%.4lf\n",avg_inval_score_[i]);
+        printf("%.4lf\t",avg_inval_score_[i]);
       }
       // for(int n : num_files_levels_){
       //   printf("%d\t",n);

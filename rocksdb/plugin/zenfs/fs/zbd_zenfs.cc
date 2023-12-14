@@ -809,10 +809,12 @@ ZonedBlockDevice::~ZonedBlockDevice() {
         }
         avg_inval_score=sum_inval_score/score_n;
       }
+      printf("[%d] samezone score : %lf\tinvalidate score %lf\n",i,avg_same_zone_score,avg_inval_score);
+      
       sum_sum_score+=sum_score;
       sum_sum_inval_score+=sum_inval_score;
       total_n+=score_n;
-      printf("[%d] samezone score : %lf\tinvalidate score %lf\n",i,avg_same_zone_score,avg_inval_score);
+      
     }
     if(total_n){
       printf("total samezone score : %lf\tinvalidate score %lf\n",sum_sum_score/total_n,sum_sum_inval_score/total_n);
