@@ -1925,6 +1925,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   // printf("caza worksd?\n");
   std::vector<bool> is_input_in_zone(io_zones.size(),false);
   (void)(input_fno);
+  (void)(predicted_size);
 
 
   // for(uint64_t fno : input_fno){
@@ -1943,7 +1944,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
 
   std::vector<uint64_t> zone_score(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
-  if(level==0 || predicted_size < (63<<(20))){
+  if(level==0){
     goto l0;
   }  
 
