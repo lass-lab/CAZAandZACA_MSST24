@@ -385,7 +385,7 @@ class Env : public Customizable {
   virtual void SetResetScheme(uint32_t,uint32_t,uint64_t,uint64_t,uint64_t,uint64_t,
                               std::vector<uint64_t>& ) {}
 
-  virtual void StatsSSTsinSameZone(std::vector<uint64_t>& ) {}
+  virtual void StatsSSTsinSameZone(std::vector<uint64_t>& ,int) {}
 
   virtual void StatsCompactionFileSize(bool,int,uint64_t) {}
 
@@ -1495,8 +1495,8 @@ class EnvWrapper : public Env {
                       std::vector<uint64_t>& other_options) override {
     target_.env->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme,other_options);
   }
-  void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno) override {
-    target_.env->StatsSSTsinSameZone(compaction_inputs_fno);
+  void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno,int output_level) override {
+    target_.env->StatsSSTsinSameZone(compaction_inputs_fno,output_level);
   }
 
   void StatsCompactionFileSize(bool is_last_file,int output_level,uint64_t file_size){

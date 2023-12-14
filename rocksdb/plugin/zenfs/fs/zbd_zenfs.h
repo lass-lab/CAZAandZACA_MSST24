@@ -615,7 +615,7 @@ class ZonedBlockDevice {
         printf("%.4lf\t",avg_same_zone_score_[i]);
       }
       for(int i = 0 ; i < 5 ; i++){
-        printf("%.4lf\t",avg_inval_score_[i]);
+        printf("%.3lf\t",avg_inval_score_[i]);
       }
       // for(int n : num_files_levels_){
       //   printf("%d\t",n);
@@ -1060,7 +1060,7 @@ class ZonedBlockDevice {
       CalculateResetThreshold(f);
     }
   }
-  void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno);
+  void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno,int output_level);
   IOStatus RuntimeReset(void);
   uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size,bool stats);
   double GetMaxSameZoneScore(std::vector<uint64_t>& compaction_inputs_fno);

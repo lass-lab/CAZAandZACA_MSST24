@@ -545,7 +545,7 @@ void CompactionJob::Prepare() {
       compaction_inputs_fno.push_back(input->fd.GetNumber());
     }
   }
-  c->immutable_options()->fs->StatsSSTsinSameZone(compaction_inputs_fno);
+  c->immutable_options()->fs->StatsSSTsinSameZone(compaction_inputs_fno,compact_->compaction->output_level());
   write_hint_ =
       c->column_family_data()->CalculateSSTWriteHint(c->output_level());
   bottommost_level_ = c->bottommost_level();

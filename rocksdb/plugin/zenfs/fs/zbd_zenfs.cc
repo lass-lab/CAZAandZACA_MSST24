@@ -796,6 +796,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     double sum_sum_score=0.0, sum_sum_inval_score=0.0;
     size_t total_n = 0;
     for(int i = 0; i<5; i++){
+
       double sum_score=0.0;
       double sum_inval_score=0.0;
       size_t score_n=same_zone_score_[i].size();
@@ -804,6 +805,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
               sum_score+=score;
         }
         avg_same_zone_score=sum_score/score_n;
+
         for(double score : invalidate_score_[i]){
           sum_inval_score+=score;
         }
@@ -942,7 +944,7 @@ IOStatus ZonedBlockDevice::AllocateMetaZone(Zone **out_meta_zone) {
   return IOStatus::NoSpace("Out of metadata zones");
 }
 
-void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno){
+void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno,int output_level){
 /*
 128
 128
@@ -1010,13 +1012,13 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   // }
   // // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
   // score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
-  int level = 0;
+  // int level = 0;
   if(input_aware_scheme_ == 1){
     for(auto fno : compaction_inputs_fno){
       auto zFile  = GetSSTZoneFileInZBDNoLock(fno);
       if(!zFile){
         zFile->selected_as_input_= true;
-        level = zFile->level_ > level ? zFile->level_ : level;
+        // level = zFile->level_ > level ? zFile->level_ : level;
       }
     }
   }
@@ -1026,8 +1028,8 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   double inval_score = GetMaxInvalidateCompactionScore(compaction_inputs_fno,&none,true);
   {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
-    same_zone_score_[level].push_back(score);
-    invalidate_score_[level].push_back(inval_score);
+    same_zone_score_[output_level].push_back(score);
+    invalidate_score_[output_level].push_back(inval_score);
     // same_zone_score_for_timelapse_.clear();
     // same_zone_score_for_timelapse_=same_zone_score_;
   }

@@ -505,8 +505,8 @@ ret:
   }
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme,
                         std::vector<uint64_t>& other_options) override;
-  void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno) override {
-    zbd_->StatsSSTsinSameZone(compaction_inputs_fno);
+  void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno,int output_level) override {
+    zbd_->StatsSSTsinSameZone(compaction_inputs_fno,output_level);
   }
 
   void StatsCompactionFileSize(bool is_last_file,int output_level,uint64_t file_size) override {
