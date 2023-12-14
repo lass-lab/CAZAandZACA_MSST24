@@ -1992,6 +1992,8 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       }
     }
   }
+  // auto sorted_zone_score = SortedByZoneScore(zone_score);
+
 
   if(!no_near_level_files){
     for(size_t i=ZENFS_META_ZONES+ZENFS_SPARE_ZONES;i<zone_score.size();i++){
@@ -2008,7 +2010,9 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       }
 
       
-      
+      if(cur_score<max_score){
+        continue;
+      }
 
       if(!target_zone->Acquire()){
         continue;
@@ -2126,6 +2130,9 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
   uint64_t max_score = 0;
   uint64_t cur_score;
   bool no_same_level_files=true;
+
+
+
   {
     // std::lock_guard<std::mutex> lg(sst_file_map_lock_);
     for(auto fno : fno_list){
@@ -2160,7 +2167,9 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
     if(cur_score == 0){
       continue;
     }
-
+    if(cur_score<max_score){
+      continue;
+    }
     if(!target_zone->Acquire()){
       continue;
     }

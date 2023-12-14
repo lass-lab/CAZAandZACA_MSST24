@@ -1065,6 +1065,16 @@ class ZonedBlockDevice {
 
   // Zone* GetIOZoneByOffset(uint64_t offset);
  private:
+    std::vector<std::pair<uint64_t,uint64_t>> SortedByZoneScore(std::vector<uint64_t>& zone_score){
+    std::vector<std::pair<uint64_t,uint64_t>> ret;
+    ret.clear();
+    for(uint64_t index = 0 ;i < zone_score.size();i++){
+      ret.push_back({zone_score[i],index});
+    }
+    std::sort(ret.rbegin(),ret.rend());
+    return ret;
+  }
+
   IOStatus GetZoneDeferredStatus();
   bool GetActiveIOZoneTokenIfAvailable();
   void WaitForOpenIOZoneToken(bool prioritized);
