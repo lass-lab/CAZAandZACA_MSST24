@@ -598,7 +598,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     }else{
       score=invalidation_ratio_score/candidate_size;
     }
-    printf("score %lf\n",score);
+    // printf("score %lf\n",score);
     // file_size_score=(normalized_candidate_compensate_size*std::log(zns_free_percent)*100)/std::log(100);
     
     // score=(double)(invalidation_ratio_score)/(double)(candidate_size>>20);
@@ -668,12 +668,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // vstorage_->ResetNextCompactionIndex(start_level_);  
     base_index_=max_index;
 
-    // if(start_level_inputs_.size()){
-    //   printf("-----------------SELECTED--------------\n");
-    //   printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
-    //   printf("score : %lf\n",max_score);
-    //   printf("-----------------END-------------------\n");
-    // }
+    if(start_level_inputs_.size()){
+      printf("-----------------SELECTED--------------\n");
+      printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
+      printf("score : %lf\n",max_score);
+      printf("-----------------END-------------------\n");
+    }
     return start_level_inputs_.size() > 0;
   }
 baseline:
