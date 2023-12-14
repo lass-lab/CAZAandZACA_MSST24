@@ -1239,7 +1239,7 @@ void ZenFS::SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,u
 
 double ZenFS::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size) {
   // return file_candidates.size();
-  uint64_t ret = 100* zbd_->GetMaxSameZoneScore(file_candidates);
+  uint64_t ret = zbd_->GetMaxSameZoneScore(file_candidates);
   return ret;
   (void)(candidate_size);
   return zbd_->GetMaxInvalidateCompactionScore(file_candidates,candidate_size,false);

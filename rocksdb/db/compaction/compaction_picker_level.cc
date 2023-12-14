@@ -670,7 +670,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     if(start_level_inputs_.size()){
       printf("-----------------SELECTED--------------\n");
-      printf("[%u,%d] start fno : %lu.sst\n",max_cmp_idx,max_index,max_file_candiates[0]->fd.GetNumber());
+      printf("[%d]start fno : %lu.sst\n",start_level_,max_file_candiates[0]->fd.GetNumber());
       printf("score : %lf\n",max_score);
       printf("-----------------END-------------------\n");
     }
