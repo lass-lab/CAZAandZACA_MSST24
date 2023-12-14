@@ -995,11 +995,13 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   // }
   // // score += sst_in_zone_square/(total_size*total_size)*(total_size/initial_total_size); // mabye overflow
   // score+= (sst_in_zone_square*total_size/initial_total_size)/total_size;
+  int level = 0;
   if(input_aware_scheme_ == 1){
     for(auto fno : compaction_inputs_fno){
       auto zFile  = GetSSTZoneFileInZBDNoLock(fno);
       if(!zFile){
         zFile->selected_as_input_= true;
+        level = zFile->level_ > level ? zFile->level_ : level;
       }
     }
   }
@@ -1009,8 +1011,8 @@ void  ZonedBlockDevice::StatsSSTsinSameZone(std::vector<uint64_t>& compaction_in
   double inval_score = GetMaxInvalidateCompactionScore(compaction_inputs_fno,&none,true);
   {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
-    same_zone_score_.push_back(score);
-    invalidate_score_.push_back(inval_score);
+    same_zone_score_[level].push_back(score);
+    invalidate_score_[level].push_back(inval_score);
     // same_zone_score_for_timelapse_.clear();
     // same_zone_score_for_timelapse_=same_zone_score_;
   }
@@ -1072,8 +1074,10 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     // same_zone_score_.push_back(score);
     // same_zone_score_for_timelapse_.clear();
-    same_zone_score_for_timelapse_=same_zone_score_;
-    invalidate_score_for_timelapse_=invalidate_score_;
+    for(int i = 0; i <5; i++){
+      same_zone_score_for_timelapse_[i]=same_zone_score_[i];
+      invalidate_score_for_timelapse_[i]=invalidate_score_[i];
+    }
   }
   double ratio_sum = 0.0;
   double ratio;
@@ -1944,24 +1948,24 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
 
   std::vector<uint64_t> zone_score(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
-  if(level==0){
+  if(level==0 || level == 1){
     goto l0;
   }  
 
-  if(level==1){
-    // fno_list.clear();
-    // zone_score.clear();
-    // zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
-    // SameLevelFileList(0,fno_list);
-    // s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
-    //                             min_capacity);
+  // if(level==1){
+  //   // fno_list.clear();
+  //   // zone_score.clear();
+  //   // zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
+  //   // SameLevelFileList(0,fno_list);
+  //   // s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
+  //   //                             min_capacity);
 
-    // if(allocated_zone!=nullptr){
-    //   // printf("CAZA 1 \n");
-    //   *zone_out=allocated_zone;
-    //   return IOStatus::OK();
-    // }
-  }
+  //   // if(allocated_zone!=nullptr){
+  //   //   // printf("CAZA 1 \n");
+  //   //   *zone_out=allocated_zone;
+  //   //   return IOStatus::OK();
+  //   // }
+  // }
 
   {
     fno_list.clear();
@@ -2061,7 +2065,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
 l0:
   // return IOStatus::OK();
 // if level 0, most level 0 zone
-  if(level==0 ||level==100){
+  if(level==0 ||level==1 ||level==100){
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
     zone_score.clear();
