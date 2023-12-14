@@ -1961,7 +1961,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
 
   std::vector<uint64_t> zone_score(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
-  if(level==0 || level == 1){
+  if(level==0){
     goto l0;
   }  
 
