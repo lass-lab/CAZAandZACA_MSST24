@@ -607,17 +607,18 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // score = invalidation_ratio_score + file_size_score*2;
 
 
-    // printf("[start] ");
-    // for(auto s : files){
-    //   printf("%lu.sst ",s->fd.GetNumber());
-    // }
-    // printf("\n");
+    printf("[start] ");
+    for(auto s : files){
+      printf("%lu.sst ",s->fd.GetNumber());
+    }
+    printf("\n");
 
-    // printf("[out] ");
-    // for(auto o : output_i.files){
-    //   printf("%lu.sst ",o->fd.GetNumber());
-    // }
-    // printf("\n");
+    printf("[out] ");
+    for(auto o : output_i.files){
+      printf("%lu.sst ",o->fd.GetNumber());
+    }
+    printf("\n");
+    printf("score %lf\n",score);
     // printf("score: %lf / %lu =  %lf\n",(score),(candidate_size>>20),((double)score/(double)(candidate_size>>20)));
 
 
