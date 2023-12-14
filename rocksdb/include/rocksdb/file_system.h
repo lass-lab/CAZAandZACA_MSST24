@@ -538,7 +538,7 @@ class FileSystem : public Customizable {
   virtual void StatsCompactionFileSize(bool,int,uint64_t) {}
   virtual void StatsAverageCompactionInputSize(int,int,uint64_t,uint64_t,uint64_t )  {}
 
-  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t * ) { return 0;};
+  virtual double GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t * ) { return 0;};
 
   // Store the last modification time of fname in *file_mtime.
   virtual IOStatus GetFileModificationTime(const std::string& fname,
@@ -1488,7 +1488,7 @@ class FileSystemWrapper : public FileSystem {
                     input_size_input_level,input_size_output_level,output_size);
   }
   
-  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t* candidate_size) {
+  double GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t* candidate_size) {
     return target_->GetMaxInvalidateCompactionScore(file_candidates,candidate_size);
   }
   IOStatus GetFileModificationTime(const std::string& fname,

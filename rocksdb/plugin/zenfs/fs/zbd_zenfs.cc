@@ -1848,7 +1848,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
   return score;
 }
 
-uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size,bool stats){
+double ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size,bool stats){
   // std::vector<std::pair<bool,uint64_t>> zone_score;
   std::vector<bool> is_sst_in_zone(io_zones.size(),false);
   std::vector<uint64_t> sst_in_zone(io_zones.size(),0);

@@ -519,7 +519,7 @@ ret:
     zbd_->StatsAverageCompactionInputSize(start_level,output_level,
                                     input_size_input_level,input_size_output_level,output_size);
   }
-  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size) override;
+  double GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size) override;
   
   bool IsZoneDevice(){ return true; }
   void ZoneCleaningWorker(bool run_once=false) override;

@@ -390,7 +390,7 @@ class Env : public Customizable {
   virtual void StatsCompactionFileSize(bool,int,uint64_t) {}
 
   virtual void StatsAverageCompactionInputSize(int,int,uint64_t,uint64_t,uint64_t) {}
-  virtual uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t*){
+  virtual double GetMaxInvalidateCompactionScore(std::vector<uint64_t>& ,uint64_t*){
     return 0;
   }
   // Store the last modification time of fname in *file_mtime.
@@ -1510,7 +1510,7 @@ class EnvWrapper : public Env {
                     input_size_input_level,input_size_output_level,output_size);
   }
 
-  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t* candidate_size) override {
+  double GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t* candidate_size) override {
     return target_.env->GetMaxInvalidateCompactionScore(file_candidates,candidate_size);
   }
 

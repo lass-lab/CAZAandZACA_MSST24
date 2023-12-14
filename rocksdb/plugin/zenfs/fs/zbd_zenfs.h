@@ -1062,7 +1062,7 @@ class ZonedBlockDevice {
   }
   void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno,int output_level);
   IOStatus RuntimeReset(void);
-  uint64_t GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size,bool stats);
+  double GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size,bool stats);
   double GetMaxSameZoneScore(std::vector<uint64_t>& compaction_inputs_fno);
   inline bool RuntimeZoneResetDisabled() {return partial_reset_scheme_==RUNTIME_ZONE_RESET_DISABLED; }
   inline bool RuntimeZoneResetOnly() {return partial_reset_scheme_==RUNTIME_ZONE_RESET_ONLY; }
