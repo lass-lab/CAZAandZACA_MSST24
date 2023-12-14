@@ -2062,6 +2062,7 @@ l0:
     zone_score.clear();
     zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
     SameLevelFileList(0,fno_list);
+    SameLevelFileList(1,fno_list);
     s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
                                 min_capacity);
     // if(allocated_zone!=nullptr){
