@@ -801,13 +801,13 @@ ZonedBlockDevice::~ZonedBlockDevice() {
       double sum_inval_score=0.0;
       size_t score_n=same_zone_score_[i].size();
       if(score_n>0){
-        for(double score : same_zone_score_[i]){
-              sum_score+=score;
+        for(size_t j = 0; j < same_zone_score_[i].size(); j++){
+          sum_score+=same_zone_score_[i][j];
         }
         avg_same_zone_score=sum_score/score_n;
 
-        for(double score : invalidate_score_[i]){
-          sum_inval_score+=score;
+        for(size_t j =0;j<invalidate_score_[i].size();j++){
+          sum_inval_score+=invalidate_score_[i][j];
         }
         avg_inval_score=sum_inval_score/score_n;
       }
