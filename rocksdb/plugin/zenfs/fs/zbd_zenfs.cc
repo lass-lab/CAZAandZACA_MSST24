@@ -791,22 +791,35 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   }
   {  
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
-    double sum_score=0.0;
-    double sum_inval_score=0.0;
+
     double avg_same_zone_score,avg_inval_score;
-    size_t score_n=same_zone_score_.size();
-    if(score_n>0){
-      for(double score : same_zone_score_){
-            sum_score+=score;
+    double sum_sum_score=0.0, sum_sum_inval_score=0.0;
+    size_t total_n = 0;
+    for(int i = 0; i<5; i++){
+      double sum_score=0.0;
+      double sum_inval_score=0.0;
+      size_t score_n=same_zone_score_[i].size();
+      if(score_n>0){
+        for(double score : same_zone_score_[i]){
+              sum_score+=score;
+        }
+        avg_same_zone_score=sum_score/score_n;
+        for(double score : invalidate_score_[i]){
+          sum_inval_score+=score;
+        }
+        avg_inval_score=sum_inval_score/score_n;
       }
-      avg_same_zone_score=sum_score/score_n;
-      for(double score : invalidate_score_){
-        sum_inval_score+=score;
-      }
-      avg_inval_score=sum_inval_score/score_n;
+      sum_sum_score+=sum_score;
+      sum_sum_inval_score+=sum_inval_score;
+      total_n+=score_n;
+      printf("[%d] samezone score : %lf\tinvalidate score %lf\n",i,avg_same_zone_score,avg_inval_score);
     }
-    printf("samezone score : %lf\n",avg_same_zone_score);
-    printf("invalidate score %lf\n",avg_inval_score);
+    if(total_n){
+      printf("total samezone score : %lf\tinvalidate score %lf\n",sum_sum_score/total_n,sum_sum_inval_score/total_n);
+    }
+
+
+
   }
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
