@@ -608,7 +608,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
 
     printf("[start] ");
-    for(auto s : files){
+    for(auto s : start_i.files){
       printf("%lu.sst ",s->fd.GetNumber());
     }
     printf("\n");
