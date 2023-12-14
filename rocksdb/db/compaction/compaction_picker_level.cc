@@ -545,9 +545,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     
     // files=start_i.files;
     // vstorage_->GetOverlappingInputs(start_level_,&smallest,&largest,&files);
-    // for(auto f : files){
-    //   file_candidates.push_back(f->fd.GetNumber());
-    // }
+    for(auto f : start_i.files){
+      file_candidates.push_back(f->fd.GetNumber());
+    }
     for(auto f : output_i.files){
       file_candidates.push_back(f->fd.GetNumber());
     }
