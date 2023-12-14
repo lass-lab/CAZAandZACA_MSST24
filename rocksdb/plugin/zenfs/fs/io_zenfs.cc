@@ -600,7 +600,7 @@ void ZoneFile::PushExtent() {
 
 IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
   Zone* zone;
-  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_ ,&zone,min_capacity);
+  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_,predicted_size_ ,&zone,min_capacity);
   // assert(IOStatus::NoSpace("Not enough capacity for append")==IOStatus::NosSpace());
   //  no_input_fno_(0);
   input_fno_.clear();
@@ -840,6 +840,11 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   // }
 
   std::vector<SSTBuffer*>* sst_buffers=zoneFile_->GetSSTBuffers();
+  zoneFile_->predicted_size_=0;
+  for(auto it : *sst_buffers){
+    zoneFile_->predicted_size_ += it->size_;
+  }
+  
 
   for(auto it : *sst_buffers){
     // if(it->positioned_==true){

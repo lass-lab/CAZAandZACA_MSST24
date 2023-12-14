@@ -2600,7 +2600,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
 
 IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& largest, int level,
                                           Env::WriteLifeTimeHint file_lifetime, IOType io_type, 
-                                          std::vector<uint64_t>& input_fno,
+                                          std::vector<uint64_t>& input_fno,uint64_t predicted_size,
                                           Zone **out_zone,uint64_t min_capacity) {
   
 
@@ -2642,7 +2642,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
 
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
-  if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
+  if(is_sst&&level>=0 && allocation_scheme_!=LIZA && predicted_size > (63<<20)){
     s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),&allocated_zone,min_capacity);
     if(!s.ok()){
       PutOpenIOZoneToken();
