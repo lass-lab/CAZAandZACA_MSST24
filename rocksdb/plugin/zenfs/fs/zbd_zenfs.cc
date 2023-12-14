@@ -1831,9 +1831,9 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
       total_size-=sst_in_zone[i];
       continue;
     }
-    if(sst_in_zone[i]!=0){
-      printf("\t\t\t%lu\n",sst_in_zone[i]>>20);
-    }
+    // if(sst_in_zone[i]!=0){
+    //   printf("\t\t\t%lu\n",sst_in_zone[i]>>20);
+    // }
     sst_in_zone_square+=(sst_in_zone[i]*sst_in_zone[i]);
   }
   // score += sum(sst_in_zone^2) /(total_size^2) * (total_size/initial_total_size)
@@ -1844,7 +1844,7 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
     // score+= (sst_in_zone_square/initial_total_size);
     score+= (double(sst_in_zone_square/total_size)/(double)initial_total_size);
   }
-  printf("\t\t\tscore : %lf     \n",score);
+  // printf("\t\t\tscore : %lf     \n",score);
   return score;
 }
 
