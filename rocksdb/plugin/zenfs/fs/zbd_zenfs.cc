@@ -1920,7 +1920,7 @@ double ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& 
 
   (void)(zone_score_sum);
   (void)(zone_score_max);
-  return zone_score_sum/sst_in_zone_n;
+  return (double)zone_score_sum/(double)sst_in_zone_n;
   // return zone_score_max;
 }
 
