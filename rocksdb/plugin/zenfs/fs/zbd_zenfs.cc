@@ -1902,7 +1902,7 @@ uint64_t ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>
 
 IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& largest,
                                                         int level,Env::WriteLifeTimeHint file_lifetime, 
-                                                        std::vector<uint64_t> input_fno,
+                                                        std::vector<uint64_t> input_fno,uint64_t predicted_size,
                                                         Zone **zone_out,uint64_t min_capacity){
   
   /////////////////////////////// CAZA
@@ -1943,7 +1943,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
 
   std::vector<uint64_t> zone_score(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
-  if(level==0){
+  if(level==0 || predicted_size < (63<<(20))){
     goto l0;
   }  
 
@@ -2521,7 +2521,7 @@ IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
 //                                            uint64_t min_capacity,
 //                                            bool* run_gc_worker_) {
 IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int level,Zone **out_zone,
-                                           Env::WriteLifeTimeHint file_lifetime,
+                                           Env::WriteLifeTimeHint file_lifetime,uint64_t file_size,
                                            uint64_t min_capacity, bool* run_gc_worker_,
                                            bool is_sst) {
   std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
@@ -2548,7 +2548,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     }
 
     if(allocation_scheme_!=LIZA&&is_sst){
-      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),out_zone,min_capacity);
+      AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
         // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
@@ -2642,8 +2642,8 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
 
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
-  if(is_sst&&level>=0 && allocation_scheme_!=LIZA && predicted_size > (63<<20)){
-    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),&allocated_zone,min_capacity);
+  if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
+    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
