@@ -1969,7 +1969,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   // zone valid overlapping capacity
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
 
-  std::vector<uint64_t> zone_score(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
+  std::vector<uint64_t> zone_score(io_zones.size(),0);
   std::vector<std::pair<uint64_t,uint64_t>>  sorted;
   if(level==0){
     goto l0;
@@ -1993,7 +1993,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   {
     fno_list.clear();
     zone_score.clear();
-    zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
+    zone_score.assign(io_zones.size(),0);
     AdjacentFileList(smallest, largest, level, fno_list);
 
 
@@ -2013,7 +2013,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       for(auto extent: extents){
         if(!extent->zone_->IsFull()){
           // zone_->index do not skip meta,spare zone
-          zone_score[extent->zone_->zidx_]+=extent->length_;
+          zone_score[extent->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]+=extent->length_;
           no_near_level_files=false;
         }
       }
@@ -2030,7 +2030,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
       
       cur_score=zidx.first;
       target_zone=io_zones[zidx.second];
-      cur_invalid_data=(target_zone->wp_-target_zone->start_) - target_zone->used_capacity_;
+      // cur_invalid_data=(target_zone->wp_-target_zone->start_) - target_zone->used_capacity_;
 
       if(cur_score==0||target_zone->IsFull()){
         continue;
@@ -2091,7 +2091,7 @@ l0:
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
     zone_score.clear();
-    zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
+    zone_score.assign(io_zones.size(),0);
     SameLevelFileList(0,fno_list);
     SameLevelFileList(1,fno_list);
     s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
@@ -2103,7 +2103,7 @@ l0:
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
     zone_score.clear();
-    zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
+    zone_score.assign(io_zones.size()-ZENFS_META_ZONES-ZENFS_SPARE_ZONES,0);
     SameLevelFileList(level,fno_list);
     s = AllocateSameLevelFilesZone(smallest,largest,fno_list,is_input_in_zone,&allocated_zone,
                                   min_capacity);
@@ -2175,7 +2175,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
       for(auto e : extents){
         
         if(!e->zone_->IsFull()){
-          zone_score[e->zone_->zidx_]+=e->length_;
+          zone_score[e->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]+=e->length_;
           no_same_level_files=false;
         }
       }
