@@ -607,18 +607,18 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // score = invalidation_ratio_score + file_size_score*2;
 
 
-    printf("[start] ");
-    for(auto s : start_i.files){
-      printf("%lu.sst ",s->fd.GetNumber());
-    }
-    printf("\n");
+    // printf("[start] ");
+    // for(auto s : start_i.files){
+    //   printf("%lu.sst ",s->fd.GetNumber());
+    // }
+    // printf("\n");
 
-    printf("[out] ");
-    for(auto o : output_i.files){
-      printf("%lu.sst ",o->fd.GetNumber());
-    }
-    printf("\n");
-    printf("score %lf\n",score);
+    // printf("[out] ");
+    // for(auto o : output_i.files){
+    //   printf("%lu.sst ",o->fd.GetNumber());
+    // }
+    // printf("\n");
+    // printf("score %lf\n",score);
     // printf("score: %lf / %lu =  %lf\n",(score),(candidate_size>>20),((double)score/(double)(candidate_size>>20)));
 
 
@@ -669,12 +669,12 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // vstorage_->ResetNextCompactionIndex(start_level_);  
     base_index_=max_index;
 
-    if(start_level_inputs_.size()){
-      printf("-----------------SELECTED--------------\n");
-      printf("[%d]start fno : %lu.sst\n",start_level_,max_file_candiates[0]->fd.GetNumber());
-      printf("score : %lf\n",max_score);
-      printf("-----------------END-------------------\n");
-    }
+    // if(start_level_inputs_.size()){
+    //   printf("-----------------SELECTED--------------\n");
+    //   printf("[%d]start fno : %lu.sst\n",start_level_,max_file_candiates[0]->fd.GetNumber());
+    //   printf("score : %lf\n",max_score);
+    //   printf("-----------------END-------------------\n");
+    // }
     return start_level_inputs_.size() > 0;
   }
 baseline:
