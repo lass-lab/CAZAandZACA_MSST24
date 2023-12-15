@@ -1950,6 +1950,8 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   std::vector<bool> is_input_in_zone(io_zones.size(),false);
   (void)(input_fno);
   (void)(predicted_size);
+  (void)(cur_invalid_data);
+  (void)(max_invalid_data);
 
 
   // for(uint64_t fno : input_fno){
@@ -2154,6 +2156,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
   uint64_t max_score = 0;
   uint64_t cur_score;
   bool no_same_level_files=true;
+  (void)(is_input_in_zone);
 
 
 
