@@ -2017,16 +2017,16 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
     }
   }
   // auto sorted_zone_score = SortedByZoneScore(zone_score);
-
+  auto sorted = SortedByZoneScore(zone_score);
 
   if(!no_near_level_files){
-    for(size_t i=ZENFS_META_ZONES+ZENFS_SPARE_ZONES;i<zone_score.size();i++){
-      if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]==true){
-        continue;
-      }
+    for(auto zidx : sorted){
+      // if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]==true){
+      //   continue;
+      // }
       
-      cur_score=zone_score[i];
-      target_zone=io_zones[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES];
+      cur_score=zidx.first;
+      target_zone=io_zones[zidx.second];
       cur_invalid_data=(target_zone->wp_-target_zone->start_) - target_zone->used_capacity_;
 
       if(cur_score==0||target_zone->IsFull()){
@@ -2047,30 +2047,29 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
         continue;
       }
 
-      if(cur_score > max_score){
-        if(allocated_zone){
-          allocated_zone->Release();
-        }
-        allocated_zone=target_zone;
-        max_score=cur_score;
-        max_invalid_data=cur_invalid_data;
-        continue;
-      }
+      break;
 
-      if(cur_score == max_score && cur_invalid_data>max_invalid_data){
-        if(allocated_zone){
-          allocated_zone->Release();
-        }
-        allocated_zone=target_zone;
-        max_invalid_data=cur_invalid_data;
-        continue;
-      }
-
-      target_zone->Release();
-      // if(!s.ok()){
-      //   printf("AllocateCompactionAwaredZone :: fail 2.5\n");
-      //   return s;
+      // if(cur_score > max_score){
+      //   if(allocated_zone){
+      //     allocated_zone->Release();
+      //   }
+      //   allocated_zone=target_zone;
+      //   max_score=cur_score;
+      //   max_invalid_data=cur_invalid_data;
+      //   continue;
       // }
+
+      // if(cur_score == max_score && cur_invalid_data>max_invalid_data){
+      //   if(allocated_zone){
+      //     allocated_zone->Release();
+      //   }
+      //   allocated_zone=target_zone;
+      //   max_invalid_data=cur_invalid_data;
+      //   continue;
+      // }
+
+      // target_zone->Release();
+
     }
   }
 
@@ -2157,6 +2156,7 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
 
 
 
+
   {
     // std::lock_guard<std::mutex> lg(sst_file_map_lock_);
     for(auto fno : fno_list){
@@ -2182,12 +2182,18 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
     return IOStatus::OK();
   }
 
-  for(size_t i =ZENFS_META_ZONES+ZENFS_SPARE_ZONES; i<zone_score.size(); i++){
-    if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
-      continue;
-    }
-    cur_score=zone_score[i];
-    target_zone=io_zones[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES];
+//////////////////////////////
+  auto sorted = SortedByZoneScore(zone_score);
+
+  for(auto zidx : sorted){
+    // if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
+    //   continue;
+    // }
+    cur_score=zidx.first;
+    target_zone=io_zones[zidx.second];
+
+
+    
     if(cur_score == 0){
       continue;
     }
@@ -2201,27 +2207,73 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
       target_zone->Release();
       continue;
     }
+    break;
 
-    if(cur_score>max_score){
-      if(allocated_zone){
-        allocated_zone->Release();
-        if(!s.ok()){
-          printf("AllocateMostL0FilesZone :: fail 1\n");
-          return s;
-        }
-      }
-      allocated_zone=target_zone;
-      max_score=cur_score;
-      continue;
-    }
+    // if(cur_score>max_score){
+    //   if(allocated_zone){
+    //     allocated_zone->Release();
+    //     if(!s.ok()){
+    //       printf("AllocateMostL0FilesZone :: fail 1\n");
+    //       return s;
+    //     }
+    //   }
+    //   allocated_zone=target_zone;
+    //   max_score=cur_score;
+    //   continue;
+    // }
 
-    target_zone->Release();
-    if(!s.ok()){
-      printf("AllocateMostL0FilesZone :: fail 2\n");
-      return s;
-    }
+    // target_zone->Release();
+    // if(!s.ok()){
+    //   printf("AllocateMostL0FilesZone :: fail 2\n");
+    //   return s;
+    // }
 
   }
+
+///////////////////
+  // for(size_t i =ZENFS_META_ZONES+ZENFS_SPARE_ZONES; i<zone_score.size(); i++){
+  //   if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
+  //     continue;
+  //   }
+  //   cur_score=zone_score[i];
+  //   target_zone=io_zones[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES];
+
+
+
+  //   if(cur_score == 0){
+  //     continue;
+  //   }
+  //   if(cur_score<max_score){
+  //     continue;
+  //   }
+  //   if(!target_zone->Acquire()){
+  //     continue;
+  //   }
+  //   if(target_zone->capacity_<=min_capacity || target_zone->IsFull()){
+  //     target_zone->Release();
+  //     continue;
+  //   }
+
+  //   if(cur_score>max_score){
+  //     if(allocated_zone){
+  //       allocated_zone->Release();
+  //       if(!s.ok()){
+  //         printf("AllocateMostL0FilesZone :: fail 1\n");
+  //         return s;
+  //       }
+  //     }
+  //     allocated_zone=target_zone;
+  //     max_score=cur_score;
+  //     continue;
+  //   }
+
+  //   target_zone->Release();
+  //   if(!s.ok()){
+  //     printf("AllocateMostL0FilesZone :: fail 2\n");
+  //     return s;
+  //   }
+
+  // }
 
   *zone_out=allocated_zone;
   return IOStatus::OK();
