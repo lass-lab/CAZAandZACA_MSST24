@@ -1968,6 +1968,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
   // 1. find UPPER/LOWER OVERLAPP RANGE zone
 
   std::vector<uint64_t> zone_score(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
+  std::vector<std::pair<uint64_t,uint64_t>>  sorted;
   if(level==0){
     goto l0;
   }  
@@ -2017,7 +2018,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
     }
   }
   // auto sorted_zone_score = SortedByZoneScore(zone_score);
-  auto sorted = SortedByZoneScore(zone_score);
+  sorted = SortedByZoneScore(zone_score);
 
   if(!no_near_level_files){
     for(auto zidx : sorted){
