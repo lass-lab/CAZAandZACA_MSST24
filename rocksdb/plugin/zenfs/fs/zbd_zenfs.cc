@@ -2049,7 +2049,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZone(Slice& smallest, Slice& 
         target_zone->Release();
         continue;
       }
-
+      allocated_zone=target_zone;
       break;
 
       // if(cur_score > max_score){
@@ -2211,27 +2211,8 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
       target_zone->Release();
       continue;
     }
+    allocated_zone=target_zone;
     break;
-
-    // if(cur_score>max_score){
-    //   if(allocated_zone){
-    //     allocated_zone->Release();
-    //     if(!s.ok()){
-    //       printf("AllocateMostL0FilesZone :: fail 1\n");
-    //       return s;
-    //     }
-    //   }
-    //   allocated_zone=target_zone;
-    //   max_score=cur_score;
-    //   continue;
-    // }
-
-    // target_zone->Release();
-    // if(!s.ok()){
-    //   printf("AllocateMostL0FilesZone :: fail 2\n");
-    //   return s;
-    // }
-
   }
 
 ///////////////////
