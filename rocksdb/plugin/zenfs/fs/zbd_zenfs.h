@@ -87,6 +87,9 @@ class ZoneFile;
 #define PARTIAL_RESET_BACKGROUND_T_WITH_ZONE_RESET 5	// |      o     |       o       |
 #define PROACTIVE_ZONECLEANING 6                      // |      x     |       x       |
 
+
+#define IS_BIG_SSTABLE(file_size) ((file_size) > (uint64_t)((uint64_t)1<<25 + (uint64_t)31<<20))
+// predicted_size > (uint64_t)( (uint64_t)1<<25 + (uint64_t)31<<20);
 class ZoneExtent;
 class ZoneList {
  private:
@@ -649,12 +652,24 @@ class ZonedBlockDevice {
   // std::atomic<uint64_t> intral0_compaction_input_size_{0};
   // std::atomic<uint64_t> intral0_compaction_output_size_{0};
   // std::atomic<uint64_t> intral0_compaction_triggered_{0};
-
+  
  public:
   uint64_t ZONE_CLEANING_KICKING_POINT=40;
   std::atomic<bool> migrating_{false};
   std::condition_variable migrate_resource_;
   std::mutex migrate_zone_mtx_;
+  
+  std::vector<std::atomic<uint64_t>> lsm_tree_;
+  /*
+  0 : 256
+  1 : 256
+  2 : 2560
+  3 : 25600
+  4 : 256000
+  5 : 2560000
+  6 : 25600000 
+  */
+  uint64_t max_bytes_for_level_base_ = 256<<20;
 
   bool zc_until_set_=false;
   uint64_t zc_;
@@ -665,7 +680,17 @@ class ZonedBlockDevice {
   void ZCorPartialLock(); 
   bool ZCorPartialTryLock();
   void ZCorPartialUnLock();
+  double PredictCompactionScore(int level){
+    if(level==0 || level == 1){
+      return lsm_tree_[level].load()/max_bytes_for_level_base_;
+    }
+    uint64_t max_bytes_for_level = max_bytes_for_level_base_;
+    for(int l = 1 ; l<level;i++){
+      max_bytes_for_level*=10;
+    }
 
+    return (double)(lsm_tree_[level].load()/max_bytes_for_level);
+  }
   inline uint64_t GetAllocationScheme() { return allocation_scheme_;}
 
   uint64_t GetZoneCleaningKickingPoint(){ 
@@ -1060,7 +1085,8 @@ class ZonedBlockDevice {
       CalculateResetThreshold(f);
     }
   }
-  void  StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno,int output_level);
+  void  GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction_inputs_input_level_fno,
+                            std::vector<uint64_t>& compaction_inputs_output_level_fno,int output_level,bool trivial_move);
   IOStatus RuntimeReset(void);
   double GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size,bool stats);
   double GetMaxSameZoneScore(std::vector<uint64_t>& compaction_inputs_fno);
@@ -1114,7 +1140,11 @@ class ZonedBlockDevice {
                                           uint64_t predicted_size,
                                           Zone **zone_out,
                                           uint64_t min_capacity = 0);
-  
+  IOStatus AllocateCompactionAwaredZoneV2(Slice& smallest, Slice& largest ,int level, 
+                                          Env::WriteLifeTimeHint file_lifetime , std::vector<uint64_t> input_fno,
+                                          uint64_t predicted_size,
+                                          Zone **zone_out,
+                                          uint64_t min_capacity = 0);
 
   IOStatus AllocateMostL0FilesZone(std::vector<uint64_t>& zone_score,std::vector<uint64_t>& fno_list,
                                     std::vector<bool>& is_input_in_zone,

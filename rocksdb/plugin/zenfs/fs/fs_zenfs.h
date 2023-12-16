@@ -505,8 +505,10 @@ ret:
   }
   void SetResetScheme(uint32_t r,uint32_t partial_reset_scheme,uint64_t T,uint64_t zc,uint64_t until,uint64_t allocation_scheme,
                         std::vector<uint64_t>& other_options) override;
-  void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno,int output_level) override {
-    zbd_->StatsSSTsinSameZone(compaction_inputs_fno,output_level);
+  void GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction_inputs_input_level_fno,
+                            std::vector<uint64_t>& compaction_inputs_output_level_fno,int output_level,bool trivial_move) override {
+    zbd_->GiveZenFStoLSMTreeHint(compaction_inputs_input_level_fno,
+                                    compaction_inputs_output_level_fno,output_level,trivial_move);
   }
 
   void StatsCompactionFileSize(bool is_last_file,int output_level,uint64_t file_size) override {

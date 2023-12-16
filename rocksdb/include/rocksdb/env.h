@@ -385,7 +385,7 @@ class Env : public Customizable {
   virtual void SetResetScheme(uint32_t,uint32_t,uint64_t,uint64_t,uint64_t,uint64_t,
                               std::vector<uint64_t>& ) {}
 
-  virtual void StatsSSTsinSameZone(std::vector<uint64_t>& ,int) {}
+  virtual void GiveZenFStoLSMTreeHint(std::vector<uint64_t>& ,std::vector<uint64_t>&,int,bool) {}
 
   virtual void StatsCompactionFileSize(bool,int,uint64_t) {}
 
@@ -1495,8 +1495,9 @@ class EnvWrapper : public Env {
                       std::vector<uint64_t>& other_options) override {
     target_.env->SetResetScheme(r,partial_reset_scheme,T,zc,until,allocation_scheme,other_options);
   }
-  void StatsSSTsinSameZone(std::vector<uint64_t>& compaction_inputs_fno,int output_level) override {
-    target_.env->StatsSSTsinSameZone(compaction_inputs_fno,output_level);
+  void GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction_inputs_input_level_fno,
+                                std::vector<uint64_t>& compaction_inputs_output_level_fno ,int output_level,bool trivial_move) override {
+    target_.env->GiveZenFStoLSMTreeHint(compaction_inputs_input_level_fno,compaction_inputs_output_level_fno,output_level);
   }
 
   void StatsCompactionFileSize(bool is_last_file,int output_level,uint64_t file_size){

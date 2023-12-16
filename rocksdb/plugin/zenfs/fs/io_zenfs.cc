@@ -828,9 +828,13 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   }
   zoneFile_->fno_=fno_;
   zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+
   if(zoneFile_->GetZbd()->GetAllocationScheme()==LIZA){
     return IOStatus::OK();
   }
+
+
+
   // zoneFile_->SetSstEnded();
 
   // zoneFile_->input_fno_=input_fno_;
@@ -845,6 +849,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     zoneFile_->predicted_size_ += it->size_;
   }
   
+  printf("predcited size :%lu\n",zoneFile_->predicted_size_);
 
   for(auto it : *sst_buffers){
     // if(it->positioned_==true){
@@ -869,6 +874,12 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     }
     delete it;
   }
+
+  // if(zoneFile_->level_ ==0){
+  //   zoneFile_->GetZbd()->lsm_tree_[0].fetch_add(1);
+  // }else{
+  zoneFile_->GetZbd()->lsm_tree_[zoneFile_->level_].fetch_add(zoneFile_->GetFileSize());
+  // }
   input_fno_.clear();
   return s;
 }

@@ -540,12 +540,32 @@ void CompactionJob::Prepare() {
              compact_->compaction->level()) > 0);
   // c->inputs();
   std::vector<uint64_t> compaction_inputs_fno;
-  for(auto c_inputs : (*c->inputs())){
-    for(auto input : (c_inputs.files)){
-      compaction_inputs_fno.push_back(input->fd.GetNumber());
-    }
+  std::vector<uint64_t> compaction_inputs_input_level_fno;
+
+  std::vector<uint64_t> compaction_inputs_output_level_fno;
+
+  compaction_inputs_input_level_fno.clear();
+  compaction_inputs_output_level_fno.clear();
+  // for()
+
+  if((*c->inputs()->size())!=2){
+    printf("???? (*c->inputs()->size()) %lu\n",(*c->inputs()->size()));
   }
-  c->immutable_options()->fs->StatsSSTsinSameZone(compaction_inputs_fno,compact_->compaction->output_level());
+  for(auto c_input_input_level : (*c->inputs())[0]){
+    compaction_inputs_input_level_fno.push_back(c_input_input_level->fd.GetNumber());
+  }
+  for(auto c_input_output_level : (*c->inputs())[0]){
+    compaction_inputs_output_level_fno.push_back(c_input_output_level->fd.GetNumber());
+  }
+
+
+  // for(auto c_inputs : (*c->inputs() )){
+  //   for(auto input : (c_inputs.files)){
+  //     compaction_inputs_fno.push_back(input->fd.GetNumber());
+  //   }
+  // }
+  c->immutable_options()->fs->GiveZenFStoLSMTreeHint(compaction_inputs_input_level_fno,compaction_inputs_output_level_fno,
+                                                  compact_->compaction->output_level(),false);
   write_hint_ =
       c->column_family_data()->CalculateSSTWriteHint(c->output_level());
   bottommost_level_ = c->bottommost_level();

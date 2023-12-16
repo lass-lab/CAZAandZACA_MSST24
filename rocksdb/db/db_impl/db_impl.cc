@@ -2905,9 +2905,34 @@ Status DBImpl::DropColumnFamilies(
   }
   return s;
 }
+uint64_t UpperAdjacentFileList(Slice& s, Slice& l, int level){
+  InternalKey largest;
+  InternalKey smallest;
+  uint64_t max_size = 0;
+  uint64_t ret_fno = 0;
+  largest.DecodeFrom(l);
+  smallest.DecodeFrom(s);
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+  CompactionInputFiles upper_level_sstable;
+  if(level == 0 ){
+    printf("UpperAdjacentFileList ? %d\n",level);
+    return 0;
+  }
+  vstorage->GetOverlappingInputs(level-1,&smallest,&largest,&upper_level_sstable.files);
+  for(const auto& f : upper_level_sstable.files){
+    if(f->being_compacted){
+      continue;
+    }
+    if(f->compensated_file_size>max_size){
+      max_size=f->compensated_file_size;
+      ret_fno=f->fd.GetNumber();
+    }
+  }
 
+  return ret_fno;
+}
 void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list) {
-  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();\
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   CompactionInputFiles higher_output_level_inputs;
   CompactionInputFiles lower_output_level_inputs;
   InternalKey largest;
@@ -4388,6 +4413,9 @@ Status DB::DropColumnFamilies(
 }
 
 //CAZA
+uint64_t UpperAdjacentFileList(Slice& s, Slice& l, int level){
+  return 0;
+}
 void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
 
   std::cout<<"DB::AdjcanetFileLIst not Supported\n";

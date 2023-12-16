@@ -379,7 +379,7 @@ class DB {
   // ListColumnFamilies to check the result.
   virtual Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families);
-
+  virtual uint64_t UpperAdjacentFileList(Slice& s, Slice& l, int level);
   virtual void AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
   virtual std::vector<int> NumLevelsFiles(void);
