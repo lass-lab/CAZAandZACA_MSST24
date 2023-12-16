@@ -2905,7 +2905,7 @@ Status DBImpl::DropColumnFamilies(
   }
   return s;
 }
-uint64_t UpperAdjacentFileList(Slice& s, Slice& l, int level){
+uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
   InternalKey largest;
   InternalKey smallest;
   uint64_t max_size = 0;
@@ -2915,7 +2915,7 @@ uint64_t UpperAdjacentFileList(Slice& s, Slice& l, int level){
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   CompactionInputFiles upper_level_sstable;
   if(level == 0 ){
-    printf("UpperAdjacentFileList ? %d\n",level);
+    printf("MostLargeUpperAdjacentFile ? %d\n",level);
     return 0;
   }
   vstorage->GetOverlappingInputs(level-1,&smallest,&largest,&upper_level_sstable.files);
@@ -2931,6 +2931,29 @@ uint64_t UpperAdjacentFileList(Slice& s, Slice& l, int level){
 
   return ret_fno;
 }
+
+void DBImpl:DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list){
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+  CompactionInputFiles downward_level_inputs;
+  InternalKey largest;
+  InternalKey smallest;
+  largest.DecodeFrom(l);
+  smallest.DecodeFrom(s);
+  // printf("ajacent 1\n");
+  if(level==0){
+    printf("no!!\n");
+  }
+  vstorage->GetOverlappingInputs(level+1,&smallest,&largest,&downward_level_inputs.files);
+  // printf("ajacent 2\n");
+  for(const auto& f : downward_level_inputs.files){
+    if(!f->being_compacted){
+      fno_list.push_back(f->fd.GetNumber());
+    }
+  }
+
+  return;
+}
+
 void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list) {
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   CompactionInputFiles higher_output_level_inputs;
@@ -4413,7 +4436,7 @@ Status DB::DropColumnFamilies(
 }
 
 //CAZA
-uint64_t UpperAdjacentFileList(Slice& s, Slice& l, int level){
+uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
   return 0;
 }
 void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
@@ -4421,8 +4444,12 @@ void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
   std::cout<<"DB::AdjcanetFileLIst not Supported\n";
 }
 
+void DownwardAdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
+  std::cout<<"DB::DownwardAdjacentFileList not Supported\n";
+}
+
 void DB::SameLevelFileList(int , std::vector<uint64_t>& ){
-  std::cout<<"DB::AdjcanetFileLIst not Supported\n";
+  std::cout<<"DB::SameLevelFileList not Supported\n";
 }
 
 std::vector<int> DB::NumLevelsFiles(void) { return std::vector<int>(0); }

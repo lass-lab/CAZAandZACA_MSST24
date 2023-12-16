@@ -1134,7 +1134,8 @@ class ZonedBlockDevice {
   IOStatus AllocateEmptyZone(Zone **zone_out);
 
 
-
+  bool CalculateZoneScore(std::vector<uint64_t>& fno_list,std::vector<uint64_t>& zone_score);
+  void AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,uint64_t>>& sorted,Zone** allocated_zone);
   IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
                                           Env::WriteLifeTimeHint file_lifetime , std::vector<uint64_t> input_fno,
                                           uint64_t predicted_size,

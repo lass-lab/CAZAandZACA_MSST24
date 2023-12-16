@@ -325,8 +325,9 @@ class DBImpl : public DB {
   virtual Status DropColumnFamily(ColumnFamilyHandle* column_family) override;
   virtual Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families) override;
-  virtual uint64_t UpperAdjacentFileList(Slice& s, Slice& l, int level) override;
+  virtual uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level) override;
   virtual void AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list) override;
+  virtual void DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list) override;
   
   // using DB::SameLevelFileList;
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list) override;
