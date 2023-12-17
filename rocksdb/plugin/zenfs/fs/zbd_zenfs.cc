@@ -797,16 +797,30 @@ ZonedBlockDevice::~ZonedBlockDevice() {
             ((sum_out_s>>20)/sum_triggered),((sum_in_is+sum_in_os)*100/sum_out_s) ,sum_triggered);
   }
   {  
+    uint64_t sum_score = 0;
+    uint64_t sum_n = 0;
     for(int level = 0; level < 5; level++){
       if(compaction_triggered_[level].load()){
         printf("[%d] Same zone score : %lu/%lu = %lu\n",level,
           same_zone_score_atomic_[level].load(),compaction_triggered_[level].load(),
           same_zone_score_atomic_[level].load()/compaction_triggered_[level].load());
+        sum_score+=same_zone_score_atomic_[level].load();
+        sum_n+=compaction_triggered_[level].load();
+      }
+    }
+    printf("avg Same zone score : %lu/%lu = %lu\n",sum_score,sum_n,sum_score/sum_n);
+    sum_score=0;
+    sum_n =0;
+    for(int level = 0; level < 5; level++){
+      if(compaction_triggered_[level].load()){
         printf("[%d] invalidation score : %lu/%lu = %lu\n",level,
         invalidate_score_atomic_[level].load(),compaction_triggered_[level].load(),
         invalidate_score_atomic_[level].load()/compaction_triggered_[level].load());
+        sum_score+=same_zone_score_atomic_[level].load();
+        sum_n+=compaction_triggered_[level].load();
       }
     }
+    printf("avg inval zone score : %lu/%lu = %lu\n",sum_score,sum_n,sum_score/sum_n);
     // std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
 
     // double avg_same_zone_score,avg_inval_score;
@@ -3002,7 +3016,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
       PutOpenIOZoneToken();
       return s;
     }
-  }else if(is_sst&&level>=0 && allocation_scheme_=CAZA_ADV){
+  }else if(is_sst&&level>=0 && allocation_scheme_==CAZA_ADV){
     s = AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
     
     if(!s.ok()){
