@@ -548,9 +548,9 @@ void CompactionJob::Prepare() {
   compaction_inputs_output_level_fno.clear();
   // for()
   auto c_inputs = c->inputs();
-  // if( (*c_inputs).size()!=2){
-  //   printf("???? (*c->inputs()->size()) %lu\n",((*c->inputs()).size()));
-  // }
+  if( (*c_inputs).size()>2){
+    printf("???? (*c->inputs()->size()) %lu\n",((*c->inputs()).size()));
+  }
   
   for(auto c_input_input_level : (*c_inputs)[0].files){
     compaction_inputs_input_level_fno.push_back(c_input_input_level->fd.GetNumber());
