@@ -2713,10 +2713,14 @@ uint32_t GetExpiredTtlFilesCount(const ImmutableOptions& ioptions,
 }
 }  // anonymous namespace
 
-double VersionStorageInfo::ReCalculateL0CompactionScore(
+double VersionStorageInfo::ReCalculateCompactionScore(
     const ImmutableOptions& immutable_options,
-    const MutableCFOptions& mutable_cf_options) 
+    const MutableCFOptions& mutable_cf_options,
+    int level) 
 {
+
+    double score;
+    if (level == 0) {
       // We treat level-0 specially by bounding the number of files
       // instead of number of bytes for two reasons:
       //
@@ -2728,7 +2732,6 @@ double VersionStorageInfo::ReCalculateL0CompactionScore(
       // file size is small (perhaps because of a small write-buffer
       // setting, or very high compression ratios, or lots of
       // overwrites/deletions).
-      double score;
       int num_sorted_runs = 0;
       uint64_t total_size = 0;
       for (auto* f : files_[level]) {
@@ -2738,9 +2741,11 @@ double VersionStorageInfo::ReCalculateL0CompactionScore(
         }
       }
 
+
+
         score = static_cast<double>(num_sorted_runs) /
                 mutable_cf_options.level0_file_num_compaction_trigger;
-    if (num_levels() > 1) {
+        if (compaction_style_ == kCompactionStyleLevel && num_levels() > 1) {
           // Level-based involves L0->L0 compactions that can lead to oversized
           // L0 files. Take into account size as well to avoid later giant
           // compactions to the base level.
@@ -2759,7 +2764,21 @@ double VersionStorageInfo::ReCalculateL0CompactionScore(
           }
           score =
               std::max(score, static_cast<double>(total_size) / l0_target_size);
+        }
+      
+    } else {
+      // Compute the ratio of current size to size limit.
+      uint64_t level_bytes_no_compacting = 0;
+      for (auto f : files_[level]) {
+        if (!f->being_compacted) {
+          level_bytes_no_compacting += f->compensated_file_size;
+        }
+      }
+      score = static_cast<double>(level_bytes_no_compacting) /
+              MaxBytesForLevel(level);
     }
+
+  
   return score;
 }
 

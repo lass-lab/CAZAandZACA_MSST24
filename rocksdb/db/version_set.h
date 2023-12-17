@@ -153,8 +153,9 @@ class VersionStorageInfo {
   void ComputeCompactionScore(const ImmutableOptions& immutable_options,
                               const MutableCFOptions& mutable_cf_options);
   
-  double ReCalculateL0CompactionScore(const ImmutableOptions& immutable_options,
-                              const MutableCFOptions& mutable_cf_options);
+  double ReCalculateCompactionScore(const ImmutableOptions& immutable_options,
+                              const MutableCFOptions& mutable_cf_options,
+                              int level);
   // Estimate est_comp_needed_bytes_
   void EstimateCompactionBytesNeeded(
       const MutableCFOptions& mutable_cf_options);
@@ -210,6 +211,7 @@ class VersionStorageInfo {
   int CompactionScoreLevel(int idx) const { return compaction_level_[idx]; }
 
   // Return idx'th highest score
+  // double ReCalculateCompactionScore(int level)
   double CompactionScore(int idx) const { return compaction_score_[idx]; }
   std::vector<double> GetCompactionScores(void) {return compaction_score_; }
   bool OverlappingInputsAtUppperLevel(int level,InternalKey* _key);

@@ -333,7 +333,7 @@ class DBImpl : public DB {
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list) override;
   virtual std::vector<int> NumLevelsFiles(void) override;
   virtual std::vector<double> LevelsCompactionScore(void) override;
-  virtual double GetL0CompactionScore(void) override;
+  virtual double ReCalculateCompactionScore(int level) override;
   virtual std::vector<uint64_t> LevelsSize(void) override;
 
   virtual const Comparator* GetDefaultICMP(void) override;
