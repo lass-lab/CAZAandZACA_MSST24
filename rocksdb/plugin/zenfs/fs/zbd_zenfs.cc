@@ -1967,7 +1967,7 @@ bool ZonedBlockDevice::CalculateZoneScore(std::vector<uint64_t>& fno_list,std::v
 
 void ZonedBlockDevice::AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,uint64_t>>& sorted,Zone** allocated_zone,uint64_t min_capacity){
     uint64_t cur_score;
-    uint64_t max_score=0;
+    // uint64_t max_score=0;
     Zone* target_zone;
     for(auto zidx : sorted){
       // if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]==true){
@@ -1977,15 +1977,13 @@ void ZonedBlockDevice::AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,
       cur_score=zidx.first;
       target_zone=io_zones[zidx.second];
       // cur_invalid_data=(target_zone->wp_-target_zone->start_) - target_zone->used_capacity_;
-
-      if(cur_score==0||target_zone->IsFull()){
+      if(cur_score==0){
+        break;
+      }
+      if(target_zone->IsFull()){
         continue;
       }
 
-      
-      if(cur_score<max_score){
-        continue;
-      }
 
       if(!target_zone->Acquire()){
         continue;
@@ -2019,14 +2017,14 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
   Zone* allocated_zone = nullptr;
   // Zone* target_zone;
   std::vector<uint64_t> fno_list;
-  uint64_t max_score=0;
+  // uint64_t max_score=0;
   uint64_t max_invalid_data=0;
   std::vector<uint64_t> zone_score(io_zones.size(),0);
   std::vector<std::pair<uint64_t,uint64_t>>  sorted;
   std::vector<bool> is_input_in_zone(io_zones.size(),false);
   (void)(input_fno);
   (void)(predicted_size);
-  (void)(cur_invalid_data);
+  // (void)(cur_invalid_data);
   (void)(max_invalid_data);
 
 
@@ -2073,7 +2071,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
     
     if( zfile&& IS_BIG_SSTABLE(zfile->GetFileSize()) ){
       // append to upper, this zfile
-      GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
+      GetNearestZoneFromZoneFile(zfile,is_input_in_zone,&allocated_zone,min_capacity);
     }else{
       fno_list.clear();
       // zone_score.assign(0,zone_score.size());
@@ -2699,11 +2697,11 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
   }
 
   // return most large one
-  uint64_t ZonedBlockDevice::MostLargeUpperAdjacentFile(Slice& smallest ,Slice& largest, int level){
-    assert(db_ptr_!=nullptr);
+  // uint64_t ZonedBlockDevice::MostLargeUpperAdjacentFile(Slice& smallest ,Slice& largest, int level){
+  //   assert(db_ptr_!=nullptr);
 
-    return db_ptr_->MostLargeUpperAdjacentFile(smallest,largest,level);
-  }
+  //   return db_ptr_->MostLargeUpperAdjacentFile(smallest,largest,level);
+  // }
 
   void ZonedBlockDevice::SameLevelFileList(int level, std::vector<uint64_t>& fno_list){
     assert(db_ptr_!=nullptr);

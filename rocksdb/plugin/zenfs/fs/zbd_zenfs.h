@@ -88,7 +88,7 @@ class ZoneFile;
 #define PROACTIVE_ZONECLEANING 6                      // |      x     |       x       |
 
 
-#define IS_BIG_SSTABLE(file_size) ((file_size) > (uint64_t)((uint64_t)1<<25 + (uint64_t)31<<20))
+#define IS_BIG_SSTABLE(file_size) (bool)((uint64_t)(file_size) > (uint64_t)((uint64_t)1<<25 + (uint64_t)31<<20))
 // predicted_size > (uint64_t)( (uint64_t)1<<25 + (uint64_t)31<<20);
 class ZoneExtent;
 class ZoneList {
