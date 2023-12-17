@@ -3021,8 +3021,14 @@ std::vector<double> DBImpl::LevelsCompactionScore(void){
 double DBImpl::ReCalculateCompactionScore(int level){
   // immutable_db_options_;
   // mutable_db_options_;
+  // GetColumnFamilySet()->GetDefault()->im
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
-  return vstorage->ReCalculateCompactionScore(immutable_db_options_,mutable_db_options_,level);
+  // versions_->GetColumnFamilySet()->GetDefault()->current().
+  // versions_->GetColumnFamilySet().optio
+  // versions_->GetColumnFamilySet()->GetDefault()->current().mu
+  // GetCurrentMutableCFOptions
+  return vstorage->ReCalculateCompactionScore((*versions_->GetColumnFamilySet()->GetDefault()->ioptions()),
+                (*GetColumnFamilySet()->GetDefault()->GetCurrentMutableCFOptions()),level);
   // double ret = 0.0;
   // int level;
   
