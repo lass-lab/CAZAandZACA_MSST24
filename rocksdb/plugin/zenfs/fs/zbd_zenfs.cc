@@ -1042,7 +1042,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
   // std::atomic<uint64_t> invalidate_score__atomic_ {0};
     // std::atomic<double> same_zone_score_atomic_ {0};
     // std::atomic<uint64_t> compaction_triggered_{0};
-    uint64_t same_zone_score_uint64t=score*1000;
+    uint64_t same_zone_score_uint64t=score*10000;
     uint64_t inval_score_uint64t=inval_score*100;
     same_zone_score_atomic_.fetch_add(same_zone_score_uint64t);
     invalidate_score_atomic_.fetch_add(inval_score_uint64t);
