@@ -1016,7 +1016,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
         continue;
       }
       uint64_t file_size=zfile->predicted_size_;
-      lsm_tree_[output_level-1].fetch_sub(file_size);
+      lsm_tree_[output_level].fetch_sub(file_size);
   }
 
     std::vector<uint64_t> input_fno = compaction_inputs_input_level_fno;
