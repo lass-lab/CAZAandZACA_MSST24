@@ -2029,9 +2029,9 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
   // (void)(cur_invalid_data);
   (void)(max_invalid_data);
 
-if(level==0){
-  goto l0;
-}
+  if(level==0){
+    goto l0;
+  }
   // bool is_big_sstable = IS_BIG_SSTABLE(predicted_size);
 
   if(IS_BIG_SSTABLE(predicted_size)){
@@ -2052,7 +2052,7 @@ if(level==0){
     
       ZoneFile* zfile=GetSSTZoneFileInZBDNoLock(upper_level_sst_fno);
       
-      if(zfile&& IS_BIG_SSTABLE(zfile->GetFileSize()) ){
+      if(zfile&& (IS_BIG_SSTABLE(zfile->GetFileSize()) || level == 1) ){
         // append to upper,this zfile
         GetNearestZoneFromZoneFile(zfile,is_input_in_zone,&allocated_zone,min_capacity);
       }else{
@@ -2073,8 +2073,8 @@ if(level==0){
     
     ZoneFile* zfile=GetSSTZoneFileInZBDNoLock(upper_level_sst_fno);
     
-    if( zfile&& IS_BIG_SSTABLE(zfile->GetFileSize()) ){
-      // append to upper, this zfile
+    if( zfile&& (IS_BIG_SSTABLE(zfile->GetFileSize()) || level==1 ) ){
+      // append to upper zfile
       GetNearestZoneFromZoneFile(zfile,is_input_in_zone,&allocated_zone,min_capacity);
     }else{
       fno_list.clear();
