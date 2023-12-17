@@ -575,36 +575,36 @@ class ZonedBlockDevice {
       (void)(inval_score_for_timelapse);
       for(int i = 0 ; i <10;i++){
         compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
-        // double sum_score=0.0;
-        // for(double score : same_zone_score_for_timelapse[i]){
-        //   sum_score+=score;
-        // }
-        // avg_same_zone_score_[i]= same_zone_score_for_timelapse[i].size() ? 
-        //                       sum_score/same_zone_score_for_timelapse[i].size() : 0.0;
+        double sum_score=0.0;
+        for(double score : same_zone_score_for_timelapse[i]){
+          sum_score+=score;
+        }
+        avg_same_zone_score_[i]= same_zone_score_for_timelapse[i].size() ? 
+                              sum_score/same_zone_score_for_timelapse[i].size() : 0.0;
         
-        // sum_score=0.0;
-        // for(double score : inval_score_for_timelapse[i]){
-        //   sum_score+=score;
-        // }
-        // avg_inval_score_[i]=inval_score_for_timelapse[i].size() ? 
-        //               sum_score/inval_score_for_timelapse[i].size() : 0.0;
+        sum_score=0.0;
+        for(double score : inval_score_for_timelapse[i]){
+          sum_score+=score;
+        }
+        avg_inval_score_[i]=inval_score_for_timelapse[i].size() ? 
+                      sum_score/inval_score_for_timelapse[i].size() : 0.0;
       }
       
 
 
-      // size_t score_n=same_zone_score_for_timelapse.size();
-      // if(score_n>0){
-      //   for(double score : same_zone_score_for_timelapse){
-      //     sum_score+=score;
-      //   }
-      //   avg_same_zone_score_=sum_score/score_n;
+      size_t score_n=same_zone_score_for_timelapse.size();
+      if(score_n>0){
+        for(double score : same_zone_score_for_timelapse){
+          sum_score+=score;
+        }
+        avg_same_zone_score_=sum_score/score_n;
 
-      //   sum_score=0.0;
-      //   for(double score : inval_score_for_timelapse){
-      //     sum_score+=score;
-      //   }
-      //   avg_inval_score_=sum_score/score_n;
-      // }
+        sum_score=0.0;
+        for(double score : inval_score_for_timelapse){
+          sum_score+=score;
+        }
+        avg_inval_score_=sum_score/score_n;
+      }
       num_files_levels_=num_files_levels;
     }
     void PrintStat(void){
