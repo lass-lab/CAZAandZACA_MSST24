@@ -1930,14 +1930,14 @@ double ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& 
   // return zone_score_max;
 }
 bool ZonedBlockDevice::CalculateZoneScore(std::vector<uint64_t>& fno_list,std::vector<uint64_t>& zone_score){
-  zone_score.clear();
+
   bool no_near_level_files=true;
-  std::vector<uint64_t> zone_score(io_zones.size(),0);
+
   {
-    fno_list.clear();
-    zone_score.clear();
-    zone_score.assign(io_zones.size(),0);
-    AdjacentFileList(smallest, largest, level, fno_list);
+
+    // zone_score.clear();
+    // zone_score.assign(io_zones.size(),0);
+
 
 
     for (auto fno : fno_list){
