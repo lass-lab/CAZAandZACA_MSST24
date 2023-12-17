@@ -2013,22 +2013,22 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
 
   // return IOStatus::OK();
   IOStatus s;
-  uint64_t cur_score;
-  uint64_t cur_invalid_data;
-  bool no_near_level_files=true;
+  // uint64_t cur_score;
+  // uint64_t cur_invalid_data;
+  // bool no_near_level_files=true;
   Zone* allocated_zone = nullptr;
-  Zone* target_zone;
+  // Zone* target_zone;
   std::vector<uint64_t> fno_list;
   uint64_t max_score=0;
   uint64_t max_invalid_data=0;
-  // printf("caza worksd?\n");
+  std::vector<uint64_t> zone_score(io_zones.size(),0);
+  std::vector<std::pair<uint64_t,uint64_t>>  sorted;
   std::vector<bool> is_input_in_zone(io_zones.size(),false);
   (void)(input_fno);
   (void)(predicted_size);
   (void)(cur_invalid_data);
   (void)(max_invalid_data);
-  std::vector<uint64_t> zone_score(io_zones.size(),0);
-  std::vector<std::pair<uint64_t,uint64_t>>  sorted;
+
 
   // bool is_big_sstable = IS_BIG_SSTABLE(predicted_size);
 
@@ -2088,114 +2088,6 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
     *zone_out=allocated_zone;
     return IOStatus::OK();
   }
-
-
-  // for(uint64_t fno : input_fno){
-  //   ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
-  //   if(zFile==nullptr){
-  //     continue;
-  //   }
-  //   auto extents=zFile->GetExtents();
-  //   for(ZoneExtent* extent : extents){
-  //     uint64_t zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
-  //     is_input_in_zone[zidx]=true;
-  //   }
-  // }
-
-  // zone valid overlapping capacity
-  // 1. find UPPER/LOWER OVERLAPP RANGE zone
-
-
-  // if(level==0){
-  //   goto l0;
-  // }  
-
-  // if(level==1){
-  //   // fno_list.clear();
-  //   // zone_score.clear();
-  //   // zone_score.assign(io_zones.size()+ZENFS_META_ZONES+ZENFS_SPARE_ZONES,0);
-  //   // SameLevelFileList(0,fno_list);
-  //   // s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
-  //   //                             min_capacity);
-
-  //   // if(allocated_zone!=nullptr){
-  //   //   // printf("CAZA 1 \n");
-  //   //   *zone_out=allocated_zone;
-  //   //   return IOStatus::OK();
-  //   // }
-  // }
-
-  // {
-    // fno_list.clear();
-
-    // AdjacentFileList(smallest, largest, level, fno_list);
-
-
-  //   for (auto fno : fno_list){
-  //     // auto it=std::find(input_fno.begin(),input_fno.end(),fno);
-  //     // if(it!=input_fno.end()){
-  //     //   continue;
-  //     // }
-  //     ZoneFile* zFile= GetSSTZoneFileInZBDNoLock(fno);
-  //     if(zFile==nullptr){
-  //       continue;
-  //     }
-  //     if(zFile->selected_as_input_){
-  //       continue;
-  //     }
-  //     auto extents=zFile->GetExtents();
-  //     for(auto extent: extents){
-  //       if(!extent->zone_->IsFull()){
-  //         // zone_->index do not skip meta,spare zone
-  //         zone_score[extent->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]+=extent->length_;
-  //         no_near_level_files=false;
-  //       }
-  //     }
-  //   }
-  // }
-
-  
-
-  // if(!CalculateZoneScore(fno_list,zone_score)){
-  //   sorted = SortedByZoneScore(zone_score);
-  //   AllocateZoneBySortedScore(sorted,&allocated_zone);
-  //   // for(auto zidx : sorted){
-  //   //   // if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]==true){
-  //   //   //   continue;
-  //   //   // }
-      
-  //   //   cur_score=zidx.first;
-  //   //   target_zone=io_zones[zidx.second];
-  //   //   // cur_invalid_data=(target_zone->wp_-target_zone->start_) - target_zone->used_capacity_;
-
-  //   //   if(cur_score==0||target_zone->IsFull()){
-  //   //     continue;
-  //   //   }
-
-      
-  //   //   if(cur_score<max_score){
-  //   //     continue;
-  //   //   }
-
-  //   //   if(!target_zone->Acquire()){
-  //   //     continue;
-  //   //   }
-
-  //   //   if(target_zone->capacity_<=min_capacity){
-  //   //     target_zone->Release();
-  //   //     continue;
-  //   //   }
-  //   //   allocated_zone=target_zone;
-  //   //   break;
-  //   // }
-  // }
-
-  // if(allocated_zone!=nullptr){
-  //   // printf("CAZA 1 \n");
-  //   *zone_out=allocated_zone;
-  //   return IOStatus::OK();
-  // }
-
 
 /////////////////////////////
 // l0:
