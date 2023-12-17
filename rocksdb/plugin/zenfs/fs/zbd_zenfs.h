@@ -592,21 +592,21 @@ class ZonedBlockDevice {
       
 
 
-      size_t score_n=same_zone_score_for_timelapse.size();
-      if(score_n>0){
-        for(double score : same_zone_score_for_timelapse){
-          sum_score+=score;
-        }
-        avg_same_zone_score_=sum_score/score_n;
+    //   size_t score_n=same_zone_score_for_timelapse.size();
+    //   if(score_n>0){
+    //     for(double score : same_zone_score_for_timelapse){
+    //       sum_score+=score;
+    //     }
+    //     avg_same_zone_score_=sum_score/score_n;
 
-        sum_score=0.0;
-        for(double score : inval_score_for_timelapse){
-          sum_score+=score;
-        }
-        avg_inval_score_=sum_score/score_n;
-      }
-      num_files_levels_=num_files_levels;
-    }
+    //     sum_score=0.0;
+    //     for(double score : inval_score_for_timelapse){
+    //       sum_score+=score;
+    //     }
+    //     avg_inval_score_=sum_score/score_n;
+    //   }
+    //   num_files_levels_=num_files_levels;
+    // }
     void PrintStat(void){
       //   Sec    | Free |  RC |  RCZ |  RCP  | R_wp  |      Twp   |   erase_sz   |      erase_sz_zc |   p_er_sz      |
       // printf("[%4d] | %3ld  | %3ld |  %3ld | [%3ld] | [ %4ld] | [ %4ld ] | [ %10ld ] | [ %10ld ] | [ %10ld ] |", 
