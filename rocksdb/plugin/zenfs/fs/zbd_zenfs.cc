@@ -1054,7 +1054,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
     same_zone_score_[output_level].push_back(score);
     invalidate_score_[output_level].push_back(inval_score);
     same_zone_score_for_timelapse_[output_level].clear();
-    same_zone_score_for_timelapse_[output_level]=same_zone_score_;
+    same_zone_score_for_timelapse_[output_level]=same_zone_score_[output_level];
 
     // uint64_t same_zone_score_uint64t=score*10000;
     // uint64_t inval_score_uint64t=inval_score*100;
