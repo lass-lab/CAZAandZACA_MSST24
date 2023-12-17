@@ -4470,7 +4470,7 @@ void DB::DownwardAdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>&
 void DB::SameLevelFileList(int , std::vector<uint64_t>& ){
   std::cout<<"DB::SameLevelFileList not Supported\n";
 }
-double DB::ReCalculateCompactionScore(int level){
+double DB::ReCalculateCompactionScore(int){
   return 0.0;
 }
 
