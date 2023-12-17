@@ -2088,6 +2088,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
       // append to upper zfile
       GetNearestZoneFromZoneFile(zfile,is_input_in_zone,&allocated_zone,min_capacity);
     }else{
+      // append to same levels
       fno_list.clear();
       // zone_score.assign(0,zone_score.size());
       zone_score.clear();
@@ -2118,18 +2119,19 @@ l0:
     // if(allocated_zone!=nullptr){
     //   // printf("CAZA 2.1\n");
     // }
-  }else{ // if other level, same level but near key-sstfile zone
-    fno_list.clear();
-
-    zone_score.clear();
-    zone_score.assign(io_zones.size(),0);
-    SameLevelFileList(level,fno_list);
-    s = AllocateSameLevelFilesZone(smallest,largest,fno_list,is_input_in_zone,&allocated_zone,
-                                  min_capacity);
-    if(allocated_zone!=nullptr){
-      //  printf("CAZA 2.2\n");
-    }
   }
+  // else{ // if other level, same level but near key-sstfile zone
+  //   fno_list.clear();
+
+  //   zone_score.clear();
+  //   zone_score.assign(io_zones.size(),0);
+  //   SameLevelFileList(level,fno_list);
+  //   s = AllocateSameLevelFilesZone(smallest,largest,fno_list,is_input_in_zone,&allocated_zone,
+  //                                 min_capacity);
+  //   if(allocated_zone!=nullptr){
+  //     //  printf("CAZA 2.2\n");
+  //   }
+  // }
 
 
   if(!s.ok()){
