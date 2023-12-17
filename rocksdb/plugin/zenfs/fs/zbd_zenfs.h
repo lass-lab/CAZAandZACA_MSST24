@@ -75,7 +75,7 @@ class ZoneFile;
 
 #define LIZA 0
 #define CAZA 1
-#define CAZA_W 2
+#define CAZA_ADV 2
 
 #define PARTIAL_RESET_KICKED_THRESHOLD 40
                                                       // | zone-reset | partial-reset |

@@ -2806,9 +2806,9 @@ IOStatus ZonedBlockDevice::AllocateEmptyZone(Zone **zone_out) {
   IOStatus s;
   Zone *allocated_zone = nullptr;
   std::vector<Zone*> sorted_zone=io_zones;
-  if(allocation_scheme_==CAZA_W){
-    sort(sorted_zone.begin(),sorted_zone.end(),Zone::SortByResetCount);
-  }
+  // if(allocation_scheme_==CAZA_W){
+  //   sort(sorted_zone.begin(),sorted_zone.end(),Zone::SortByResetCount);
+  // }
 
   for (const auto z : sorted_zone) {
     if (z->Acquire()) {
@@ -2894,8 +2894,13 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       return IOStatus::OK();
     }
 
-    if(allocation_scheme_!=LIZA&&is_sst){
-      AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
+    if(is_sst){
+      if(allocation_scheme_==CAZA){
+        AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
+      }else if(allocation_scheme_==CAZA_ADV){
+        AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
+      }
+      
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
         // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
@@ -2989,13 +2994,24 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
 
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
-  if(is_sst&&level>=0 && allocation_scheme_!=LIZA){
+  if(is_sst&&level>=0 && allocation_scheme_==CAZA){
+    s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
+    
+    
+    if(!s.ok()){
+      PutOpenIOZoneToken();
+      return s;
+    }
+  }else if(is_sst&&level>=0 && allocation_scheme_=CAZA_ADV){
     s = AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
+    
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
     }
   }
+
+
   if(allocated_zone!=nullptr){
     // printf("AllocateIOZone :: CAZA allocated : %lu\n",allocated_zone->zidx_);
     goto end;
