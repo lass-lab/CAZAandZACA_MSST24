@@ -3024,9 +3024,9 @@ double DBImpl::GetL0CompactionScore(void){
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   for (int i = 0; i < 8 ; i++) {
     
-    level = vstorage_->CompactionScoreLevel(i);
+    level = vstorage->CompactionScoreLevel(i);
     if(level==0){
-      ret = vstorage_->CompactionScore(i);
+      ret = vstorage->CompactionScore(i);
       break;
     }
   }
