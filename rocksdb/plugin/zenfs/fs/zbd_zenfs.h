@@ -685,7 +685,7 @@ class ZonedBlockDevice {
       return lsm_tree_[level].load()/max_bytes_for_level_base_;
     }
     uint64_t max_bytes_for_level = max_bytes_for_level_base_;
-    for(int l = 1 ; l<level;i++){
+    for(int l = 1 ; l<level;l++){
       max_bytes_for_level*=10;
     }
 
@@ -1135,7 +1135,7 @@ class ZonedBlockDevice {
 
 
   bool CalculateZoneScore(std::vector<uint64_t>& fno_list,std::vector<uint64_t>& zone_score);
-  void AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,uint64_t>>& sorted,Zone** allocated_zone);
+  void AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,uint64_t>>& sorted,Zone** allocated_zone,uint64_t min_capacity);
   IOStatus AllocateCompactionAwaredZone(Slice& smallest, Slice& largest ,int level, 
                                           Env::WriteLifeTimeHint file_lifetime , std::vector<uint64_t> input_fno,
                                           uint64_t predicted_size,

@@ -1017,12 +1017,12 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
       lsm_tree_[output_level-1].fetch_sub(file_size);
   }
 
-
-  if(input_aware_scheme_ == 1){
     std::vector<uint64_t> input_fno = compaction_inputs_input_level_fno;
     input_fno.insert(input_fno.end(),
             compaction_inputs_output_level_fno.begin(),
             compaction_inputs_output_level_fno.end());
+  if(input_aware_scheme_ == 1){
+
     for(auto fno : input_fno){
       auto zFile  = GetSSTZoneFileInZBDNoLock(fno);
       if(!zFile){
@@ -1032,9 +1032,9 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
     }
   }
 
-  double score = GetMaxSameZoneScore(compaction_inputs_fno);
+  double score = GetMaxSameZoneScore(input_fno);
   uint64_t none;
-  double inval_score = GetMaxInvalidateCompactionScore(compaction_inputs_fno,&none,true);
+  double inval_score = GetMaxInvalidateCompactionScore(input_fno,&none,true);
   {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     same_zone_score_[output_level].push_back(score);
@@ -1965,7 +1965,7 @@ bool ZonedBlockDevice::CalculateZoneScore(std::vector<uint64_t>& fno_list,std::v
   return no_near_level_files;
 }
 
-void ZonedBlockDevice::AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,uint64_t>>& sorted,Zone** allocated_zone){
+void ZonedBlockDevice::AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,uint64_t>>& sorted,Zone** allocated_zone,uint64_t min_capacity){
     uint64_t cur_score;
     uint64_t max_score=0;
     Zone* target_zone;
@@ -2043,7 +2043,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
       DownwardAdjacentFileList(smallest, largest, level, fno_list);
       if(!CalculateZoneScore(fno_list,zone_score)){
         sorted = SortedByZoneScore(zone_score);
-        AllocateZoneBySortedScore(sorted,&allocated_zone);
+        AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
       }
     }else{ // upper_level_score>this_level_score
       uint64_t upper_level_sst_fno = MostLargeUpperAdjacentFile(smallest, largest, level);
@@ -2052,7 +2052,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
       
       if(zfile&& IS_BIG_SSTABLE(zfile->GetFileSize()) ){
         // append to upper,this zfile
-        GetNearestZoneFromZoneFile(zFile,is_input_in_zone,&allocated_zone,min_capacity);
+        GetNearestZoneFromZoneFile(zfile,is_input_in_zone,&allocated_zone,min_capacity);
       }else{
         // append to downward
         fno_list.clear();
@@ -2061,7 +2061,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
         DownwardAdjacentFileList(smallest, largest, level, fno_list);
         if(!CalculateZoneScore(fno_list,zone_score)){
           sorted = SortedByZoneScore(zone_score);
-          AllocateZoneBySortedScore(sorted,&allocated_zone);
+          AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
         }
       }
     }
