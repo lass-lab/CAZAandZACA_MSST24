@@ -646,6 +646,8 @@ class ZonedBlockDevice {
   std::mutex same_zone_score_mutex_;
   std::vector<double> same_zone_score_[10];
   std::vector<double> same_zone_score_for_timelapse_[10];
+  std::atomic<double> same_zone_score_atomic_ {0};
+  std::atmoic<uint64_t> compaction_triggered_{)}
 
   std::vector<double> invalidate_score_[10];
   std::vector<double> invalidate_score_for_timelapse_[10];

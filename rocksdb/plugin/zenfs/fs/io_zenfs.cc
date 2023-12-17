@@ -874,7 +874,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     }
     delete it;
   }
-  printf("%lu %d\n",zoneFile_->predicted_size_,IS_BIG_SSTABLE(zoneFile_->predicted_size_));
+  // printf("%lu %d\n",zoneFile_->predicted_size_,IS_BIG_SSTABLE(zoneFile_->predicted_size_));
   // if(zoneFile_->level_ ==0){
   //   zoneFile_->GetZbd()->lsm_tree_[0].fetch_add(1);
   // }else{
