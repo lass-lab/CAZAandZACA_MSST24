@@ -1047,7 +1047,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
     same_zone_score_atomic_.fetch_add(same_zone_score_uint64t);
     invalidate_score_atomic_.fetch_add(inval_score_uint64t);
     compaction_triggered_.fetch_add(1);
-    printf("%lu %lu\n",same_zone_score_uint64t,inval_score_uint64t);
+    // printf("%lu %lu\n",same_zone_score_uint64t,inval_score_uint64t);
   }
 }
 
