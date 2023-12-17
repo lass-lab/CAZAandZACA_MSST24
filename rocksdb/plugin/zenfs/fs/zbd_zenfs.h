@@ -689,7 +689,7 @@ class ZonedBlockDevice {
       max_bytes_for_level*=10;
     }
 
-    return (double)(lsm_tree_[level].load()/max_bytes_for_level);
+    return (double)( (double)(lsm_tree_[level].load()) /(double) max_bytes_for_level);
   }
   inline uint64_t GetAllocationScheme() { return allocation_scheme_;}
 
