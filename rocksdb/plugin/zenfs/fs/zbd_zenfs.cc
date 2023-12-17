@@ -1931,7 +1931,7 @@ double ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& 
 }
 bool ZonedBlockDevice::CalculateZoneScore(std::vector<uint64_t>& fno_list,std::vector<uint64_t>& zone_score){
 
-  bool no_near_level_files=true;
+  bool there_is_near_level_files=false;
 
   {
 
@@ -1957,12 +1957,12 @@ bool ZonedBlockDevice::CalculateZoneScore(std::vector<uint64_t>& fno_list,std::v
         if(!extent->zone_->IsFull()){
           // zone_->index do not skip meta,spare zone
           zone_score[extent->zone_->zidx_-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]+=extent->length_;
-          no_near_level_files=false;
+          there_is_near_level_files=true;
         }
       }
     }
   }
-  return no_near_level_files;
+  return there_is_near_level_files;
 }
 
 void ZonedBlockDevice::AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,uint64_t>>& sorted,Zone** allocated_zone,uint64_t min_capacity){
@@ -2039,7 +2039,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
       zone_score.clear();
       zone_score.assign(io_zones.size(),0);
       DownwardAdjacentFileList(smallest, largest, level, fno_list);
-      if(!CalculateZoneScore(fno_list,zone_score)){
+      if(CalculateZoneScore(fno_list,zone_score)){
         sorted = SortedByZoneScore(zone_score);
         AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
       }
@@ -2057,7 +2057,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
         zone_score.clear();
         zone_score.assign(io_zones.size(),0);
         DownwardAdjacentFileList(smallest, largest, level, fno_list);
-        if(!CalculateZoneScore(fno_list,zone_score)){
+        if(CalculateZoneScore(fno_list,zone_score)){
           sorted = SortedByZoneScore(zone_score);
           AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
         }
