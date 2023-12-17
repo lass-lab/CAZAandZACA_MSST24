@@ -384,6 +384,7 @@ class DB {
   virtual void DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
   
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
+  virtual double ReCalculateCompactionScore(int level);
   virtual std::vector<int> NumLevelsFiles(void);
   virtual std::vector<double> LevelsCompactionScore(void);
   virtual double GetL0CompactionScore(void);
