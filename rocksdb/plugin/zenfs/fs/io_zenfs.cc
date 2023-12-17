@@ -878,7 +878,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
   // if(zoneFile_->level_ ==0){
   //   zoneFile_->GetZbd()->lsm_tree_[0].fetch_add(1);
   // }else{
-  zoneFile_->GetZbd()->lsm_tree_[zoneFile_->level_].fetch_add(zoneFile_->GetFileSize());
+  zoneFile_->GetZbd()->lsm_tree_[zoneFile_->level_].fetch_add(zoneFile_->predicted_size_);
   // }
   input_fno_.clear();
   return s;

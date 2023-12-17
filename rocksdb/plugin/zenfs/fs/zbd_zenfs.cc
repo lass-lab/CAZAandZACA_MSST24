@@ -987,7 +987,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
         printf("why nullptr? %lu\n",fno);
         continue;
       }
-      uint64_t file_size=zfile->GetFileSize();
+      uint64_t file_size=zfile->predicted_size_;
       lsm_tree_[output_level-1].fetch_sub(file_size);
       lsm_tree_[output_level].fetch_add(file_size);
     }
@@ -1005,7 +1005,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
         printf("why nullptr? %lu\n",fno);
         continue;
       }
-      uint64_t file_size=zfile->GetFileSize();
+      uint64_t file_size=zfile->predicted_size_;
       lsm_tree_[output_level-1].fetch_sub(file_size);
   }
   for(uint64_t fno : compaction_inputs_output_level_fno){
@@ -1015,7 +1015,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
         printf("why nullptr? %lu\n",fno);
         continue;
       }
-      uint64_t file_size=zfile->GetFileSize();
+      uint64_t file_size=zfile->predicted_size_;
       lsm_tree_[output_level-1].fetch_sub(file_size);
   }
 
