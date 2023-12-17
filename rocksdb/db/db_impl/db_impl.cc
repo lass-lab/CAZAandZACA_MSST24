@@ -3028,7 +3028,7 @@ double DBImpl::ReCalculateCompactionScore(int level){
   // versions_->GetColumnFamilySet()->GetDefault()->current().mu
   // GetCurrentMutableCFOptions
   auto ioptions = versions_->GetColumnFamilySet()->GetDefault()->ioptions();
-  auto moptions = versions_->GetColumnFamilySet()->GetDefault()->GetCurrentMutableCFOptions()
+  auto moptions = versions_->GetColumnFamilySet()->GetDefault()->GetCurrentMutableCFOptions();
   return vstorage->ReCalculateCompactionScore((*ioptions),
                 (*moptions),level);
   // double ret = 0.0;
