@@ -312,7 +312,7 @@ void ZenFS::BackgroundStatTimeLapse(){
   // int mt;
   while (run_bg_stats_worker_) {
     free_percent_ = zbd_->CalculateFreePercent();
-    for(int l = 0 ;l < 4 l ++){
+    for(int l = 0 ;l < 4 ;l ++){
       printf("[%d] : %lf , %lu",l,zbd_->PredictCompactionScore(l),zbd_->lsm_tree_[l].load()>>20 );
     }
     
