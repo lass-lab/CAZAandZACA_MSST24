@@ -1053,6 +1053,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     same_zone_score_[output_level].push_back(score);
     invalidate_score_[output_level].push_back(inval_score);
+
     same_zone_score_for_timelapse_[output_level].clear();
     same_zone_score_for_timelapse_[output_level]=same_zone_score_[output_level];
 
@@ -2019,6 +2020,26 @@ void ZonedBlockDevice::AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,
       break;
     }
 }
+
+/*
+AdvancedCAZA(level i,key_range, SST_size, level_score[i],level_score[i-1] )
+If Type(SST_size) == LARGE : 
+	if (level_score[i-1] > level_score[i] )
+		UpperLevelOverlappedSST = GetOverlappedSST(i-1,key_range) 
+	 	if ( Type(UpperLevelOverlappedSST.size) == LARGE )
+	 		AppendUpperLevelOverlappedSST()
+	 	else
+	 		AppendDownwardLevelOverlappedSST()
+	else
+		AppendDownwardLevelOverlappedSST()
+else	
+	UpperLevelOverlappedSST = GetOverlappedSST(i-1,key_range) 
+	if(Type(UpperLevelOverlappedSST.size) == LARGE)
+		AppendUpperLevelOverlappedSST()
+	else
+		AppendSameLevelNearKeyrangeSST()
+
+*/
 IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice& largest,
                                                         int level,Env::WriteLifeTimeHint file_lifetime, 
                                                         std::vector<uint64_t> input_fno,uint64_t predicted_size,
