@@ -2714,8 +2714,8 @@ uint32_t GetExpiredTtlFilesCount(const ImmutableOptions& ioptions,
 }  // anonymous namespace
 
 double VersionStorageInfo::ReCalculateCompactionScore(
-    const ImmutableOptions& immutable_options,
-    const MutableCFOptions& mutable_cf_options,
+    ImmutableOptions& immutable_options,
+    MutableCFOptions& mutable_cf_options,
     int level) 
 {
 
