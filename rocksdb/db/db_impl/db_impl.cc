@@ -2905,7 +2905,7 @@ Status DBImpl::DropColumnFamilies(
   }
   return s;
 }
-uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
+uint64_t DBImpl::MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
   InternalKey largest;
   InternalKey smallest;
   uint64_t max_size = 0;
@@ -2932,7 +2932,7 @@ uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
   return ret_fno;
 }
 
-void DBImpl:DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list){
+void DBImpl::DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list){
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   CompactionInputFiles downward_level_inputs;
   InternalKey largest;
@@ -4436,7 +4436,7 @@ Status DB::DropColumnFamilies(
 }
 
 //CAZA
-uint64_t MostLargeUpperAdjacentFile(Slice& , Slice& , int ){
+uint64_t DB::MostLargeUpperAdjacentFile(Slice& , Slice& , int ){
   return 0;
 }
 void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
@@ -4444,7 +4444,7 @@ void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
   std::cout<<"DB::AdjcanetFileLIst not Supported\n";
 }
 
-void DownwardAdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
+void DB::DownwardAdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
   std::cout<<"DB::DownwardAdjacentFileList not Supported\n";
 }
 
