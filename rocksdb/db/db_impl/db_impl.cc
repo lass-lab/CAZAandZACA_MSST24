@@ -3021,18 +3021,20 @@ std::vector<double> DBImpl::LevelsCompactionScore(void){
 double DBImpl::GetL0CompactionScore(void){
   immutable_db_options_;
   mutable_db_options_;
-  double ret = 0.0;
-  int level;
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
-  for (int i = 0; i < 8 ; i++) {
+  return vstorage->ReCalculateL0CompactionScore(immutable_db_options_,mutable_db_options_);
+  // double ret = 0.0;
+  // int level;
+  
+  // for (int i = 0; i < 8 ; i++) {
     
-    level = vstorage->CompactionScoreLevel(i);
-    if(level==0){
-      ret = vstorage->CompactionScore(i);
-      break;
-    }
-  }
-  return ret;
+  //   level = vstorage->CompactionScoreLevel(i);
+  //   if(level==0){
+  //     ret = vstorage->CompactionScore(i);
+  //     break;
+  //   }
+  // }
+  // return ret;
 }
 
 std::vector<uint64_t> DBImpl::LevelsSize(void){
