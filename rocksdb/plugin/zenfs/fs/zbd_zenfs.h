@@ -606,7 +606,7 @@ class ZonedBlockDevice {
     //     avg_inval_score_=sum_score/score_n;
     //   }
     //   num_files_levels_=num_files_levels;
-    // }
+    }
     void PrintStat(void){
       //   Sec    | Free |  RC |  RCZ |  RCP  | R_wp  |      Twp   |   erase_sz   |      erase_sz_zc |   p_er_sz      |
       // printf("[%4d] | %3ld  | %3ld |  %3ld | [%3ld] | [ %4ld] | [ %4ld ] | [ %10ld ] | [ %10ld ] | [ %10ld ] |", 
@@ -616,12 +616,12 @@ class ZonedBlockDevice {
                 T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
              R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20)
              ,avg_invalid_ratio_);
-      // for(int i = 0 ; i < 5 ; i++){
-      //   printf("%.4lf\t",avg_same_zone_score_[i]);
-      // }
-      // for(int i = 0 ; i < 5 ; i++){
-      //   printf("%.3lf\t",avg_inval_score_[i]);
-      // }
+      for(int i = 0 ; i < 5 ; i++){
+        printf("%.4lf\t",avg_same_zone_score_[i]);
+      }
+      for(int i = 0 ; i < 5 ; i++){
+        printf("%.3lf\t",avg_inval_score_[i]);
+      }
       // for(int n : num_files_levels_){
       //   printf("%d\t",n);
       // }
