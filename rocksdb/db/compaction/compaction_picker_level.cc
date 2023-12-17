@@ -518,7 +518,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // else (l1.... -> ln)
 
-
+    if(candidate->compensated_file_size<(63<<20)){
+      break;
+    }
     if(candidate->being_compacted){
       continue;
     }
@@ -555,7 +557,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // printf("[%u,%d] start fno : %lu.sst\n",cmp_idx,index,candidate->fd.GetNumber());
 
     if(file_candidates.size()==1 ){
-      continue;
+      goto baseline;
     }
 
     // if(ioptions_.compaction_scheme==BASELINE_COMPACTION
@@ -594,7 +596,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     // (void)(file_size_score);
     file_size_score=(normalized_candidate_compensate_size*zns_free_percent)/100;
     // if(candidate_size==0){
-      score=invalidation_ratio_score;
+    score=invalidation_ratio_score;
     // }else{
     // score=invalidation_ratio_score/candidate_size;
     // }
@@ -678,6 +680,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     return start_level_inputs_.size() > 0;
   }
 baseline:
+  start_level_inputs_.clear();
 //////////////////////////////////////////////////////////////////////////////////////////
   for (cmp_idx = vstorage_->NextCompactionIndex(start_level_);
        cmp_idx < file_size.size(); cmp_idx++) {

@@ -117,7 +117,7 @@ do
                     if [ $COMPACTION_ALGORITHM -eq $BASELINE_COMPACTION ]; then
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_${i}.txt
                     elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_MAX_START_LEVEL_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_IAWARE_${INPUT_AWARE_SCHEME}_${i}.txt
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_MAX_START_LEVEL_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_toonlylargesst_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EAGER ]; then
