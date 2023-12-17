@@ -2037,7 +2037,18 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
   if(IS_BIG_SSTABLE(predicted_size)){
     double upper_level_score = PredictCompactionScore(level-1);
     double this_level_score = PredictCompactionScore(level);
-    if(this_level_score>upper_level_score){
+    
+    if(level == 1){
+        // append to downward
+      fno_list.clear();
+      zone_score.clear();
+      zone_score.assign(io_zones.size(),0);
+      DownwardAdjacentFileList(smallest, largest, level, fno_list);
+      if(CalculateZoneScore(fno_list,zone_score)){
+        sorted = SortedByZoneScore(zone_score);
+        AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
+      }
+    }else if(this_level_score>upper_level_score){
       // append to downward
       fno_list.clear();
       zone_score.clear();
@@ -2095,7 +2106,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
 l0:
   // return IOStatus::OK();
 // if level 0, most level 0 zone
-  if(level==0 ||level==1 ||level==100){
+  if(level==0 || level==100){
     fno_list.clear();
     // zone_score.assign(0,zone_score.size());
     zone_score.clear();
