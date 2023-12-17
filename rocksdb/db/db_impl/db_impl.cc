@@ -4476,7 +4476,7 @@ double DB::ReCalculateCompactionScore(int){
 
 std::vector<int> DB::NumLevelsFiles(void) { return std::vector<int>(0); }
 std::vector<double> DB::LevelsCompactionScore(void) { return std::vector<double>(0); }
-double DB::ReCalculateCompactionScore(int level) {return 0.0;}
+
 std::vector<uint64_t> DB::LevelsSize(void) { return std::vector<uint64_t>(0); }
 const Comparator* DB::GetDefaultICMP(void) { return nullptr;}
 
