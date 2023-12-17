@@ -681,10 +681,10 @@ class ZonedBlockDevice {
   bool ZCorPartialTryLock();
   void ZCorPartialUnLock();
   double PredictCompactionScore(int level){
-    if(db_ptr!=nullptr){
-      return  db_ptr_->ReCalculateCompactionScore(level);
-    }
-    
+    // if(db_ptr!=nullptr){
+    //   return  db_ptr_->ReCalculateCompactionScore(level);
+    // }
+
     if(level ==0 ){
       if(db_ptr_==nullptr){
         return 0.0;
