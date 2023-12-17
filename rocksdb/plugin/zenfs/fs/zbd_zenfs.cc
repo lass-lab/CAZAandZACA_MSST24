@@ -2029,10 +2029,12 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
   // (void)(cur_invalid_data);
   (void)(max_invalid_data);
 
-
+if(level==0){
+  goto l0;
+}
   // bool is_big_sstable = IS_BIG_SSTABLE(predicted_size);
 
-  if(IS_BIG_SSTABLE(predicted_size) && level > 0){
+  if(IS_BIG_SSTABLE(predicted_size)){
     double upper_level_score = PredictCompactionScore(level-1);
     double this_level_score = PredictCompactionScore(level);
     if(this_level_score>upper_level_score){
@@ -2090,7 +2092,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
   }
 
 /////////////////////////////
-// l0:
+l0:
   // return IOStatus::OK();
 // if level 0, most level 0 zone
   if(level==0 ||level==1 ||level==100){
