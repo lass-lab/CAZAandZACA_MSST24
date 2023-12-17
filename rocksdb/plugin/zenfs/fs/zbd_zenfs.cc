@@ -957,10 +957,10 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
 
 
   if(trivial_move){
-    if(!(compaction_inputs_input_level_fno.size()!=1 && compaction_inputs_output_level_fno.size()==0) ){
-      printf("????? %lu %lu\n",compaction_inputs_input_level_fno.size(),compaction_inputs_output_level_fno.size());
-      return;
-    }
+    // if(! ( compaction_inputs_input_level_fno.size()!=1 && compaction_inputs_output_level_fno.size()!=0 ) ){
+    //   printf("????? %lu %lu\n",compaction_inputs_input_level_fno.size(),compaction_inputs_output_level_fno.size());
+    //   return;
+    // }
 
     if(output_level==1){
       printf("0->1 trivial move??\n");
