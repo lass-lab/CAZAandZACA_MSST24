@@ -449,7 +449,8 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   }
 #endif
   for(int level = 0; level < 9; i++){
-    lsm_tree_.push_back(std::atomic<uint64_t>(0));
+    std::atomic<uint64_t> a;
+    lsm_tree_.push_back(a);
   }
   while (m < ZENFS_META_ZONES && i < zone_rep->ZoneCount()) {
     /* Only use sequential write required zones */
