@@ -1475,7 +1475,7 @@ class FileSystemWrapper : public FileSystem {
 
   void GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction_inputs_input_level_fno,
                           std::vector<uint64_t>& compaction_inputs_output_level_fno ,int output_level,bool trivial_move) override {
-    target_->GiveZenFStoLSMTreeHint(compaction_inputs_fno,output_level);
+    target_->GiveZenFStoLSMTreeHint(compaction_inputs_input_level_fno,compaction_inputs_output_level_fno,output_level,trivial_move);
   }
 
   void StatsCompactionFileSize(bool is_last_file,int output_level,uint64_t file_size){
