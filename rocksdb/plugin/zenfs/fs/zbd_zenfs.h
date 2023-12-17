@@ -573,22 +573,22 @@ class ZonedBlockDevice {
       }
       (void)(same_zone_score_for_timelapse);
       (void)(inval_score_for_timelapse);
-      // for(int i = 0 ; i <10;i++){
-      //   compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
-      //   double sum_score=0.0;
-      //   for(double score : same_zone_score_for_timelapse[i]){
-      //     sum_score+=score;
-      //   }
-      //   avg_same_zone_score_[i]= same_zone_score_for_timelapse[i].size() ? 
-      //                         sum_score/same_zone_score_for_timelapse[i].size() : 0.0;
+      for(int i = 0 ; i <10;i++){
+        compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
+        // double sum_score=0.0;
+        // for(double score : same_zone_score_for_timelapse[i]){
+        //   sum_score+=score;
+        // }
+        // avg_same_zone_score_[i]= same_zone_score_for_timelapse[i].size() ? 
+        //                       sum_score/same_zone_score_for_timelapse[i].size() : 0.0;
         
-      //   sum_score=0.0;
-      //   for(double score : inval_score_for_timelapse[i]){
-      //     sum_score+=score;
-      //   }
-      //   avg_inval_score_[i]=inval_score_for_timelapse[i].size() ? 
-      //                 sum_score/inval_score_for_timelapse[i].size() : 0.0;
-      // }
+        // sum_score=0.0;
+        // for(double score : inval_score_for_timelapse[i]){
+        //   sum_score+=score;
+        // }
+        // avg_inval_score_[i]=inval_score_for_timelapse[i].size() ? 
+        //               sum_score/inval_score_for_timelapse[i].size() : 0.0;
+      }
       
 
 
@@ -605,7 +605,7 @@ class ZonedBlockDevice {
       //   }
       //   avg_inval_score_=sum_score/score_n;
       // }
-      // num_files_levels_=num_files_levels;
+      num_files_levels_=num_files_levels;
     }
     void PrintStat(void){
       //   Sec    | Free |  RC |  RCZ |  RCP  | R_wp  |      Twp   |   erase_sz   |      erase_sz_zc |   p_er_sz      |
