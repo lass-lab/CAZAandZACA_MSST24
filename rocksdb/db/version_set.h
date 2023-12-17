@@ -153,8 +153,8 @@ class VersionStorageInfo {
   void ComputeCompactionScore(const ImmutableOptions& immutable_options,
                               const MutableCFOptions& mutable_cf_options);
   
-  double ReCalculateCompactionScore( ImmutableOptions& immutable_options,
-                               MutableCFOptions& mutable_cf_options,
+  double ReCalculateCompactionScore( ImmutableOptions immutable_options,
+                               MutableCFOptions mutable_cf_options,
                               int level);
   // Estimate est_comp_needed_bytes_
   void EstimateCompactionBytesNeeded(
