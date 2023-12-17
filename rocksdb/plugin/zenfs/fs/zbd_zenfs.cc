@@ -794,40 +794,48 @@ ZonedBlockDevice::~ZonedBlockDevice() {
             ((sum_out_s>>20)/sum_triggered),((sum_in_is+sum_in_os)*100/sum_out_s) ,sum_triggered);
   }
   {  
-    std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
-
-    double avg_same_zone_score,avg_inval_score;
-    double sum_sum_score=0.0, sum_sum_inval_score=0.0;
-    size_t total_n = 0;
-    for(int i = 0; i<5; i++){
-
-      double sum_score=0.0;
-      double sum_inval_score=0.0;
-      size_t score_n=same_zone_score_[i].size();
-      if(score_n>0){
-        for(size_t j = 0; j < same_zone_score_[i].size(); j++){
-          sum_score+=same_zone_score_[i][j];
-        }
-        avg_same_zone_score=sum_score/score_n;
-
-        for(size_t j =0;j<invalidate_score_[i].size();j++){
-          sum_inval_score+=invalidate_score_[i][j];
-        }
-        avg_inval_score=sum_inval_score/score_n;
-        printf("[%d] samezone score : %lf\tinvalidate score %lf\n",i,avg_same_zone_score,avg_inval_score);
-      }else{
-        printf("[%d] samezone score : (none)\tinvalidate score (none)\n",i);
-      }
-      
-      
-      sum_sum_score+=sum_score;
-      sum_sum_inval_score+=sum_inval_score;
-      total_n+=score_n;
-      
+    if(compaction_triggered_.load()){
+      printf("Same zone score : %lu/%lu = %lu\n",
+        same_zone_score_atomic_.load(),compaction_triggered_.load(),
+        same_zone_score_atomic_.load()/compaction_triggered_.load());
+      printf("invalidation score : %lu/%lu = %lu\n",
+      invalidate_score_atomic_.load(),compaction_triggered_.load(),
+      invalidate_score_atomic_.load()/compaction_triggered_.load());
     }
-    if(total_n){
-      printf("total samezone score : %lf\tinvalidate score %lf\n",sum_sum_score/total_n,sum_sum_inval_score/total_n);
-    }
+    // std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
+
+    // double avg_same_zone_score,avg_inval_score;
+    // double sum_sum_score=0.0, sum_sum_inval_score=0.0;
+    // size_t total_n = 0;
+    // for(int i = 0; i<5; i++){
+
+    //   double sum_score=0.0;
+    //   double sum_inval_score=0.0;
+    //   size_t score_n=same_zone_score_[i].size();
+    //   if(score_n>0){
+    //     for(size_t j = 0; j < same_zone_score_[i].size(); j++){
+    //       sum_score+=same_zone_score_[i][j];
+    //     }
+    //     avg_same_zone_score=sum_score/score_n;
+
+    //     for(size_t j =0;j<invalidate_score_[i].size();j++){
+    //       sum_inval_score+=invalidate_score_[i][j];
+    //     }
+    //     avg_inval_score=sum_inval_score/score_n;
+    //     printf("[%d] samezone score : %lf\tinvalidate score %lf\n",i,avg_same_zone_score,avg_inval_score);
+    //   }else{
+    //     printf("[%d] samezone score : (none)\tinvalidate score (none)\n",i);
+    //   }
+      
+      
+    //   sum_sum_score+=sum_score;
+    //   sum_sum_inval_score+=sum_inval_score;
+    //   total_n+=score_n;
+      
+    // }
+    // if(total_n){
+    //   printf("total samezone score : %lf\tinvalidate score %lf\n",sum_sum_score/total_n,sum_sum_inval_score/total_n);
+    // }
 
 
 
@@ -964,19 +972,6 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
 
     if(output_level==1){
       printf("0->1 trivial move??\n");
-      // return;
-      // for(uint64_t fno : compaction_inputs_input_level_fno){
-      //   zfile=GetSSTZoneFileInZBDNoLock(fno);
-        
-      //   if(zfile==nullptr){
-      //     printf("why nullptr? %lu\n",fno);
-      //     continue;
-      //   }
-      //   uint64_t file_size=zfile->GetFileSize();
-      //   lsm_tree_[0].fetch_sub(1); // level 0 based on # of SST
-      //   lsm_tree_[1].fetch_add(file_size);
-      // }
-      // return;
     }
   
 
@@ -1038,11 +1033,21 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
   uint64_t none;
   double inval_score = GetMaxInvalidateCompactionScore(input_fno,&none,true);
   {
-    std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
-    same_zone_score_[output_level].push_back(score);
-    invalidate_score_[output_level].push_back(inval_score);
+    // std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
+    // same_zone_score_[output_level].push_back(score);
+    // invalidate_score_[output_level].push_back(inval_score);
     // same_zone_score_for_timelapse_.clear();
     // same_zone_score_for_timelapse_=same_zone_score_;
+
+  // std::atomic<uint64_t> invalidate_score__atomic_ {0};
+    // std::atomic<double> same_zone_score_atomic_ {0};
+    // std::atomic<uint64_t> compaction_triggered_{0};
+    uint64_t same_zone_score_uint64t=score*1000;
+    uint64_t inval_score_uint64t=inval_score*100;
+    same_zone_score_atomic_.fetch_add(same_zone_score_uint64t);
+    invalidate_score_atomic_.fetch_add(inval_score_uint64t);
+    compaction_triggered_.fetch_add();
+    printf("%lu %lu\n",same_zone_score_uint64t,inval_score_uint64t);
   }
 }
 
@@ -1098,15 +1103,15 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
   //   }
   // }
 
-  {
-    std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
-    // same_zone_score_.push_back(score);
-    // same_zone_score_for_timelapse_.clear();
-    for(int i = 0; i <5; i++){
-      same_zone_score_for_timelapse_[i]=same_zone_score_[i];
-      invalidate_score_for_timelapse_[i]=invalidate_score_[i];
-    }
-  }
+  // {
+  //   std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
+  //   // same_zone_score_.push_back(score);
+  //   // same_zone_score_for_timelapse_.clear();
+  //   for(int i = 0; i <5; i++){
+  //     same_zone_score_for_timelapse_[i]=same_zone_score_[i];
+  //     invalidate_score_for_timelapse_[i]=invalidate_score_[i];
+  //   }
+  // }
   double ratio_sum = 0.0;
   double ratio;
   for(auto z : io_zones){

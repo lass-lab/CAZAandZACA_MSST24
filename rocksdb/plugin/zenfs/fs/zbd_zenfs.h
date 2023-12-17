@@ -571,22 +571,24 @@ class ZonedBlockDevice {
       }else{
         R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
       }
-      for(int i = 0 ; i <10;i++){
-        compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
-        double sum_score=0.0;
-        for(double score : same_zone_score_for_timelapse[i]){
-          sum_score+=score;
-        }
-        avg_same_zone_score_[i]= same_zone_score_for_timelapse[i].size() ? 
-                              sum_score/same_zone_score_for_timelapse[i].size() : 0.0;
+      (void)(same_zone_score_for_timelapse);
+      (void)(inval_score_for_timelapse);
+      // for(int i = 0 ; i <10;i++){
+      //   compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
+      //   double sum_score=0.0;
+      //   for(double score : same_zone_score_for_timelapse[i]){
+      //     sum_score+=score;
+      //   }
+      //   avg_same_zone_score_[i]= same_zone_score_for_timelapse[i].size() ? 
+      //                         sum_score/same_zone_score_for_timelapse[i].size() : 0.0;
         
-        sum_score=0.0;
-        for(double score : inval_score_for_timelapse[i]){
-          sum_score+=score;
-        }
-        avg_inval_score_[i]=inval_score_for_timelapse[i].size() ? 
-                      sum_score/inval_score_for_timelapse[i].size() : 0.0;
-      }
+      //   sum_score=0.0;
+      //   for(double score : inval_score_for_timelapse[i]){
+      //     sum_score+=score;
+      //   }
+      //   avg_inval_score_[i]=inval_score_for_timelapse[i].size() ? 
+      //                 sum_score/inval_score_for_timelapse[i].size() : 0.0;
+      // }
       
 
 
@@ -614,12 +616,12 @@ class ZonedBlockDevice {
                 T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
              R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20)
              ,avg_invalid_ratio_);
-      for(int i = 0 ; i < 5 ; i++){
-        printf("%.4lf\t",avg_same_zone_score_[i]);
-      }
-      for(int i = 0 ; i < 5 ; i++){
-        printf("%.3lf\t",avg_inval_score_[i]);
-      }
+      // for(int i = 0 ; i < 5 ; i++){
+      //   printf("%.4lf\t",avg_same_zone_score_[i]);
+      // }
+      // for(int i = 0 ; i < 5 ; i++){
+      //   printf("%.3lf\t",avg_inval_score_[i]);
+      // }
       // for(int n : num_files_levels_){
       //   printf("%d\t",n);
       // }
@@ -646,11 +648,15 @@ class ZonedBlockDevice {
   std::mutex same_zone_score_mutex_;
   std::vector<double> same_zone_score_[10];
   std::vector<double> same_zone_score_for_timelapse_[10];
-  std::atomic<double> same_zone_score_atomic_ {0};
-  std::atmoic<uint64_t> compaction_triggered_{)}
+
+  std::atomic<uint64_t> same_zone_score_atomic_ {0};
+
 
   std::vector<double> invalidate_score_[10];
   std::vector<double> invalidate_score_for_timelapse_[10];
+
+  std::atomic<uint64_t> invalidate_score_atomic_ {0};
+  std::atomic<uint64_t> compaction_triggered_{0};
   // std::atomic<uint64_t> intral0_compaction_input_size_{0};
   // std::atomic<uint64_t> intral0_compaction_output_size_{0};
   // std::atomic<uint64_t> intral0_compaction_triggered_{0};
