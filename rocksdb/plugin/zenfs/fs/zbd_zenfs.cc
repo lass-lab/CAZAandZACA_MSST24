@@ -448,7 +448,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
     i++;
   }
 #endif
-  for(int level = 0; level < 9; i++){
+  for(int level = 0; level < 9; level++){
     // std::atomic<uint64_t> a;
     // lsm_tree_.push_back(a);
     lsm_tree_[level]=0;
