@@ -386,6 +386,7 @@ class DB {
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
   virtual std::vector<int> NumLevelsFiles(void);
   virtual std::vector<double> LevelsCompactionScore(void);
+  virtual double GetL0CompactionScore(void);
   virtual std::vector<uint64_t> LevelsSize(void);
   virtual const Comparator* GetDefaultICMP(void);
   

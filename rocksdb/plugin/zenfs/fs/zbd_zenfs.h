@@ -681,8 +681,14 @@ class ZonedBlockDevice {
   bool ZCorPartialTryLock();
   void ZCorPartialUnLock();
   double PredictCompactionScore(int level){
-    if(level==0 || level == 1){
-      return (double)((double)( lsm_tree_[level].load()) / (double)max_bytes_for_level_base_);
+    if(level ==0 ){
+      if(db_ptr_==nullptr){
+        return 0.0;
+      }
+      return db_ptr_->GetL0CompactionScore(0);
+    }
+    if(level == 1){
+      return (double)((double)( lsm_tree_[level].load()) / (double)(max_bytes_for_level_base_));
     }
     uint64_t max_bytes_for_level = max_bytes_for_level_base_;
     for(int l = 1 ; l<level;l++){
