@@ -3019,6 +3019,8 @@ std::vector<double> DBImpl::LevelsCompactionScore(void){
 }
 
 double DBImpl::GetL0CompactionScore(void){
+  immutable_db_options_;
+  mutable_db_options_;
   double ret = 0.0;
   int level;
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
