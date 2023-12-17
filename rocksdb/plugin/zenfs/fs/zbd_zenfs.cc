@@ -2788,7 +2788,22 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
   void ZonedBlockDevice::AdjacentFileList(Slice& smallest ,Slice& largest, int level, std::vector<uint64_t>& fno_list){
     assert(db_ptr_!=nullptr);
     fno_list.clear();
+    if(db_ptr_==nullptr){
+      return;
+    }
     db_ptr_->AdjacentFileList(smallest,largest,level,fno_list);
+  }
+  uint64_t ZonedBlockDevice::MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
+    if(db_ptr_==nullptr){
+      return 0;
+    }
+    return db_ptr_->MostLargeUpperAdjacentFile(s,l,level);
+  }
+  void ZonedBlockDevice::DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list){
+    if(db_ptr_==nullptr){
+      return;
+    }
+    db_ptr_->DownwardAdjacentFileList(s,l,level,fno_list);
   }
 
   // return most large one
