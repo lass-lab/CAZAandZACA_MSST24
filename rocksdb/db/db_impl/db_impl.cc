@@ -4436,7 +4436,7 @@ Status DB::DropColumnFamilies(
 }
 
 //CAZA
-uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
+uint64_t MostLargeUpperAdjacentFile(Slice& , Slice& , int ){
   return 0;
 }
 void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
