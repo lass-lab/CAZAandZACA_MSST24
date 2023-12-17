@@ -659,7 +659,7 @@ class ZonedBlockDevice {
   std::condition_variable migrate_resource_;
   std::mutex migrate_zone_mtx_;
   
-  std::vector<std::atomic<uint64_t>> lsm_tree_;
+  std::atomic<uint64_t> lsm_tree_[10];
   /*
   0 : 256
   1 : 256
