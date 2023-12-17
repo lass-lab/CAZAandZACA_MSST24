@@ -551,10 +551,11 @@ void CompactionJob::Prepare() {
   if( (*(c->inputs())).size()!=2){
     printf("???? (*c->inputs()->size()) %lu\n",(*c->inputs()->size()));
   }
-  for(auto c_input_input_level : (*(c->inputs())) [0]){
+  auto c_inputs = c->inputs();
+  for(auto c_input_input_level : (*c_inputs) [0]){
     compaction_inputs_input_level_fno.push_back(c_input_input_level->fd.GetNumber());
   }
-  for(auto c_input_output_level : (*(c->inputs())) [1]){
+  for(auto c_input_output_level : (*c_inputs) [1]){
     compaction_inputs_output_level_fno.push_back(c_input_output_level->fd.GetNumber());
   }
 
