@@ -649,14 +649,14 @@ class ZonedBlockDevice {
   std::vector<double> same_zone_score_[10];
   std::vector<double> same_zone_score_for_timelapse_[10];
 
-  std::atomic<uint64_t> same_zone_score_atomic_ {0};
-
+  
 
   std::vector<double> invalidate_score_[10];
   std::vector<double> invalidate_score_for_timelapse_[10];
 
-  std::atomic<uint64_t> invalidate_score_atomic_ {0};
-  std::atomic<uint64_t> compaction_triggered_{0};
+  std::atomic<uint64_t> same_zone_score_atomic_[10];
+  std::atomic<uint64_t> invalidate_score_atomic_ [10];
+  std::atomic<uint64_t> compaction_triggered_[10];
   // std::atomic<uint64_t> intral0_compaction_input_size_{0};
   // std::atomic<uint64_t> intral0_compaction_output_size_{0};
   // std::atomic<uint64_t> intral0_compaction_triggered_{0};

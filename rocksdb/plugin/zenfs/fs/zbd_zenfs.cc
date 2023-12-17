@@ -452,6 +452,9 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
     // std::atomic<uint64_t> a;
     // lsm_tree_.push_back(a);
     lsm_tree_[level]=0;
+    same_zone_score_atomic_[level]=0;
+    invalidate_score_atomic_[level]=0;
+    compaction_triggered_[level]=0;
   }
   while (m < ZENFS_META_ZONES && i < zone_rep->ZoneCount()) {
     /* Only use sequential write required zones */
@@ -794,13 +797,15 @@ ZonedBlockDevice::~ZonedBlockDevice() {
             ((sum_out_s>>20)/sum_triggered),((sum_in_is+sum_in_os)*100/sum_out_s) ,sum_triggered);
   }
   {  
-    if(compaction_triggered_.load()){
-      printf("Same zone score : %lu/%lu = %lu\n",
-        same_zone_score_atomic_.load(),compaction_triggered_.load(),
-        same_zone_score_atomic_.load()/compaction_triggered_.load());
-      printf("invalidation score : %lu/%lu = %lu\n",
-      invalidate_score_atomic_.load(),compaction_triggered_.load(),
-      invalidate_score_atomic_.load()/compaction_triggered_.load());
+    for(int level = 0; level < 5; level++){
+      if(compaction_triggered_[level].load()){
+        printf("[%d] Same zone score : %lu/%lu = %lu\n",level,
+          same_zone_score_atomic_[level].load(),compaction_triggered_[level].load(),
+          same_zone_score_atomic_[level].load()/compaction_triggered_[level].load());
+        printf("[%d] invalidation score : %lu/%lu = %lu\n",level,
+        invalidate_score_atomic_[level].load(),compaction_triggered_[level].load(),
+        invalidate_score_atomic_[level].load()/compaction_triggered_[level].load());
+      }
     }
     // std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
 
@@ -1044,9 +1049,9 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
     // std::atomic<uint64_t> compaction_triggered_{0};
     uint64_t same_zone_score_uint64t=score*10000;
     uint64_t inval_score_uint64t=inval_score*100;
-    same_zone_score_atomic_.fetch_add(same_zone_score_uint64t);
-    invalidate_score_atomic_.fetch_add(inval_score_uint64t);
-    compaction_triggered_.fetch_add(1);
+    same_zone_score_atomic_[output_level].fetch_add(same_zone_score_uint64t);
+    invalidate_score_atomic_[output_level].fetch_add(inval_score_uint64t);
+    compaction_triggered_[output_level].fetch_add(1);
     // printf("%lu %lu\n",same_zone_score_uint64t,inval_score_uint64t);
   }
 }
