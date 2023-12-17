@@ -796,7 +796,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
             (sum_in_is>>20)/sum_triggered),((sum_in_os>>20)/sum_triggered),
             ((sum_out_s>>20)/sum_triggered),((sum_in_is+sum_in_os)*100/sum_out_s) ,sum_triggered);
   }
-  {  
+    
     // uint64_t sum_score = 0;
     // uint64_t sum_n = 0;
     // for(int level = 0; level < 5; level++){
@@ -821,6 +821,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     //   }
     // }
     // printf("avg inval zone score : %lu/%lu = %lu\n",sum_score,sum_n,sum_score/sum_n);
+    {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
 
     double avg_same_zone_score,avg_inval_score;
@@ -855,9 +856,6 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     if(total_n){
       printf("total samezone score : %lf\tinvalidate score %lf\n",sum_sum_score/total_n,sum_sum_inval_score/total_n);
     }
-
-
-
   }
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
@@ -1152,6 +1150,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
                 same_zone_score_for_timelapse_,invalidate_score_for_timelapse_,
                 avg_invalid_ratio);
 }
+
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
     T++;
     if(fr>=T){
