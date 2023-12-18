@@ -2078,7 +2078,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
   if(IS_BIG_SSTABLE(predicted_size)){
     double upper_level_score = PredictCompactionScore(level-1);
     double this_level_score = PredictCompactionScore(level);
-    
+    double downward_level_score = PredictCompactionScore(level+1);
     if(level == 1){
         // append to downward
       fno_list.clear();
@@ -2090,15 +2090,62 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
         AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
       }
     }else if(this_level_score>upper_level_score){
-      // append to downward
-      fno_list.clear();
-      zone_score.clear();
-      zone_score.assign(io_zones.size(),0);
-      DownwardAdjacentFileList(smallest, largest, level, fno_list);
-      if(CalculateZoneScore(fno_list,zone_score)){
-        sorted = SortedByZoneScore(zone_score);
-        AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
+        // fno_list.clear();
+        // zone_score.clear();
+        // zone_score.assign(io_zones.size(),0);
+        // DownwardAdjacentFileList(smallest, largest, level, fno_list);
+
+
+
+        // if(CalculateZoneScore(fno_list,zone_score)){
+        //   sorted = SortedByZoneScore(zone_score);
+        //   AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
+        // }
+
+      if(this_level_score>downward_level_score){
+        // append to downward
+        fno_list.clear();
+        zone_score.clear();
+        zone_score.assign(io_zones.size(),0);
+        DownwardAdjacentFileList(smallest, largest, level, fno_list);
+
+
+
+        if(CalculateZoneScore(fno_list,zone_score)){
+          sorted = SortedByZoneScore(zone_score);
+          AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
+        }
+      }else{ // downward level score > this level score 
+        uint64_t downward_level_sst_fno = MostLargeDownwardAdjacentFile(smallest,largest,level);
+        ZoneFile* zfile=GetSSTZoneFileInZBDNoLock(downward_level_sst_fno);
+        if(zfile && IS_BIG_SSTABLE(zfile->predicted_size_)){
+          // append to same levels
+          fno_list.clear();
+          // zone_score.assign(0,zone_score.size());
+          zone_score.clear();
+          zone_score.assign(io_zones.size(),0);
+          SameLevelFileList(level,fno_list);
+          s = AllocateSameLevelFilesZone(smallest,largest,fno_list,is_input_in_zone,&allocated_zone,
+                                        min_capacity);
+        }else{
+          // append downward
+          fno_list.clear();
+          zone_score.clear();
+          zone_score.assign(io_zones.size(),0);
+          DownwardAdjacentFileList(smallest, largest, level, fno_list);
+
+
+
+          if(CalculateZoneScore(fno_list,zone_score)){
+            sorted = SortedByZoneScore(zone_score);
+            AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
+          }
+        }
       }
+      
+
+
+
     }else{ // upper_level_score>this_level_score
       uint64_t upper_level_sst_fno = MostLargeUpperAdjacentFile(smallest, largest, level);
     
@@ -2740,6 +2787,14 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
       return;
     }
     db_ptr_->AdjacentFileList(smallest,largest,level,fno_list);
+  }
+
+
+  uint64_t ZonedBlockDevice::MostLargeDownwardAdjacentFile(Slice& s, Slice& l, int level){
+    if(db_ptr_==nullptr){
+      return 0;
+    }
+    return db_ptr_->MostLargeDownwardAdjacentFile(s,l,level);
   }
   uint64_t ZonedBlockDevice::MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
     if(db_ptr_==nullptr){

@@ -2905,6 +2905,34 @@ Status DBImpl::DropColumnFamilies(
   }
   return s;
 }
+
+uint64_t DBImpl::MostLargeDownwardAdjacentFile(Slice& s, Slice& l, int level){
+  InternalKey largest;
+  InternalKey smallest;
+  uint64_t max_size = 0;
+  uint64_t ret_fno = 0;
+  largest.DecodeFrom(l);
+  smallest.DecodeFrom(s);
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+  CompactionInputFiles downward_level_sstable;
+  if(level == 0 ){
+    printf("MostLargeDownwardAdjacentFile ? %d\n",level);
+    return 0;
+  }
+  vstorage->GetOverlappingInputs(level+1,&smallest,&largest,&downward_level_sstable.files);
+  for(const auto& f : downward_level_sstable.files){
+    if(f->being_compacted){
+      continue;
+    }
+    if(f->compensated_file_size>max_size){
+      max_size=f->compensated_file_size;
+      ret_fno=f->fd.GetNumber();
+    }
+  }
+
+  return ret_fno;
+}
+
 uint64_t DBImpl::MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
   InternalKey largest;
   InternalKey smallest;
@@ -4464,6 +4492,9 @@ Status DB::DropColumnFamilies(
 
 //CAZA
 uint64_t DB::MostLargeUpperAdjacentFile(Slice& , Slice& , int ){
+  return 0;
+}
+virtual DB::MostLargeDownwardAdjacentFile(Slice& s, Slice& l, int level){
   return 0;
 }
 void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
