@@ -4494,7 +4494,7 @@ Status DB::DropColumnFamilies(
 uint64_t DB::MostLargeUpperAdjacentFile(Slice& , Slice& , int ){
   return 0;
 }
-uint64_t DB::MostLargeDownwardAdjacentFile(Slice& s, Slice& l, int level){
+uint64_t DB::MostLargeDownwardAdjacentFile(Slice& , Slice& , int ){
   return 0;
 }
 void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
