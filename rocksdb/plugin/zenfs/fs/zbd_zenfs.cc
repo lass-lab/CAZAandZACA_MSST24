@@ -2790,11 +2790,11 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
   }
 
 
-  uint64_t ZonedBlockDevice::MostLargeDownwardAdjacentFile(Slice& s, Slice& l, int level){
+  uint64_t ZonedBlockDevice::MostSmallDownwardAdjacentFile(Slice& s, Slice& l, int level){
     if(db_ptr_==nullptr){
       return 0;
     }
-    return db_ptr_->MostLargeDownwardAdjacentFile(s,l,level);
+    return db_ptr_->MostSmallDownwardAdjacentFile(s,l,level);
   }
   uint64_t ZonedBlockDevice::MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level){
     if(db_ptr_==nullptr){
