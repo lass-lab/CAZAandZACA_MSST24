@@ -380,7 +380,7 @@ class DB {
   virtual Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families);
   virtual uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level);
-  virtual uint64_t MostLargeDownwardAdjacentFile(Slice& s, Slice& l, int level);
+  virtual uint64_t MostSmallDownwardAdjacentFile(Slice& s, Slice& l, int level);
   virtual void AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
   virtual void DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
   

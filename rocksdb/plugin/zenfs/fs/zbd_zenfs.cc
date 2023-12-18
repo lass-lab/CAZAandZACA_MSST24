@@ -2116,7 +2116,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
           AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
         }
       }else{ // downward level score > this level score 
-        uint64_t downward_level_sst_fno = MostLargeDownwardAdjacentFile(smallest,largest,level);
+        uint64_t downward_level_sst_fno = MostSmallDownwardAdjacentFile(smallest,largest,level);
         ZoneFile* zfile=GetSSTZoneFileInZBDNoLock(downward_level_sst_fno);
         if(zfile && IS_BIG_SSTABLE(zfile->predicted_size_)){
           // append to same levels
