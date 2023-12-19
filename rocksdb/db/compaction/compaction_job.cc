@@ -708,7 +708,7 @@ void CompactionJob::GenSubcompactionBoundaries() {
       std::min({static_cast<uint64_t>(ranges.size()),
                 static_cast<uint64_t>(c->max_subcompactions()),
                 max_output_files});
-
+  printf("max subcompaction %lu\n",c->max_subcompactions);
   if (subcompactions > 1) {
     double mean = sum * 1.0 / subcompactions;
     // Greedily add ranges to the subcompaction until the sum of the ranges'
