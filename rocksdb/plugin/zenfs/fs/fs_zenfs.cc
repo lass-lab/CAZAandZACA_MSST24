@@ -316,8 +316,9 @@ void ZenFS::BackgroundStatTimeLapse(){
     //   printf("[%d] : %lf , %lu\n",l,zbd_->PredictCompactionScore(l),zbd_->lsm_tree_[l].load()>>20 );
     // }
     
-
-    zbd_->AddTimeLapse(mount_time_);
+    if(zbd_!=nullptr){
+      zbd_->AddTimeLapse(mount_time_);
+    }
     sleep(1);
     mount_time_.fetch_add(1);
     // if(mount_time_.load()>4000){
