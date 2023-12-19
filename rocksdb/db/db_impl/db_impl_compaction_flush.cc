@@ -2461,8 +2461,8 @@ void DBImpl::MaybeScheduleFlushOrCompaction() {
     return;
   }
   auto bg_job_limits = GetBGJobLimits();
-  printf("bg_job_limits.max_flushes %d bg_job_limits.max_compactions %d\n",
-      bg_job_limits.max_flushes,bg_job_limits.max_compactions);
+  // printf("bg_job_limits.max_flushes %d bg_job_limits.max_compactions %d\n",
+  //     bg_job_limits.max_flushes,bg_job_limits.max_compactions);
   bool is_flush_pool_empty =
       env_->GetBackgroundThreads(Env::Priority::HIGH) == 0;
   GetFileSystem()->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
