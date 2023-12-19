@@ -1130,6 +1130,10 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
   double ratio_sum = 0.0;
   double ratio;
   for(auto z : io_zones){
+    if(z==nullptr){
+      ratio_sum=0.0;
+      break;
+    }
     uint64_t invalid_size = (z->wp_ -z->start_) - z->used_capacity_;
     ratio=(double)(invalid_size/(double)(z->max_capacity_));
     // if(z->wp_ - z->start_){
