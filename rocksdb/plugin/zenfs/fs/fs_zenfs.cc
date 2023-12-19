@@ -252,6 +252,7 @@ ZenFS::ZenFS(ZonedBlockDevice* zbd, std::shared_ptr<FileSystem> aux_fs,
   next_file_id_ = 1;
   metadata_writer_.zenFS = this;
   zbd_->SetFSptr(this);
+  printf("zenfs ptr %p\n",this);
   // printf("Reset scheme :: %d\n",reset_scheme_);
 }
 
