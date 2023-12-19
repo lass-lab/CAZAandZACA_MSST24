@@ -2987,9 +2987,13 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
 
     if(is_sst){
       if(allocation_scheme_==CAZA){
+        printf("AllocateCompactionAwaredZone\n");
         AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
       }else if(allocation_scheme_==CAZA_ADV){
+        printf("AllocateCompactionAwaredZoneV2\n");
         AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
+      }else{
+        printf("I am LIZA!\n");
       }
       
       if (s.ok() && (*out_zone) != nullptr) {
