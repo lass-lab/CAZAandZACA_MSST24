@@ -3091,7 +3091,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   
   if(is_sst&&level>=0 && allocation_scheme_==CAZA){
     s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
-    printf("AllocateCompactionAwaredZone\n");
+    // printf("AllocateCompactionAwaredZone\n");
     
     if(!s.ok()){
       PutOpenIOZoneToken();
@@ -3099,13 +3099,13 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
     }
   }else if(is_sst&&level>=0 && allocation_scheme_==CAZA_ADV){
     s = AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
-    printf("AllocateCompactionAwaredZoneV2\n");
+    // printf("AllocateCompactionAwaredZoneV2\n");
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
     }
   }else{
-    printf("I AM LIZA\n");
+    // printf("I AM LIZA\n");
   }
 
 
