@@ -1127,23 +1127,23 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
       invalidate_score_for_timelapse_[i]=invalidate_score_[i];
     }
   }
-  double ratio_sum = 0.0;
-  double ratio;
-  for(auto z : io_zones){
-    if(z==nullptr){
-      ratio_sum=0.0;
-      break;
-    }
-    uint64_t invalid_size = (z->wp_ -z->start_) - z->used_capacity_;
-    ratio=(double)(invalid_size/(double)(z->max_capacity_));
-    // if(z->wp_ - z->start_){
-    //   ratio = (double)(invalid_size/(double)(z->wp_ -z->start_));
-    // }else{
-    //   ratio = 0.0;
-    // }
-    ratio_sum+=ratio;
-  }
-  double avg_invalid_ratio = ratio_sum/(io_zones.size());
+  // double ratio_sum = 0.0;
+  // double ratio;
+  // for(auto z : io_zones){
+  //   if(z==nullptr){
+  //     ratio_sum=0.0;
+  //     break;
+  //   }
+  //   uint64_t invalid_size = (z->wp_ -z->start_) - z->used_capacity_;
+  //   ratio=(double)(invalid_size/(double)(z->max_capacity_));
+  //   // if(z->wp_ - z->start_){
+  //   //   ratio = (double)(invalid_size/(double)(z->wp_ -z->start_));
+  //   // }else{
+  //   //   ratio = 0.0;
+  //   // }
+  //   ratio_sum+=ratio;
+  // }
+  // double avg_invalid_ratio = ratio_sum/(io_zones.size());
   far_stats_.emplace_back(cur_free_percent_, 
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
           erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
@@ -1153,7 +1153,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
                 // db_ptr_ ? db_ptr_->LevelsSize() : 
                 std::vector<uint64_t>(0),compaction_stats_,
                 same_zone_score_for_timelapse_,invalidate_score_for_timelapse_,
-                avg_invalid_ratio);
+                0.0);
 }
 
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
