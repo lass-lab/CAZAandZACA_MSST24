@@ -573,7 +573,7 @@ class ZonedBlockDevice {
       }
       (void)(same_zone_score_for_timelapse);
       (void)(inval_score_for_timelapse);
-      for(int i = 0 ; i <10;i++){
+      for(int i = 0 ; i <5;i++){
         compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
         double sum_score=0.0;
         for(double score : same_zone_score_for_timelapse[i]){
