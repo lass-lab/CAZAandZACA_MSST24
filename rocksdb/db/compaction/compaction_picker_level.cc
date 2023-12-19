@@ -518,9 +518,9 @@ bool LevelCompactionBuilder::PickFileToCompact() {
 
     // else (l1.... -> ln)
 
-    if(candidate->compensated_file_size<(63<<20)){
-      break;
-    }
+    // if(candidate->compensated_file_size<(63<<20)){
+    //   break;
+    // }
     if(candidate->being_compacted){
       continue;
     }
