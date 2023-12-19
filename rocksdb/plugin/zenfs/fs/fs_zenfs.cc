@@ -287,7 +287,7 @@ ZenFS::~ZenFS() {
   meta_log_.reset(nullptr);
 
   ClearFiles();
-  // delete zbd_;
+  delete zbd_;
 }
 
 void ZenFS::RocksDBStatTimeLapse(void){
