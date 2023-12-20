@@ -860,7 +860,10 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
   printf("============================================================\n\n");
-
+  for(size_t i=0;i<far_stats_.size();i++){
+    far_stats_[i].PrintInvalidZoneDist();
+    // write_stall_timelapse_[i].PrintStat();
+  }
   // std::vector<uint64_t> sst_file_size_last_;
   // std::mutex sst_file_size_last_lock_;
   // std::vector<uint64_t> sst_file_size_else_;
@@ -1129,20 +1132,36 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
   }
   // double ratio_sum = 0.0;
   // double ratio;
-  // for(auto z : io_zones){
-  //   if(z==nullptr){
-  //     ratio_sum=0.0;
-  //     break;
-  //   }
-  //   uint64_t invalid_size = (z->wp_ -z->start_) - z->used_capacity_;
-  //   ratio=(double)(invalid_size/(double)(z->max_capacity_));
-  //   // if(z->wp_ - z->start_){
-  //   //   ratio = (double)(invalid_size/(double)(z->wp_ -z->start_));
-  //   // }else{
-  //   //   ratio = 0.0;
-  //   // }
-  //   ratio_sum+=ratio;
-  // }
+
+  std::vector<uint64_t> invalid_percent_per_zone(101,0);
+
+  for(auto z : io_zones){
+    if(z==nullptr){
+
+      break;
+    }
+    if(z->Empty()){
+      // invalid_percent_per_zone.push_back(0);
+      invalid_percent_per_zone[0]++;
+      continue;
+    }
+    uint64_t relative_wp = (z->wp_ -z->start_);
+    uint64_t invalid_size = relative_wp - z->used_capacity_;
+    uint64_t invalid_percent = (invalid_size*100)/(relative_wp) ;
+    if(invalid_percent >100){
+      printf("?? %lu %lu %lu\n",relative_wp,invalid_size,invalid_percent);
+      invalid_percent_per_zone[0]++;
+      continue;
+    }
+    invalid_percent_per_zone[invalid_percent]++;
+    // uint64_t invalid_size = (z->wp_ -z->start_) - z->used_capacity_;
+    // ratio=(double)(invalid_size/(double)(z->max_capacity_));
+    // if(z->wp_ - z->start_){
+    //   ratio = (double)(invalid_size/(double)(z->wp_ -z->start_));
+    // }else{
+    //   ratio = 0.0;
+    // }
+  }
   // double avg_invalid_ratio = ratio_sum/(io_zones.size());
   far_stats_.emplace_back(cur_free_percent_, 
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
@@ -1153,7 +1172,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
                 // db_ptr_ ? db_ptr_->LevelsSize() : 
                 std::vector<uint64_t>(0),compaction_stats_,
                 same_zone_score_for_timelapse_,invalidate_score_for_timelapse_,
-                0.0);
+                0.0,invalid_percent_per_zone);
 }
 
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
