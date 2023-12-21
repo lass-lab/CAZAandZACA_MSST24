@@ -860,10 +860,10 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
   printf("============================================================\n\n");
-  for(size_t i=0;i<far_stats_.size();i++){
-    far_stats_[i].PrintInvalidZoneDist();
-    // write_stall_timelapse_[i].PrintStat();
-  }
+  // for(size_t i=0;i<far_stats_.size();i++){
+  //   far_stats_[i].PrintInvalidZoneDist();
+  //   // write_stall_timelapse_[i].PrintStat();
+  // }
   // std::vector<uint64_t> sst_file_size_last_;
   // std::mutex sst_file_size_last_lock_;
   // std::vector<uint64_t> sst_file_size_else_;
