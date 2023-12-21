@@ -250,6 +250,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   // immutable_db_options_.fs=options.env->file_system_;
   if(immutable_db_options_.statistics==nullptr&& immutable_db_options_.is_db_bench==false){
     immutable_db_options_.statistics=ROCKSDB_NAMESPACE::CreateDBStatistics();
+    printf("immutable_db_options_.statistics %p\n",immutable_db_options_.statistics.get());
   }
   // printf("DBImpl::DBImpl immutable_db_options_.fs.get() %p\n",immutable_db_options_.fs.get());
   env_->GetAbsolutePath(dbname, &db_absolute_path_).PermitUncheckedError();
@@ -780,6 +781,7 @@ DBImpl::~DBImpl() {
   printf("%s\n",stats.c_str());
   printf("==============================~DBImpl=========================\n");
   if(immutable_db_options_.statistics!=nullptr){
+    printf("immutable_db_options_.statistics %p\n",immutable_db_options_.statistics);
     printf("%s",immutable_db_options_.statistics->ToString().c_str());
   }else{
     printf("immutable_db_options_.statistics nullptr\n");
