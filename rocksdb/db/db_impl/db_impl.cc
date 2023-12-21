@@ -248,12 +248,13 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   assert(batch_per_txn_ || seq_per_batch_);
   // TODO: Check for an error here
   // immutable_db_options_.fs=options.env->file_system_;
-  if(immutable_db_options_.statistics==nullptr&& immutable_db_options_.is_db_bench==false){
+  if(immutable_db_options_.stats==nullptr&& immutable_db_options_.is_db_bench==false){
       Status s = Statistics::CreateFromString(ConfigOptions(),
-                                            "", &immutable_db_options_.statistics);
-    immutable_db_options_.statistics=ROCKSDB_NAMESPACE::CreateDBStatistics();
-    printf("immutable_db_options_.statistics %p\n",immutable_db_options_.statistics.get());
-    immutable_db_options_.statistics->set_stats_level(static_cast<StatsLevel>(ROCKSDB_NAMESPACE::StatsLevel::kExceptDetailedTimers));
+                                            "", &immutable_db_options_.stats);
+    // immutable_db_options_.stats=ROCKSDB_NAMESPACE::CreateDBStatistics();
+    immutable_db_options_.stats=new StatisticsImpl(nullptr);
+    printf("immutable_db_options_.statistics %p\n",immutable_db_options_.stats);
+    immutable_db_options_.stats->set_stats_level(static_cast<StatsLevel>(ROCKSDB_NAMESPACE::StatsLevel::kExceptDetailedTimers));
   }
   // printf("DBImpl::DBImpl immutable_db_options_.fs.get() %p\n",immutable_db_options_.fs.get());
   env_->GetAbsolutePath(dbname, &db_absolute_path_).PermitUncheckedError();
