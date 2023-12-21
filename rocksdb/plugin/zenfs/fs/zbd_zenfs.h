@@ -579,7 +579,7 @@ class ZonedBlockDevice {
       // printf("++farstat? 0\n");
       double sum_sum_same_score = 0.0;
       size_t n_compaction = 0;
-      double sum_sum_inval_score = 0. 0;
+      double sum_sum_inval_score = 0.0;
 
       for(int i = 0 ; i <5;i++){
         compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
