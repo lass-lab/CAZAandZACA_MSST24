@@ -784,7 +784,7 @@ DBImpl::~DBImpl() {
   printf("%s\n",stats.c_str());
   printf("==============================~DBImpl=========================\n");
     if(immutable_db_options_.stats!=nullptr){
-      printf("immutable_db_options_.stats %p\n",immutable_db_options_.statistics.get());
+      printf("immutable_db_options_.stats %p\n",immutable_db_options_.stats.get());
       printf("%s",immutable_db_options_.stats->ToString().c_str());
     }else{
       printf("immutable_db_options_.stats nullptr\n");
