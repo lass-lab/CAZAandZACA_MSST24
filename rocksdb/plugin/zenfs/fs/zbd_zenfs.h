@@ -597,19 +597,19 @@ class ZonedBlockDevice {
       
 
 
-    //   size_t score_n=same_zone_score_for_timelapse.size();
-    //   if(score_n>0){
-    //     for(double score : same_zone_score_for_timelapse){
-    //       sum_score+=score;
-    //     }
-    //     avg_same_zone_score_=sum_score/score_n;
+      size_t score_n=same_zone_score_for_timelapse.size();
+      if(score_n>0){
+        for(double score : same_zone_score_for_timelapse){
+          sum_score+=score;
+        }
+        avg_same_zone_score_[0]=sum_score/score_n;
 
-    //     sum_score=0.0;
-    //     for(double score : inval_score_for_timelapse){
-    //       sum_score+=score;
-    //     }
-    //     avg_inval_score_=sum_score/score_n;
-    //   }
+        sum_score=0.0;
+        for(double score : inval_score_for_timelapse){
+          sum_score+=score;
+        }
+        avg_inval_score_[0]=sum_score/score_n;
+      }
     //   num_files_levels_=num_files_levels;
     }
 
