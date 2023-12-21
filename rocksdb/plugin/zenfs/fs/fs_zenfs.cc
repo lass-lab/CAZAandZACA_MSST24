@@ -313,6 +313,7 @@ void ZenFS::RocksDBStatTimeLapse(void){
 
 void ZenFS::BackgroundStatTimeLapse(){
   // int mt;
+  printf(" I am timelapse thread\n");
   while (run_bg_stats_worker_) {
     free_percent_ = zbd_->CalculateFreePercent();
     // for(int l = 0 ;l < 4 ;l++){
@@ -334,6 +335,7 @@ void ZenFS::BackgroundStatTimeLapse(){
     // }
     
   }
+  printf(" I am timelapse thread bybye\n");
 }
 void ZenFS::PartialResetWorker(uint64_t T){
   // (void)(run_once);
