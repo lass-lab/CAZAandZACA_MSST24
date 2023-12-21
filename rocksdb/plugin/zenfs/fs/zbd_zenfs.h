@@ -550,7 +550,8 @@ class ZonedBlockDevice {
     // uint64_t l1l2_compaction_triggered_;
     // CompactionStats _compaction_stats_[10];
     uint64_t compaction_triggered_[10];
-
+    double total_avg_same_zone_score_;
+    double total_avg_inval_score_;
     double avg_same_zone_score_[10];
     double avg_inval_score_ [10];
     double avg_invalid_ratio_;
@@ -603,8 +604,8 @@ class ZonedBlockDevice {
                       sum_score/inval_score_for_timelapse[i].size() : 0.0;
       }
       // printf("++farstat? 1\n");
-      avg_same_zone_score_[0]=n_compaction == 0 ? 1.0 : sum_sum_same_score/n_compaction;
-      avg_inval_score_[0] = n_compaction == 0 ? 1.0 : sum_sum_inval_score/n_compaction;
+      total_avg_same_zone_score_=n_compaction == 0 ? 1.0 : sum_sum_same_score/n_compaction;
+      total_avg_inval_score_ = n_compaction == 0 ? 1.0 : sum_sum_inval_score/n_compaction;
 
       invalid_percent_per_zone_.clear();
       invalid_percent_per_zone_=invalid_percent_per_zone;
@@ -649,6 +650,8 @@ class ZonedBlockDevice {
       for(int i = 0 ; i < 5 ; i++){
         printf("%.3lf\t",avg_inval_score_[i]);
       }
+      printf("%.4lf\t",total_avg_same_zone_score_);
+      printf("%.4lf\t",total_avg_inval_score_);
       // for(int n : num_files_levels_){
       //   printf("%d\t",n);
       // }
