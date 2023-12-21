@@ -1140,7 +1140,7 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
 
       break;
     }
-    if(z->Empty()){
+    if(z->IsEmpty()){
       // invalid_percent_per_zone.push_back(0);
       invalid_percent_per_zone[0]++;
       continue;
