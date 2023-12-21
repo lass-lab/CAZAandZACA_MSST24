@@ -783,11 +783,11 @@ DBImpl::~DBImpl() {
   printf("==============================~DBImpl=========================\n");
   printf("%s\n",stats.c_str());
   printf("==============================~DBImpl=========================\n");
-    if(immutable_db_options_.statistics!=nullptr){
-      printf("immutable_db_options_.statistics %p\n",immutable_db_options_.statistics.get());
+    if(immutable_db_options_.stats!=nullptr){
+      printf("immutable_db_options_.stats %p\n",immutable_db_options_.statistics.get());
       printf("%s",immutable_db_options_.statistics->ToString().c_str());
     }else{
-      printf("immutable_db_options_.statistics nullptr\n");
+      printf("immutable_db_options_.stats nullptr\n");
     }
   }
   init_logger_creation_s_.PermitUncheckedError();
