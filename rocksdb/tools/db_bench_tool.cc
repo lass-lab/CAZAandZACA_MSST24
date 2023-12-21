@@ -8525,7 +8525,7 @@ int db_bench_tool(int argc, char** argv) {
   }
   if (dbstats) {
     dbstats->set_stats_level(static_cast<StatsLevel>(FLAGS_stats_level));
-    printf("%u\n",FLAGS_stats_level);
+    printf(" FLAGS_stats_level %u\n",FLAGS_stats_level);
   }
   FLAGS_compaction_pri_e =
       (ROCKSDB_NAMESPACE::CompactionPri)FLAGS_compaction_pri;
