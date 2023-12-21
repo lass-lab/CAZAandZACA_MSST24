@@ -1167,8 +1167,11 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
           erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
                 wasted_wp_.load() , T, reset_threshold_arr_[cur_free_percent_],
-                GetZoneSize(),db_ptr_ ? db_ptr_->NumLevelsFiles() : std::vector<int>(0),
-                db_ptr_ ? db_ptr_->LevelsCompactionScore() : std::vector<double>(0),
+                GetZoneSize(),
+                // db_ptr_ ? db_ptr_->NumLevelsFiles() : 
+                std::vector<int>(0),
+                // db_ptr_ ? db_ptr_->LevelsCompactionScore() : 
+                std::vector<double>(0),
                 // db_ptr_ ? db_ptr_->LevelsSize() : 
                 std::vector<uint64_t>(0),compaction_stats_,
                 same_zone_score_for_timelapse_,invalidate_score_for_timelapse_,

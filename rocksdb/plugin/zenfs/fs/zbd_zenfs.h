@@ -576,7 +576,7 @@ class ZonedBlockDevice {
       }
       (void)(same_zone_score_for_timelapse);
       (void)(inval_score_for_timelapse);
-      printf("++farstat? 0\n");
+      // printf("++farstat? 0\n");
       for(int i = 0 ; i <5;i++){
         compaction_triggered_[i]=compaction_stats[i].compaction_triggered_;
         double sum_score=0.0;
@@ -593,11 +593,11 @@ class ZonedBlockDevice {
         avg_inval_score_[i]=inval_score_for_timelapse[i].size() ? 
                       sum_score/inval_score_for_timelapse[i].size() : 0.0;
       }
-      printf("++farstat? 1\n");
+      // printf("++farstat? 1\n");
       invalid_percent_per_zone_.clear();
       invalid_percent_per_zone_=invalid_percent_per_zone;
       
-  printf("++farstat?\n");
+  // printf("++farstat?\n");
 
       // size_t score_n=same_zone_score_for_timelapse.size();
       // if(score_n>0){
