@@ -1125,10 +1125,10 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
     std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
     // same_zone_score_.push_back(score);
     // same_zone_score_for_timelapse_.clear();
-    for(int i = 0; i <5; i++){
-      same_zone_score_for_timelapse_[i]=same_zone_score_[i];
-      invalidate_score_for_timelapse_[i]=invalidate_score_[i];
-    }
+    // for(int i = 0; i <5; i++){
+    //   same_zone_score_for_timelapse_[i]=same_zone_score_[i];
+    //   invalidate_score_for_timelapse_[i]=invalidate_score_[i];
+    // }
   }
   // double ratio_sum = 0.0;
   // double ratio;
