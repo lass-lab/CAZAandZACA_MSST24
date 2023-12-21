@@ -76,8 +76,8 @@ MAX_INVALIDATION_COMPACTION=1
 
 
 
-MAX_COMPACTION_KICK=100
-MAX_COMPACTION_START_LEVEL=1
+MAX_COMPACTION_KICK=25
+MAX_COMPACTION_START_LEVEL=2
 
 INPUT_AWARE_SCHEME=0
 
@@ -86,7 +86,7 @@ while :
 do
     FAILED=0
     # for ALLOCATION_ALGORITHM in $RUNTIME_ZONE_RESET_ONLY $PARTIAL_RESET_WITH_ZONE_RESET
-    for ALLOCATION_ALGORITHM in $LIZA
+    for ALLOCATION_ALGORITHM in $LIZA $CAZA_ADV
     do
         for i in 1 2 3
         do
@@ -112,12 +112,12 @@ do
             echo "NO ${RESULT_DIR_PATH}"
             mkdir ${RESULT_DIR_PATH}
         fi
-            for COMPACTION_ALGORITHM in $MAX_INVALIDATION_COMPACTION
+            for COMPACTION_ALGORITHM in $BASELINE_COMPACTION $MAX_INVALIDATION_COMPACTION
                 do
                     if [ $COMPACTION_ALGORITHM -eq $BASELINE_COMPACTION ]; then
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_${i}.txt
                     elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_MAX_START_LEVEL_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_${i}.txt
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_ZAC_START_LEVEL_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EAGER ]; then
@@ -154,7 +154,7 @@ do
                           -histogram -seed=1699101730035899  -wait_for_compactions=false -enable_intraL0_compaction=false \
                         -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
                         -allocation_scheme=${ALLOCATION_ALGORITHM}  -compaction_scheme=${COMPACTION_ALGORITHM} \
-                         -max_compaction_start_level=${MAX_COMPACTION_START_LEVEL} -input_aware_scheme=${INPUT_AWARE_SCHEME}  \
+                         -max_compaction_start_level=${MAX_COMPACTION_START_LEVEL} -input_aware_scheme=${MAX_INVALIDATION_COMPACTION}  \
                         -max_compaction_kick=${MAX_COMPACTION_KICK} > ${RESULT_DIR_PATH}/tmp
                         EC=$?
                         if grep -q "${SIZE} operations;" ${RESULT_DIR_PATH}/tmp; then
