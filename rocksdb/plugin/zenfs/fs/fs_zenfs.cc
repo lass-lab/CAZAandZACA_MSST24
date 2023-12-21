@@ -258,6 +258,7 @@ ZenFS::ZenFS(ZonedBlockDevice* zbd, std::shared_ptr<FileSystem> aux_fs,
 
 ZenFS::~ZenFS() {
   Status s;
+  sleep(1);
   Info(logger_, "ZenFS shutting down");
   zbd_->LogZoneUsage();
 
