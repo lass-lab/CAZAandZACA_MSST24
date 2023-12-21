@@ -251,7 +251,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   if(immutable_db_options_.statistics==nullptr&& immutable_db_options_.is_db_bench==false){
     immutable_db_options_.statistics=ROCKSDB_NAMESPACE::CreateDBStatistics();
     printf("immutable_db_options_.statistics %p\n",immutable_db_options_.statistics.get());
-    dbstats->set_stats_level(static_cast<StatsLevel>(ROCKSDB_NAMESPACE::StatsLevel::kExceptDetailedTimers));
+    immutable_db_options_.statistics->set_stats_level(static_cast<StatsLevel>(ROCKSDB_NAMESPACE::StatsLevel::kExceptDetailedTimers));
   }
   // printf("DBImpl::DBImpl immutable_db_options_.fs.get() %p\n",immutable_db_options_.fs.get());
   env_->GetAbsolutePath(dbname, &db_absolute_path_).PermitUncheckedError();
