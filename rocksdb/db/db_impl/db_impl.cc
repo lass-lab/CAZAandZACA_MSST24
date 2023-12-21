@@ -772,9 +772,15 @@ DBImpl::~DBImpl() {
   std::string stats;
   if(immutable_db_options_.is_db_bench==false){ // this is YCSB
   GetProperty("rocksdb.stats",&stats);
+  // GetProperty()
   printf("==============================~DBImpl=========================\n");
   printf("%s\n",stats.c_str());
   printf("==============================~DBImpl=========================\n");
+  if(immutable_db_options_.statistics!=nullptr){
+    printf("%s",immutable_db_options_.statistics->ToString().c_str());
+  }else{
+    printf("immutable_db_options_.statistics nullptr\n");
+  }
   }
   init_logger_creation_s_.PermitUncheckedError();
 

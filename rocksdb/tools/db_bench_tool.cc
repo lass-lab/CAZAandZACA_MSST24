@@ -8367,6 +8367,7 @@ class Benchmark {
       fprintf(stdout, "\n==== DB: %s ===\n", db->GetName().c_str());
     }
     std::string stats;
+    printf("@@@@@@@@@@@@@@@@ printstats %s\n",key);
     if (!db->GetProperty(key, &stats)) {
       stats = "(failed)";
     }
