@@ -266,13 +266,14 @@ ZenFS::~ZenFS() {
 
   run_bg_partial_reset_worker_=false;
   run_bg_stats_worker_= false;
+  if(bg_stats_worker_) {
+    bg_stats_worker_->join();
+  }
   run_gc_worker_ = false;
   zbd_->migrating_=false;
   zbd_->migrate_resource_.notify_one();
   // migrating_=false;
-  if(bg_stats_worker_) {
-    bg_stats_worker_->join();
-  }
+
   if(bg_partial_reset_worker_){
     bg_partial_reset_worker_->join();
   }
