@@ -2101,7 +2101,7 @@ bool ZonedBlockDevice::CompactionSimulator(uint64_t predicted_size,int level,Sli
     std::vector<uint64_t> predicted_down_level;
     std::vector<uint64_t> predicted_upper_level;
     predicted_down_level.push_back(predicted_size_);
-    current_this_level_size+=predicted_size_;
+    current_this_level_size+=predicted_size;
 
     for(auto fno : this_fno_list){
       ZoneFile* zfile = GetSSTZoneFileInZBDNoLock(fno);
