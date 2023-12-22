@@ -430,6 +430,7 @@ class InternalStats {
 
   void AddDBStats(InternalDBStatsType type, uint64_t value,
                   bool concurrent = false) {
+    (void)(concurrent);
     auto& v = db_stats_[type];
     if (true) {
       v.fetch_add(value, std::memory_order_relaxed);
