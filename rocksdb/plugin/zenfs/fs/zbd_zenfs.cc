@@ -2128,7 +2128,8 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
           sorted = SortedByZoneScore(zone_score);
           AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
         }
-    }else if(this_level_score>upper_level_score){
+    }
+    else if(this_level_score>upper_level_score){
         
         fno_list.clear();
         zone_score.clear();
