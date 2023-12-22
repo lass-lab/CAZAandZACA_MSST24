@@ -2515,6 +2515,7 @@ void DBImpl::MaybeScheduleFlushOrCompaction() {
     return;
   }
   immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
+  printf("GetFilesystem %p\n",GetFileSystem());
   while (bg_compaction_scheduled_ + bg_bottom_compaction_scheduled_ <
              bg_job_limits.max_compactions &&
          unscheduled_compactions_ > 0) {
