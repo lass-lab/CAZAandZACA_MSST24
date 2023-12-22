@@ -2100,7 +2100,7 @@ bool ZonedBlockDevice::CompactionSimulator(uint64_t predicted_size,int level,Sli
 
     std::vector<uint64_t> predicted_down_level;
     std::vector<uint64_t> predicted_upper_level;
-    predicted_down_level.push_back(predicted_size_);
+    predicted_down_level.push_back(predicted_size);
     current_this_level_size+=predicted_size;
 
     for(auto fno : this_fno_list){
@@ -2313,7 +2313,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
     
     ZoneFile* zfile=GetSSTZoneFileInZBDNoLock(upper_level_sst_fno);
     
-    if( (zfile&& (IS_BIG_SSTABLE(zfile->predicted_size_)) || level==1 ) ){
+    if( zfile && (IS_BIG_SSTABLE(zfile->predicted_size_) || level==1 ) ){
       // append to upper zfile
       GetNearestZoneFromZoneFile(zfile,is_input_in_zone,&allocated_zone,min_capacity);
     }else{
