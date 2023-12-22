@@ -849,7 +849,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     zoneFile_->predicted_size_ += it->size_;
   }
   
-  printf("predcited size :\t%lu\n",(zoneFile_->predicted_size_>>20));
+  // printf("predcited size :\t%lu\n",(zoneFile_->predicted_size_>>20));
 
   for(auto it : *sst_buffers){
     // if(it->positioned_==true){

@@ -292,7 +292,9 @@ struct CompactionJob::SubcompactionState {
         }
       }
     }
-
+    if(outfile->GetFileSize()>=64<<20){
+      return true;
+    }
     return false;
   }
 
