@@ -4169,6 +4169,7 @@ class Benchmark {
     options.max_background_flushes = FLAGS_max_background_flushes;
     options.compaction_style = FLAGS_compaction_style_e;
     options.compaction_pri = FLAGS_compaction_pri_e;
+    printf("options.compaction_pri %d\n",options.compaction_pri);
     options.allow_mmap_reads = FLAGS_mmap_read;
     options.allow_mmap_writes = FLAGS_mmap_write;
     options.use_direct_reads = FLAGS_use_direct_reads;

@@ -1608,9 +1608,9 @@ void InternalStats::DumpCFMapStatsByPriority(
 void InternalStats::DumpCFMapStatsIOStalls(
     std::map<std::string, std::string>* cf_stats) {
   (*cf_stats)["io_stalls.level0_slowdown"] =
-      std::to_string(cf_stats_count_[L0_FILE_COUNT_LIMIT_SLOWDOWNS]);
+      std::to_string(cf_stats_count_[L0_FILE_COUNT_LIMIT_SLOWDOWNS]); //
   (*cf_stats)["io_stalls.level0_slowdown_with_compaction"] =
-      std::to_string(cf_stats_count_[LOCKED_L0_FILE_COUNT_LIMIT_SLOWDOWNS]);
+      std::to_string(cf_stats_count_[LOCKED_L0_FILE_COUNT_LIMIT_SLOWDOWNS]); //
   (*cf_stats)["io_stalls.level0_numfiles"] =
       std::to_string(cf_stats_count_[L0_FILE_COUNT_LIMIT_STOPS]);
   (*cf_stats)["io_stalls.level0_numfiles_with_compaction"] =
@@ -1620,7 +1620,7 @@ void InternalStats::DumpCFMapStatsIOStalls(
   (*cf_stats)["io_stalls.slowdown_for_pending_compaction_bytes"] =
       std::to_string(cf_stats_count_[PENDING_COMPACTION_BYTES_LIMIT_SLOWDOWNS]);
   (*cf_stats)["io_stalls.memtable_compaction"] =
-      std::to_string(cf_stats_count_[MEMTABLE_LIMIT_STOPS]);
+      std::to_string(cf_stats_count_[MEMTABLE_LIMIT_STOPS]); //
   (*cf_stats)["io_stalls.memtable_slowdown"] =
       std::to_string(cf_stats_count_[MEMTABLE_LIMIT_SLOWDOWNS]);
 
