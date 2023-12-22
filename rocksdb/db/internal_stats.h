@@ -431,7 +431,7 @@ class InternalStats {
   void AddDBStats(InternalDBStatsType type, uint64_t value,
                   bool concurrent = false) {
     auto& v = db_stats_[type];
-    if (concurrent) {
+    if (true) {
       v.fetch_add(value, std::memory_order_relaxed);
     } else {
       v.store(v.load(std::memory_order_relaxed) + value,
