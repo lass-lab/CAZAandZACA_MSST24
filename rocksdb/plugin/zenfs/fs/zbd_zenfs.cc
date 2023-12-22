@@ -2227,8 +2227,8 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
           AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
         }
     }
-    else if(!CompactionSimulator(predicted_size,level,smallest,largest)){ // if upper level occur first == false
-      // else if (this_level_score> upper_level_score){
+    // else if(!CompactionSimulator(predicted_size,level,smallest,largest)){ // if upper level occur first == false
+      else if (this_level_score> upper_level_score){
         
         fno_list.clear();
         zone_score.clear();
