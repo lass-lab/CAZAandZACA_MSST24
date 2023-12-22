@@ -2957,11 +2957,11 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
   //   return db_ptr_->MostLargeUpperAdjacentFile(smallest,largest,level);
   // }
 
-  void ZonedBlockDevice::SameLevelFileList(int level, std::vector<uint64_t>& fno_list){
+  void ZonedBlockDevice::SameLevelFileList(int level, std::vector<uint64_t>& fno_list,bool exclude_being_compacted){
     assert(db_ptr_!=nullptr);
     fno_list.clear();
     // printf("level %d",level);
-    db_ptr_->SameLevelFileList(level,fno_list);
+    db_ptr_->SameLevelFileList(level,fno_list,exclude_being_compacted);
   }
 
   IOStatus ZonedBlockDevice::GetNearestZoneFromZoneFile(ZoneFile* zFile,std::vector<bool>& is_input_in_zone,

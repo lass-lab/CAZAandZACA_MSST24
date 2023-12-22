@@ -1201,7 +1201,7 @@ class ZonedBlockDevice {
   void DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
   uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level);
   uint64_t MostSmallDownwardAdjacentFile(Slice& s, Slice& l, int level);
-  void SameLevelFileList(int level, std::vector<uint64_t>& fno_list);
+  void SameLevelFileList(int level, std::vector<uint64_t>& fno_list, bool exclude_being_compacted = true);
   // int NumLevelFiles(int level);
   IOStatus AllocateSameLevelFilesZone(Slice& smallest, Slice& largest ,
                                       const std::vector<uint64_t>& fno_list,
