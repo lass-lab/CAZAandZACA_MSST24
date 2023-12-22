@@ -2066,6 +2066,103 @@ else
 		AppendSameLevelNearKeyrangeSST()
 
 */
+bool ZonedBlockDevice::CompactionSimulator(uint64_t predicted_size,int level,Slice& smallest, Slice& largest){
+    std::vector<uint64_t> upper_fno_list;
+    std::vector<uint64_t> this_fno_list;
+    uint64_t upper_level_file_fno= MostLargeUpperAdjacentFile(smallest, largest, level);
+    ZoneFile* upper_level_file = GetSSTZoneFileInZBDNoLock(upper_level_file_fno);
+
+    uint64_t upper_level_file_size;
+    bool upper_level_occurs_first = true;
+    if(!upper_level_file){
+      return upper_level_occurs_first;
+      
+    }
+    upper_level_file_size=upper_level_file->predicted_size_;
+    uint64_t current_upper_level_size ;
+    uint64_t current_this_level_size;
+
+
+    uint64_t upper_level_size_limit = max_bytes_for_level_base_;
+    uint64_t this_level_size_limit = max_bytes_for_level_base_;
+
+    for(int l = 1 ;l < level-1;l++){
+      upper_level_size_limit*=10;
+    }
+    for(int l = 1 ; l < level ; l++){
+      this_level_size_limit*=10;
+    }
+
+    SameLevelFileList(level-1,upper_fno_list,false);
+    SameLevelFileList(level,this_fno_list,false);
+
+
+
+    std::vector<uint64_t> predicted_down_level;
+    std::vector<uint64_t> predicted_upper_level;
+    predicted_down_level.push_back(predicted_size_);
+    current_this_level_size+=predicted_size_;
+
+    for(auto fno : this_fno_list){
+      ZoneFile* zfile = GetSSTZoneFileInZBDNoLock(fno);
+      if(!zfile){
+        continue;
+      }
+      predicted_down_level.push_back(zfile->predicted_size_);
+      current_this_level_size+=zfile->predicted_size_;
+    }
+
+
+    for(auto fno : upper_fno_list){
+      ZoneFile* zfile = GetSSTZoneFileInZBDNoLock(fno);
+      if(!zfile){
+        continue;
+      }
+      predicted_upper_level.push_back(zfile->predicted_size_);
+      current_upper_level_size+=zfile->predicted_size_; 
+    }
+    sort(predicted_upper_level.rbegin(),predicted_upper_level.rend());
+
+
+
+
+    // sort(predicted_down_level.rbegin(),predicted_down_level.rend());
+
+    while(true){
+      double this_level_score = (double)current_this_level_size/this_level_size_limit;
+      double upper_level_score = (double)current_upper_level_size/upper_level_size_limit;
+
+      if(this_level_score>upper_level_score){
+        sort(predicted_down_level.rbegin(),predicted_down_level.rend());
+        if(predicted_down_level[0]<=predicted_size){
+          // this occurs first
+          upper_level_occurs_first=false;
+          break;
+        }
+        current_this_level_size-=predicted_down_level[0];
+        predicted_down_level.erase(predicted_down_level.begin());
+      }else{
+        if(predicted_upper_level[0]<=upper_level_file_size){
+          upper_level_occurs_first=true;
+          break;
+        }
+        current_upper_level_size-=predicted_upper_level[0];
+        current_this_level_size+=predicted_upper_level[0];
+        predicted_down_level.push_back(predicted_upper_level[0]);
+        predicted_upper_level.erase(predicted_upper_level.begin());
+      }
+    }
+
+    
+    // for(auto this_size : predicted_down_level){
+    //   this_index++;
+    //   if(this_size<=predicted_size){
+    //     break;
+    //   }
+    // }
+  return upper_level_occurs_first;
+}
+
 IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice& largest,
                                                         int level,Env::WriteLifeTimeHint file_lifetime, 
                                                         std::vector<uint64_t> input_fno,uint64_t predicted_size,
@@ -2104,7 +2201,8 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
   if(IS_BIG_SSTABLE(predicted_size)){
     double upper_level_score = PredictCompactionScore(level-1);
     double this_level_score = PredictCompactionScore(level);
-    
+    double l0_score= PredictCompactionScore(0);
+
     if(level == 1){
         // append to downward
       fno_list.clear();
@@ -2116,7 +2214,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
         AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
       }
     } 
-    else if(level==2 && (PredictCompactionScore(0) > this_level_score)  ) {
+    else if(level==2 && (l0_score > this_level_score ) &&  (l0_score>upper_level_score) ) {
         fno_list.clear();
         zone_score.clear();
         zone_score.assign(io_zones.size(),0);
@@ -2129,7 +2227,8 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
           AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
         }
     }
-    else if(this_level_score>upper_level_score){
+    else if(!CompactionSimulator(predicted_size,level,smallest,largest)){
+      // else if (this_level_score> upper_level_score){
         
         fno_list.clear();
         zone_score.clear();
