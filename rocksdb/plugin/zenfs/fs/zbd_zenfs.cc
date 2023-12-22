@@ -2079,8 +2079,8 @@ bool ZonedBlockDevice::CompactionSimulator(uint64_t predicted_size,int level,Sli
       
     }
     upper_level_file_size=upper_level_file->predicted_size_;
-    uint64_t current_upper_level_size ;
-    uint64_t current_this_level_size;
+    uint64_t current_upper_level_size =0;
+    uint64_t current_this_level_size = 0;
 
 
     uint64_t upper_level_size_limit = max_bytes_for_level_base_;
