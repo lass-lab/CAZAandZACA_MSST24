@@ -2312,8 +2312,17 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
     uint64_t upper_level_sst_fno=MostLargeUpperAdjacentFile(smallest, largest, level);
     
     ZoneFile* zfile=GetSSTZoneFileInZBDNoLock(upper_level_sst_fno);
-    
-    if( zfile && (IS_BIG_SSTABLE(zfile->predicted_size_) || level==1 ) ){
+    if(level == 1){
+      fno_list.clear();
+      // zone_score.assign(0,zone_score.size());
+      zone_score.clear();
+      zone_score.assign(io_zones.size(),0);
+      SameLevelFileList(0,fno_list);
+      SameLevelFileList(1,fno_list);
+      s = AllocateMostL0FilesZone(zone_score,fno_list,is_input_in_zone,&allocated_zone,
+                                  min_capacity);
+    }
+    else if( zfile && IS_BIG_SSTABLE(zfile->predicted_size_)){
       // append to upper zfile
       GetNearestZoneFromZoneFile(zfile,is_input_in_zone,&allocated_zone,min_capacity);
     }else{
