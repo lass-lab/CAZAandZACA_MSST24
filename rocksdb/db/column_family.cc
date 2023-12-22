@@ -920,7 +920,8 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
   }
   // else if(zns_free_percent<=ioptions_.zc_kicks){
   //    return {WriteStallCondition::kDelayed, WriteStallCause::kL0FileCountLimit};
-  }else if (!mutable_cf_options.disable_auto_compactions &&
+  // }
+  else if (!mutable_cf_options.disable_auto_compactions &&
              mutable_cf_options.soft_pending_compaction_bytes_limit > 0 &&
              num_compaction_needed_bytes >=
                  mutable_cf_options.soft_pending_compaction_bytes_limit) {
