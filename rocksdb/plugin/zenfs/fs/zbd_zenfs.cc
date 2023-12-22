@@ -2313,7 +2313,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
     
     ZoneFile* zfile=GetSSTZoneFileInZBDNoLock(upper_level_sst_fno);
     
-    if( zfile&& (IS_BIG_SSTABLE(zfile->GetFileSize()) || level==1 ) ){
+    if( (zfile&& (IS_BIG_SSTABLE(zfile->predictid_size_)) || level==1 ) ){
       // append to upper zfile
       GetNearestZoneFromZoneFile(zfile,is_input_in_zone,&allocated_zone,min_capacity);
     }else{
