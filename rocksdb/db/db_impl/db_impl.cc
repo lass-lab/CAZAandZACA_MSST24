@@ -3032,7 +3032,7 @@ void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_
 
 void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list, bool exclude_being_compacted){
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
-  std::vector<int>& files_by_compactio_pri=vstorage->FilesByCompactionPri(level);
+  const std::vector<int>& files_by_compactio_pri=vstorage->FilesByCompactionPri(level);
 
   auto files=vstorage->LevelFiles(level);
   for(int i= 0;i<files_by_compactio_pri.size();i++){
