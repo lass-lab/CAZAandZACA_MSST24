@@ -3037,7 +3037,7 @@ void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list, bool 
   auto files=vstorage->LevelFiles(level);
   for(int i= 0;i<files_by_compactio_pri.size();i++){
     int index = files_by_compactio_pri[i];
-    auto file = files[i];
+    auto file = files[index];
     if(file->being_compacted && exclude_being_compacted){
       continue;
     }
