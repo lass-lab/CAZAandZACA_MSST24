@@ -883,7 +883,7 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
     const MutableCFOptions& mutable_cf_options,
     const ImmutableCFOptions& immutable_cf_options) {
   // fs_
-  uint64_t zns_free_space;
+  // uint64_t zns_free_space;
   uint64_t zns_free_percent;
   
   ioptions()->fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
