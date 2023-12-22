@@ -2115,7 +2115,21 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
         sorted = SortedByZoneScore(zone_score);
         AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
       }
+    } 
+    else if(level==2 && (PredictCompactionScore(0) > this_level_score)  ) {
+        fno_list.clear();
+        zone_score.clear();
+        zone_score.assign(io_zones.size(),0);
+        DownwardAdjacentFileList(smallest, largest, level, fno_list);
+
+
+
+        if(CalculateZoneScore(fno_list,zone_score)){
+          sorted = SortedByZoneScore(zone_score);
+          AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
+        }
     }else if(this_level_score>upper_level_score){
+        
         fno_list.clear();
         zone_score.clear();
         zone_score.assign(io_zones.size(),0);
