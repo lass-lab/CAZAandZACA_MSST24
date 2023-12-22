@@ -886,7 +886,7 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
   uint64_t zns_free_space;
   uint64_t zns_free_percent;
   
-  ioptions()->fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
+  ioptions()->fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
   // printf("%lu %lu\n",zns_free_space,zns_free_percent);
   // if(zns_free_percent<=5){
   //   return {WriteStallCondition::kStopped,WriteStallCause::kNoFreeSpaceInZNS};
@@ -916,7 +916,9 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
              num_l0_files >=
                  mutable_cf_options.level0_slowdown_writes_trigger) {
     return {WriteStallCondition::kDelayed, WriteStallCause::kL0FileCountLimit};
-  } else if (!mutable_cf_options.disable_auto_compactions &&
+  }else if(zns_free_percent<=ioptions_.zc_kicks){
+     return {WriteStallCondition::kDelayed, WriteStallCause::kL0FileCountLimit};
+  }else if (!mutable_cf_options.disable_auto_compactions &&
              mutable_cf_options.soft_pending_compaction_bytes_limit > 0 &&
              num_compaction_needed_bytes >=
                  mutable_cf_options.soft_pending_compaction_bytes_limit) {
