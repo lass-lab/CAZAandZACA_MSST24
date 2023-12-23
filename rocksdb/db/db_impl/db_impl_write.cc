@@ -1150,7 +1150,9 @@ Status DBImpl::PreprocessWrite(const WriteOptions& write_options,
   immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
 
   if (UNLIKELY(status.ok() && (write_controller_.IsStopped() ||
-                               write_controller_.NeedsDelay())  ) ) {
+                               write_controller_.NeedsDelay()
+                              //  || zns_free_percent<20
+                               )  ) ) {
     PERF_TIMER_STOP(write_pre_and_post_process_time);
     PERF_TIMER_GUARD(write_delay_time);
     // We don't know size of curent batch so that we always use the size
