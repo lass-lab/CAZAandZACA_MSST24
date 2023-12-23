@@ -577,9 +577,9 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
 
 
     zbd_->SetZCRunning(false);
-    if(db_ptr_){
-        db_ptr_->ZenFSInstallSuperVersionAndScheduleWork();
-    }
+    // if(db_ptr_){
+    //     db_ptr_->ZenFSInstallSuperVersionAndScheduleWork();
+    // }
   }
 }
 
