@@ -331,6 +331,7 @@ class DBImpl : public DB {
   virtual void DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list) override;
   
   // using DB::SameLevelFileList;
+  virtual void ZenFSInstallSuperVersionAndScheduleWork(void) override;
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list,bool exclude_being_compacted=true) override;
   virtual std::vector<int> NumLevelsFiles(void) override;
   virtual std::vector<double> LevelsCompactionScore(void) override;
