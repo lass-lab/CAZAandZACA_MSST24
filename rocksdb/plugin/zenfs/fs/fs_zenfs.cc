@@ -574,10 +574,12 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
 
         ZoneCleaning(false);
     }
+
+
+    zbd_->SetZCRunning(false);
     if(db_ptr_){
         db_ptr_->ZenFSInstallSuperVersionAndScheduleWork();
     }
-    zbd_->SetZCRunning(false);
   }
 }
 
