@@ -2465,7 +2465,7 @@ void DBImpl::MaybeScheduleFlushOrCompaction() {
   //     bg_job_limits.max_flushes,bg_job_limits.max_compactions);
   bool is_flush_pool_empty =
       env_->GetBackgroundThreads(Env::Priority::HIGH) == 0;
-  immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
+  // immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   // printf("filesystem ptr? %p\n");
   while (!is_flush_pool_empty && unscheduled_flushes_ > 0 &&
          bg_flush_scheduled_ < bg_job_limits.max_flushes) {
@@ -2480,7 +2480,7 @@ void DBImpl::MaybeScheduleFlushOrCompaction() {
         "DBImpl::MaybeScheduleFlushOrCompaction:AfterSchedule:0",
         &unscheduled_flushes_);
   }
-  immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
+  // immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   // GetFileSystem()->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   // special case -- if high-pri (flush) thread pool is empty, then schedule
   // flushes in low-pri (compaction) thread pool.
@@ -2516,7 +2516,7 @@ void DBImpl::MaybeScheduleFlushOrCompaction() {
     return;
   }
   immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
-  printf("GetFilesystem %p %lu\n",GetFileSystem(),zns_free_percent);
+  // printf("GetFilesystem %p %lu\n",GetFileSystem(),zns_free_percent);
   while (bg_compaction_scheduled_ + bg_bottom_compaction_scheduled_ <
              bg_job_limits.max_compactions &&
          unscheduled_compactions_ > 0) {
