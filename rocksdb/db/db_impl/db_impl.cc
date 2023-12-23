@@ -3036,7 +3036,7 @@ void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_
   //     ColumnFamilyData* cfd, SuperVersionContext* sv_context,
   //     const MutableCFOptions& mutable_cf_options);
 
-void DBImpl::ZenFSInstallSuperVersionAndScheduleWork(){
+void DBImpl::ZenFSInstallSuperVersionAndScheduleWork(void){
   if(!versions_){
     return;
   }
