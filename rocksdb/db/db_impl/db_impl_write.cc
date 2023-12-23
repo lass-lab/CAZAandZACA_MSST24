@@ -1731,7 +1731,7 @@ Status DBImpl::DelayWrite(uint64_t num_bytes,
       TEST_SYNC_POINT("DBImpl::DelayWrite:Sleep");
         uint64_t zns_free_percent;
         immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
-        while(zns_free_percent<=20){
+        while(zns_free_percent<20){
           // std::sleep_
           usleep(1000);
         }
