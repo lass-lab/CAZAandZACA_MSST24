@@ -2465,7 +2465,7 @@ void DBImpl::MaybeScheduleFlushOrCompaction() {
   //     bg_job_limits.max_flushes,bg_job_limits.max_compactions);
   bool is_flush_pool_empty =
       env_->GetBackgroundThreads(Env::Priority::HIGH) == 0;
-  // immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
+  immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   // printf("filesystem ptr? %p\n");
   while (!is_flush_pool_empty && unscheduled_flushes_ > 0 &&
          bg_flush_scheduled_ < bg_job_limits.max_flushes) {
