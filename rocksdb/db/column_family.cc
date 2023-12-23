@@ -886,6 +886,7 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
   uint64_t zns_free_space;
   uint64_t zns_free_percent;
   (void)(zns_free_space);
+  
   ioptions()->fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
   // printf("ioptions()->fs %p\n",ioptions()->fs.get());
   // printf("%lu %lu\n",zns_free_space,zns_free_percent);
