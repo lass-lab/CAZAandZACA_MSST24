@@ -376,7 +376,7 @@ class ZenFS : public FileSystemWrapper {
                         IODebugContext* /*dbg*/) override {
 loop:
     // uint64_t fr;
-    // printf("ZenFS::GetFreeSPace\n");
+    printf("ZenFS::GetFreeSPace %lu %p\n",free_percent_,this);
     if(diskfree!=nullptr){
       *diskfree = zbd_->GetFreeSpace();
     }
