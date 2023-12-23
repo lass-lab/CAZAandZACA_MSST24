@@ -2465,9 +2465,9 @@ void DBImpl::MaybeScheduleFlushOrCompaction() {
   //     bg_job_limits.max_flushes,bg_job_limits.max_compactions);
   bool is_flush_pool_empty =
       env_->GetBackgroundThreads(Env::Priority::HIGH) == 0;
-  printf("MaybeScheduleFlushOrCompaction %p\n",immutable_db_options_.fs.get());
+  // printf("MaybeScheduleFlushOrCompaction %p\n",immutable_db_options_.fs.get());
   immutable_db_options_.fs->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
-  printf("MaybeScheduleFlushOrCompaction %lu\n",zns_free_percent);
+  // printf("MaybeScheduleFlushOrCompaction %lu\n",zns_free_percent);
   // printf("filesystem ptr? %p\n");
   // compaction_picker_->IsLevel0CompactionInProgress()
   while (!is_flush_pool_empty && unscheduled_flushes_ > 0 &&
