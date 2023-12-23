@@ -3032,6 +3032,25 @@ void DBImpl::AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_
   return;
 }
 
+  // void InstallSuperVersionAndScheduleWork(
+  //     ColumnFamilyData* cfd, SuperVersionContext* sv_context,
+  //     const MutableCFOptions& mutable_cf_options);
+
+void DBImpl::ZenFSInstallSuperVersionAndScheduleWork(){
+  if(!versions_){
+    return;
+  }
+  auto cfd = versions_->GetColumnFamilySet()->GetDefault();
+  if(!cfd){
+    return;
+  }
+  // InstallSuperVersionAndScheduleWork(cfd,
+  //                                        &job_context.superversion_contexts[0],
+  //                                        *cfd->GetLatestMutableCFOptions());
+  JobContext job_context(next_job_id_.fetch_add(1), true);
+  InstallSuperVersionAndScheduleWork(cfd,&job_context.superversion_contexts[0],*cfd->GetLatestMutableCFOptions());
+}
+
 void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list, bool exclude_being_compacted){
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   const std::vector<int>& files_by_compactio_pri=vstorage->FilesByCompactionPri(level);
@@ -4532,7 +4551,9 @@ void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
 void DB::DownwardAdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
   std::cout<<"DB::DownwardAdjacentFileList not Supported\n";
 }
-
+void DBImpl::ZenFSInstallSuperVersionAndScheduleWork(void){
+  return;
+}
 void DB::SameLevelFileList(int , std::vector<uint64_t>&,bool ){
   std::cout<<"DB::SameLevelFileList not Supported\n";
 }

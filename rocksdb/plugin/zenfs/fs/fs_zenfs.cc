@@ -571,7 +571,11 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
     }else if(zbd_->ProactiveZoneCleaning() 
           && free_percent_>MODIFIED_ZC_KICKING_POINT
           && run_gc_worker_){
+
         ZoneCleaning(false);
+    }
+    if(db_ptr_){
+        db_ptr_->ZenFSInstallSuperVersionAndScheduleWork();
     }
     zbd_->SetZCRunning(false);
   }
