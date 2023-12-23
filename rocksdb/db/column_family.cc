@@ -884,8 +884,9 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
     const ImmutableCFOptions& immutable_cf_options) {
   // fs_
   uint64_t zns_free_space;
-  uint64_t zns_free_percent;
+  uint64_t zns_free_percent=100;
   (void)(zns_free_space);
+  (void)(zns_free_percent);
   
   ioptions()->fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
   // printf("ioptions()->fs %p\n",ioptions()->fs.get());
@@ -919,7 +920,7 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
                  mutable_cf_options.level0_slowdown_writes_trigger) {
     return {WriteStallCondition::kDelayed, WriteStallCause::kL0FileCountLimit};
   }
-  else if(zns_free_percent<20){
+  else if(zns_free_percent<=20){
      return {WriteStallCondition::kDelayed, WriteStallCause::kL0FileCountLimit};
   }
   else if (!mutable_cf_options.disable_auto_compactions &&
