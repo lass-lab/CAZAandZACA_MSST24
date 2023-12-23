@@ -4551,7 +4551,7 @@ void DB::AdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
 void DB::DownwardAdjacentFileList(Slice& , Slice& , int , std::vector<uint64_t>& ){
   std::cout<<"DB::DownwardAdjacentFileList not Supported\n";
 }
-void DBImpl::ZenFSInstallSuperVersionAndScheduleWork(void){
+void DB::ZenFSInstallSuperVersionAndScheduleWork(void){
   return;
 }
 void DB::SameLevelFileList(int , std::vector<uint64_t>&,bool ){
