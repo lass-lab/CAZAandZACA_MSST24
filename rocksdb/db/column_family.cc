@@ -1010,6 +1010,7 @@ WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
       // L0 is the last two files from stopping.
       bool near_stop = vstorage->l0_delay_trigger_count() >=
                        mutable_cf_options.level0_stop_writes_trigger - 2;
+      near_stop=false;
       write_controller_token_ =
           SetupDelay(write_controller, compaction_needed_bytes,
                      prev_compaction_needed_bytes_, was_stopped || near_stop,
