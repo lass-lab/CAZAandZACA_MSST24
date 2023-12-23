@@ -249,15 +249,15 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   // TODO: Check for an error here
   // immutable_db_options_.fs=options.env->file_system_;
   if(immutable_db_options_.stats==nullptr&& immutable_db_options_.is_db_bench==false){
-    immutable_db_options_.statistics=ROCKSDB_NAMESPACE::CreateDBStatistics();
-    printf( "in dbimpl immutable_db_options_.statistics %p\n",immutable_db_options_.statistics.get());
-      Status s = Statistics::CreateFromString(ConfigOptions(),
-                                            "", &immutable_db_options_.statistics);
-    // immutable_db_options_.stats=ROCKSDB_NAMESPACE::CreateDBStatistics();
-    immutable_db_options_.stats=immutable_db_options_.statistics.get();
-    printf("immutable_db_options_.statistics %p\n",immutable_db_options_.stats);
-    immutable_db_options_.stats->set_stats_level(static_cast<StatsLevel>(ROCKSDB_NAMESPACE::StatsLevel::kExceptDetailedTimers));
-    stats_=immutable_db_options_.stats;
+    // immutable_db_options_.statistics=ROCKSDB_NAMESPACE::CreateDBStatistics();
+    // printf( "in dbimpl immutable_db_options_.statistics %p\n",immutable_db_options_.statistics.get());
+    //   Status s = Statistics::CreateFromString(ConfigOptions(),
+    //                                         "", &immutable_db_options_.statistics);
+    // // immutable_db_options_.stats=ROCKSDB_NAMESPACE::CreateDBStatistics();
+    // immutable_db_options_.stats=immutable_db_options_.statistics.get();
+    // printf("immutable_db_options_.statistics %p\n",immutable_db_options_.stats);
+    // immutable_db_options_.stats->set_stats_level(static_cast<StatsLevel>(ROCKSDB_NAMESPACE::StatsLevel::kExceptDetailedTimers));
+    // stats_=immutable_db_options_.stats;
   }
   printf("immutable_db_options_.stats %p immutable_db_options_.statistics %p\n",immutable_db_options_.stats,immutable_db_options_.statistics.get());
   // printf("DBImpl::DBImpl immutable_db_options_.fs.get() %p\n",immutable_db_options_.fs.get());
