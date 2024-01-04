@@ -87,7 +87,7 @@ while :
 do
     FAILED=0
     # for ALLOCATION_ALGORITHM in $RUNTIME_ZONE_RESET_ONLY $PARTIAL_RESET_WITH_ZONE_RESET
-    for ALLOCATION_ALGORITHM in $LIZA $CAZA_ADV
+    for ALLOCATION_ALGORITHM in  $CAZA_ADV
     do
         for i in 1 2 3
         do
