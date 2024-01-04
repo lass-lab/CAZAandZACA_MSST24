@@ -64,7 +64,7 @@ UNTIL=20
 # SLOWDOWN_TRIGGER=16
 # STOPS_TRIGGER=16
 SIZE=$HEAVY
-SIZE=83047219
+# SIZE=83047219
 # MOTIV_SMALL_ME_256MB_ERASEBLOCK_64MB
 # FAR_LARGE_ME_256MB_ERASEBLOCK_64MB3
 
@@ -93,10 +93,12 @@ do
         do
         if [ $ALLOCATION_ALGORITHM -eq $LIZA ]; then
             RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/LIZA
+            MAX_COMPACTION_KICK=27
         elif [ $ALLOCATION_ALGORITHM -eq $CAZA ]; then
             RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/CAZA
         elif [ $ALLOCATION_ALGORITHM -eq $CAZA_ADV ]; then
             RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/CAZA_ADV
+            MAX_COMPACTION_KICK=22
         # elif [ $ALLOCATION_ALGORITHM -eq $RUNTIME_ZONE_RESET_ONLY ]; then
         #     RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/RUNTIME_ZONE_RESET_ONLY
         # elif [ $ALLOCATION_ALGORITHM -eq $PROACTIVE_ZC ]; then
@@ -116,9 +118,11 @@ do
             for COMPACTION_ALGORITHM in $BASELINE_COMPACTION $MAX_INVALIDATION_COMPACTION
                 do
                     if [ $COMPACTION_ALGORITHM -eq $BASELINE_COMPACTION ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_readrandomwriterandom_${i}.txt
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_FAR_${i}.txt
+                        # INPUT_AWARE_SCHEME=0
                     elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_ZAC_START_LEVEL_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_readrandomwriterandom_${i}.txt
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_ZACA_FAR_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_${i}.txt
+                        # INPUT_AWARE_SCHEME=1
                     # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EAGER ]; then
@@ -153,7 +157,7 @@ do
                          -num=${SIZE} -readwritepercent=10 -benchmarks="readrandomwriterandom,stats" --fs_uri=zenfs://dev:nvme0n1 -statistics  -value_size=1024 \
                           -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} -subcompactions=${T_SUBCOMPACTION}  \
                           -histogram -seed=1699101730035899  -wait_for_compactions=false -enable_intraL0_compaction=false \
-                        -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
+                        -reset_scheme=${LINEAR} -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
                         -allocation_scheme=${ALLOCATION_ALGORITHM}  -compaction_scheme=${COMPACTION_ALGORITHM} \
                          -max_compaction_start_level=${MAX_COMPACTION_START_LEVEL} -input_aware_scheme=${MAX_INVALIDATION_COMPACTION}  \
                         -max_compaction_kick=${MAX_COMPACTION_KICK} > ${RESULT_DIR_PATH}/tmp
