@@ -154,7 +154,7 @@ do
                         sleep 3
                         echo $RESULT_PATH
                         sudo ${ROCKSDB_PATH}/db_bench \
-                         -num=${SIZE} -readwritepercent=10 -benchmarks="readrandomwriterandom,stats" --fs_uri=zenfs://dev:nvme0n1 -statistics  -value_size=1024 \
+                         -num=${SIZE} -benchmarks="fillrandom,stats" --fs_uri=zenfs://dev:nvme0n1 -statistics  -value_size=1024 \
                           -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} -subcompactions=${T_SUBCOMPACTION}  \
                           -histogram -seed=1699101730035899  -wait_for_compactions=false -enable_intraL0_compaction=false \
                         -reset_scheme=${LINEAR} -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
