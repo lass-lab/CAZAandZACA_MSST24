@@ -122,7 +122,7 @@ do
                         # INPUT_AWARE_SCHEME=0
                     elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
                         MAX_COMPACTION_KICK=${i}
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_ZACA_FAR_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_${i}.txt
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_ZACA_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_${i}.txt
                         # INPUT_AWARE_SCHEME=1
                     # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
@@ -158,7 +158,7 @@ do
                          -num=${SIZE} -benchmarks="fillrandom,stats" --fs_uri=zenfs://dev:nvme0n1 -statistics  -value_size=1024 \
                           -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} -subcompactions=${T_SUBCOMPACTION}  \
                           -histogram -seed=1699101730035899  -wait_for_compactions=false -enable_intraL0_compaction=false \
-                        -reset_scheme=${LINEAR} -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
+                        -reset_scheme=0 -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
                         -allocation_scheme=${ALLOCATION_ALGORITHM}  -compaction_scheme=${COMPACTION_ALGORITHM} \
                          -max_compaction_start_level=${MAX_COMPACTION_START_LEVEL} -input_aware_scheme=${MAX_INVALIDATION_COMPACTION}  \
                         -max_compaction_kick=${i} > ${RESULT_DIR_PATH}/tmp
