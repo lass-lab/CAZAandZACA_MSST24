@@ -78,7 +78,7 @@ MAX_INVALIDATION_COMPACTION=1
 
 
 MAX_COMPACTION_KICK=25
-MAX_COMPACTION_START_LEVEL=2
+MAX_COMPACTION_START_LEVEL=1
 
 INPUT_AWARE_SCHEME=0
 
@@ -89,7 +89,7 @@ do
     # for ALLOCATION_ALGORITHM in $RUNTIME_ZONE_RESET_ONLY $PARTIAL_RESET_WITH_ZONE_RESET
     for ALLOCATION_ALGORITHM in  $CAZA_ADV
     do
-        for i in 1 2 3
+        for i in 30 40 50 60 70 100
         do
         if [ $ALLOCATION_ALGORITHM -eq $LIZA ]; then
             RESULT_DIR_PATH=${RESULT_DIR_ROOT_PATH}/LIZA
@@ -115,7 +115,7 @@ do
             echo "NO ${RESULT_DIR_PATH}"
             mkdir ${RESULT_DIR_PATH}
         fi
-            for COMPACTION_ALGORITHM in $BASELINE_COMPACTION $MAX_INVALIDATION_COMPACTION
+            for COMPACTION_ALGORITHM in $MAX_INVALIDATION_COMPACTION
                 do
                     if [ $COMPACTION_ALGORITHM -eq $BASELINE_COMPACTION ]; then
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_FAR_${i}.txt
@@ -160,7 +160,7 @@ do
                         -reset_scheme=${LINEAR} -tuning_point=100 -partial_reset_scheme=1 -disable_wal=true -zc=${ZC_KICKS} -until=${UNTIL} \
                         -allocation_scheme=${ALLOCATION_ALGORITHM}  -compaction_scheme=${COMPACTION_ALGORITHM} \
                          -max_compaction_start_level=${MAX_COMPACTION_START_LEVEL} -input_aware_scheme=${MAX_INVALIDATION_COMPACTION}  \
-                        -max_compaction_kick=${MAX_COMPACTION_KICK} > ${RESULT_DIR_PATH}/tmp
+                        -max_compaction_kick=${i} > ${RESULT_DIR_PATH}/tmp
 
                         # -num=${SIZE} -benchmarks="fillrandom,stats" --fs_uri=zenfs://dev:nvme0n1 -statistics  -value_size=1024 \
                         #   -max_background_compactions=${T_COMPACTION}   -max_background_flushes=${T_FLUSH} -subcompactions=${T_SUBCOMPACTION}  \
