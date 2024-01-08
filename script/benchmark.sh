@@ -121,6 +121,7 @@ do
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_FAR_${i}.txt
                         # INPUT_AWARE_SCHEME=0
                     elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
+                        MAX_COMPACTION_KICK=${i}
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_ZACA_FAR_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_${i}.txt
                         # INPUT_AWARE_SCHEME=1
                     # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
