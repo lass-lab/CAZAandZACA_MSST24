@@ -710,6 +710,7 @@ class FileSystem : public Customizable {
 
   // If you're adding methods here, remember to add them to EnvWrapper too.
 uint32_t reset_scheme_;
+uint64_t cur_ops_ = 0;
  private:
   void operator=(const FileSystem&);
 

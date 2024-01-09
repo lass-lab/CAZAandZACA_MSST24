@@ -321,7 +321,7 @@ void ZenFS::BackgroundStatTimeLapse(){
     // }
     
     if(zbd_!=nullptr){
-      zbd_->AddTimeLapse(mount_time_);
+      zbd_->AddTimeLapse(mount_time_,cur_ops_);
     }
     sleep(1);
     mount_time_.fetch_add(1);

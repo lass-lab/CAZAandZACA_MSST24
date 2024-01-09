@@ -1071,7 +1071,7 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
 
 
 
-void ZonedBlockDevice::AddTimeLapse(int T) {
+void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
   (void)(T);
   // size_t reclaimable= 0;
   // size_t written = 0;
@@ -1175,7 +1175,8 @@ void ZonedBlockDevice::AddTimeLapse(int T) {
                 // db_ptr_ ? db_ptr_->LevelsSize() : 
                 std::vector<uint64_t>(0),compaction_stats_,
                 same_zone_score_for_timelapse_,invalidate_score_for_timelapse_,
-                0.0,invalid_percent_per_zone);
+                0.0,invalid_percent_per_zone,
+                cur_ops);
 }
 
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){

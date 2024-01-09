@@ -557,7 +557,7 @@ class ZonedBlockDevice {
     double avg_invalid_ratio_;
 
     std::vector<uint64_t> invalid_percent_per_zone_;
-
+    uint64_t cur_ops_;
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
             uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels, 
             std::vector<double> compaction_scores, std::vector<uint64_t> levels_size,
@@ -565,11 +565,12 @@ class ZonedBlockDevice {
             std::vector<double>* same_zone_score_for_timelapse,
             std::vector<double>* inval_score_for_timelapse ,
             double avg_invalid_ratio,
-            std::vector<uint64_t> invalid_percent_per_zone)
+            std::vector<uint64_t> invalid_percent_per_zone,
+            uint64_t cur_ops)
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
           , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
-          levels_size_(levels_size),avg_invalid_ratio_(avg_invalid_ratio) {
+          levels_size_(levels_size),avg_invalid_ratio_(avg_invalid_ratio),cur_ops_(cur_ops) {
       if((rc+rc_zc)==0){
         R_wp_= 100;
       }else{
@@ -650,6 +651,7 @@ class ZonedBlockDevice {
       for(int i = 0 ; i < 5 ; i++){
         printf("%.3lf\t",avg_inval_score_[i]);
       }
+      printf("%lu\t",cur_ops_);
       // for(int n : num_files_levels_){
       //   printf("%d\t",n);
       // }
@@ -877,7 +879,7 @@ class ZonedBlockDevice {
 
     zc_timelapse_.push_back({zc_z,s,e,us,copied,forced});
   }
-  void AddTimeLapse(int T);
+  void AddTimeLapse(int T,uint64_t cur_ops);
 
   
   
