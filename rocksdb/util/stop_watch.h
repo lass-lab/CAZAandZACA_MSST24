@@ -30,7 +30,8 @@ class StopWatch {
         total_delay_(0),
         delay_start_time_(0),
         start_time_((stats_enabled_ || elapsed != nullptr) ? clock->NowMicros()
-                                                           : 0) {}
+                                                           : 0),
+        start_time_chrono_(std::chrono::high_resolution_clock::now()) {}
 
   ~StopWatch() {
     if (elapsed_) {
@@ -43,11 +44,17 @@ class StopWatch {
     if (elapsed_ && delay_enabled_) {
       *elapsed_ -= total_delay_;
     }
+    auto elapsed_chrono = std::chrono::high_resolution_clock::now() - start_time_chrono_;
+    long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed_chrono).count();
     if (stats_enabled_) {
+      // statistics_->reportTimeToHistogram(
+      //     hist_type_, (elapsed_ != nullptr)
+      //                     ? *elapsed_
+      //                     : (clock_->NowMicros() - start_time_));
       statistics_->reportTimeToHistogram(
-          hist_type_, (elapsed_ != nullptr)
-                          ? *elapsed_
-                          : (clock_->NowMicros() - start_time_));
+          hist_type_,(uint64_t) microseconds
+                          
+                          );
     }
   }
 
@@ -83,6 +90,7 @@ class StopWatch {
   uint64_t total_delay_;
   uint64_t delay_start_time_;
   const uint64_t start_time_;
+  double start_time_chrono_;
 };
 
 // a nano second precision stopwatch
