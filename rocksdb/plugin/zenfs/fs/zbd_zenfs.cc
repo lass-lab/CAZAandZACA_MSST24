@@ -857,6 +857,13 @@ ZonedBlockDevice::~ZonedBlockDevice() {
       printf("total samezone score : %lf\tinvalidate score %lf\n",sum_sum_score/total_n,sum_sum_inval_score/total_n);
     }
   }
+    // read_latency_sum_.fetch_add(microseconds);
+  // read_n_.fetch_add(1);
+  if(read_n_.load()){
+    printf("read latency %lu / %lu = %lu us\n",
+      read_latency_sum_.load(),read_n_.load(),read_latency_sum_.load()/read_n_.load());
+  }
+  
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
   printf("============================================================\n\n");
