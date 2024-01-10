@@ -90,7 +90,7 @@ class StopWatch {
   uint64_t total_delay_;
   uint64_t delay_start_time_;
   const uint64_t start_time_;
-  double start_time_chrono_;
+  std::chrono::high_resolution_clock::time_point start_time_chrono_;
 };
 
 // a nano second precision stopwatch
