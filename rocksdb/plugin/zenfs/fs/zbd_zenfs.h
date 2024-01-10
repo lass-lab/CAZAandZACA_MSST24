@@ -373,7 +373,10 @@ class ZonedBlockDevice {
   size_t before_zc_T_=-1;
   bool before_zc_ = true;
 
-
+  // read_latency_sum_.fetch_add(microseconds);
+  // read_n_.fetch_add(1);
+  std::atomic<uint64_t> read_latency_sum_{0};
+  std::atomic<uint64_t> read_n_{0};
 
   std::atomic<uint64_t> wasted_wp_{0};
   std::atomic<clock_t> runtime_reset_reset_latency_{0};

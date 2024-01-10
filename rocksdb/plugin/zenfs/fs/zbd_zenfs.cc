@@ -3066,7 +3066,7 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
   int ret = 0;
   int left = n;
   int r = -1;
-
+  auto start_chrono = std::chrono::high_resolution_clock::now();
   (void)(direct);
   while (left) {
     r = zbd_be_->Read(buf, left, offset, direct);
@@ -3081,7 +3081,12 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
     left -= r;
     offset += r;
   }
+  auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
+  
+  long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
 
+  read_latency_sum_.fetch_add(microseconds);
+  read_n_.fetch_add(1);
   if (r < 0) return r;
   return ret;
 }
