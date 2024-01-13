@@ -3286,6 +3286,7 @@ void VersionStorageInfo::UpdateFilesByCompactionPri(
     // don't need this
     return;
   }
+  auto start_chrono = std::chrono::high_resolution_clock::now();
   // No need to sort the highest level because it is never compacted.
   for (int level = 0; level < num_levels() - 1; level++) {
     const std::vector<FileMetaData*>& files = files_[level];
@@ -3340,6 +3341,9 @@ void VersionStorageInfo::UpdateFilesByCompactionPri(
     next_file_to_compact_by_size_[level] = 0;
     assert(files_[level].size() == files_by_compaction_pri_[level].size());
   }
+  auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
+  long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
+  printf("\t%lu\n",nanoseconds);
 }
 
 void VersionStorageInfo::GenerateLevel0NonOverlapping() {

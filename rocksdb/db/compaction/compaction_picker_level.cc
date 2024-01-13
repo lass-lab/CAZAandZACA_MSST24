@@ -499,6 +499,8 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     ){
     goto baseline;
   }
+
+  auto start_chrono = std::chrono::high_resolution_clock::now();
   // for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
   for(cmp_idx= 0;cmp_idx<file_size.size();cmp_idx++){
     std::vector<uint64_t> file_candidates;
@@ -677,6 +679,10 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     //   printf("score : %lf\n",max_score);
     //   printf("-----------------END-------------------\n");
     // }
+    
+    auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
+    long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
+    printf("\t\t%lu\n",nanoseconds);
     return start_level_inputs_.size() > 0;
   }
 baseline:
