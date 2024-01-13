@@ -682,7 +682,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     
     auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
     long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
-    printf("\t\t%lu\n",nanoseconds);
+    printf("\t\t%llu\n",nanoseconds);
     return start_level_inputs_.size() > 0;
   }
 baseline:

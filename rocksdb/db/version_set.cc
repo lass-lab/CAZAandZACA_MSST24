@@ -3343,7 +3343,7 @@ void VersionStorageInfo::UpdateFilesByCompactionPri(
   }
   auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
   long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
-  printf("\t%lu\n",nanoseconds);
+  printf("\t%llu\n",nanoseconds);
 }
 
 void VersionStorageInfo::GenerateLevel0NonOverlapping() {
