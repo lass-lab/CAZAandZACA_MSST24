@@ -490,6 +490,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
   uint64_t zns_free_percent=100;
   // GetFileSystem()->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   ioptions_.fs->GetFreeSpace(std::string(),IOOptions(),nullptr,&zns_free_percent,nullptr);
+  auto start_chrono = std::chrono::high_resolution_clock::now();
   // mutable_cf_options_.level0_slowdown_writes_trigger;
   // mutable_cf_options_.
   max_file_candiates.clear();
@@ -500,7 +501,7 @@ bool LevelCompactionBuilder::PickFileToCompact() {
     goto baseline;
   }
 
-  auto start_chrono = std::chrono::high_resolution_clock::now();
+
   // for(cmp_idx= vstorage_->NextCompactionIndex(start_level_);cmp_idx<file_size.size();cmp_idx++){
   for(cmp_idx= 0;cmp_idx<file_size.size();cmp_idx++){
     std::vector<uint64_t> file_candidates;
