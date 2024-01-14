@@ -3208,7 +3208,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
                                           std::vector<uint64_t>& input_fno,uint64_t predicted_size,
                                           Zone **out_zone,uint64_t min_capacity) {
   
-
+  auto start_chrono = std::chrono::high_resolution_clock::now();
   // RuntimeReset();
   Zone *allocated_zone = nullptr;
   unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
@@ -3358,6 +3358,10 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
 end:
   *out_zone = allocated_zone;
 
+  auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
+  long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
+  (void)(nanoseconds);
+  printf("\t\t\t\t%llu\n",nanoseconds);
   metrics_->ReportGeneral(ZENFS_OPEN_ZONES_COUNT, open_io_zones_);
   metrics_->ReportGeneral(ZENFS_ACTIVE_ZONES_COUNT, active_io_zones_);
 

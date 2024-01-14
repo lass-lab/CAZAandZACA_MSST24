@@ -1206,7 +1206,7 @@ IOStatus ZenFS::GetFileSize(const std::string& filename,
   } else {
     s = target()->GetFileSize(ToAuxPath(f), options, size, dbg);
   }
-  printf("%lu\n",*size);
+  // printf("%lu\n",*size);
   return s;
 }
 
