@@ -504,6 +504,7 @@ class ZonedBlockDevice {
   uint32_t partial_reset_scheme_;
   uint64_t input_aware_scheme_;
   uint64_t tuning_point_;
+  uint64_t async_zc_enabled_;
   enum {
     kEager = 0,
     kLazy = 1,
@@ -722,6 +723,9 @@ class ZonedBlockDevice {
   bool ZCorPartialTryLock();
   void ZCorPartialUnLock();
   double PredictCompactionScore(int level){
+  uint64_t AsyncZCEnabled(){
+    return async_zc_enabled_;
+  }
     // if(db_ptr_!=nullptr){
     //   return  db_ptr_->ReCalculateCompactionScore(level);
     // }

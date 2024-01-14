@@ -20,7 +20,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
-
+#include <libaio.h>
 #ifdef ZENFS_EXPORT_PROMETHEUS
 #include "metrics_prometheus.h"
 #endif
@@ -518,6 +518,124 @@ zbd_->ZCorPartialUnLock();
   return migrate_zones_start.size() + all_inval_zone_n;
 }
 
+void ZenFS::AsyncZoneCleaning(void){
+  size_t should_be_copied=0;
+  (void)(forced);
+  uint64_t zone_size=zbd_->GetZoneSize();
+
+  int start = GetMountTime();
+  auto start_chrono = std::chrono::high_resolution_clock::now();
+
+  zbd_->ZCorPartialLock();
+
+  ZenFSSnapshot snapshot;
+  ZenFSSnapshotOptions options;
+
+  options.zone_ = 1;
+  options.zone_file_ = 1;
+  options.log_garbage_ = 1;
+  // zbd_->EntireZoneReadLock();
+  GetZenFSSnapshot(snapshot, options);
+  
+  size_t all_inval_zone_n = 0;
+  std::vector<std::pair<uint64_t, uint64_t>> victim_candidate;
+  std::set<uint64_t> migrate_zones_start;
+
+  std::vector<ZonedBlockDevice::ZoneReadLock> zone_read_locks;
+  ZonedBlockDevice::ZoneReadLock zone_read_lock;
+  
+
+
+  for (const auto& zone : snapshot.zones_) {
+
+    if(zone.capacity !=0 ){
+      continue;
+    }
+    if(zone.used_capacity==zone.max_capacity){
+      continue;
+    }
+
+    // if (zone.capacity == 0) { 
+//  select:   
+      uint64_t garbage_percent_approx =
+        100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
+      // uint64_t garbage_percent_approx=zone.max_capacity-zone.used_capacity;
+      if(zone.used_capacity>0){ // valid copy zone
+        // victim_candidate.push_back({garbage_percent_approx, zone.start});
+        victim_candidate.emplace_back(garbage_percent_approx,zone.start);
+      }
+      else{ // no valid copy zone
+        all_inval_zone_n++;
+      }
+    // }
+  }
+  // sort(victim_candidate.begin(), victim_candidate.end(),VictimZoneCandiate::cmp);
+  sort(victim_candidate.rbegin(), victim_candidate.rend());
+
+  uint64_t threshold = 0;
+  uint64_t reclaimed_zone_n=1;
+
+
+
+  reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
+  for (size_t i = 0; (i < reclaimed_zone_n && migrate_zones_start.size()<reclaimed_zone_n ); i++) {
+    if(victim_candidate[i].first>threshold){
+      should_be_copied+=(zone_size-(victim_candidate[i].first*zone_size/100) );
+      migrate_zones_start.emplace(victim_candidate[i].second);
+    }
+  }
+
+
+  // if(migrate_zones_.empty()){
+  //   return;
+  // }
+  
+  std::vector<ZoneExtentSnapshot*> migrate_exts;
+  for (auto& ext : snapshot.extents_) {
+    if (migrate_zones_start.find(ext.zone_start) !=
+        migrate_zones_start.end()) {
+      migrate_exts.push_back(&ext);
+    }
+  }
+
+  if (migrate_zones_start.size() > 0) {
+
+    IOStatus s;
+
+    Info(logger_, "Garbage collecting %d extents \n",
+         (int)migrate_exts.size());
+    
+    
+    
+    s = AsyncMigrateExtents(migrate_exts);
+
+
+
+    if(!run_gc_worker_){
+      zbd_->SetZCRunning(false);
+      zbd_->ZCorPartialUnLock();
+      return 0;
+    }
+    zc_triggerd_count_.fetch_add(1);
+    if (!s.ok()) {
+      Error(logger_, "Garbage collection failed");
+    }
+    int end=GetMountTime();
+    if(should_be_copied>0){
+      auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
+      long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+      zbd_->AddZCTimeLapse(start, end,microseconds,
+                          migrate_zones_start.size(),should_be_copied, forced);
+    }
+  }
+
+
+
+  zbd_->ZCorPartialUnLock();
+}
+
+
+
 
 void ZenFS::ZoneCleaningWorker(bool run_once) {
   uint64_t MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
@@ -560,7 +678,11 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
             ){
         zbd_->SetZCRunning(true);  
         before_free_percent=free_percent_;
-        ZoneCleaning(force);
+        if(zbd_->AsyncZCEnabled()){
+          AsyncZoneCleaning();
+        }else{
+          ZoneCleaning(force);
+        }
         zbd_->ResetUnusedIOZones();
         free_percent_ = zbd_->CalculateFreePercent();
         force=(before_free_percent==free_percent_);
@@ -1833,6 +1955,9 @@ Status ZenFS::Mount(bool readonly) {
       Info(logger_, "Starting garbage collection worker");
       run_gc_worker_ = true;
       gc_worker_.reset(new std::thread(&ZenFS::ZoneCleaningWorker, this,false));
+
+      
+
     }
     run_bg_stats_worker_=true;
     if(bg_stats_worker_==nullptr){
@@ -2111,7 +2236,63 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
   //   zbd_->LogGarbageInfo();
   // }
 }
+IOStatus AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
+  // throw all read
+  std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
+  std::map<std::string, std::vector<AsyncZoneCleainingIocb*>> reaped_read_file_extents;
+  size_t read_reaped_n = 0;
+  io_context_t read_ioctx;
+  int extent_n = (int)extents.size();
+  int read_fd=zbd_->GetFD(READ_FD);
+  io_setup(extent_n,&read_ioctx);
 
+  for (auto* ext : extents) {
+    // ThrowAsyncExtentsRead(ext);
+    uint64_t start,legnth;
+    if (ends_with(fname, ".sst")) {
+      start=ext->start;
+      length=ext->start;
+    }else{
+      start=ext->start-ZoneFile::SPARSE_HEADER_SIZE;
+      length=ext->start+ZoneFile::SPARSE_HEADER_SIZE;
+    }
+    struct AsyncZoneCleainingIocb* async_zc_read_iocb= new AsyncZoneCleainingIocb(ext->filename,length);
+    io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, length, start);
+    async_zc_read_iocb->iocb_.data=async_zc_read_iocb;
+    io_submit(read_ioctx,1,&(async_zc_read_iocb->iocb_));
+    file_extents[ext->filename].emplace_back(ext);
+  }
+
+
+  // reap here
+  struct io_event* read_events = new io_event[extent_n];
+  while(read_reaped_n < extent_n){
+    int num_events;
+    num_events = io_getevents(read_ioctx, 1, extent_n, read_events,
+                              &timeout);
+    for (int i = 0; i < num_events; i++) {
+      struct io_event event = read_events[i];
+      AsyncZoneCleainingIocb* reaped_read_iocb = static_cast<AsyncZoneCleainingIocb*>(event.data);
+      reaped_read_file_extents[reaped_read->filename_].emplace_back(reaped_read_iocb);
+
+      // req->Complete(event.res);
+      // delete req;
+    }
+
+    for (const auto& it : file_extents) {
+      if(it.second.size() == reaped_read_file_extents[it.first.c_str()].size() ){
+        // Async write everything
+      }  
+    }
+    read_reaped_n+=num_events;
+  }
+  
+
+
+
+
+  
+}
 IOStatus ZenFS::MigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
   IOStatus s;
@@ -2121,10 +2302,7 @@ IOStatus ZenFS::MigrateExtents(
   // printf("before MigrateExtents\n");
   for (auto* ext : extents) {
     std::string fname = ext->filename;
-    // We only migrate SST file extents
-    // if (ends_with(fname, ".sst")) {
-      file_extents[fname].emplace_back(ext);
-    // }
+    file_extents[fname].emplace_back(ext);
   }
   //  printf("after MigrateExtents\n");e
   for (const auto& it : file_extents) {

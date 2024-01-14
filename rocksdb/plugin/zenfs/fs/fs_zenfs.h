@@ -172,6 +172,18 @@ class ZenFS : public FileSystemWrapper {
   DB* db_ptr_ = nullptr;
   std::condition_variable		cv_;
 
+
+  // std::condition_variable async_zc_reader_wake_up_cv_;
+  std::mutex async_zc_reader_wake_up_mutex_;
+
+
+
+  
+  bool async_zc_done_ = false;
+  std::mutex async_zc_wake_up_mutex_;
+  bool async_zc_reader_done_=false;
+  std::condition_variable async_zc_wake_up_cv_;
+
   struct ZenFSMetadataWriter : public MetadataWriter {
     ZenFS* zenFS;
     IOStatus Persist(ZoneFile* zoneFile) {
@@ -319,6 +331,17 @@ class ZenFS : public FileSystemWrapper {
       return v1.garbage_percent_approx_<v2.garbage_percent_approx_;
     }
   };
+
+  struct AsyncZoneCleainingIocb{
+    AsyncZoneCleainingIocb(std::string fname,uint64_t length){
+      filename_=fname;
+      posix_memalign((void**)(&buffer_),sysconf(_SC_PAGE_SIZE),length);
+      // posix_memalign((void**)&buf,sysconf(_SC_PAGE_SIZE),size);
+    }
+    struct iocb iocb_;
+    std::string filename_;
+    char* buffer_;
+  }
 
   void EncodeJson(std::ostream& json_stream);
 
@@ -525,6 +548,14 @@ ret:
   
   bool IsZoneDevice(){ return true; }
   void ZoneCleaningWorker(bool run_once=false) override;
+
+
+  // void AsyncZoneCleaningWorker(void);
+  void AsyncZoneCleaning(void);
+
+  void AsyncZoneCleaningWriter(void);
+
+
   void PartialResetWorker(uint64_t T);
 
   size_t ZoneCleaning(bool forced) override;
@@ -551,6 +582,7 @@ ret:
 
 
   IOStatus MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
+  IOStatus AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
 
   IOStatus MigrateFileExtents(
       const std::string& fname,
