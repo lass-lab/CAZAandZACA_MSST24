@@ -322,6 +322,20 @@ IOStatus Zone::Close() {
   return IOStatus::OK();
 }
 
+IOStatus Zone::ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aiocb){
+  if(aiocb->length_+aiocb->header_size_ % zbd_->GetBlockSize() != 0){
+    printf("ThrowAsyncZCWrite %lu %lu",aiocb->length_,aiocb->header_size_);
+  }
+  io_prep_pwrite(&(aiocb->iocb_), GetFD(WRITE_DIRECT_FD), 
+    aiocb->buffer_, aiocb->length_+aiocb->header_size_, wp_);
+  int res = io_submit(ioctx, 1, &(aiocb->iocb_));
+  if(res==1){
+    return IOStatus::OK();
+  }
+  printf("ThrowAsyncZCWrite res %d\n",res);
+  return IOStatus::IOError(strerror(errno));
+}
+
 IOStatus Zone::Append(char *data, uint64_t size) {
   ZenFSMetricsLatencyGuard guard(zbd_->GetMetrics(), ZENFS_ZONE_WRITE_LATENCY,
                                  Env::Default());

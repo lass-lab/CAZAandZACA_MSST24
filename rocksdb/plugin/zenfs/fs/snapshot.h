@@ -66,6 +66,7 @@ class ZoneExtentSnapshot {
   uint64_t start;
   uint64_t length;
   uint64_t zone_start;
+  uint64_t header_size;
   std::string filename;
 
  public:
@@ -79,6 +80,7 @@ class ZoneExtentSnapshot {
           }
           start=extent->start_;
           length=extent->length_;
+          header_size=extent->header_size_;
           Zone* z = extent->zone_;
           zone_start=z->start_;
           filename=fname;

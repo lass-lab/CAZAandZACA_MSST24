@@ -233,6 +233,7 @@ class Zone {
  
   void PushExtentAtFront(ZoneExtent* ze);
   IOStatus Append(char *data, uint64_t size);
+  IOStatus ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aiocb);
   bool IsUsed();
   bool IsFull();
   bool IsEmpty();
@@ -269,6 +270,23 @@ class Zone {
   }
 
   uint64_t PrintZoneExtent(bool print);
+};
+
+struct AsyncZoneCleaningIocb{
+    AsyncZoneCleaningIocb(std::string fname,uint64_t start,uint64_t length,uint64_t header_size)
+    : start_(start),length_(length) ,header_size_(header_size)
+    {
+      filename_=fname;
+      posix_memalign((void**)(&buffer_),sysconf(_SC_PAGE_SIZE),length+header_size);
+      // posix_memalign((void**)&buf,sysconf(_SC_PAGE_SIZE),size);
+    }
+
+    struct iocb iocb_;
+    uint64_t start_;
+    uint64_t length_;
+    uint64_t header_size_;
+    std::string filename_;
+    char* buffer_;
 };
 
 class ZonedBlockDeviceBackend {

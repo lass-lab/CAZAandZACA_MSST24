@@ -332,20 +332,7 @@ class ZenFS : public FileSystemWrapper {
     }
   };
 
-  struct AsyncZoneCleaningIocb{
-    AsyncZoneCleaningIocb(std::string fname,uint64_t start,uint64_t length): start_(start),length_(length) 
-    {
-      filename_=fname;
-      posix_memalign((void**)(&buffer_),sysconf(_SC_PAGE_SIZE),length);
-      // posix_memalign((void**)&buf,sysconf(_SC_PAGE_SIZE),size);
-    }
 
-    struct iocb iocb_;
-    uint64_t start_;
-    uint64_t length_;
-    std::string filename_;
-    char* buffer_;
-  }
 
   void EncodeJson(std::ostream& json_stream);
 
