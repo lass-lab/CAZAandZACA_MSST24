@@ -250,7 +250,7 @@ class Zone {
   IOStatus Finish();
   IOStatus Close();
   void PushExtent(ZoneExtent* ze);
-  inline int GetFD(int i );
+
   void PushExtentAtFront(ZoneExtent* ze);
   IOStatus Append(char *data, uint64_t size);
   IOStatus ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aiocb);
@@ -748,6 +748,7 @@ class ZonedBlockDevice {
   uint64_t AsyncZCEnabled(){
     return async_zc_enabled_;
   }
+    inline int GetFD(int i );
   double PredictCompactionScore(int level){
 
     // if(db_ptr_!=nullptr){
