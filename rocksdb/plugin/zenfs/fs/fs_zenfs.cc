@@ -520,7 +520,7 @@ zbd_->ZCorPartialUnLock();
 
 void ZenFS::AsyncZoneCleaning(void){
   size_t should_be_copied=0;
-  (void)(forced);
+  // (void)(forced);
   uint64_t zone_size=zbd_->GetZoneSize();
 
   int start = GetMountTime();
@@ -2237,7 +2237,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
   //   zbd_->LogGarbageInfo();
   // }
 }
-IOStatus AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
+IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
   // throw all read
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   std::map<std::string, std::vector<AsyncZoneCleaningIocb*>> reaped_read_file_extents;
