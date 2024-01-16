@@ -2281,7 +2281,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     for (int i = 0; i < num_events; i++) {
       struct io_event event = read_events[i];
       AsyncZoneCleaningIocb* reaped_read_iocb = static_cast<AsyncZoneCleaningIocb*>(event.data);
-      reaped_read_file_extents[reaped_read->filename_].emplace_back(reaped_read_iocb);
+      reaped_read_file_extents[reaped_read_iocb->filename_].emplace_back(reaped_read_iocb);
     }
 
     for (const auto& it : file_extents) {
