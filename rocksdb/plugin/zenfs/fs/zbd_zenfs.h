@@ -248,7 +248,7 @@ class Zone {
   IOStatus Close();
   void PushExtent(ZoneExtent* ze);
   inline int GetFD(int i ) {
-    return zbd_be->GetFD(i);
+    return zbd_be_->GetFD(i);
   }
   void PushExtentAtFront(ZoneExtent* ze);
   IOStatus Append(char *data, uint64_t size);
