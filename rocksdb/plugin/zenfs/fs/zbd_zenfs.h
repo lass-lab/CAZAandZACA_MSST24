@@ -191,8 +191,12 @@ struct AsyncZoneCleaningIocb{
     : start_(start),length_(length) ,header_size_(header_size)
     {
       filename_=fname;
-      posix_memalign((void**)(&buffer_),sysconf(_SC_PAGE_SIZE),length+header_size);
-      // posix_memalign((void**)&buf,sysconf(_SC_PAGE_SIZE),size);
+      int r=posix_memalign((void**)(&buffer_),sysconf(_SC_PAGE_SIZE),length+header_size);
+        // posix_memalign((void**)&buf,sysconf(_SC_PAGE_SIZE),size);
+      if (r) {
+        return printf("AsyncZoneCleaningIocb Out of memory while recovering");
+      }
+
     }
 
     struct iocb iocb_;

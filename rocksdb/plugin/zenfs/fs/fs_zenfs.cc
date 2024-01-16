@@ -2288,8 +2288,8 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
       if(it.second.size() == reaped_read_file_extents[it.first.c_str()].size() ){
         // Async write everything
         writer_thread_pool.push_back(
-          new std::thread(ZenFS::AsyncMigrateFileExtentsWorker,this,
-              it.first,reaped_read_file_extents[it.first.c_str()])
+          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+              it.first,reaped_read_file_extents[it.first.c_str()] )
           );
       }  
     }
