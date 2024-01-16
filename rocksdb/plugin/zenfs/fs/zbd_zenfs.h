@@ -32,6 +32,7 @@
 #include "rocksdb/file_system.h"
 #include "rocksdb/io_status.h"
 #include "rocksdb/comparator.h"
+#include <libaio.h>
 
 namespace ROCKSDB_NAMESPACE {
 

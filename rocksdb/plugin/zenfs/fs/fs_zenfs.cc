@@ -20,7 +20,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
-#include <libaio.h>
+
 #ifdef ZENFS_EXPORT_PROMETHEUS
 #include "metrics_prometheus.h"
 #endif
