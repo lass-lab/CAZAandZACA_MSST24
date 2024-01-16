@@ -626,7 +626,7 @@ void ZenFS::AsyncZoneCleaning(void){
       auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
       long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
       zbd_->AddZCTimeLapse(start, end,microseconds,
-                          migrate_zones_start.size(),should_be_copied, forced);
+                          migrate_zones_start.size(),should_be_copied, false);
     }
   }
 
@@ -2300,6 +2300,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
   for(size_t t = 0; t <writer_thread_pool.size(); t++){
     writer_thread_pool[t]->join();
   }
+  return IOStatus::OK();
 }
 IOStatus ZenFS::MigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {

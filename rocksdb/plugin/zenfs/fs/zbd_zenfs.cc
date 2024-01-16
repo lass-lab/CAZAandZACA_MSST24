@@ -327,7 +327,7 @@ IOStatus Zone::ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aio
     printf("ThrowAsyncZCWrite %lu %lu",aiocb->length_,aiocb->header_size_);
   }
   struct iocb* iocb=&(aiocb->iocb_);
-  io_prep_pwrite(&(iocb), zbd_->GetFD(WRITE_DIRECT_FD), 
+  io_prep_pwrite((iocb), zbd_->GetFD(WRITE_DIRECT_FD), 
     aiocb->buffer_, aiocb->length_+aiocb->header_size_, wp_);
   int res = io_submit(ioctx, 1, &(iocb));
   if(res==1){
@@ -376,9 +376,7 @@ Zone *ZonedBlockDevice::GetIOZone(uint64_t offset) {
       return z;
   return nullptr;
 }
-inline int ZonedBlockDevice::GetFD(int i ) {
-    return zbd_be_->GetFD(i);
-}
+
 ZonedBlockDevice::ZonedBlockDevice(std::string path, ZbdBackendType backend,
                                    std::shared_ptr<Logger> logger,
                                    std::shared_ptr<ZenFSMetrics> metrics)
