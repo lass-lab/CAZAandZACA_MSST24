@@ -2412,6 +2412,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     timeout.tv_nsec = 100000000;
     num_events = io_getevents(write_ioctx, 1, extent_n, write_events,
                               &timeout);
+    write_reaped_n+=num_events;
   }
 
     // sync it
