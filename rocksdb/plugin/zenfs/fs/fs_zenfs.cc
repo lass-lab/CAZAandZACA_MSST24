@@ -2331,7 +2331,7 @@ IOStatus ZenFS::MigrateExtents(
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     std::string fname,
     std::vector<AsyncZoneCleaningIocb*> migrate_exts) {
-  // IOStatus s = IOStatus::OK();
+  IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
   io_context_t write_ioctx;
   int extent_n = (int)migrate_exts.size();
@@ -2568,7 +2568,7 @@ IOStatus ZenFS::MigrateFileExtents(
   Info(logger_, "MigrateFileExtents Finished, fname: %s, extent count: %lu",
        fname.data(), migrate_exts.size());
     // printf("after finding in MigrateFileExtents 22\n");
-  return IOStatus::OK();
+  return s;
 }
 
 extern "C" FactoryFunc<FileSystem> zenfs_filesystem_reg;
