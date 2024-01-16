@@ -2290,7 +2290,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
         // bg_partial_reset_worker_.reset(new std::thread(&ZenFS::PartialResetWorker, this,T));
         writer_thread_pool.push_back(
           new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
-              it.first,reaped_read_file_extents[it.first.c_str()] )
+              it.first, reaped_read_file_extents[it.first.c_str()]  )
           );
       }  
     }
@@ -2329,8 +2329,8 @@ IOStatus ZenFS::MigrateExtents(
 }
 
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
-    const std::string& fname,
-    std::vector<AsyncZoneCleaningIocb*>& migrate_exts) {
+    const std::string fname,
+    std::vector<AsyncZoneCleaningIocb*> migrate_exts) {
   IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
   io_context_t write_ioctx;
