@@ -247,7 +247,9 @@ class Zone {
   IOStatus Finish();
   IOStatus Close();
   void PushExtent(ZoneExtent* ze);
- 
+  inline int GetFD(int i ) {
+    return zbd_be->GetFD(i);
+  }
   void PushExtentAtFront(ZoneExtent* ze);
   IOStatus Append(char *data, uint64_t size);
   IOStatus ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aiocb);
