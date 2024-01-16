@@ -46,6 +46,9 @@ class ZoneFile;
 // uint64_t ZONE_CLEANING_KICKING_POINT=20;
 
 // #define ZONE_CLEANING_KICKING_POINT (40)
+#define READ_FD 0
+#define READ_DIRECT_FD 1
+#define WRITE_DIRECT_FD 2
 
 #define KB (1024)
 
@@ -247,9 +250,7 @@ class Zone {
   IOStatus Finish();
   IOStatus Close();
   void PushExtent(ZoneExtent* ze);
-  inline int GetFD(int i ) {
-    return zbd_be_->GetFD(i);
-  }
+  inline int GetFD(int i );
   void PushExtentAtFront(ZoneExtent* ze);
   IOStatus Append(char *data, uint64_t size);
   IOStatus ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aiocb);
