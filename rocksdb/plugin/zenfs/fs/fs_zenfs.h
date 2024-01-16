@@ -545,7 +545,7 @@ ret:
   void AsyncZoneCleaning(void);
 
   void AsyncMigrateFileExtentsWorker(
-    const std::string fname,
+    std::string fname,
     std::vector<AsyncZoneCleaningIocb*> migrate_exts);
 
   void PartialResetWorker(uint64_t T);
