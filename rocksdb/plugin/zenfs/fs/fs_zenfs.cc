@@ -2419,6 +2419,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     zbd_->AddGCBytesWritten(copied);
     SyncFileExtents(zfile.get(), new_extent_list);
     zfile->ReleaseWRLock();
+  return IOStatus::OK();
 }
 
 IOStatus ZenFS::MigrateFileExtents(
