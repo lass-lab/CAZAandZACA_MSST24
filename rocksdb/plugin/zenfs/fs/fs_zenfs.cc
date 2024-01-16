@@ -614,7 +614,8 @@ void ZenFS::AsyncZoneCleaning(void){
     if(!run_gc_worker_){
       zbd_->SetZCRunning(false);
       zbd_->ZCorPartialUnLock();
-      return 0;
+      // return 0;
+      return;
     }
     zc_triggerd_count_.fetch_add(1);
     if (!s.ok()) {

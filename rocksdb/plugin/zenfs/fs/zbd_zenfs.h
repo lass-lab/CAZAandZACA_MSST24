@@ -199,6 +199,7 @@ struct AsyncZoneCleaningIocb{
     std::string filename_;
     char* buffer_;
 };
+
 class Zone {
   ZonedBlockDevice *zbd_;
   ZonedBlockDeviceBackend *zbd_be_;
@@ -741,10 +742,11 @@ class ZonedBlockDevice {
   void ZCorPartialLock(); 
   bool ZCorPartialTryLock();
   void ZCorPartialUnLock();
-  double PredictCompactionScore(int level){
   uint64_t AsyncZCEnabled(){
     return async_zc_enabled_;
   }
+  double PredictCompactionScore(int level){
+
     // if(db_ptr_!=nullptr){
     //   return  db_ptr_->ReCalculateCompactionScore(level);
     // }
