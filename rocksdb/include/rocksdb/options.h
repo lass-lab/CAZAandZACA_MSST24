@@ -674,6 +674,8 @@ struct DBOptions {
   uint64_t input_aware_scheme;
   uint64_t max_compaction_kick;
 
+  uint64_t async_zc_enabled;
+
   uint32_t partial_reset_scheme;
 
   uint64_t tuning_point;

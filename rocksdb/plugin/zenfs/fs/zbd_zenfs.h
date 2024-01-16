@@ -1147,6 +1147,7 @@ class ZonedBlockDevice {
     partial_reset_scheme_=partial_reset_scheme;
     tuning_point_=T;
     input_aware_scheme_ = other_options[0];
+    async_zc_enabled_ = other_options[1];
     if(zc!=0){
       zc_until_set_=true;
       zc_=zc;

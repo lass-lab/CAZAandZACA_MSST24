@@ -1690,6 +1690,7 @@ DEFINE_int32(max_compaction_start_level,2,"start level");
 
 DEFINE_uint64(input_aware_scheme,0,"input_aware_scheme");
 
+DEFINE_uint64(async_zc_enabled,0,"async_zc_enabled");
 
 namespace ROCKSDB_NAMESPACE {
 namespace {
@@ -4123,6 +4124,7 @@ class Benchmark {
     options.enable_intraL0_compaction = FLAGS_enable_intraL0_compaction;
     options.max_compaction_start_level = FLAGS_max_compaction_start_level;
     options.input_aware_scheme=FLAGS_input_aware_scheme;
+    options.async_zc_enabled=FLAGS_async_zc_enabled;
     options.zc=FLAGS_zc;
     options.until=FLAGS_until;
     options.tuning_point=FLAGS_tuning_point;
