@@ -2334,7 +2334,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
   io_context_t write_ioctx;
-  int extent_n = (int)extents.size();
+  int extent_n = (int)migrate_exts.size();
   int write_reaped_n = 0;
   io_setup(extent_n,&write_ioctx);
 
@@ -2375,8 +2375,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                                 return false;
                               }
                                                             // new ext
-                             return ext_snapshot->start == ext->start_ &&
-                                    ext_snapshot->length == ext->length_;
+                             return ext_snapshot->start_ == ext->start_ &&
+                                    ext_snapshot->length_ == ext->length_;
                            });
     if (it == migrate_exts.end()) {
       Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
