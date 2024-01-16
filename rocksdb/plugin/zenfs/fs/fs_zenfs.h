@@ -544,7 +544,7 @@ ret:
   // void AsyncZoneCleaningWorker(void);
   void AsyncZoneCleaning(void);
 
-  void AsyncMigrateFileExtentsWorker(
+  IOStatus AsyncMigrateFileExtentsWorker(
     std::string fname,
     std::vector<AsyncZoneCleaningIocb*> migrate_exts);
 
