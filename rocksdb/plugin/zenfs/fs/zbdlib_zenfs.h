@@ -20,9 +20,6 @@
 
 
 
-#define READ_FD 0
-#define READ_DIRECT_FD 1
-#define WRITE_DIRECT_FD 2
 
 
 #define BLKPARTIALRESETZONE	_IOW(0x12, 137, struct blk_zone_range) // NO CACHE FLUSH

@@ -748,7 +748,7 @@ class ZonedBlockDevice {
   uint64_t AsyncZCEnabled(){
     return async_zc_enabled_;
   }
-  int ZonedBlockDevice::GetFD(int i) {
+  int GetFD(int i) {
     return zbd_be_->GetFD(i);
   }
   double PredictCompactionScore(int level){
