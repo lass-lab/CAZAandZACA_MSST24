@@ -2287,6 +2287,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     for (const auto& it : file_extents) {
       if(it.second.size() == reaped_read_file_extents[it.first.c_str()].size() ){
         // Async write everything
+        // bg_partial_reset_worker_.reset(new std::thread(&ZenFS::PartialResetWorker, this,T));
         writer_thread_pool.push_back(
           new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
               it.first,reaped_read_file_extents[it.first.c_str()] )
