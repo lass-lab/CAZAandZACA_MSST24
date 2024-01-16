@@ -28,8 +28,8 @@ zenfs_PKGCONFIG_REQUIRES-$(ZENFS_EXPORT_PROMETHEUS) += ", prometheus-cpp-pull ==
 zenfs_SOURCES += $(zenfs_SOURCES-y)
 zenfs_HEADERS += $(zenfs_HEADERS-y)
 zenfs_CXXFLAGS += $(zenfs_CXXFLAGS-y)
-zenfs_LDFLAGS += -u zenfs_filesystem_reg
-zenfs_LDFLAGS += -laio
+zenfs_LDFLAGS += -u zenfs_filesystem_reg -laio
+# zenfs_LDFLAGS += 
 ZENFS_ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 $(shell cd $(ZENFS_ROOT_DIR) && ./generate-version.sh)
