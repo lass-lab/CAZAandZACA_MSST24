@@ -2213,7 +2213,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
       /* Skip files open for writing, as extents are being updated */
       if (!file.TryAcquireWRLock()) continue;
       if(file.is_sst_==false&&file.is_wal_==false){
-        files_.erase(file_it);
+        // files_.erase(file_it);
         delete file_it.second;
         continue;
       }
