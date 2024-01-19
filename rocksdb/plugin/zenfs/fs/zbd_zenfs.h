@@ -1050,7 +1050,7 @@ class ZonedBlockDevice {
   
   uint64_t CalculateFreePercent(void) {
     // uint64_t zone_sz=BYTES_TO_MB(io_zones[0]->max_capacity_); // MB
-    uint64_t device_size=(uint64_t)io_zones.size()*io_zones[0]->max_capacity_ ; // MB
+    uint64_t device_size=(uint64_t)io_zones.size()*BYTES_TO_MB(io_zones[0]->max_capacity_) ; // MB
     uint64_t d_free_space=device_size ; // MB
     uint64_t writed = 0;
     for(const auto z : io_zones){
