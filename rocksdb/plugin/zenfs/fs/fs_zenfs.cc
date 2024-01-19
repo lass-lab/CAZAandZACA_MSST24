@@ -2280,6 +2280,9 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     timeout.tv_nsec = 100000000;
     num_events = io_getevents(read_ioctx, 1, extent_n, read_events,
                               &timeout);
+    if(num_events<1){
+      continue;
+    }
     for (int i = 0; i < num_events; i++) {
       struct io_event event = read_events[i];
       AsyncZoneCleaningIocb* reaped_read_iocb = static_cast<AsyncZoneCleaningIocb*>(event.data);
@@ -2414,6 +2417,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     timeout.tv_nsec = 100000000;
     num_events = io_getevents(write_ioctx, 1, extent_n, write_events,
                               &timeout);
+    if(num_events<1){
+      continue;
+    }
     write_reaped_n+=num_events;
   }
 
