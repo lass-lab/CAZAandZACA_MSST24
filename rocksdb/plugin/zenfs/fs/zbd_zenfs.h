@@ -194,7 +194,7 @@ struct AsyncZoneCleaningIocb{
     : start_(start),length_(length) ,header_size_(header_size)
     {
       filename_=fname;
-      if(header_size != ZoneFile::SPARSE_HEADER_SIZE){
+      if(header_size >LBA_SIZE){
         header_size=0;
         header_size_=0;
       }
