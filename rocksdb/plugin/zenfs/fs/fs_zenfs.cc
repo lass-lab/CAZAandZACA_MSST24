@@ -319,7 +319,7 @@ void ZenFS::BackgroundStatTimeLapse(){
   files_mtx_.lock();
   for(auto f : files_){
     if(f->is_sst_==false&& f->is_wal_==false){
-      s = DeleteFileNoLock(fname, options, dbg);
+      s = DeleteFileNoLock(fname, IOOptions(), nullptr);
     }
   }
   files_mtx_.unlock();
