@@ -314,6 +314,16 @@ void ZenFS::RocksDBStatTimeLapse(void){
 void ZenFS::BackgroundStatTimeLapse(){
   // int mt;
   // printf(" I am timelapse thread\n");
+
+  sleep(1);
+  files_mtx_.lock();
+  for(auto f : files_){
+    if(f->is_sst_==false&& f->is_wal_==false){
+      s = DeleteFileNoLock(fname, options, dbg);
+    }
+  }
+  files_mtx_.unlock();
+
   while (run_bg_stats_worker_) {
     free_percent_ = zbd_->CalculateFreePercent();
     // for(int l = 0 ;l < 4 ;l++){
@@ -2212,11 +2222,11 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
 
       /* Skip files open for writing, as extents are being updated */
       if (!file.TryAcquireWRLock()) continue;
-      if(file.is_sst_==false&&file.is_wal_==false){
-        // files_.erase(file_it);
-        delete file_it.second.get();
-        continue;
-      }
+      // if(file.is_sst_==false&&file.is_wal_==false){
+      //   // files_.erase(file_it);
+      //   delete file_it.second.get();
+      //   continue;
+      // }
       // file -> extents mapping
       snapshot.zone_files_.emplace_back(file);
       // extent -> file mapping
