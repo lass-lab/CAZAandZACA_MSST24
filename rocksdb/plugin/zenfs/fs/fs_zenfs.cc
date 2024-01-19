@@ -2214,7 +2214,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
       if (!file.TryAcquireWRLock()) continue;
       if(file.is_sst_==false&&file.is_wal_==false){
         // files_.erase(file_it);
-        delete file_it.second;
+        delete file_it.second.get();
         continue;
       }
       // file -> extents mapping
