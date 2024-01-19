@@ -1361,10 +1361,6 @@ IOStatus ZonedWritableFile::Append(const Slice& data,
   zoneFile_->GetZBDMetrics()->ReportQPS(ZENFS_WRITE_QPS, 1);
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
-    // if(strstr(zoneFile_->GetFilename().c_str(),"OPTIONS")){
-
-    //   return IOStatus::OK();
-    // }
 
   if(zoneFile_->is_wal_ == false && zoneFile_->is_sst_ == false){
     return IOStatus::OK();
