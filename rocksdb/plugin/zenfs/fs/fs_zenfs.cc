@@ -1028,10 +1028,7 @@ IOStatus ZenFS::NewRandomAccessFile(const std::string& filename,
   return IOStatus::OK();
 }
 
-inline bool ends_with(std::string const& value, std::string const& ending) {
-  if (ending.size() > value.size()) return false;
-  return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-}
+
 
 IOStatus ZenFS::NewWritableFile(const std::string& filename,
                                 const FileOptions& file_opts,
@@ -1255,15 +1252,17 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
     zoneFile->AddLinkName(fname);
 
     /* RocksDB does not set the right io type(!)*/
+    zoneFile->is_sst_=ends_with(fname,".sst");
     if (ends_with(fname, ".log")) {
       printf("%s\n",fname.c_str());
       zoneFile->SetIOType(IOType::kWAL);
       zoneFile->SetSparse(!file_opts.use_direct_writes);
       zoneFile->is_wal_=true;
     } else {
+      
       zoneFile->SetIOType(IOType::kUnknown);
     }
-    zoneFile->is_sst_=ends_with(fname,".sst");
+    
     // printf("fname : %s\n",fname.c_str());
     /* Persist the creation of the file */
     s = SyncFileMetadataNoLock(zoneFile);

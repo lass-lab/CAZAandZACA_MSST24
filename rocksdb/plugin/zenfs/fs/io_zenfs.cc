@@ -1361,11 +1361,14 @@ IOStatus ZonedWritableFile::Append(const Slice& data,
   zoneFile_->GetZBDMetrics()->ReportQPS(ZENFS_WRITE_QPS, 1);
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
-    if(strstr(zoneFile_->GetFilename().c_str(),"OPTIONS")){
+    // if(strstr(zoneFile_->GetFilename().c_str(),"OPTIONS")){
 
-      return IOStatus::OK();
-    }
+    //   return IOStatus::OK();
+    // }
 
+  if(zoneFile_->is_wal_ == false && zoneFile_->is_sst_ == false){
+    return IOStatus::OK();
+  }
   if(zoneFile_->IsSST()&&zoneFile_->GetAllocationScheme()!=LIZA){
     // if(fno_set_==false){
     //   return IOStatus::IOError("PositionedAppend to SST should set fno before append");
@@ -1401,10 +1404,13 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
                                                data.size());
 // /rocksdbtest/dbbench/OPTIONS-000007
 
-    if(strstr(zoneFile_->GetFilename().c_str(),"OPTIONS")){
-
+    if(zoneFile_->is_wal_ == false && zoneFile_->is_sst_ == false){
       return IOStatus::OK();
     }
+
+  // if(ends_with(zoneFile_->GetFilename().c_str(),".log")){
+
+  // }
 
   if(zoneFile_->IsSST()&&zoneFile_->GetAllocationScheme()!=LIZA){
     // if(fno_set_==false){
