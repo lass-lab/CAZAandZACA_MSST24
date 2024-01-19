@@ -2323,6 +2323,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
   for(size_t t = 0; t <writer_thread_pool.size(); t++){
     writer_thread_pool[t]->join();
   }
+  io_destroy(read_ioctx);
   return IOStatus::OK();
 }
 IOStatus ZenFS::MigrateExtents(
@@ -2372,6 +2373,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   // Don't migrate open for write files and prevent write reopens while we
   // migrate
   if (!zfile->TryAcquireWRLock()) {
+    io_destroy(write_ioctx);
     return IOStatus::OK();
   }
 
@@ -2413,6 +2415,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                               zfile->predicted_size_,
                               ext->length_,&run_gc_worker_,zfile->IsSST());
     if(!run_gc_worker_){
+      io_destroy(write_ioctx);
       return IOStatus::OK();
     }
     if(target_zone!=nullptr&&target_zone->lifetime_==Env::WriteLifeTimeHint::WLTH_NOT_SET){
@@ -2444,6 +2447,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     zbd_->AddGCBytesWritten(copied);
     SyncFileExtents(zfile.get(), new_extent_list);
     zfile->ReleaseWRLock();
+    io_destroy(write_ioctx);
   return IOStatus::OK();
 }
 
