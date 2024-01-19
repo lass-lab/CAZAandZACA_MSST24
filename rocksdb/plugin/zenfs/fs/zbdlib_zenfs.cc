@@ -183,6 +183,7 @@ IOStatus ZbdlibBackend::PartialReset(uint64_t start, uint64_t erase_size, bool c
   #ifndef BLKPARTIALRESETZONE
     (void)(start);
     (void)(erase_size);
+    (void)(clflush);
     printf("ZbdlibBackend::PartialReset  :: Not Supported\n");
     return IOStatus::IOError("Not supported\n");
 
