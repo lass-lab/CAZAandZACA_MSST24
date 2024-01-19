@@ -194,6 +194,11 @@ struct AsyncZoneCleaningIocb{
     : start_(start),length_(length) ,header_size_(header_size)
     {
       filename_=fname;
+      if(header_size != ZoneFile::SPARSE_HEADER_SIZE){
+        header_size=0;
+        header_size_=0;
+      }
+
       int r=posix_memalign((void**)(&buffer_),sysconf(_SC_PAGE_SIZE),length+header_size);
         // posix_memalign((void**)&buf,sysconf(_SC_PAGE_SIZE),size);
       if (r) {
