@@ -521,7 +521,7 @@ zbd_->ZCorPartialUnLock();
 void ZenFS::AsyncZoneCleaning(void){
   size_t should_be_copied=0;
   // (void)(forced);
-  printf("AsyncZoneCleaning\n");
+  // printf("AsyncZoneCleaning\n");
   uint64_t zone_size;
 
   int start = GetMountTime();
@@ -2258,7 +2258,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
   int read_fd=zbd_->GetFD(READ_FD);
   int err=io_setup(extent_n,&read_ioctx);
   if(err){
-    printf("io_setup error@@@@@ %d\n",err);
+    printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
   }
   for (auto* ext : extents) {
     // ThrowAsyncExtentsRead(ext);
