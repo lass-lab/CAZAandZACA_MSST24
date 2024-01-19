@@ -486,7 +486,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   open_io_zones_ = 0;
   uint64_t device_io_capacity= (1<<log2_DEVICE_IO_CAPACITY);
   device_io_capacity=device_io_capacity<<30;
-  for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]-max_capacity_)<(device_io_capacity);  i++) {
+  for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i++) {
     /* Only use sequential write required zones */
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
       if (!zbd_be_->ZoneIsOffline(zone_rep, i)) {
@@ -513,7 +513,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
       CalculateResetThreshold(f);
     }
   // uint64_t device_free_space=(i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES)*zbd_be_->GetZoneSize();
-  uint64_t device_free_space=io_zones.size()*zbd_be_->GetZoneSize();
+  uint64_t device_free_space=io_zones.size()*meta_zones[0]-max_capacity_;
   printf("device free space : %ld\n",BYTES_TO_MB(device_free_space));
   printf("zone sz %lu\n",zone_sz_);
   device_free_space_.store(device_free_space);
