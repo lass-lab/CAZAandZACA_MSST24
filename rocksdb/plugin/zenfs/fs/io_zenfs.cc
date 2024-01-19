@@ -1361,7 +1361,10 @@ IOStatus ZonedWritableFile::Append(const Slice& data,
   zoneFile_->GetZBDMetrics()->ReportQPS(ZENFS_WRITE_QPS, 1);
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
+    if(strstr(zoneFile_->GetFilename().c_str(),"OPTIONS")){
 
+      return IOStatus::OK();
+    }
 
   if(zoneFile_->IsSST()&&zoneFile_->GetAllocationScheme()!=LIZA){
     // if(fno_set_==false){
@@ -1397,7 +1400,11 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
 // /rocksdbtest/dbbench/OPTIONS-000007
-  
+
+    if(strstr(zoneFile_->GetFilename().c_str(),"OPTIONS")){
+
+      return IOStatus::OK();
+    }
 
   if(zoneFile_->IsSST()&&zoneFile_->GetAllocationScheme()!=LIZA){
     // if(fno_set_==false){
