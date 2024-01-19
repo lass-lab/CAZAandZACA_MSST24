@@ -198,6 +198,9 @@ struct AsyncZoneCleaningIocb{
       }
 
     }
+    ~AsyncZoneCleaningIocb() {
+      free(buffer_);
+    }
 
     struct iocb iocb_;
     uint64_t start_;

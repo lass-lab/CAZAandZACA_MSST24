@@ -2249,6 +2249,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
   // throw all read
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   std::map<std::string, std::vector<AsyncZoneCleaningIocb*>> reaped_read_file_extents;
+  std::vector<AsyncZoneCleaningIocb*> to_be_freed;
   std::vector<std::thread*> writer_thread_pool;
         
   int read_reaped_n = 0;
@@ -2270,6 +2271,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     //   length=ext->length+ZoneFile::SPARSE_HEADER_SIZE;
     // }
     struct AsyncZoneCleaningIocb* async_zc_read_iocb= new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
+    to_be_freed.push_back(async_zc_read_iocb);
     io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
         ext->length+ext->header_size, ext->start-ext->header_size);
     async_zc_read_iocb->iocb_.data=async_zc_read_iocb;
@@ -2328,6 +2330,10 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
 
   for(size_t t = 0; t <writer_thread_pool.size(); t++){
     writer_thread_pool[t]->join();
+  }
+
+  for(size_t a = 0 ;a < to_be_freed.size();a++){
+    free(to_be_freed[a]);
   }
   io_destroy(read_ioctx);
   return IOStatus::OK();
