@@ -2274,7 +2274,11 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
         ext->length+ext->header_size, ext->start-ext->header_size);
     async_zc_read_iocb->iocb_.data=async_zc_read_iocb;
     struct iocb* iocb= &(async_zc_read_iocb->iocb_);
-    io_submit(read_ioctx,1,&(iocb));
+    err=io_submit(read_ioctx,1,&(iocb));
+    if(err!=1){
+      printf("io submit err? %d\n",err);
+    }
+    
     file_extents[ext->filename].emplace_back(ext);
   }
 
