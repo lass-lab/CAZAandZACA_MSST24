@@ -481,12 +481,12 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
     }
     i++;
   }
-
+// zbd_be->ZoneMaxCapacity
   active_io_zones_ = 0;
   open_io_zones_ = 0;
   uint64_t device_io_capacity= (1<<log2_DEVICE_IO_CAPACITY);
   device_io_capacity=device_io_capacity<<30;
-  for (; i < zone_rep->ZoneCount() && (io_zones.size()*zbd_be_->GetZoneSize())<(device_io_capacity);  i++) {
+  for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]-max_capacity_)<(device_io_capacity);  i++) {
     /* Only use sequential write required zones */
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
       if (!zbd_be_->ZoneIsOffline(zone_rep, i)) {
@@ -1255,7 +1255,7 @@ void ZonedBlockDevice::CalculateResetThreshold(uint64_t free_percent) {
   // uint64_t max_capacity = (1<<io_zones[0]->log2_erase_unit_size_);
   // uint64_t free_percent = cur_free_percent_;
   uint64_t max_capacity = io_zones[0]->max_capacity_;
-  printf("CalculateResetThreshold : %lu\n",max_capacity);
+  // printf("CalculateResetThreshold : %lu\n",max_capacity);
   switch (reset_scheme_)
   {
   case kEager:
