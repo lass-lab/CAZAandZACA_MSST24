@@ -596,7 +596,7 @@ void ZenFS::AsyncZoneCleaning(void){
   for (auto& ext : snapshot.extents_) {
     // /rocksdbtest/dbbench/OPTIONS-000007
     if(strstr(ext.filename.c_str(),"OPTIONS")){
-      ext.zone_p->used_capacity_-=ext.length;
+      // ext.zone_p->used_capacity_-=ext.length;
       continue;
     }
     if (migrate_zones_start.find(ext.zone_start) !=
