@@ -597,6 +597,7 @@ void ZenFS::AsyncZoneCleaning(void){
     // /rocksdbtest/dbbench/OPTIONS-000007
     if(strstr(ext.filename.c_str(),"OPTIONS")){
       // ext.zone_p->used_capacity_-=ext.length;
+      // zbd_->GetIOZone(ext.start)->used_capacity_-=ext.length;
 
       continue;
     }
@@ -2211,7 +2212,11 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
 
       /* Skip files open for writing, as extents are being updated */
       if (!file.TryAcquireWRLock()) continue;
-
+      if(file.is_sst_==false&&file.is_wal_==false){
+        files_.erase(file_it);
+        delete file_it.second;
+        continue;
+      }
       // file -> extents mapping
       snapshot.zone_files_.emplace_back(file);
       // extent -> file mapping
