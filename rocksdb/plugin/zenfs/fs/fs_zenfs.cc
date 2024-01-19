@@ -604,7 +604,7 @@ void ZenFS::AsyncZoneCleaning(void){
     }
   }
 
-  if (migrate_zones_start.size() > 0) {
+  if (migrate_exts.size() > 0) {
 
     IOStatus s;
 
