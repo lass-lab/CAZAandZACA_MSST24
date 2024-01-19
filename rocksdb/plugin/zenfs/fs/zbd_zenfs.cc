@@ -305,8 +305,8 @@ IOStatus Zone::Finish() {
   IOStatus ios = zbd_be_->Finish(start_);
   if (ios != IOStatus::OK()) return ios;
 
-  // capacity_ = 0;
-  // wp_ = start_ + zbd_->GetZoneSize();
+  capacity_ = 0;
+  wp_ = start_ + zbd_->GetZoneSize();
 
   return IOStatus::OK();
 }
@@ -509,18 +509,20 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
       }
     }
   }
-  
+    for(uint64_t f=0;f<=100;f++){
+      CalculateResetThreshold(f);
+    }
   // uint64_t device_free_space=(i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES)*zbd_be_->GetZoneSize();
   uint64_t device_free_space=io_zones.size()*zbd_be_->GetZoneSize();
   printf("device free space : %ld\n",BYTES_TO_MB(device_free_space));
   printf("zone sz %lu\n",zone_sz_);
   device_free_space_.store(device_free_space);
 
-  if(zone_sz_>(1<<30)){
-    ZONE_CLEANING_KICKING_POINT=40;
-  }else{
+  // if(zone_sz_>(1<<30)){
+  //   ZONE_CLEANING_KICKING_POINT=40;
+  // }else{
     ZONE_CLEANING_KICKING_POINT=20;
-  }
+  // }
   // for(uint64_t fr = 100;fr>0;fr--){
   //   uint64_t lazylog=LazyLog(io_zones[0]->max_capacity_,fr,70);
   //   uint64_t lazylinear=LazyLinear(io_zones[0]->max_capacity_,fr,70);
@@ -1250,8 +1252,10 @@ inline uint64_t ZonedBlockDevice::LazyExponential(uint64_t sz, uint64_t fr,
 
 void ZonedBlockDevice::CalculateResetThreshold(uint64_t free_percent) {
   uint64_t rt = 0;
-  uint64_t max_capacity = (1<<io_zones[0]->log2_erase_unit_size_);
+  // uint64_t max_capacity = (1<<io_zones[0]->log2_erase_unit_size_);
   // uint64_t free_percent = cur_free_percent_;
+  uint64_t max_capacity = io_zones[0]->max_capacity_;
+  printf("CalculateResetThreshold : %lu\n",max_capacity);
   switch (reset_scheme_)
   {
   case kEager:
@@ -1403,20 +1407,128 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
 // }
 
 
+// IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
+//   // clock_t reset_latency{0};
+//   // size_t ratio = 0;
+//   size_t total_invalid=0;
+//   size_t reclaimed_invalid=0;
+//   uint64_t erase_unit_size=(1<<(io_zones[0]->log2_erase_unit_size_));
+//   // uint64_t total_written=0;
+//   uint64_t end_erase_unit_written;
+//   uint64_t total_full_erase_unit_written;
+//   bool is_end_erase_unit_should_be_erased;
+//   IOStatus reset_status=IOStatus::OK();
+//   if(cur_free_percent_>=99){
+//     return reset_status;
+//   }
+  
+
+//   for (size_t i =0;i<io_zones.size();i++) {
+//     const auto z = io_zones[i];
+//     if(is_reseted[i]){
+//       continue;
+//     }
+//     if(z->IsEmpty()){
+//       continue;
+//     }
+//     if(z->IsUsed()){
+//       continue;
+//     }
+//     if ( z->Acquire() ) {
+//       if(z->IsEmpty()){
+//           z->Release();
+//           continue;
+//       }
+//       if(z->IsUsed()){
+//           z->Release();
+//           continue;
+//       }
+
+
+//       bool full = z->IsFull();
+//       total_invalid=(z->wp_ - z->start_);
+//       end_erase_unit_written=total_invalid%erase_unit_size;
+//       total_full_erase_unit_written=(total_invalid/erase_unit_size)*erase_unit_size;
+//       // printf("total invalid %lu end erase unit wrttien %lu total_full_erase_unit written %lu erase unit size %lu\n",total_invalid,end_erase_unit_written,total_full_erase_unit_written,erase_unit_size);
+//       // if(end_erase_unit_written>reset_threshold_){ //eu
+//       // printf("end")
+//       // }
+//       // 
+//       if(reset_scheme_==kEager){
+//         is_end_erase_unit_should_be_erased=true;
+//       }else{
+//         is_end_erase_unit_should_be_erased=(erase_unit_size-end_erase_unit_written) < reset_threshold_arr_[cur_free_percent_];
+//       }
+
+//       // printf("end erase written  : %lu rt %lu is_end_erase_unit_should_be_erased %d\n",end_erase_unit_written,reset_threshold_,is_end_erase_unit_should_be_erased);
+       
+//       if(is_end_erase_unit_should_be_erased){
+//         reclaimed_invalid+=(z->wp_-z->start_);
+//         erase_size_.fetch_add(z->wp_-z->start_);
+//         wasted_wp_.fetch_add((erase_unit_size-end_erase_unit_written));
+//         reset_status = z->Reset();
+//       }else if(total_full_erase_unit_written>0){
+//         reclaimed_invalid+=total_full_erase_unit_written;
+//         erase_size_.fetch_add(total_full_erase_unit_written);
+//         if(total_full_erase_unit_written==z->max_capacity_){
+//           reset_status = z->Reset();
+//         }else{
+//           reset_status = z->PartialResetToAllInvalidZone(total_full_erase_unit_written);
+//         }
+//       }else{
+//         goto no_reset;
+//       }
+
+//       if (!reset_status.ok()) return reset_status;
+//       // if (!z->IsEmpty() && !z->IsUsed()) {
+
+//         // uint64_t cp=z->GetCapacityLeft();
+//         // if (cp > reset_threshold_) {
+//         //   z->Release();
+//         //   continue;
+//         // }
+
+
+//         // clock_t start=clock();
+
+//         // reset_status = z->Reset();
+//         is_reseted[i]=true;
+//         reset_count_.fetch_add(1);
+//         z->reset_count_++;
+//         // 
+
+//         // clock_t end=clock();
+// no_reset:
+//         if (!full&&z->IsEmpty()) { // not full -> empty
+//           PutActiveIOZoneToken();
+//         } 
+//         z->Release();
+//         // if (!reset_status.ok()) return reset_status;
+
+//       // } 
+//       // else {
+//       //   z->Release();
+//       // }
+//     }
+//   }
+//   // if(total_written){
+//   //   runtime_zone_reset_called_n_.fetch_add(1);
+//   //   ratio_sum2_.fetch_add((100*reclaimed_invalid)/total_written);
+//   // }
+//   return IOStatus::OK();
+// }
+
+
+
+
 IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
-  // clock_t reset_latency{0};
-  // size_t ratio = 0;
   size_t total_invalid=0;
-  size_t reclaimed_invalid=0;
-  uint64_t erase_unit_size=(1<<(io_zones[0]->log2_erase_unit_size_));
-  // uint64_t total_written=0;
-  uint64_t end_erase_unit_written;
-  uint64_t total_full_erase_unit_written;
-  bool is_end_erase_unit_should_be_erased;
+  // size_t reclaimed_invalid=0;
+
   IOStatus reset_status=IOStatus::OK();
-  if(cur_free_percent_>=99){
-    return reset_status;
-  }
+  // if(cur_free_percent_>=99){
+  //   return reset_status;
+  // }
   
 
   for (size_t i =0;i<io_zones.size();i++) {
@@ -1443,51 +1555,22 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
 
       bool full = z->IsFull();
       total_invalid=(z->wp_ - z->start_);
-      end_erase_unit_written=total_invalid%erase_unit_size;
-      total_full_erase_unit_written=(total_invalid/erase_unit_size)*erase_unit_size;
       // printf("total invalid %lu end erase unit wrttien %lu total_full_erase_unit written %lu erase unit size %lu\n",total_invalid,end_erase_unit_written,total_full_erase_unit_written,erase_unit_size);
       // if(end_erase_unit_written>reset_threshold_){ //eu
       // printf("end")
       // }
       // 
-      if(reset_scheme_==kEager){
-        is_end_erase_unit_should_be_erased=true;
-      }else{
-        is_end_erase_unit_should_be_erased=(erase_unit_size-end_erase_unit_written) < reset_threshold_arr_[cur_free_percent_];
-      }
-
-      // printf("end erase written  : %lu rt %lu is_end_erase_unit_should_be_erased %d\n",end_erase_unit_written,reset_threshold_,is_end_erase_unit_should_be_erased);
-       
-      if(is_end_erase_unit_should_be_erased){
-        reclaimed_invalid+=(z->wp_-z->start_);
-        erase_size_.fetch_add(z->wp_-z->start_);
-        wasted_wp_.fetch_add((erase_unit_size-end_erase_unit_written));
-        reset_status = z->Reset();
-      }else if(total_full_erase_unit_written>0){
-        reclaimed_invalid+=total_full_erase_unit_written;
-        erase_size_.fetch_add(total_full_erase_unit_written);
-        if(total_full_erase_unit_written==z->max_capacity_){
-          reset_status = z->Reset();
-        }else{
-          reset_status = z->PartialResetToAllInvalidZone(total_full_erase_unit_written);
-        }
-      }else{
+      if(total_invalid>reset_threshold_arr_[cur_free_percent_]){
         goto no_reset;
       }
+      erase_size_.fetch_add(total_invalid);
+      wasted_wp_.fetch_add(z->max_capacity_ - total_invalid);
+      // printf("end erase written  : %lu rt %lu is_end_erase_unit_should_be_erased %d\n",end_erase_unit_written,reset_threshold_,is_end_erase_unit_should_be_erased);
+      reset_status = z->Reset();
+      // printf("Reset !! %lu\n",i);
+
 
       if (!reset_status.ok()) return reset_status;
-      // if (!z->IsEmpty() && !z->IsUsed()) {
-
-        // uint64_t cp=z->GetCapacityLeft();
-        // if (cp > reset_threshold_) {
-        //   z->Release();
-        //   continue;
-        // }
-
-
-        // clock_t start=clock();
-
-        // reset_status = z->Reset();
         is_reseted[i]=true;
         reset_count_.fetch_add(1);
         z->reset_count_++;
@@ -1499,18 +1582,9 @@ no_reset:
           PutActiveIOZoneToken();
         } 
         z->Release();
-        // if (!reset_status.ok()) return reset_status;
-
-      // } 
-      // else {
-      //   z->Release();
-      // }
     }
   }
-  // if(total_written){
-  //   runtime_zone_reset_called_n_.fetch_add(1);
-  //   ratio_sum2_.fetch_add((100*reclaimed_invalid)/total_written);
-  // }
+ 
   return IOStatus::OK();
 }
 
@@ -3376,7 +3450,7 @@ end:
   auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
   long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
   (void)(nanoseconds);
-  printf("\t\t\t\t%llu\n",nanoseconds);
+  // printf("\t\t\t\t%llu\n",nanoseconds);
   metrics_->ReportGeneral(ZENFS_OPEN_ZONES_COUNT, open_io_zones_);
   metrics_->ReportGeneral(ZENFS_ACTIVE_ZONES_COUNT, active_io_zones_);
 
