@@ -1049,8 +1049,8 @@ class ZonedBlockDevice {
   void SetCurFreepercent(uint64_t free_percent) { cur_free_percent_=free_percent; }
   
   uint64_t CalculateFreePercent(void) {
-    uint64_t zone_sz=BYTES_TO_MB(zbd_be_->GetZoneSize()); // MB
-    uint64_t device_size=(uint64_t)GetNrZones()*zone_sz ; // MB
+    uint64_t zone_sz=BYTES_TO_MB(io_zones[0]->max_capacity_); // MB
+    uint64_t device_size=(uint64_t)GetNrZones()*io_zones[0]->max_capacity_ ; // MB
     uint64_t d_free_space=device_size ; // MB
     uint64_t writed = 0;
     for(const auto z : io_zones){
