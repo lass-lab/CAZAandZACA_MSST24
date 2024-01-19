@@ -1396,6 +1396,8 @@ IOStatus ZonedWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
   zoneFile_->GetZBDMetrics()->ReportQPS(ZENFS_WRITE_QPS, 1);
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
+// /rocksdbtest/dbbench/OPTIONS-000007
+  
 
   if(zoneFile_->IsSST()&&zoneFile_->GetAllocationScheme()!=LIZA){
     // if(fno_set_==false){

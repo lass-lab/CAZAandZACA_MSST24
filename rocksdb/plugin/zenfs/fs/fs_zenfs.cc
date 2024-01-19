@@ -594,6 +594,10 @@ void ZenFS::AsyncZoneCleaning(void){
   
   std::vector<ZoneExtentSnapshot*> migrate_exts;
   for (auto& ext : snapshot.extents_) {
+    // /rocksdbtest/dbbench/OPTIONS-000007
+    if(strstr(ext->filename.c_str(),"OPTIONS")){
+      continue;
+    }
     if (migrate_zones_start.find(ext.zone_start) !=
         migrate_zones_start.end()) {
       migrate_exts.push_back(&ext);
