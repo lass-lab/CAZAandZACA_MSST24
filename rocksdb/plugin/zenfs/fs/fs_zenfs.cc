@@ -405,7 +405,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
     //   }  
     //   goto select;
     // }
-
+zone_size=zone.max_capacity;
 
     if(zone.capacity !=0 ){
       continue;
@@ -413,7 +413,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
     if(zone.used_capacity==zone.max_capacity){
       continue;
     }
-zone_size=zone.max_capacity;
+// zone_size=zone.max_capacity;
     // if (zone.capacity == 0) { 
 //  select:   
       uint64_t garbage_percent_approx =
@@ -548,7 +548,7 @@ void ZenFS::AsyncZoneCleaning(void){
 
 
   for (const auto& zone : snapshot.zones_) {
-
+    zone_size=zone.max_capacity;
     if(zone.capacity !=0 ){
       continue;
     }
@@ -560,7 +560,7 @@ void ZenFS::AsyncZoneCleaning(void){
 //  select:   
       uint64_t garbage_percent_approx =
         100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
-        zone_size=zone.max_capacity;
+        
       // uint64_t garbage_percent_approx=zone.max_capacity-zone.used_capacity;
       if(zone.used_capacity>0){ // valid copy zone
         // victim_candidate.push_back({garbage_percent_approx, zone.start});
