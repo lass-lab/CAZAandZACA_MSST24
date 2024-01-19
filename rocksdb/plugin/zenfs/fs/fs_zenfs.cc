@@ -363,7 +363,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
   size_t should_be_copied=0;
   (void)(forced);
-  uint64_t zone_size=zbd_->GetZoneSize();
+  uint64_t zone_size;
   // uint64_t zone_per_erase_unit_ratio=(zbd_->GetEraseUnitSize()*100)/zone_size;
   // uint64_t erase_unit_size=zbd_->GetEraseUnitSize();
   int start = GetMountTime();
@@ -413,7 +413,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
     if(zone.used_capacity==zone.max_capacity){
       continue;
     }
-
+zone_size=zone.max_capacity;
     // if (zone.capacity == 0) { 
 //  select:   
       uint64_t garbage_percent_approx =
@@ -521,7 +521,8 @@ zbd_->ZCorPartialUnLock();
 void ZenFS::AsyncZoneCleaning(void){
   size_t should_be_copied=0;
   // (void)(forced);
-  uint64_t zone_size=zbd_->GetZoneSize();
+  printf("AsyncZoneCleaning\n");
+  uint64_t zone_size;
 
   int start = GetMountTime();
   auto start_chrono = std::chrono::high_resolution_clock::now();
@@ -559,6 +560,7 @@ void ZenFS::AsyncZoneCleaning(void){
 //  select:   
       uint64_t garbage_percent_approx =
         100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
+        zone_size=zone.max_capacity;
       // uint64_t garbage_percent_approx=zone.max_capacity-zone.used_capacity;
       if(zone.used_capacity>0){ // valid copy zone
         // victim_candidate.push_back({garbage_percent_approx, zone.start});
