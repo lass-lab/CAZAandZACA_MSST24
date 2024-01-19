@@ -513,7 +513,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
       CalculateResetThreshold(f);
     }
   // uint64_t device_free_space=(i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES)*zbd_be_->GetZoneSize();
-  uint64_t device_free_space=io_zones.size()*meta_zones[0]-max_capacity_;
+  uint64_t device_free_space=io_zones.size()*meta_zones[0]->max_capacity_;
   printf("device free space : %ld\n",BYTES_TO_MB(device_free_space));
   printf("zone sz %lu\n",zone_sz_);
   device_free_space_.store(device_free_space);
