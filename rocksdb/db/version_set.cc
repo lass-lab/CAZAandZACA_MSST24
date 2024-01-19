@@ -5023,7 +5023,7 @@ Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
   if (!s.ok()) {
     return s;
   }
-  return Status::OK();
+  // return Status::OK();
   if (fname.empty() || fname.back() != '\n') {
     return Status::Corruption("CURRENT file does not end with newline");
   }
