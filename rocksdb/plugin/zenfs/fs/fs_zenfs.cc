@@ -315,14 +315,14 @@ void ZenFS::BackgroundStatTimeLapse(){
   // int mt;
   // printf(" I am timelapse thread\n");
 
-  sleep(1);
-  files_mtx_.lock();
-  for(auto f : files_){
-    if(f.second->is_sst_==false&& f.second->is_wal_==false){
-      DeleteFileNoLock(f.first, IOOptions(), nullptr);
-    }
-  }
-  files_mtx_.unlock();
+  // sleep(1);
+  // files_mtx_.lock();
+  // // for(auto f : files_){
+  // //   if(f.second->is_sst_==false&& f.second->is_wal_==false){
+  // //     DeleteFileNoLock(f.first, IOOptions(), nullptr);
+  // //   }
+  // // }
+  // files_mtx_.unlock();
 
   while (run_bg_stats_worker_) {
     free_percent_ = zbd_->CalculateFreePercent();
@@ -605,9 +605,18 @@ void ZenFS::AsyncZoneCleaning(void){
   std::vector<ZoneExtentSnapshot*> migrate_exts;
   for (auto& ext : snapshot.extents_) {
     // /rocksdbtest/dbbench/OPTIONS-000007
-    if(strstr(ext.filename.c_str(),"OPTIONS")){
-      // ext.zone_p->used_capacity_-=ext.length;
-      // zbd_->GetIOZone(ext.start)->used_capacity_-=ext.length;
+    if(strstr(ext.filename.c_str(),"OPTION")){
+      zbd_->GetIOZone(ext.start)->used_capacity_-=ext.length;
+
+      continue;
+    }
+    if(strstr(ext.filename.c_str(),"MANIFEST")){
+      zbd_->GetIOZone(ext.start)->used_capacity_-=ext.length;
+
+      continue;
+    }
+    if(strstr(ext.filename.c_str(),"CURRENT")){
+      zbd_->GetIOZone(ext.start)->used_capacity_-=ext.length;
 
       continue;
     }
