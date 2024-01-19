@@ -22,9 +22,9 @@
 
 
 
-#define BLKPARTIALRESETZONE	_IOW(0x12, 137, struct blk_zone_range) // NO CACHE FLUSH
-#define BLKPARTIALRESETZONE_clflush	_IOW(0x12, 139, struct blk_zone_range) // CACHE FLUSH
-#define BLKDUMMYCMD	_IOW(0x12, 138, struct blk_zone_range)
+// #define BLKPARTIALRESETZONE	_IOW(0x12, 137, struct blk_zone_range) // NO CACHE FLUSH
+// #define BLKPARTIALRESETZONE_clflush	_IOW(0x12, 139, struct blk_zone_range) // CACHE FLUSH
+// #define BLKDUMMYCMD	_IOW(0x12, 138, struct blk_zone_range)
 
 #ifdef BLKPARTIALRESETZONE
 #define zbd_circular_partial_reset(fd,zidx,n) { \
