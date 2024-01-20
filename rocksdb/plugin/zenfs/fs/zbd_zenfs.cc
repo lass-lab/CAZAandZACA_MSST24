@@ -1199,7 +1199,8 @@ void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
           erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
                 wasted_wp_.load() , T, reset_threshold_arr_[cur_free_percent_],
-                GetZoneSize(),
+                // GetZoneSize(),
+                io_zones[0]->max_capacity_,
                 // db_ptr_ ? db_ptr_->NumLevelsFiles() : 
                 std::vector<int>(0),
                 // db_ptr_ ? db_ptr_->LevelsCompactionScore() : 
