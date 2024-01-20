@@ -325,7 +325,7 @@ IOStatus Zone::Close() {
 IOStatus Zone::ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aiocb){
   uint64_t align = 0;
   uint64_t wr_size = aiocb->length_+aiocb->header_size_;
-  align = aiocb->length_+aiocb->header_size_ % zbd_->GetBlockSize();
+  align = (aiocb->length_+aiocb->header_size_) % zbd_->GetBlockSize();
   if(align != 0){
     // printf("ThrowAsyncZCWrite %lu %lu",aiocb->length_,aiocb->header_size_);
     wr_size= (wr_size+ zbd_->GetBlockSize()-align);
