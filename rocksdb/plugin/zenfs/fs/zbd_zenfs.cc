@@ -3217,12 +3217,12 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
                                            Env::WriteLifeTimeHint file_lifetime,uint64_t file_size,
                                            uint64_t min_capacity, bool* run_gc_worker_,
                                            bool is_sst) {
-  std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
+  // std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
   if((*run_gc_worker_)==false){
       migrating_=false;
       return IOStatus::OK();
   } 
-  migrate_resource_.wait(lock, [this] { return !migrating_; });
+  // migrate_resource_.wait(lock, [this] { return !migrating_; });
   IOStatus s;
   migrating_ = true;
   bool force_get=false;
