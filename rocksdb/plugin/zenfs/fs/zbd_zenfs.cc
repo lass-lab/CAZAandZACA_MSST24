@@ -3227,7 +3227,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   migrating_ = true;
   // bool force_get=false;
   int blocking_time=0;
-  unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
+  // unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
 
   (void)(smallest);
   (void)(largest);
@@ -3313,7 +3313,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   auto start_chrono = std::chrono::high_resolution_clock::now();
   // RuntimeReset();
   Zone *allocated_zone = nullptr;
-  // unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
+  unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
   int new_zone = 0;
   IOStatus s;
   
