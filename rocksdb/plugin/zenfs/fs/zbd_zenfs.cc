@@ -3228,7 +3228,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   migrating_ = true;
   // bool force_get=false;
   int blocking_time=0;
-  // unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
+  unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
   while(!GetActiveIOZoneTokenIfAvailable());
   (void)(smallest);
   (void)(largest);
@@ -3277,7 +3277,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
-    s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
+    // s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
     if(s.ok()&&(*out_zone)!=nullptr){
       Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
       break;
