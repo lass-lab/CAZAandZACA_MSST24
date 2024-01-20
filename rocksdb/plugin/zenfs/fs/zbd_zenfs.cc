@@ -3198,14 +3198,15 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
 IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
   IOStatus s = IOStatus::OK();
   {
-    std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
-    migrating_ = false;
+    PutActiveIOZoneToken();
+    // std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
+    // migrating_ = false;
     if (zone != nullptr) {
       zone->Release();
       Info(logger_, "ReleaseMigrateZone: %lu", zone->start_);
     }
   }
-  migrate_resource_.notify_one();
+  // migrate_resource_.notify_one();
   return s;
 }
 
@@ -3228,7 +3229,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   // bool force_get=false;
   int blocking_time=0;
   // unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
-
+  while(!GetActiveIOZoneTokenIfAvailable());
   (void)(smallest);
   (void)(largest);
   (void)(level);
@@ -3239,48 +3240,48 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       migrating_=false;
       return IOStatus::OK();
     }
-    AllocateIOZone(is_sst,smallest,largest,level,file_lifetime,IOType::kWAL
-    , none,file_size,out_zone,min_capacity);
-    // if(is_sst){
-    //   if(allocation_scheme_==CAZA){
-    //     // printf("AllocateCompactionAwaredZone\n");
-    //     AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
-    //   }else if(allocation_scheme_==CAZA_ADV){
-    //     // printf("AllocateCompactionAwaredZoneV2\n");
-    //     AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
-    //   }else{
-    //     // printf("I am LIZA!\n");
-    //   }
+    // AllocateIOZone(is_sst,smallest,largest,level,file_lifetime,IOType::kWAL
+    // , none,file_size,out_zone,min_capacity);
+    if(is_sst){
+      if(allocation_scheme_==CAZA){
+        // printf("AllocateCompactionAwaredZone\n");
+        AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
+      }else if(allocation_scheme_==CAZA_ADV){
+        // printf("AllocateCompactionAwaredZoneV2\n");
+        AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
+      }else{
+        // printf("I am LIZA!\n");
+      }
       
-    //   if (s.ok() && (*out_zone) != nullptr) {
-    //     Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-    //     // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
-    //     break;
-    //   }
-    // }
+      if (s.ok() && (*out_zone) != nullptr) {
+        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+        // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)->zidx_);
+        break;
+      }
+    }
 
-    // s=GetBestOpenZoneMatch(file_lifetime, &best_diff,std::vector<uint64_t>() ,out_zone, min_capacity);
+    s=GetBestOpenZoneMatch(file_lifetime, &best_diff,std::vector<uint64_t>() ,out_zone, min_capacity);
     
 
 
-    // if (s.ok() && (*out_zone) != nullptr) {
-    //   Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-    //   break;
-    // }
+    if (s.ok() && (*out_zone) != nullptr) {
+      Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+      break;
+    }
 
 
-    // s=AllocateEmptyZone(out_zone); 
-    // if (s.ok() && (*out_zone) != nullptr) {
-    //   Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-    //   (*out_zone)->lifetime_=file_lifetime;
-    //   break;
-    // }
+    s=AllocateEmptyZone(out_zone); 
+    if (s.ok() && (*out_zone) != nullptr) {
+      Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+      (*out_zone)->lifetime_=file_lifetime;
+      break;
+    }
 
-    // // s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
-    // if(s.ok()&&(*out_zone)!=nullptr){
-    //   Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-    //   break;
-    // }
+    s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
+    if(s.ok()&&(*out_zone)!=nullptr){
+      Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+      break;
+    }
 
 
 
