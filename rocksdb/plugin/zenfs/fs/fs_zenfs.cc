@@ -2283,7 +2283,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
   int read_fd=zbd_->GetFD(READ_FD);
   int err=io_queue_init(extent_n,&read_ioctx);
   if(err){
-    EINVAL;
+    // EINVAL;
     printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
   }
   for (auto* ext : extents) {
@@ -2299,7 +2299,8 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     struct AsyncZoneCleaningIocb* async_zc_read_iocb= new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
     to_be_freed.push_back(async_zc_read_iocb);
     io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
-        ext->length+ext->header_size, ext->start-ext->header_size);
+        (async_zc_read_iocb->length_+async_zc_read_iocb->header_size_), 
+        (async_zc_read_iocb->start_-async_zc_read_iocb->header_size_));
     async_zc_read_iocb->iocb_.data=async_zc_read_iocb;
     struct iocb* iocb= &(async_zc_read_iocb->iocb_);
     err=io_submit(read_ioctx,1,&(iocb));
