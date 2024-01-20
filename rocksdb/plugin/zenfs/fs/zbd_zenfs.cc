@@ -3202,7 +3202,7 @@ IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
     // std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
     // migrating_ = false;
     if (zone != nullptr) {
-      PutActiveIOZoneToken();
+      // PutActiveIOZoneToken();
       zone->Release();
       Info(logger_, "ReleaseMigrateZone: %lu", zone->start_);
     }
@@ -3230,9 +3230,10 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   // bool force_get=false;
   int blocking_time=0;
   unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
-  while(!GetActiveIOZoneTokenIfAvailable()){
-    ApplyFinishThreshold();
-  }
+  
+  // {
+  //   // ApplyFinishThreshold();
+  // }
   (void)(smallest);
   (void)(largest);
   (void)(level);
@@ -3272,15 +3273,16 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
-
-    s=AllocateEmptyZone(out_zone); 
-    if (s.ok() && (*out_zone) != nullptr) {
-      Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-      (*out_zone)->lifetime_=file_lifetime;
-      break;
+    if(GetActiveIOZoneTokenIfAvailable()){
+      s=AllocateEmptyZone(out_zone); 
+      if (s.ok() && (*out_zone) != nullptr) {
+        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+        (*out_zone)->lifetime_=file_lifetime;
+        break;
+      }
     }
 
-    // s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
+    s = GetAnyLargestRemainingZone(out_zone,false,min_capacity);
     if(s.ok()&&(*out_zone)!=nullptr){
       Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
       break;
