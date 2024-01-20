@@ -2463,7 +2463,11 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       target_zone->lifetime_=Env::WriteLifeTimeHint::WLTH_LONG;
     }
     // throw it
+    
     uint64_t target_start = target_zone->wp_;
+    if(zfile->IsSparse()){
+      target_start= target_zone->wp_ + ZoneFile::SPARSE_HEADER_SIZE;
+    }
     ext->start_=target_start;
     ext->zone_ = target_zone;
     target_zone->ThrowAsyncZCWrite(write_ioctx,*it);

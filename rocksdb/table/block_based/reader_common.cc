@@ -44,7 +44,7 @@ Status VerifyBlockChecksum(ChecksumType type, const char* data,
     }
     printf("@@@@@@@@@@@@@@@@ERROR BENCHMARK put error\n");
     // exit(-1);
-    return Status::OK();
+    // return Status::OK();
     return Status::Corruption(
         "block checksum mismatch: stored = " + std::to_string(stored) +
         ", computed = " + std::to_string(computed) +
