@@ -2503,7 +2503,9 @@ l0:
 
 
   // Empty zone allocation should set lifetime for zone
+  if(GetActiveIOZoneTokenIfAvailable()){
   s = AllocateEmptyZone(&allocated_zone);
+  }
   // if(!s.ok()){
   //   return s;
   // }
@@ -2725,7 +2727,9 @@ l0:
 
 
   // Empty zone allocation should set lifetime for zone
+      if(GetActiveIOZoneTokenIfAvailable()){
   s = AllocateEmptyZone(&allocated_zone);
+  }
   // if(!s.ok()){
   //   return s;
   // }
@@ -3438,12 +3442,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
       }
 
       s = AllocateEmptyZone(&allocated_zone);
-      if(s.ok()&&allocated_zone==nullptr){
-        s=GetAnyLargestRemainingZone(&allocated_zone,false,min_capacity);
-        if(allocated_zone){
-          allocated_zone->lifetime_=file_lifetime;
-        }
-      }
+
       if (!s.ok()) {
         PutActiveIOZoneToken();
         PutOpenIOZoneToken();
@@ -3457,6 +3456,12 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
       } else {
         PutActiveIOZoneToken();
       }
+    }
+  }
+  if(s.ok()&&allocated_zone==nullptr){
+    s=GetAnyLargestRemainingZone(&allocated_zone,false,min_capacity);
+    if(allocated_zone){
+      allocated_zone->lifetime_=file_lifetime;
     }
   }
 
