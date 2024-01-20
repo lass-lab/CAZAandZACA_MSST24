@@ -2235,6 +2235,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
           ext_snapshot.length=ext->length_;
           ext_snapshot.zone_start=ext->zone_->start_;
           ext_snapshot.filename=file.GetFilename();
+          ext_snapshot.header_size=ext->header_size_;
           // printf("GetZenFSSnapshot :: ext->start %lu\n",ext->start_);
           snapshot.extents_.push_back(ext_snapshot);
         }

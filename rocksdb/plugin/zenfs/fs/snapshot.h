@@ -69,6 +69,7 @@ class ZoneExtentSnapshot {
   uint64_t header_size;
   std::string filename;
   Zone* zone_p;
+  // ZoneFile* zfile_p;
 
  public:
   ZoneExtentSnapshot() {}
