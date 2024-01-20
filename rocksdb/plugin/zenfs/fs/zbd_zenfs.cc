@@ -2039,6 +2039,7 @@ double ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& 
     }
     total_size+=sst_in_zone[i];
     uint64_t relative_wp = io_zones[i]->wp_ - io_zones[i]->start_;
+    relative_wp= relative_wp > io_zones[i]->max_capacity_ ? io_zones[i]->max_capacity_ : relative_wp;
     uint64_t after_valid_capacity= io_zones[i]->used_capacity_ - sst_in_zone[i];
     uint64_t after_invalid_capacity = relative_wp - after_valid_capacity;
     
