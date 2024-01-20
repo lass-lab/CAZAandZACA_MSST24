@@ -2412,6 +2412,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     new_ext->zone_=ext->zone_;
     new_extent_list.push_back(new_ext);
   }
+  extent_n = 0;
   for (ZoneExtent* ext : new_extent_list) {
     auto it = std::find_if(migrate_exts.begin(), migrate_exts.end(),
                            [&](const AsyncZoneCleaningIocb* ext_snapshot) {
@@ -2457,13 +2458,15 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     ext->start_=target_start;
     ext->zone_ = target_zone;
     target_zone->ThrowAsyncZCWrite(write_ioctx,*it);
-
+    extent_n++;
+    
     target_zone->PushExtent(ext);
     ext->zone_->used_capacity_ += ext->length_;
 
     copied+=ext->length_;
     
-    
+
+
     if (GetFileNoLock(fname) == nullptr) {
       Info(logger_, "Migrate file not exist anymore.");
       zbd_->ReleaseMigrateZone(target_zone);
