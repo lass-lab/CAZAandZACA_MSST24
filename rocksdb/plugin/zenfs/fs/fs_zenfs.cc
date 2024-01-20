@@ -2462,7 +2462,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
       size += 4096-pad;
     }
 
-    target_zone->Append((*it)->buffer,size);
+    target_zone->Append((*it)->buffer_,size);
 
     extent_n++;
 
