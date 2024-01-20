@@ -2276,11 +2276,14 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
   std::vector<std::thread*> writer_thread_pool;
         
   int read_reaped_n = 0;
-  io_context_t read_ioctx;
+  // io_context_t read_ioctx;
+  // aio_context_t ctx;
+  aio_context_t read_ioctx = 0;;
   int extent_n = (int)extents.size();
   int read_fd=zbd_->GetFD(READ_FD);
   int err=io_setup(extent_n,&read_ioctx);
   if(err){
+    EINVAL;
     printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
   }
   for (auto* ext : extents) {
@@ -2391,7 +2394,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     std::vector<AsyncZoneCleaningIocb*> migrate_exts) {
   IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
-  io_context_t write_ioctx;
+  aio_context_t write_ioctx = 0;
   int extent_n = (int)migrate_exts.size();
   int write_reaped_n = 0;
   io_setup(extent_n,&write_ioctx);
