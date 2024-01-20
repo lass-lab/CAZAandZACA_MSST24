@@ -3230,7 +3230,9 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   // bool force_get=false;
   int blocking_time=0;
   unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
-  while(!GetActiveIOZoneTokenIfAvailable());
+  while(!GetActiveIOZoneTokenIfAvailable()){
+    ApplyFinishThreshold();
+  }
   (void)(smallest);
   (void)(largest);
   (void)(level);
