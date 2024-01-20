@@ -2464,10 +2464,16 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     }
     // throw it
     uint64_t target_start = target_zone->wp_;
-    target_zone->ThrowAsyncZCWrite(write_ioctx,*it);
-    copied+=ext->length_;
     ext->start_=target_start;
+    ext->zone_ = target_zone;
+    target_zone->ThrowAsyncZCWrite(write_ioctx,*it);
+
+    target_zone->PushExtent(ext);
+    ext->zone_->used_capacity_ += ext->length_;
     zbd_->ReleaseMigrateZone(target_zone);
+    
+    
+    copied+=ext->length_;
   }
 
   // reap it

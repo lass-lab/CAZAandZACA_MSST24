@@ -356,7 +356,7 @@ void ZoneFile::ClearExtents() {
     }
     assert(zone && zone->used_capacity_ >= (*e)->length_);
     if(zone->used_capacity_<(*e)->length_){
-      printf("clearextents Error here@@@");
+      printf("clearextents Error here@@@ %s %lu %lu\n",GetFilename().c_str(),zone->used_capacity_.load(),(*e)->length_);
       continue;
     }
     zone->used_capacity_.fetch_sub((*e)->length_); 
