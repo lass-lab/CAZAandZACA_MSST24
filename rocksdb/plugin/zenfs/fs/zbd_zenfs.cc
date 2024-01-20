@@ -1847,6 +1847,7 @@ IOStatus ZonedBlockDevice::GetAnyLargestRemainingZone(Zone** zone_out,bool force
     if(!z->Acquire()){
       continue;
     }
+    
     if(z->capacity_>min_capacity ){
       if(allocated_zone){
         allocated_zone->Release();

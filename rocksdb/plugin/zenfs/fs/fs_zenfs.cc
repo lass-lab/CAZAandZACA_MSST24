@@ -2456,6 +2456,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                               ext->length_,&run_gc_worker_,zfile->IsSST());
     if(!run_gc_worker_){
       io_destroy(write_ioctx);
+      zbd_->ReleaseMigrateZone(target_zone);
       return IOStatus::OK();
     }
     if(target_zone!=nullptr&&target_zone->lifetime_==Env::WriteLifeTimeHint::WLTH_NOT_SET){
@@ -2466,6 +2467,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     target_zone->ThrowAsyncZCWrite(write_ioctx,*it);
     copied+=ext->length_;
     ext->start_=target_start;
+    zbd_->ReleaseMigrateZone(target_zone);
   }
 
   // reap it
