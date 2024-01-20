@@ -1195,6 +1195,10 @@ void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
     // }
   }
   // double avg_invalid_ratio = ratio_sum/(io_zones.size());
+  if(cur_free_percent_>100){
+    printf("Addtimelapse cur_free_percent_ ? %lu\n",cur_free_percent_);
+  }
+
   far_stats_.emplace_back(cur_free_percent_, 
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
           erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
