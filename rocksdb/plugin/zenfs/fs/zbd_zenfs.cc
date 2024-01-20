@@ -1847,7 +1847,7 @@ IOStatus ZonedBlockDevice::GetAnyLargestRemainingZone(Zone** zone_out,bool force
     if(!z->Acquire()){
       continue;
     }
-    if(z->IsEmtpy()){
+    if(z->IsEmpty()){
       z->Release();
       continue;
     }
