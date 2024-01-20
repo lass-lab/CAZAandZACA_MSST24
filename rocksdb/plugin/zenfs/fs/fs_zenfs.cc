@@ -604,29 +604,13 @@ void ZenFS::AsyncZoneCleaning(void){
   
   std::vector<ZoneExtentSnapshot*> migrate_exts;
   for (auto& ext : snapshot.extents_) {
-    // /rocksdbtest/dbbench/OPTIONS-000007
-    // if(strstr(ext.filename.c_str(),"OPTION")){
-    //   zbd_->GetIOZone(ext.start)->used_capacity_-=ext.length;
-
-    //   continue;
-    // }
-    // if(strstr(ext.filename.c_str(),"MANIFEST")){
-    //   zbd_->GetIOZone(ext.start)->used_capacity_-=ext.length;
-
-    //   continue;
-    // }
-    // if(strstr(ext.filename.c_str(),"CURRENT")){
-    //   zbd_->GetIOZone(ext.start)->used_capacity_-=ext.length;
-
-    //   continue;
-    // }
     if (migrate_zones_start.find(ext.zone_start) !=
         migrate_zones_start.end()) {
       migrate_exts.push_back(&ext);
     }
   }
 
-  if (migrate_exts.size() > 0) {
+  if (migrate_zones_start.size() > 0) {
 
     IOStatus s;
 
@@ -2468,6 +2452,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     uint64_t target_start = target_zone->wp_;
     if(zfile->IsSparse()){
       target_start= target_zone->wp_ + ZoneFile::SPARSE_HEADER_SIZE;
+      ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
     }
     ext->start_=target_start;
     ext->zone_ = target_zone;
@@ -2475,10 +2460,19 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
     target_zone->PushExtent(ext);
     ext->zone_->used_capacity_ += ext->length_;
-    zbd_->ReleaseMigrateZone(target_zone);
-    
-    
+
     copied+=ext->length_;
+    
+    
+    if (GetFileNoLock(fname) == nullptr) {
+      Info(logger_, "Migrate file not exist anymore.");
+      zbd_->ReleaseMigrateZone(target_zone);
+      // for (ZoneExtent* de : new_extent_list) {
+      //   de->is_invalid_=true;
+      // }
+      break;
+    }
+    zbd_->ReleaseMigrateZone(target_zone);
   }
 
   // reap it
