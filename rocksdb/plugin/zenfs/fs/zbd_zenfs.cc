@@ -3217,12 +3217,12 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
                                            Env::WriteLifeTimeHint file_lifetime,uint64_t file_size,
                                            uint64_t min_capacity, bool* run_gc_worker_,
                                            bool is_sst) {
-  // std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
+  std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
   if((*run_gc_worker_)==false){
       migrating_=false;
       return IOStatus::OK();
   } 
-  // migrate_resource_.wait(lock, [this] { return !migrating_; });
+  migrate_resource_.wait(lock, [this] { return !migrating_; });
   IOStatus s;
   migrating_ = true;
   bool force_get=false;
@@ -3275,14 +3275,14 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
-    s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
+    // s = GetAnyLargestRemainingZone(out_zone,force_get,min_capacity);
     if(s.ok()&&(*out_zone)!=nullptr){
       Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
       break;
     }
     s = ResetUnusedIOZones();
     // usleep(1000 * 1000);
-    sleep(1);
+    // sleep(1);
     blocking_time++;
 
     if(!s.ok()){
