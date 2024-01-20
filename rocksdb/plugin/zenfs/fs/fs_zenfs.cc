@@ -2348,15 +2348,24 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
           new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
               it.first, reaped_read_file_extents[it.first.c_str()]  )
           );
-      }  
+         
+        if(writer_thread_pool.size()>4){
+          for(size_t t = 0; t <writer_thread_pool.size(); t++){
+            writer_thread_pool[t]->join();
+          }
+          writer_thread_pool.clear();
+        }
+      }
+
+
     }
     // read_reaped_n+=num_events;
   }
   
 
-  for(size_t t = 0; t <writer_thread_pool.size(); t++){
-    writer_thread_pool[t]->join();
-  }
+  // for(size_t t = 0; t <writer_thread_pool.size(); t++){
+  //   writer_thread_pool[t]->join();
+  // }
 
   for(size_t a = 0 ;a < to_be_freed.size();a++){
     free(to_be_freed[a]);
