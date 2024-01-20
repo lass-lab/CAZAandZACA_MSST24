@@ -3318,7 +3318,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
       break;
     }
-    FinishCheapestIOZone();
+    // FinishCheapestIOZone();
 
 
 
