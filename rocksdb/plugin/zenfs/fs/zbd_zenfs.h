@@ -1077,7 +1077,7 @@ class ZonedBlockDevice {
       if(tmp > z->max_capacity_){
         tmp = z->max_capacity_;
       }
-      writed=tmp;
+      writed+=tmp;
         
 
       // }
