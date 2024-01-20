@@ -532,10 +532,12 @@ void ZenFS::AsyncZoneCleaning(void){
   size_t should_be_copied=0;
   // (void)(forced);
   // printf("AsyncZoneCleaning\n");
+  struct timespec start_timespec, end_timespec;
   uint64_t zone_size;
 
   int start = GetMountTime();
   auto start_chrono = std::chrono::high_resolution_clock::now();
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
   zbd_->ZCorPartialLock();
 
@@ -636,8 +638,10 @@ void ZenFS::AsyncZoneCleaning(void){
     int end=GetMountTime();
     if(should_be_copied>0){
       auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
+      clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+      long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-      zbd_->AddZCTimeLapse(start, end,microseconds,
+      zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000)/1000,
                           migrate_zones_start.size(),should_be_copied, false);
     }
   }
