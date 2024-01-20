@@ -3198,10 +3198,11 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
 IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
   IOStatus s = IOStatus::OK();
   {
-    PutActiveIOZoneToken();
+    
     // std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
     // migrating_ = false;
     if (zone != nullptr) {
+      PutActiveIOZoneToken();
       zone->Release();
       Info(logger_, "ReleaseMigrateZone: %lu", zone->start_);
     }
