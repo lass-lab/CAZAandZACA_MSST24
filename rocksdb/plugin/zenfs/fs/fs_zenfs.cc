@@ -481,7 +481,7 @@ zone_size=zone.max_capacity;
     if (migrate_zones_start.find(ext.zone_start) !=
         migrate_zones_start.end()) {
       migrate_exts.push_back(&ext);
-      should_be_copied+=ext->length + ext->header_size;
+      should_be_copied+=ext.length + ext.header_size;
     }
   }
 
