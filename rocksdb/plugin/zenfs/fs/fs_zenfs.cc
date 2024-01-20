@@ -508,7 +508,7 @@ zone_size=zone.max_capacity;
       clock_gettime(CLOCK_MONOTONIC, &end_timespec);
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       
-      zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000)/1000,
+      zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
                           migrate_zones_start.size(),should_be_copied, forced);
     }
   }
@@ -648,7 +648,7 @@ void ZenFS::AsyncZoneCleaning(void){
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
       (void)(microseconds);
-      zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000)/1000,
+      zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
                           migrate_zones_start.size(),should_be_copied, false);
     }
   }
