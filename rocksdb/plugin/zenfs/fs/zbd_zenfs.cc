@@ -323,14 +323,22 @@ IOStatus Zone::Close() {
 }
 
 IOStatus Zone::ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aiocb){
-  if(aiocb->length_+aiocb->header_size_ % zbd_->GetBlockSize() != 0){
-    printf("ThrowAsyncZCWrite %lu %lu",aiocb->length_,aiocb->header_size_);
+  uint64_t align = 0;
+  uint64_t wr_size = aiocb->length_+aiocb->header_size_;
+  align = aiocb->length_+aiocb->header_size_ % zbd_->GetBlockSize();
+  if(align != 0){
+    // printf("ThrowAsyncZCWrite %lu %lu",aiocb->length_,aiocb->header_size_);
+    wr_size= (wr_size+ zbd_->GetBlockSize()-align);
   }
   struct iocb* iocb=&(aiocb->iocb_);
   io_prep_pwrite((iocb), zbd_->GetFD(WRITE_DIRECT_FD), 
-    aiocb->buffer_, aiocb->length_+aiocb->header_size_, wp_);
+    aiocb->buffer_, wr_size, wp_);
   int res = io_submit(ioctx, 1, &(iocb));
   if(res==1){
+
+    wp_+=wr_size;
+    capacity_-=wr_size;
+    zbd_->AddBytesWritten(wr_size);
     return IOStatus::OK();
   }
   printf("ThrowAsyncZCWrite res %d\n",res);
