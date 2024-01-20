@@ -576,7 +576,7 @@ ret:
 
 
   IOStatus MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
-  IOStatus AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
+  uint64_t AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
 
   IOStatus MigrateFileExtents(
       const std::string& fname,

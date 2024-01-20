@@ -466,7 +466,7 @@ zone_size=zone.max_capacity;
   reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
   for (size_t i = 0; (i < reclaimed_zone_n && migrate_zones_start.size()<reclaimed_zone_n ); i++) {
     if(victim_candidate[i].first>threshold){
-      should_be_copied+=(zone_size-(victim_candidate[i].first*zone_size/100) );
+      // should_be_copied+=(zone_size-(victim_candidate[i].first*zone_size/100) );
       migrate_zones_start.emplace(victim_candidate[i].second);
     }
   }
@@ -481,6 +481,7 @@ zone_size=zone.max_capacity;
     if (migrate_zones_start.find(ext.zone_start) !=
         migrate_zones_start.end()) {
       migrate_exts.push_back(&ext);
+      should_be_copied+=ext->length + ext->header_size;
     }
   }
 
@@ -600,7 +601,7 @@ void ZenFS::AsyncZoneCleaning(void){
   reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
   for (size_t i = 0; (i < reclaimed_zone_n && migrate_zones_start.size()<reclaimed_zone_n ); i++) {
     if(victim_candidate[i].first>threshold){
-      should_be_copied+=(zone_size-(victim_candidate[i].first*zone_size/100) );
+      // should_be_copied+=(zone_size-(victim_candidate[i].first*zone_size/100) );
       migrate_zones_start.emplace(victim_candidate[i].second);
     }
   }
@@ -627,7 +628,7 @@ void ZenFS::AsyncZoneCleaning(void){
     
     
     
-    s = AsyncMigrateExtents(migrate_exts);
+    should_be_copied = AsyncMigrateExtents(migrate_exts);
 
 
 
@@ -2264,8 +2265,9 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
   //   zbd_->LogGarbageInfo();
   // }
 }
-IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
+uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
   // throw all read
+  uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   std::map<std::string, std::vector<AsyncZoneCleaningIocb*>> reaped_read_file_extents;
   std::vector<AsyncZoneCleaningIocb*> to_be_freed;
@@ -2294,6 +2296,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     // }
     struct AsyncZoneCleaningIocb* async_zc_read_iocb= new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
     to_be_freed.push_back(async_zc_read_iocb);
+    ret+=async_zc_read_iocb->length_+async_zc_read_iocb->header_size_;
     io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
         (async_zc_read_iocb->length_+async_zc_read_iocb->header_size_), 
         (async_zc_read_iocb->start_-async_zc_read_iocb->header_size_));
@@ -2359,7 +2362,7 @@ IOStatus ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     free(to_be_freed[a]);
   }
   io_destroy(read_ioctx);
-  return IOStatus::OK();
+  return ret;
 }
 IOStatus ZenFS::MigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
