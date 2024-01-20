@@ -62,8 +62,16 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
   capacity_ = 0;
   zone_sz_= zbd_be_->GetZoneSize();
   block_sz_ = zbd_be_->GetBlockSize();
-  if (zbd_be->ZoneIsWritable(zones, idx))
-    capacity_ = max_capacity_ - (wp_ - start_);
+  if (zbd_be->ZoneIsWritable(zones, idx)){
+    uint64_t relative_wp = wp_ - start_;
+    if(relative_wp>max_capacity_){
+      capacity_=0;
+    }else{
+      capacity_=max_capacity_-relative_wp;
+    }
+    // capacity_ = max_capacity_ - (wp_ - start_);
+  
+  }
 }
 Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
            std::unique_ptr<ZoneList> &zones, uint64_t idx,
@@ -80,8 +88,14 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
   capacity_ = 0;
   zone_sz_= zbd_be_->GetZoneSize();
   block_sz_ = zbd_be_->GetBlockSize();
-  if (zbd_be->ZoneIsWritable(zones, idx))
-    capacity_ = max_capacity_ - (wp_ - start_);
+  if (zbd_be->ZoneIsWritable(zones, idx)){
+    uint64_t relative_wp = wp_ - start_;
+    if(relative_wp>max_capacity_){
+      capacity_=0;
+    }else{
+      capacity_=max_capacity_-relative_wp;
+    }
+  }
   erase_unit_size_=(1<<log2_erase_unit_size_);
 }
 
