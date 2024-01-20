@@ -2053,8 +2053,11 @@ double ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& 
       printf("after_invalid_capacity %lu > zone_size %lu??\n",after_invalid_capacity,zone_size); 
       zone_score[i]=100;
     }else{
-      
-      zone_score[i]=(after_invalid_capacity)*100/(relative_wp);
+      if(relative_wp != 0){
+        zone_score[i]=(after_invalid_capacity)*100/(relative_wp);
+      }else{
+        zone_score[i]=0;
+      }
     }
 
     if(zone_score[i]>zone_score_max){
