@@ -3240,7 +3240,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       return IOStatus::OK();
     }
     AllocateIOZone(is_sst,smallest,largest,level,file_lifetime,IOType::kWAL
-    , none,file_size,out_zone,min_capacity)
+    , none,file_size,out_zone,min_capacity);
     // if(is_sst){
     //   if(allocation_scheme_==CAZA){
     //     // printf("AllocateCompactionAwaredZone\n");
@@ -3313,7 +3313,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   auto start_chrono = std::chrono::high_resolution_clock::now();
   // RuntimeReset();
   Zone *allocated_zone = nullptr;
-  unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
+  // unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
   int new_zone = 0;
   IOStatus s;
   
