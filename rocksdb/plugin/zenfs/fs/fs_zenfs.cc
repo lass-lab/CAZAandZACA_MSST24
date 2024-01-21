@@ -2267,9 +2267,10 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
 }
 uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
   // throw all read
+  printf("AsyncMigrateExtents\n");
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
-
+  std::map<std::string, bool> migration_done;
   std::map<std::string, std::vector<AsyncZoneCleaningIocb*>> reaped_read_file_extents;
   std::vector<AsyncZoneCleaningIocb*> to_be_freed;
   std::vector<std::thread*> writer_thread_pool;
@@ -2309,6 +2310,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     }
     
     file_extents[ext->filename].emplace_back(ext);
+    migration_done[ext->filename]= false;
   }
 
 
@@ -2346,17 +2348,18 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
 
     // throw write
     for (const auto& it : file_extents) {
-      if(it.second.size() == reaped_read_file_extents[it.first.c_str()].size() ){
+      if( migration_done[it.first.c_str()]==false &&
+        it.second.size() == reaped_read_file_extents[it.first.c_str()].size() ){
         // Async write everything
         // it.second.clear();
+        printf("%s done\n",it.first.c_str());
         file_extents[it.first.c_str()].clear();
-        
-        // bg_partial_reset_worker_.reset(new std::thread(&ZenFS::PartialResetWorker, this,T));
+        migration_done[it.first.c_str()]=true;
         writer_thread_pool.push_back(
           new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
               it.first, reaped_read_file_extents[it.first.c_str()]  )
           );
-        reaped_read_file_extents[it.first.c_str()].clear();
+        // reaped_read_file_extents[it.first.c_str()].clear();
         // if(writer_thread_pool.size()>3){
         //   for(size_t t = 0; t <writer_thread_pool.size(); t++){
         //     writer_thread_pool[t]->join();
