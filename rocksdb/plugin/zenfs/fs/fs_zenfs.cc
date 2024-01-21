@@ -2358,7 +2358,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
 
 
         writer_thread_pool.push_back(
-          new std::thread(&ZenFS::MigrateFileExtentsWorker,this,
+          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
               it.first, reaped_read_file_extents[it.first.c_str()]  )
           );
         // AsyncMigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
@@ -2471,7 +2471,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
       Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
       continue;
     }
-    copied+=ext->length_;
+    // copied+=ext->length_;
 
 
 
@@ -2605,7 +2605,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
       continue;
     }
-    copied+=ext->length_;
+    // copied+=ext->length_;
 
 
 
