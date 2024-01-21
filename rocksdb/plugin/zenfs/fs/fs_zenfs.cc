@@ -2337,7 +2337,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     timeout.tv_sec = 0;
     timeout.tv_nsec = 100000000;
 
-    int reap_min_nr ; 
+    // int reap_min_nr ; 
 
     num_events = io_getevents(read_ioctx, 1, extent_n, read_events,
                               &timeout);
