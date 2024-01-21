@@ -2329,6 +2329,8 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     if(num_events<1){
       continue;
     }
+
+    // reap.
     for (int i = 0; i < num_events; i++) {
       struct io_event event = read_events[i];
       AsyncZoneCleaningIocb* reaped_read_iocb = static_cast<AsyncZoneCleaningIocb*>(event.data);
@@ -2341,11 +2343,14 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
       read_reaped_n++;
     }
 
+
+    // throw write
     for (const auto& it : file_extents) {
       if(it.second.size() == reaped_read_file_extents[it.first.c_str()].size() ){
         // Async write everything
         // it.second.clear();
         file_extents[it.first.c_str()].clear();
+        reaped_read_file_extents[it.first.c_str()].clear();
         // bg_partial_reset_worker_.reset(new std::thread(&ZenFS::PartialResetWorker, this,T));
         writer_thread_pool.push_back(
           new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
