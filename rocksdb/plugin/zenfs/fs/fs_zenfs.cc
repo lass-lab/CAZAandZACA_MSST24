@@ -2400,9 +2400,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     // read_reaped_n+=num_events;
   }
   
-  for(size_t a = 0 ;a < to_be_freed.size();a++){
-    free(to_be_freed[a]);
-  }
+
   io_destroy(read_ioctx);
   // free(read_events);
 
@@ -2410,7 +2408,9 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     writer_thread_pool[t]->join();
   }
 
-
+  for(size_t a = 0 ;a < to_be_freed.size();a++){
+    free(to_be_freed[a]);
+  }
 
   return ret;
 }
