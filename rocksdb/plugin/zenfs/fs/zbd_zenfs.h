@@ -190,8 +190,8 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
   return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 struct AsyncZoneCleaningIocb{
-    AsyncZoneCleaningIocb(struct iocb* iocb,std::string fname,uint64_t start,uint64_t length,uint64_t header_size)
-    : iocb_(iocb),start_(start),length_(length) ,header_size_(header_size)
+    AsyncZoneCleaningIocb(std::string fname,uint64_t start,uint64_t length,uint64_t header_size)
+    : start_(start),length_(length) ,header_size_(header_size)
     {
       filename_=fname;
       if(header_size >4096){
@@ -209,7 +209,7 @@ struct AsyncZoneCleaningIocb{
       free(buffer_);
     }
 
-    struct iocb* iocb_;
+    struct iocb iocb_;
     uint64_t start_;
     uint64_t length_;
     uint64_t header_size_;

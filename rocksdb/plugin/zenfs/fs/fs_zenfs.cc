@@ -2289,8 +2289,8 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     // EINVAL;
     printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
   }
-   struct iocb iocb_arr[extent_n];
-   memset(iocbs, 0, sizeof(iocb_arr));
+   struct iocb* iocb_arr[extent_n];
+   memset(iocb_arr, 0, sizeof(iocb_arr));
   // struct iocb* iocb_arr[extent_n];
   int index = 0;
   for (auto* ext : extents) {
@@ -2307,15 +2307,16 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
 
 
     struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
-          new AsyncZoneCleaningIocb(&iocb_arr[index],ext->filename,ext->start,ext->length,ext->header_size);
+          new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
     to_be_freed.push_back(async_zc_read_iocb);
     ret+=async_zc_read_iocb->length_+async_zc_read_iocb->header_size_;
     
     
-    io_prep_pread((async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
+    io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
         (async_zc_read_iocb->length_+async_zc_read_iocb->header_size_), 
         (async_zc_read_iocb->start_-async_zc_read_iocb->header_size_));
-    async_zc_read_iocb->iocb_->data=async_zc_read_iocb;
+    async_zc_read_iocb->iocb_.data=async_zc_read_iocb;
+    iocb_arr[index]=&(async_zc_read_iocb->iocb_);
     // iocb_arr[to_be_freed.size()-1]=&(async_zc_read_iocb->iocb_);
     // struct iocb* iocb= (async_zc_read_iocb->iocb_);
     // err=io_submit(read_ioctx,1,&(iocb));
@@ -2327,7 +2328,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     migration_done[ext->filename]= false;
   }
 
-    err=io_submit(read_ioctx,extent_n,&iocb_arr);
+    err=io_submit(read_ioctx,extent_n,iocb_arr);
     if(err!=extent_n){
       printf("io submit err? %d\n",err);
     }
