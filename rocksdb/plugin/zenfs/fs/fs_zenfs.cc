@@ -2289,7 +2289,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
   for (auto* ext : extents) {
     // ThrowAsyncExtentsRead(ext);
     // uint64_t start,legnth;
-    if (ends_with(fname, ".log")) {
+    if (ends_with(ext->filename, ".log")) {
       // start=ext->start-ZoneFile::SPARSE_HEADER_SIZE;
       ext->header_size=ZoneFile::SPARSE_HEADER_SIZE;
     }
