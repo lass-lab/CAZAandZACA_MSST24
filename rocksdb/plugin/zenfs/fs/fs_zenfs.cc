@@ -2311,12 +2311,12 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     ret+=async_zc_read_iocb->length_+async_zc_read_iocb->header_size_;
     
     
-    io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
+    io_prep_pread((async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
         (async_zc_read_iocb->length_+async_zc_read_iocb->header_size_), 
         (async_zc_read_iocb->start_-async_zc_read_iocb->header_size_));
     async_zc_read_iocb->iocb_->data=async_zc_read_iocb;
     // iocb_arr[to_be_freed.size()-1]=&(async_zc_read_iocb->iocb_);
-    struct iocb* iocb= &(async_zc_read_iocb->iocb_);
+    // struct iocb* iocb= (async_zc_read_iocb->iocb_);
     // err=io_submit(read_ioctx,1,&(iocb));
     // if(err!=1){
     //   printf("io submit err? %d\n",err);
@@ -2326,7 +2326,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     migration_done[ext->filename]= false;
   }
 
-    err=io_submit(read_ioctx,extent_n,&iocb_arr);
+    err=io_submit(read_ioctx,extent_n,iocb_arr);
     if(err!=extent_n){
       printf("io submit err? %d\n",err);
     }
