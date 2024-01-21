@@ -548,7 +548,7 @@ ret:
     std::vector<AsyncZoneCleaningIocb*> migrate_exts);
   IOStatus AsyncMigrateFileExtentsWorker(
     std::string fname,
-    std::vector<AsyncZoneCleaningIocb*> migrate_exts);
+    std::vector<AsyncZoneCleaningIocb*>* migrate_exts);
 
   void PartialResetWorker(uint64_t T);
 

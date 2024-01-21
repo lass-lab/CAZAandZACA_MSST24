@@ -2289,6 +2289,8 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     // EINVAL;
     printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
   }
+
+  struct iocb* iocb_arr[extent_n];
   for (auto* ext : extents) {
     // ThrowAsyncExtentsRead(ext);
     // uint64_t start,legnth;
@@ -2304,19 +2306,27 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     struct AsyncZoneCleaningIocb* async_zc_read_iocb= new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
     to_be_freed.push_back(async_zc_read_iocb);
     ret+=async_zc_read_iocb->length_+async_zc_read_iocb->header_size_;
+    
+    
     io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
         (async_zc_read_iocb->length_+async_zc_read_iocb->header_size_), 
         (async_zc_read_iocb->start_-async_zc_read_iocb->header_size_));
     async_zc_read_iocb->iocb_.data=async_zc_read_iocb;
-    struct iocb* iocb= &(async_zc_read_iocb->iocb_);
-    err=io_submit(read_ioctx,1,&(iocb));
-    if(err!=1){
-      printf("io submit err? %d\n",err);
-    }
+    iocb_arr[to_be_freed.size()-1]=&(async_zc_read_iocb->iocb_);
+    // struct iocb* iocb= &(async_zc_read_iocb->iocb_);
+    // err=io_submit(read_ioctx,1,&(iocb));
+    // if(err!=1){
+    //   printf("io submit err? %d\n",err);
+    // }
     
     file_extents[ext->filename].emplace_back(ext);
     migration_done[ext->filename]= false;
   }
+
+    err=io_submit(read_ioctx,extent_n,iocb_arr);
+    if(err!=1){
+      printf("io submit err? %d\n",err);
+    }
 
 
   // reap here
@@ -2362,9 +2372,12 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
         migration_done[it.first.c_str()]=true;
 
 
+
+
+
         writer_thread_pool.push_back(
           new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
-              it.first, reaped_read_file_extents[it.first.c_str()]  )
+              it.first, &reaped_read_file_extents[it.first.c_str()]  )
           );
         // AsyncMigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
 
@@ -2383,15 +2396,17 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     // read_reaped_n+=num_events;
   }
   
+  for(size_t a = 0 ;a < to_be_freed.size();a++){
+    free(to_be_freed[a]);
+  }
+  io_destroy(read_ioctx);
 
   for(size_t t = 0; t <writer_thread_pool.size(); t++){
     writer_thread_pool[t]->join();
   }
 
-  for(size_t a = 0 ;a < to_be_freed.size();a++){
-    free(to_be_freed[a]);
-  }
-  io_destroy(read_ioctx);
+
+
   return ret;
 }
 IOStatus ZenFS::MigrateExtents(
@@ -2554,18 +2569,18 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
 
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     std::string fname,
-    std::vector<AsyncZoneCleaningIocb*> migrate_exts) {
+    std::vector<AsyncZoneCleaningIocb*>* migrate_exts) {
   IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
   io_context_t write_ioctx = 0;
-  int extent_n = (int)migrate_exts.size();
+  int extent_n = (int)migrate_exts->size();
   int write_reaped_n = 0;
   int err = io_queue_init(extent_n,&write_ioctx);
   if(err){
     printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
   }
   Info(logger_, "MigrateFileExtents, fname: %s, extent count: %lu",
-       fname.data(), migrate_exts.size());
+       fname.data(), migrate_exts->size());
   
   // The file may be deleted by other threads, better double check.
   auto zfile = GetFile(fname);
@@ -2592,7 +2607,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   }
   extent_n = 0;
   for (ZoneExtent* ext : new_extent_list) {
-    auto it = std::find_if(migrate_exts.begin(), migrate_exts.end(),
+    auto it = std::find_if(migrate_exts->begin(), migrate_exts->end(),
                            [&](const AsyncZoneCleaningIocb* ext_snapshot) {
                               if(ext_snapshot==nullptr){
                                 printf("ext_snapshot nullptr\n");
@@ -2606,7 +2621,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                              return ext_snapshot->start_ == ext->start_ &&
                                     ext_snapshot->length_ == ext->length_;
                            });
-    if (it == migrate_exts.end()) {
+    if (it == migrate_exts->end()) {
       Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
       continue;
     }

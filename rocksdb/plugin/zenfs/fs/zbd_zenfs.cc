@@ -367,6 +367,7 @@ IOStatus Zone::Append(char *data, uint64_t size, bool zc) {
   char *ptr = data;
   uint64_t left = size;
   int ret;
+  (void)(zc);
 
   // std::lock_guard<std::mutex> lg_wp(wp_lock_);
   if (capacity_ < size)
@@ -386,9 +387,9 @@ IOStatus Zone::Append(char *data, uint64_t size, bool zc) {
     wp_ += ret;
     capacity_ -= ret;
     left -= ret;
-    if(zc==false){
+    // if(zc==false){
       zbd_->AddBytesWritten(ret);
-    }
+    // }
   }
 
   return IOStatus::OK();
