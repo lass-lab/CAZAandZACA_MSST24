@@ -443,7 +443,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   sort(victim_candidate.rbegin(), victim_candidate.rend());
 
   uint64_t threshold = 0;
-  uint64_t reclaimed_zone_n=1;
+  uint64_t reclaimed_zone_n=4;
   // if(zbd_->PartialResetWithZoneReset()){
   //   reclaimed_zone_n=1;
   //   if(forced){
