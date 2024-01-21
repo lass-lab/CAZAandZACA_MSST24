@@ -2361,7 +2361,9 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
         //   new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
         //       it.first, reaped_read_file_extents[it.first.c_str()]  )
         //   );
-        AsyncMigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
+        // AsyncMigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
+
+        MigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
         // reaped_read_file_extents[it.first.c_str()].clear();
         // if(writer_thread_pool.size()>3){
         //   for(size_t t = 0; t <writer_thread_pool.size(); t++){
