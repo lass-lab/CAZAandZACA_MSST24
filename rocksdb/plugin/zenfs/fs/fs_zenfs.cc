@@ -2341,7 +2341,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     int num_events;
     struct timespec timeout;
     timeout.tv_sec = 0;
-    timeout.tv_nsec = 100000000;
+    timeout.tv_nsec = 1000;
 
     // int reap_min_nr ; 
 
@@ -2392,12 +2392,12 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
 
         // MigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
         // reaped_read_file_extents[it.first.c_str()].clear();
-        if(writer_thread_pool.size()==2){
-          for(size_t t = 0; t <writer_thread_pool.size(); t++){
-            writer_thread_pool[t]->join();
-          }
-          writer_thread_pool.clear();
-        }
+        // if(writer_thread_pool.size()==2){
+        //   for(size_t t = 0; t <writer_thread_pool.size(); t++){
+        //     writer_thread_pool[t]->join();
+        //   }
+        //   writer_thread_pool.clear();
+        // }
       }
 
 
@@ -2687,10 +2687,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   while(write_reaped_n<extent_n){
     int num_events;
     struct timespec timeout;
-    // timeout.tv_sec = 0;
-    // timeout.tv_nsec = 100000000; // 100ms
     timeout.tv_sec = 0;
-    timeout.tv_nsec = 1000000000; // 1000ms
+    timeout.tv_nsec = 10000; // 100ms
+    // timeout.tv_sec = 0;
+    // timeout.tv_nsec = 1000000000; // 1000ms
     int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
     // write_reap_min_nr=1;
 
