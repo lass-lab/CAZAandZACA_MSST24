@@ -2290,6 +2290,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
   }
    struct iocb iocb_arr[extent_n];
+   memset(iocbs, 0, sizeof(iocb_arr));
   // struct iocb* iocb_arr[extent_n];
   int index = 0;
   for (auto* ext : extents) {
@@ -2326,7 +2327,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     migration_done[ext->filename]= false;
   }
 
-    err=io_submit(read_ioctx,extent_n,iocb_arr);
+    err=io_submit(read_ioctx,extent_n,&iocb_arr);
     if(err!=extent_n){
       printf("io submit err? %d\n",err);
     }
