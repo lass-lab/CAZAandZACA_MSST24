@@ -2687,7 +2687,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     timeout.tv_sec = 0;
     timeout.tv_nsec = 1000000000; // 1000ms
     int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
-    write_reap_min_nr=1;
+    // write_reap_min_nr=1;
 
     num_events = io_getevents(write_ioctx, write_reap_min_nr, extent_n, write_events,
                               &timeout);
