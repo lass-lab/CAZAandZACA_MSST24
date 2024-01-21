@@ -2540,7 +2540,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
   // }
 
   // sync it
-  // zbd_->AddGCBytesWritten(copied);
+  zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
   zfile->ReleaseWRLock();
   // io_destroy(write_ioctx);

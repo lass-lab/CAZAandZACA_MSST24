@@ -267,7 +267,7 @@ class Zone {
   void PushExtent(ZoneExtent* ze);
 
   void PushExtentAtFront(ZoneExtent* ze);
-  IOStatus Append(char *data, uint64_t size);
+  IOStatus Append(char *data, uint64_t size,bool zc=false);
   IOStatus ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aiocb);
   bool IsUsed();
   bool IsFull();
