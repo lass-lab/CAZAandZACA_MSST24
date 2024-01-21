@@ -3310,6 +3310,8 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
         (*out_zone)->lifetime_=file_lifetime;
         break;
+      }else{
+        PutActiveIOZoneToken();
       }
     }
 
