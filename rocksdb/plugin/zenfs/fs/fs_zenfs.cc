@@ -594,7 +594,7 @@ void ZenFS::AsyncZoneCleaning(void){
   sort(victim_candidate.rbegin(), victim_candidate.rend());
 
   uint64_t threshold = 0;
-  uint64_t reclaimed_zone_n=1;
+  uint64_t reclaimed_zone_n=4;
 
 
 
@@ -2292,6 +2292,8 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     if (ends_with(ext->filename, ".log")) {
       // start=ext->start-ZoneFile::SPARSE_HEADER_SIZE;
       ext->header_size=ZoneFile::SPARSE_HEADER_SIZE;
+    }else{
+      ext->header_size=0;
     }
     // else{
 
