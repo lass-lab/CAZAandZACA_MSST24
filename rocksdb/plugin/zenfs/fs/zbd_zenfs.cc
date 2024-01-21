@@ -352,6 +352,7 @@ IOStatus Zone::ThrowAsyncZCWrite(io_context_t& ioctx, AsyncZoneCleaningIocb* aio
 
     wp_+=wr_size;
     capacity_-=wr_size;
+    zbd_->AddBytesWritten(ret);
     // zbd_->AddBytesWritten(wr_size);
     return IOStatus::OK();
   }
