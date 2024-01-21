@@ -379,7 +379,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   int start = GetMountTime();
   auto start_chrono = std::chrono::high_resolution_clock::now();
     struct timespec start_timespec, end_timespec;
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  
   // zc_lock_.lock();
   zbd_->ZCorPartialLock();
   // if(zbd_->ProactiveZoneCleaning()){
@@ -491,7 +491,10 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
     Info(logger_, "Garbage collecting %d extents \n",
          (int)migrate_exts.size());
+    clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     s = MigrateExtents(migrate_exts);
+    clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+
     if(!run_gc_worker_){
       zbd_->SetZCRunning(false);
       zbd_->ZCorPartialUnLock();
@@ -506,7 +509,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
       long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
       (void)(microseconds);
-      clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+      
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       
       zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
@@ -544,7 +547,7 @@ void ZenFS::AsyncZoneCleaning(void){
   int start = GetMountTime();
   auto start_chrono = std::chrono::high_resolution_clock::now();
     struct timespec start_timespec, end_timespec;
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  
 
   zbd_->ZCorPartialLock();
 
@@ -627,9 +630,9 @@ void ZenFS::AsyncZoneCleaning(void){
          (int)migrate_exts.size());
     
     
-    
+    clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     should_be_copied = AsyncMigrateExtents(migrate_exts);
-
+    clock_gettime(CLOCK_MONOTONIC, &end_timespec);
 
 
     if(!run_gc_worker_){
@@ -645,7 +648,7 @@ void ZenFS::AsyncZoneCleaning(void){
     int end=GetMountTime();
     if(should_be_copied>0){
       auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
-      clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+      
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
       (void)(microseconds);
