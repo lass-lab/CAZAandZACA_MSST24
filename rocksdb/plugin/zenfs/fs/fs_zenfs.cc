@@ -2290,7 +2290,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
   }
 
-  struct iocb* iocb_arr[extent_n];
+  // struct iocb* iocb_arr[extent_n];
   for (auto* ext : extents) {
     // ThrowAsyncExtentsRead(ext);
     // uint64_t start,legnth;
@@ -2312,21 +2312,21 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
         (async_zc_read_iocb->length_+async_zc_read_iocb->header_size_), 
         (async_zc_read_iocb->start_-async_zc_read_iocb->header_size_));
     async_zc_read_iocb->iocb_.data=async_zc_read_iocb;
-    iocb_arr[to_be_freed.size()-1]=&(async_zc_read_iocb->iocb_);
-    // struct iocb* iocb= &(async_zc_read_iocb->iocb_);
-    // err=io_submit(read_ioctx,1,&(iocb));
-    // if(err!=1){
-    //   printf("io submit err? %d\n",err);
-    // }
+    // iocb_arr[to_be_freed.size()-1]=&(async_zc_read_iocb->iocb_);
+    struct iocb* iocb= &(async_zc_read_iocb->iocb_);
+    err=io_submit(read_ioctx,1,&(iocb));
+    if(err!=1){
+      printf("io submit err? %d\n",err);
+    }
     
     file_extents[ext->filename].emplace_back(ext);
     migration_done[ext->filename]= false;
   }
 
-    err=io_submit(read_ioctx,extent_n,iocb_arr);
-    if(err!=1){
-      printf("io submit err? %d\n",err);
-    }
+    // err=io_submit(read_ioctx,extent_n,iocb_arr);
+    // if(err!=extent_n){
+    //   printf("io submit err? %d\n",err);
+    // }
 
 
   // reap here
@@ -2336,6 +2336,9 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     struct timespec timeout;
     timeout.tv_sec = 0;
     timeout.tv_nsec = 100000000;
+
+    int reap_min_nr ; 
+
     num_events = io_getevents(read_ioctx, 1, extent_n, read_events,
                               &timeout);
     // for(const auto& it : file_extents){
@@ -2400,6 +2403,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     free(to_be_freed[a]);
   }
   io_destroy(read_ioctx);
+  free(read_events);
 
   for(size_t t = 0; t <writer_thread_pool.size(); t++){
     writer_thread_pool[t]->join();
@@ -2676,9 +2680,14 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   while(write_reaped_n<extent_n){
     int num_events;
     struct timespec timeout;
+    // timeout.tv_sec = 0;
+    // timeout.tv_nsec = 100000000; // 100ms
     timeout.tv_sec = 0;
-    timeout.tv_nsec = 100000000;
-    num_events = io_getevents(write_ioctx, 1, extent_n, write_events,
+    timeout.tv_nsec = 1000000000; // 1000ms
+    int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
+
+
+    num_events = io_getevents(write_ioctx, write_reap_min_nr, extent_n, write_events,
                               &timeout);
     if(num_events<1){
       continue;
