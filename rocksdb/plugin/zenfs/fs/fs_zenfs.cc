@@ -2357,13 +2357,13 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
         migration_done[it.first.c_str()]=true;
 
 
-        // writer_thread_pool.push_back(
-        //   new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
-        //       it.first, reaped_read_file_extents[it.first.c_str()]  )
-        //   );
+        writer_thread_pool.push_back(
+          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+              it.first, reaped_read_file_extents[it.first.c_str()]  )
+          );
         // AsyncMigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
 
-        MigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
+        // MigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
         // reaped_read_file_extents[it.first.c_str()].clear();
         // if(writer_thread_pool.size()>3){
         //   for(size_t t = 0; t <writer_thread_pool.size(); t++){
@@ -2540,7 +2540,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
   // }
 
   // sync it
-  zbd_->AddGCBytesWritten(copied);
+  // zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
   zfile->ReleaseWRLock();
   // io_destroy(write_ioctx);
@@ -2776,11 +2776,9 @@ IOStatus ZenFS::MigrateFileExtents(
                          ext->length_ + ZoneFile::SPARSE_HEADER_SIZE,
                          target_zone);
       ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
-      // zbd_->AddGCBytesWritten(ext->length_ + ZoneFile::SPARSE_HEADER_SIZE);
       copied +=ZoneFile::SPARSE_HEADER_SIZE;
     } else {
       zfile->MigrateData(ext->start_, ext->length_, target_zone);
-      // zbd_->AddGCBytesWritten(ext->length_);
     }
 
     if(!run_gc_worker_){
