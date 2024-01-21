@@ -2330,7 +2330,8 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
 
 
   // reap here
-  struct io_event* read_events = new io_event[extent_n];
+  struct io_event read_events[extent_n];
+  //  = new io_event[extent_n];
   while(read_reaped_n < extent_n){
     int num_events;
     struct timespec timeout;
@@ -2403,7 +2404,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
     free(to_be_freed[a]);
   }
   io_destroy(read_ioctx);
-  free(read_events);
+  // free(read_events);
 
   for(size_t t = 0; t <writer_thread_pool.size(); t++){
     writer_thread_pool[t]->join();
