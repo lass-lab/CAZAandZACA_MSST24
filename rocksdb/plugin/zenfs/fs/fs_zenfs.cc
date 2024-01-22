@@ -2378,7 +2378,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
 
 
-    AsyncZoneCleaningIocb* eaped_read_iocb=dynamic_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
+    AsyncZoneCleaningIocb* eaped_read_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
     // reap.r
     reaped_read_file_extents[reaped_read_iocb->filename_].emplace_back(reaped_read_iocb);
     read_reaped_n++;
