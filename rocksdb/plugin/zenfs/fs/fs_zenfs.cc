@@ -2289,15 +2289,15 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   int extent_n = (int)extents.size();
   int read_fd=zbd_->GetFD(READ_FD);
   // int err=io_queue_init(extent_n,&read_ioctx);
-
+    
 
   io_uring read_ring;
-  io_uring_queue_init(extent_n, &read_ring, 0);
+  int err=io_uring_queue_init(extent_n, &read_ring, 0);
 
 
   if(err){
     // EINVAL;
-    printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
+    printf("\t\t\tio_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
   }
   //  struct iocb* iocb_arr[extent_n];
   //  memset(iocb_arr, 0, sizeof(iocb_arr));
@@ -2327,7 +2327,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     io_uring_sqe_set_data(sqe,async_zc_read_iocb);
     io_uring_prep_read(sqe,read_fd,async_zc_read_iocb->buffer_,
                       async_zc_read_iocb->length_+async_zc_read_iocb->header_size_,
-                      async_zc_read_iocb->start_-async_zc_read_iocb->header_size_)
+                      async_zc_read_iocb->start_-async_zc_read_iocb->header_size_);
     // io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
     //     (async_zc_read_iocb->length_+async_zc_read_iocb->header_size_), 
     //     (async_zc_read_iocb->start_-async_zc_read_iocb->header_size_));
@@ -2348,7 +2348,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
 
     // err=io_submit(read_ioctx,extent_n,iocb_arr);
-    io_uring_submit(&read_ring);
+    err=io_uring_submit(&read_ring);
     if(err!=extent_n){
       printf("io submit err? %d\n",err);
     }
@@ -2372,8 +2372,8 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     //                           &timeout);
     // ret = io_uring_wait_cqe(&ring, &cqe);
     struct io_uring_cqe* cqe = nullptr;
-    int result = io_uring_peek_cqes(&read_ring, &cqe);
-    if(res){
+    int result = io_uring_peek_cqe(&read_ring, &cqe);
+    if(result){
       continue;
     }
 
