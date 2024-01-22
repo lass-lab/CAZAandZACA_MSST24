@@ -2851,10 +2851,11 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
     int result = io_uring_peek_cqe(&write_ring, &cqe); // success 0 , polling
 
     // int result = io_uring_wait_cqe(&write_ring, &cqe); // success 0
-    AsyncZoneCleaningIocb* reaped_write_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
+    
     if(result!=0){
       continue;
     }
+    AsyncZoneCleaningIocb* reaped_write_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
     if(reaped_write_iocb->index_!=write_reaped_n){
       printf("[write_reaped_n %d]!= reaped_write_iocb->index_ %d extent_n %d\n",write_reaped_n,reaped_write_iocb->index_,extent_n);
     }
