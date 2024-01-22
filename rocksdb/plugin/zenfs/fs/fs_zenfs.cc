@@ -2280,6 +2280,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     
 
   io_uring read_ring;
+  unsigned flags = IORING_SETUP_SQPOLL;
   int err=io_uring_queue_init(extent_n, &read_ring, 0);
 
 
@@ -2738,7 +2739,8 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
   int write_reaped_n = 0;
   // int err = io_queue_init(extent_n,&write_ioctx);
   io_uring write_ring;
-  int err=io_uring_queue_init(extent_n, &write_ring, 0);
+  unsigned flags = IORING_SETUP_SQPOLL;
+  int err=io_uring_queue_init(extent_n, &write_ring, flags);
 
   if(err){
     printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_uring_queue_init err %d %d",err,extent_n);
