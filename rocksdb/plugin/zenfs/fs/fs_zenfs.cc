@@ -2854,7 +2854,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
       continue;
     }
     if(reaped_write_iocb->index_!=write_reaped_n){
-      printf("[write_reaped_n %d]!= reaped_write_iocb->index_ %d extent_n %d",write_reaped_n,reaped_write_iocb->index_,extent_n);
+      printf("[write_reaped_n %d]!= reaped_write_iocb->index_ %d extent_n %d\n",write_reaped_n,reaped_write_iocb->index_,extent_n);
     }
     write_reaped_n++;
     io_uring_cqe_seen(&write_ring,cqe);
