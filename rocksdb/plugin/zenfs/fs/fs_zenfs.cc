@@ -444,23 +444,6 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
   uint64_t threshold = 0;
   uint64_t reclaimed_zone_n=one_zc_reclaimed_zone_n_;
-  // if(zbd_->PartialResetWithZoneReset()){
-  //   reclaimed_zone_n=1;
-  //   if(forced){
-  //     reclaimed_zone_n+=1;
-  //   }
-  //   threshold=(100 - 3 * (zbd_->GetZoneCleaningKickingPoint() - zbd_->CalculateFreePercent()));
-  // }else{
-  //     reclaimed_zone_n=1;
-  //     if(forced){
-  //     reclaimed_zone_n+=2;
-  //   }
-  //   threshold = 0;
-  // }
-    // reclaimed_zone_n=2;
-    // if(forced){
-    //   reclaimed_zone_n+=1;
-    // }
 
 
   reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
@@ -2309,14 +2292,6 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   // struct iocb* iocb_arr[extent_n];
   int index = 0;
   for (auto* ext : extents) {
-    // ThrowAsyncExtentsRead(ext);
-    // uint64_t start,legnth;
-    // if (ends_with(ext->filename, ".log")) {
-    //   // start=ext->start-ZoneFile::SPARSE_HEADER_SIZE;
-    //   ext->header_size=ZoneFile::SPARSE_HEADER_SIZE;
-    // }else{
-    //   ext->header_size=0;
-    // }
     
    
 
@@ -2825,11 +2800,11 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     }
     // throw it
     
-    uint64_t target_start = target_zone->wp_;
-    if(zfile->IsSparse()){
-      target_start= target_zone->wp_ + ZoneFile::SPARSE_HEADER_SIZE;
-      ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
-    }
+    uint64_t target_start = target_zone->wp_ - (*it)->header_size_;
+    // if(zfile->IsSparse()){
+    //   target_start= target_zone->wp_ + ZoneFile::SPARSE_HEADER_SIZE;
+    //   ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
+    // }
     ext->start_=target_start;
     ext->zone_ = target_zone;
     target_zone->ThrowAsyncZCWrite(write_ioctx,*it);
