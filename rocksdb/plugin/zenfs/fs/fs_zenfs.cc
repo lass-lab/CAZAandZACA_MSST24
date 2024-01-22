@@ -2311,12 +2311,12 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   for (auto* ext : extents) {
     // ThrowAsyncExtentsRead(ext);
     // uint64_t start,legnth;
-    if (ends_with(ext->filename, ".log")) {
-      // start=ext->start-ZoneFile::SPARSE_HEADER_SIZE;
-      ext->header_size=ZoneFile::SPARSE_HEADER_SIZE;
-    }else{
-      ext->header_size=0;
-    }
+    // if (ends_with(ext->filename, ".log")) {
+    //   // start=ext->start-ZoneFile::SPARSE_HEADER_SIZE;
+    //   ext->header_size=ZoneFile::SPARSE_HEADER_SIZE;
+    // }else{
+    //   ext->header_size=0;
+    // }
     
    
 
@@ -2348,7 +2348,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
     err=io_uring_submit(&read_ring);
     if(err!=1){
-      printf("io submit err? %d\n",err);
+      printf("io_uring_submit err? %d\n",err);
     }
     index++;
     file_extents[ext->filename].emplace_back(ext);
@@ -2387,6 +2387,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     AsyncZoneCleaningIocb* reaped_read_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
     // reap.r
+    io_uring_cqe_seen(&read_ring,cqe);
     reaped_read_file_extents[reaped_read_iocb->filename_].emplace_back(reaped_read_iocb);
     read_reaped_n++;
     // for (int i = 0; i < num_events; i++) {
