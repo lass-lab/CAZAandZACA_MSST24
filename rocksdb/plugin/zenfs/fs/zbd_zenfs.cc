@@ -389,6 +389,9 @@ IOStatus Zone::ThrowAsyncUringZCWrite(io_uring* write_ring, AsyncZoneCleaningIoc
     capacity_-=wr_size;
     zbd_->AddBytesWritten(wr_size);
     // zbd_->AddBytesWritten(wr_size);
+    if(wp_%4096){
+      printf("ThrowAsyncUringZCWrite error ? %lu mod 4096 = %lu",wp_,wp%4096);
+    }
     return IOStatus::OK();
   }
   printf("ThrowAsyncZCWrite res %d\n",res);

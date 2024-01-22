@@ -2805,7 +2805,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
     }
     // throw it
     
-    uint64_t target_start = target_zone->wp_ - (*it)->header_size_;
+    uint64_t target_start = target_zone->wp_ + (*it)->header_size_;
     ext->header_size_=(*it)->header_size_;
     // if(zfile->IsSparse()){
     //   target_start= target_zone->wp_ + ZoneFile::SPARSE_HEADER_SIZE;
@@ -2933,7 +2933,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     }
     // throw it
     
-    uint64_t target_start = target_zone->wp_ - (*it)->header_size_;
+    uint64_t target_start = target_zone->wp_ + (*it)->header_size_;
     ext->header_size_=(*it)->header_size_;
     // if(zfile->IsSparse()){
     //   target_start= target_zone->wp_ + ZoneFile::SPARSE_HEADER_SIZE;
