@@ -2341,14 +2341,14 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     // }
 
     io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
-
+    err=io_uring_submit(&read_ring);
     index++;
     file_extents[ext->filename].emplace_back(ext);
     migration_done[ext->filename]= false;
   }
 
     // err=io_submit(read_ioctx,extent_n,iocb_arr);
-    err=io_uring_submit(&read_ring);
+    
     if(err!=extent_n){
       printf("io submit err? %d\n",err);
     }
@@ -2370,9 +2370,10 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     // num_events = io_getevents(read_ioctx, 1, extent_n, read_events,
     //                           &timeout);
-    // ret = io_uring_wait_cqe(&ring, &cqe);
+    // 
     struct io_uring_cqe* cqe = nullptr;
-    int result = io_uring_peek_cqe(&read_ring, &cqe);
+    int result = io_uring_wait_cqe(&read_ring, &cqe);
+    // int result = io_uring_peek_cqe(&read_ring, &cqe);
     if(result){
       continue;
     }
