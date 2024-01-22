@@ -2843,7 +2843,10 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
   // struct io_event write_events[extent_n];
   while(write_reaped_n<extent_n){
     struct io_uring_cqe* cqe = nullptr;
-    int result = io_uring_peek_cqe(&write_ring, &cqe);
+ 
+    // int result = io_uring_peek_cqe(&write_ring, &cqe); // success 0 , polling
+
+        int result = io_uring_wait_cqe(&write_ring, &cqe); // success 0
     if(result!=0){
       continue;
     }

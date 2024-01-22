@@ -368,12 +368,10 @@ IOStatus Zone::ThrowAsyncUringZCWrite(io_uring* write_ring, AsyncZoneCleaningIoc
     // printf("ThrowAsyncZCWrite %lu %lu",aiocb->length_,aiocb->header_size_);
     wr_size= (wr_size+ zbd_->GetBlockSize()-align);
   }
-  // struct iocb* iocb=&(aiocb->iocb_);
-  // io_prep_pwrite((iocb), zbd_->GetFD(WRITE_DIRECT_FD), 
-  //   aiocb->buffer_, wr_size, wp_);
+
   // int res = io_submit(ioctx, 1, &(iocb));
   struct io_uring_sqe *sqe = io_uring_get_sqe(write_ring);
-  io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
+  // io_uring_sqe_set_flags(sqe, IOSQE_ASYNC); // sqe polling
   if(sqe==nullptr){
     printf("ThrowAsyncUringZCWrite sqe nullptr\n");
   }
