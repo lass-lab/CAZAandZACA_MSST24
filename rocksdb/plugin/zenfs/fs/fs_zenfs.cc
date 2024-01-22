@@ -631,7 +631,12 @@ void ZenFS::AsyncZoneCleaning(void){
     
     
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-    should_be_copied = AsyncUringMigrateExtents(migrate_exts);
+    if(zbd_->AsyncZCEnabled()==1){
+      should_be_copied = AsyncMigrateExtents(migrate_exts);
+    }else{
+      should_be_copied = AsyncUringMigrateExtents(migrate_exts);
+    }
+    
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
 
 
