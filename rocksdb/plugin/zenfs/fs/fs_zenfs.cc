@@ -2729,7 +2729,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
     std::vector<AsyncZoneCleaningIocb*>* migrate_exts) {
   IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
-  io_context_t write_ioctx = 0;
+  // io_context_t write_ioctx = 0;
   int extent_n = (int)migrate_exts->size();
   int write_reaped_n = 0;
   // int err = io_queue_init(extent_n,&write_ioctx);
@@ -2840,6 +2840,9 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
   while(write_reaped_n<extent_n){
     struct io_uring_cqe* cqe = nullptr;
     int result = io_uring_peek_cqe(&write_ring, &cqe);
+    if(result!=0){
+      continue;
+    }
     write_reaped_n++;
     io_uring_cqe_seen(&write_ring,cqe);
   }
