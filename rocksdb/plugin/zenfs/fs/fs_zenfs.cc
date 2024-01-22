@@ -2374,7 +2374,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     struct io_uring_cqe* cqe = nullptr;
     int result = io_uring_wait_cqe(&read_ring, &cqe);
     // int result = io_uring_peek_cqe(&read_ring, &cqe);
-    if(result){
+    if(result!=0){
       continue;
     }
 
