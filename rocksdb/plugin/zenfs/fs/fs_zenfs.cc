@@ -2281,7 +2281,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
   io_uring read_ring;
   unsigned flags = IORING_SETUP_SQPOLL;
-  int err=io_uring_queue_init(extent_n, &read_ring, 0);
+  int err=io_uring_queue_init(extent_n, &read_ring, flags);
 
 
   if(err){
@@ -2848,9 +2848,9 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
   while(write_reaped_n<extent_n){
     struct io_uring_cqe* cqe = nullptr;
  
-    // int result = io_uring_peek_cqe(&write_ring, &cqe); // success 0 , polling
+    int result = io_uring_peek_cqe(&write_ring, &cqe); // success 0 , polling
 
-    int result = io_uring_wait_cqe(&write_ring, &cqe); // success 0
+    // int result = io_uring_wait_cqe(&write_ring, &cqe); // success 0
     AsyncZoneCleaningIocb* reaped_write_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
     if(result!=0){
       continue;
