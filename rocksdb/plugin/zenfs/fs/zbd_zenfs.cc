@@ -371,7 +371,7 @@ IOStatus Zone::ThrowAsyncUringZCWrite(io_uring* write_ring, AsyncZoneCleaningIoc
 
   // int res = io_submit(ioctx, 1, &(iocb));
   struct io_uring_sqe *sqe = io_uring_get_sqe(write_ring);
-  // io_uring_sqe_set_flags(sqe, IOSQE_ASYNC); // sqe polling
+  io_uring_sqe_set_flags(sqe, IOSQE_ASYNC); // sqe polling
   if(sqe==nullptr){
     printf("ThrowAsyncUringZCWrite sqe nullptr\n");
   }
