@@ -33,6 +33,7 @@
 #include "rocksdb/io_status.h"
 #include "rocksdb/comparator.h"
 #include <libaio.h>
+#include <liburing.h>
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -208,7 +209,7 @@ struct AsyncZoneCleaningIocb{
     ~AsyncZoneCleaningIocb() {
       free(buffer_);
     }
-
+    struct iovec io_uring_iovec;
     struct iocb iocb_;
     uint64_t start_;
     uint64_t length_;

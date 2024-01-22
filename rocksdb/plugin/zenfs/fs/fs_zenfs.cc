@@ -631,7 +631,7 @@ void ZenFS::AsyncZoneCleaning(void){
     
     
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-    should_be_copied = AsyncMigrateExtents(migrate_exts);
+    should_be_copied = AsyncUringMigrateExtents(migrate_exts);
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
 
 
@@ -2268,6 +2268,166 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
   //   zbd_->LogGarbageInfo();
   // }
 }
+
+
+uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
+  // throw all read
+  // printf("AsyncMigrateExtents\n");
+  uint64_t ret = 0;
+  std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
+  std::map<std::string, bool> migration_done;
+  std::map<std::string, std::vector<AsyncZoneCleaningIocb*>> reaped_read_file_extents;
+  std::vector<AsyncZoneCleaningIocb*> to_be_freed;
+  std::vector<std::thread*> writer_thread_pool;
+        
+  int read_reaped_n = 0;
+  // io_context_t read_ioctx;
+  // io_context_t ctx;
+  // io_context_t read_ioctx = 0;
+
+
+  int extent_n = (int)extents.size();
+  int read_fd=zbd_->GetFD(READ_FD);
+  // int err=io_queue_init(extent_n,&read_ioctx);
+
+
+  io_uring read_ring;
+  io_uring_queue_init(extent_n, &read_ring, 0);
+
+
+  if(err){
+    // EINVAL;
+    printf("\t\t\tio_setup error@@@@@ %d %d\n",err,extent_n);
+  }
+  //  struct iocb* iocb_arr[extent_n];
+  //  memset(iocb_arr, 0, sizeof(iocb_arr));
+  // struct iocb* iocb_arr[extent_n];
+  int index = 0;
+  for (auto* ext : extents) {
+    // ThrowAsyncExtentsRead(ext);
+    // uint64_t start,legnth;
+    if (ends_with(ext->filename, ".log")) {
+      // start=ext->start-ZoneFile::SPARSE_HEADER_SIZE;
+      ext->header_size=ZoneFile::SPARSE_HEADER_SIZE;
+    }else{
+      ext->header_size=0;
+    }
+    
+   
+
+
+    struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
+          new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
+    to_be_freed.push_back(async_zc_read_iocb);
+
+    ret+=async_zc_read_iocb->length_+async_zc_read_iocb->header_size_;
+    
+
+    struct io_uring_sqe *sqe = io_uring_get_sqe(&read_ring);
+    io_uring_sqe_set_data(sqe,async_zc_read_iocb);
+    io_uring_prep_read(sqe,read_fd,async_zc_read_iocb->buffer_,
+                      async_zc_read_iocb->length_+async_zc_read_iocb->header_size_,
+                      async_zc_read_iocb->start_-async_zc_read_iocb->header_size_)
+    // io_prep_pread(&(async_zc_read_iocb->iocb_), read_fd, async_zc_read_iocb->buffer_, 
+    //     (async_zc_read_iocb->length_+async_zc_read_iocb->header_size_), 
+    //     (async_zc_read_iocb->start_-async_zc_read_iocb->header_size_));
+    // async_zc_read_iocb->iocb_.data=async_zc_read_iocb;
+    // iocb_arr[index]=&(async_zc_read_iocb->iocb_);
+    // iocb_arr[to_be_freed.size()-1]=&(async_zc_read_iocb->iocb_);
+    // struct iocb* iocb= (async_zc_read_iocb->iocb_);
+    // err=io_submit(read_ioctx,1,&(iocb));
+    // if(err!=1){
+    //   printf("io submit err? %d\n",err);
+    // }
+
+    io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
+
+    index++;
+    file_extents[ext->filename].emplace_back(ext);
+    migration_done[ext->filename]= false;
+  }
+
+    // err=io_submit(read_ioctx,extent_n,iocb_arr);
+    io_uring_submit(&read_ring);
+    if(err!=extent_n){
+      printf("io submit err? %d\n",err);
+    }
+
+
+  // reap here
+  // struct io_event read_events[extent_n];
+  //  = new io_event[extent_n];
+  while(read_reaped_n < extent_n){
+
+
+
+    // int num_events;
+    // struct timespec timeout;
+    // timeout.tv_sec = 0;
+    // timeout.tv_nsec = 10000;
+
+    // // int reap_min_nr ; 
+
+    // num_events = io_getevents(read_ioctx, 1, extent_n, read_events,
+    //                           &timeout);
+    // ret = io_uring_wait_cqe(&ring, &cqe);
+    struct io_uring_cqe* cqe = nullptr;
+    int result = io_uring_peek_cqes(&read_ring, &cqe);
+    if(res){
+      continue;
+    }
+
+
+    AsyncZoneCleaningIocb* reaped_read_iocb=static_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
+    // reap.
+    reaped_read_file_extents[reaped_read_iocb->filename_].emplace_back(reaped_read_iocb);
+    read_reaped_n++;
+    // for (int i = 0; i < num_events; i++) {
+    //   struct io_event event = read_events[i];
+    //   AsyncZoneCleaningIocb* reaped_read_iocb = static_cast<AsyncZoneCleaningIocb*>(event.data);
+    //   reaped_read_file_extents[reaped_read_iocb->filename_].emplace_back(reaped_read_iocb);
+    //   read_reaped_n++;
+    // }
+
+
+    // throw write
+    for (const auto& it : file_extents) {
+      if( migration_done[it.first.c_str()]==false &&
+        it.second.size() == reaped_read_file_extents[it.first.c_str()].size() ){
+
+        file_extents[it.first.c_str()].clear();
+        migration_done[it.first.c_str()]=true;
+        writer_thread_pool.push_back(
+          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+              it.first, &reaped_read_file_extents[it.first.c_str()]  )
+          );
+      }
+
+
+    }
+    // read_reaped_n+=num_events;
+  }
+  
+
+  // io_destroy(read_ioctx);
+
+   io_uring_queue_exit(&read_ring);
+  // free(read_events);
+
+  for(size_t t = 0; t <writer_thread_pool.size(); t++){
+    writer_thread_pool[t]->join();
+  }
+
+  for(size_t a = 0 ;a < to_be_freed.size();a++){
+    free(to_be_freed[a]);
+  }
+
+  return ret;
+}
+
+
+
+
 uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
   // throw all read
   // printf("AsyncMigrateExtents\n");
@@ -2281,7 +2441,9 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
   int read_reaped_n = 0;
   // io_context_t read_ioctx;
   // io_context_t ctx;
-  io_context_t read_ioctx = 0;;
+  io_context_t read_ioctx = 0;
+
+
   int extent_n = (int)extents.size();
   int read_fd=zbd_->GetFD(READ_FD);
   int err=io_queue_init(extent_n,&read_ioctx);
@@ -2419,6 +2581,8 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
 
   return ret;
 }
+
+
 IOStatus ZenFS::MigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
   IOStatus s;
