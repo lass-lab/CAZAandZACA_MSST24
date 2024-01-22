@@ -2323,7 +2323,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
     err=io_uring_submit(&read_ring);
-    if(err!=1){
+    if(err==-errno){
       printf("io_uring_submit err? %d\n",err);
     }
     index++;
@@ -2853,6 +2853,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
     // int result = io_uring_wait_cqe(&write_ring, &cqe); // success 0
     
     if(result!=0){
+      
       continue;
     }
     AsyncZoneCleaningIocb* reaped_write_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);

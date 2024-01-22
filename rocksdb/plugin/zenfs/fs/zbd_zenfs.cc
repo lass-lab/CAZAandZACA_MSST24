@@ -382,7 +382,11 @@ IOStatus Zone::ThrowAsyncUringZCWrite(io_uring* write_ring, AsyncZoneCleaningIoc
                 wp_);
 
   int res=io_uring_submit(write_ring);
-  if(res==1){
+  if(res==-errno){
+    printf("ThrowAsyncZCWrite res %d\n",res);
+    return IOStatus::IOError(strerror(errno));
+  }
+  // if(res==-errno){
 
     wp_+=wr_size;
     capacity_-=wr_size;
@@ -392,9 +396,8 @@ IOStatus Zone::ThrowAsyncUringZCWrite(io_uring* write_ring, AsyncZoneCleaningIoc
       printf("ThrowAsyncUringZCWrite error ? %lu mod 4096 = %lu",wp_,wp_%4096);
     }
     return IOStatus::OK();
-  }
-  printf("ThrowAsyncZCWrite res %d\n",res);
-  return IOStatus::IOError(strerror(errno));
+  // }
+
 }
 
 IOStatus Zone::Append(char *data, uint64_t size, bool zc) {
@@ -1232,11 +1235,12 @@ void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
       invalid_percent_per_zone[0]++;
       continue;
     }
+    
     uint64_t relative_wp = (z->wp_ -z->start_);
     uint64_t invalid_size = relative_wp - z->used_capacity_;
     uint64_t invalid_percent = (invalid_size*100)/(relative_wp) ;
     if(invalid_percent >100){
-      printf("?? %lu %lu %lu\n",relative_wp,invalid_size,invalid_percent);
+      printf("AddTimeLapse ?? %lu %lu %lu\n",relative_wp,invalid_size,invalid_percent);
       invalid_percent_per_zone[0]++;
       continue;
     }
