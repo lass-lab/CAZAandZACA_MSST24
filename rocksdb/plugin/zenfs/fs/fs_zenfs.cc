@@ -2732,10 +2732,15 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
   io_context_t write_ioctx = 0;
   int extent_n = (int)migrate_exts->size();
   int write_reaped_n = 0;
-  int err = io_queue_init(extent_n,&write_ioctx);
+  // int err = io_queue_init(extent_n,&write_ioctx);
+  io_uring write_ring;
+  int err=io_uring_queue_init(extent_n, &write_ring, 0);
+
   if(err){
-    printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
+    printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_uring_queue_init err %d %d",err,extent_n);
   }
+
+
   Info(logger_, "MigrateFileExtents, fname: %s, extent count: %lu",
        fname.data(), migrate_exts->size());
   
@@ -2748,7 +2753,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
   // Don't migrate open for write files and prevent write reopens while we
   // migrate
   if (!zfile->TryAcquireWRLock()) {
-    io_destroy(write_ioctx);
+    io_uring_queue_exit(&write_ring);
     return IOStatus::OK();
   }
 
@@ -2791,7 +2796,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
                               zfile->predicted_size_,
                               ext->length_,&run_gc_worker_,zfile->IsSST());
     if(!run_gc_worker_){
-      io_destroy(write_ioctx);
+      io_uring_queue_exit(&write_ring);
       zbd_->ReleaseMigrateZone(target_zone);
       return IOStatus::OK();
     }
@@ -2808,7 +2813,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
     // }
     ext->start_=target_start;
     ext->zone_ = target_zone;
-    target_zone->ThrowAsyncZCWrite(write_ioctx,*it);
+    target_zone->ThrowAsyncUringZCWrite(&write_ring,*it);
     extent_n++;
 
     target_zone->PushExtent(ext);
@@ -2833,28 +2838,17 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
   // struct io_event* write_events = new io_event[extent_n];
   struct io_event write_events[extent_n];
   while(write_reaped_n<extent_n){
-    int num_events;
-    struct timespec timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_nsec = 10000; // 100ms
-    // timeout.tv_sec = 0;
-    // timeout.tv_nsec = 1000000000; // 1000ms
-    int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
-    // write_reap_min_nr=1;
-
-    num_events = io_getevents(write_ioctx, write_reap_min_nr, extent_n, write_events,
-                              &timeout);
-    if(num_events<1){
-      continue;
-    }
-    write_reaped_n+=num_events;
+    struct io_uring_cqe* cqe = nullptr;
+    int result = io_uring_peek_cqe(&write_ring, &cqe);
+    write_reaped_n++;
+    io_uring_cqe_seen(&write_ring,cqe);
   }
 
     // sync it
     zbd_->AddGCBytesWritten(copied);
     SyncFileExtents(zfile.get(), new_extent_list);
     zfile->ReleaseWRLock();
-    io_destroy(write_ioctx);
+    io_uring_queue_exit(&write_ring);
   return IOStatus::OK();
 }
 
