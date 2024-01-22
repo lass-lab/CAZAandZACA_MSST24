@@ -375,6 +375,7 @@ IOStatus Zone::ThrowAsyncUringZCWrite(io_uring* write_ring, AsyncZoneCleaningIoc
   if(sqe==nullptr){
     printf("ThrowAsyncUringZCWrite sqe nullptr\n");
   }
+  io_uring_sqe_set_data(sqe,aiocb);
   io_uring_prep_write(sqe,zbd_->GetFD(WRITE_DIRECT_FD), 
                 aiocb->buffer_,
                 wr_size,

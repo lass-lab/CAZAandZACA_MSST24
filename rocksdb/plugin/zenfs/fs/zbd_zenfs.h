@@ -216,6 +216,7 @@ struct AsyncZoneCleaningIocb{
     uint64_t header_size_;
     std::string filename_;
     char* buffer_;
+    int index_;
 };
 
 class Zone {

@@ -2380,14 +2380,14 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
         file_extents[it.first.c_str()].clear();
         migration_done[it.first.c_str()]=true;
-        // writer_thread_pool.push_back(
-        //   new std::thread(&ZenFS::AsyncUringMigrateFileExtentsWorker,this,
-        //       it.first, &reaped_read_file_extents[it.first.c_str()]  )
-        //   );
         writer_thread_pool.push_back(
-          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+          new std::thread(&ZenFS::AsyncUringMigrateFileExtentsWorker,this,
               it.first, &reaped_read_file_extents[it.first.c_str()]  )
           );
+        // writer_thread_pool.push_back(
+        //   new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+        //       it.first, &reaped_read_file_extents[it.first.c_str()]  )
+        //   );
       }
 
 
@@ -2817,7 +2817,9 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
     // }
     ext->start_=target_start;
     ext->zone_ = target_zone;
+    // io_uring_sqe_set_data(sqe,(*it));
     target_zone->ThrowAsyncUringZCWrite(&write_ring,*it);
+    (*it)->index_=extent_n;
     extent_n++;
 
     target_zone->PushExtent(ext);
@@ -2846,9 +2848,13 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
  
     // int result = io_uring_peek_cqe(&write_ring, &cqe); // success 0 , polling
 
-        int result = io_uring_wait_cqe(&write_ring, &cqe); // success 0
+    int result = io_uring_wait_cqe(&write_ring, &cqe); // success 0
+    AsyncZoneCleaningIocb* reaped_write_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
     if(result!=0){
       continue;
+    }
+    if(reaped_write_iocb->index_!=write_reaped_n){
+      printf("[write_reaped_n %d]!= reaped_write_iocb->index_ %d extent_n %d",write_reaped_n,reaped_write_iocb->index_,extent_n);
     }
     write_reaped_n++;
     io_uring_cqe_seen(&write_ring,cqe);
