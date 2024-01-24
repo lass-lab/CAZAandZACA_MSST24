@@ -2627,7 +2627,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
     }else{
       thread_pool.push_back(
         new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
-            it.first, (it.second))
+            it.first, &(it.second))
         );
     }
 
@@ -3065,7 +3065,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       std::string fname,
-      std::vector<ZoneExtentSnapshot*> migrate_exts){
+      std::vector<ZoneExtentSnapshot*>* migrate_exts){
   IOStatus s;
   io_uring read_ring;
   io_context_t write_ioctx = 0;
@@ -3074,7 +3074,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   std::vector<AsyncZoneCleaningIocb*> to_be_freed;
   uint64_t copied = 0;
   int read_fd=zbd_->GetFD(READ_FD);
-  int extent_n = (int)migrate_exts.size();
+  int extent_n = (int)migrate_exts->size();
   unsigned flags = IORING_SETUP_SQPOLL;
   int err=io_uring_queue_init(extent_n, &read_ring, flags);
 
@@ -3103,7 +3103,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   }
 
 // read throw
-  for(auto* ext : migrate_exts){
+  for(auto* ext : (*migrate_exts)){
     struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
           new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
     to_be_freed.push_back(async_zc_read_iocb);
