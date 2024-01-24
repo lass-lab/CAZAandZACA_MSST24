@@ -3143,9 +3143,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     new_extent_list.push_back(new_ext);    
   }
   struct timespec timeout;
-  timeout.tv_sec = 0;
-  timeout.tv_nsec = 0;
-
+  struct __kernel_timespec kernel_timeout;
+  kernel_timeout.tv_sec=0;
+  kernel_timeout.tv_nsec=0;
 // read reap, write throw
   while(read_reaped_n < extent_n){
     struct io_uring_cqe* cqe = nullptr;
@@ -3156,7 +3156,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
 
-    int result = io_uring_wait_cqe_timeout(&read_ring, &cqe, &timeout);
+    int result = io_uring_wait_cqe_timeout(&read_ring, &cqe, &kernel_timeout);
     if(result!=0){
       continue;
     }
