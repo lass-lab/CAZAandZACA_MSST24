@@ -3186,9 +3186,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       std::vector<ZoneExtentSnapshot*>* migrate_exts,
       io_context_t* write_ioctx,
       io_uring* read_ring){
-  struct timespec start_timespec, end_timespec;
+  // struct timespec start_timespec, end_timespec;
 
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
   IOStatus s;
   // io_uring* read_ring= new io_uring;
@@ -3256,10 +3256,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       return IOStatus::OK();
     }
   }
-  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-  long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-  printf("read throw breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  // long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  // printf("read throw breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
   std::vector<ZoneExtent*> new_extent_list;
   std::vector<ZoneExtent*> extents = zfile->GetExtents(); // old ext
@@ -3369,10 +3369,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
   }
-  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-  printf("read reap, write throw breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  // printf("read reap, write throw breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
 
     timeout.tv_sec = 0;
@@ -3406,15 +3406,15 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   PushBackAsyncStructure(read_ring,write_ioctx);
 
 
-  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-  printf("write reap breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  // printf("write reap breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
 // sync
   // for(size_t a = 0 ;a < to_be_freed.size();a++){
   //   free(to_be_freed[a]);
   // }
 
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
   zfile->ReleaseWRLock();
@@ -3422,9 +3422,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   // io_uring_queue_exit(&read_ring);
   // io_destroy(write_ioctx);
 
-  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-  printf("cleanup breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  // printf("cleanup breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
   return IOStatus::OK();
 }
 
