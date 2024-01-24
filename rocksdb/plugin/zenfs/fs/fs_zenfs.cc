@@ -2660,14 +2660,14 @@ uint64_t ZenFS::AsyncMigrateExtents(
     io_context_t* write_ioctx=nullptr;
     write_ioctx= new io_context_t;
     if(write_ioctx==nullptr){
-      prinf("AsyncMigrateExtents write_ioctx == nullptr\n");
+      printf("AsyncMigrateExtents write_ioctx == nullptr\n");
     }
 
 
     io_uring* read_ring= nullptr;
     read_ring= new io_uring;
     if(write_ioctx==nullptr){
-      prinf("AsyncMigrateExtents read_ring == nullptr\n");
+      printf("AsyncMigrateExtents read_ring == nullptr\n");
     }
     if(zbd_->AsyncZCEnabled()>=2){ //single thread
 
@@ -2694,7 +2694,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
       }
     }else{
        std::thread* t=new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
-            it.first, &(it.second),write_ioctx, read_ring)
+            it.first, &(it.second),write_ioctx, read_ring);
       // AsyncWorker* async_worker = new AsyncWorker(t,write_ioctx,read_ring);
       thread_pool.emplace_back(t,write_ioctx,read_ring);
       // thread_pool.push_back(
