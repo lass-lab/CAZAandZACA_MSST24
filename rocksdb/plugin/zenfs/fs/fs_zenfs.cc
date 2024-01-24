@@ -3215,7 +3215,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       for(size_t a = 0 ;a < to_be_freed.size();a++){
         free(to_be_freed[a]);
       } 
-      io_uring_queue_exit(read_ring);
+      // io_uring_queue_exit(read_ring);
 
       return IOStatus::OK();
     }
