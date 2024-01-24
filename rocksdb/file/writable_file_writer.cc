@@ -520,7 +520,7 @@ IOStatus WritableFileWriter::WriteBuffered(
           writable_file_->GetIOPriority(), op_rate_limiter_priority);
   IOOptions io_options;
   io_options.rate_limiter_priority = rate_limiter_priority_used;
-
+  printf("WritableFileWriter::WriteBuffered size %lu\n",size);
   while (left > 0) {
     size_t allowed = left;
     if (rate_limiter_ != nullptr &&
@@ -529,7 +529,7 @@ IOStatus WritableFileWriter::WriteBuffered(
                                             rate_limiter_priority_used, stats_,
                                             RateLimiter::OpType::kWrite);
     }
-
+    printf("WritableFileWriter :: allowed %lu\n",allowed);
     {
       IOSTATS_TIMER_GUARD(write_nanos);
       TEST_SYNC_POINT("WritableFileWriter::Flush:BeforeAppend");
