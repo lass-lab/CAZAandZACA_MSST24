@@ -3345,9 +3345,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                                 cur_ext->length_,&run_gc_worker_,zfile->IsSST());
   
     if(!run_gc_worker_){
-      for(size_t a = 0 ;a < to_be_freed.size();a++){
-        free(to_be_freed[a]);
-      }
+      // for(size_t a = 0 ;a < to_be_freed.size();a++){
+      //   free(to_be_freed[a]);
+      // }
 
       // io_uring_queue_exit(read_ring);
       // io_destroy(*write_ioctx);
@@ -3409,6 +3409,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       if(reaped_write_iocb->filename_==fname){
         write_reaped_n++;
       }
+      free(reaped_write_iocb);
     }
     // write_reaped_n+=num_events;
   }
@@ -3419,9 +3420,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   printf("write reap breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
 // sync
-  for(size_t a = 0 ;a < to_be_freed.size();a++){
-    free(to_be_freed[a]);
-  }
+  // for(size_t a = 0 ;a < to_be_freed.size();a++){
+  //   free(to_be_freed[a]);
+  // }
 
   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   zbd_->AddGCBytesWritten(copied);
