@@ -2301,7 +2301,8 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     
 
   io_uring read_ring;
-  unsigned flags = IORING_SETUP_SQPOLL;
+  // unsigned flags = IORING_SETUP_SQPOLL;
+  unsigned flags = 0;
   int err=io_uring_queue_init(extent_n, &read_ring, flags);
 
 
