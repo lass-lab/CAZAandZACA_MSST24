@@ -2259,7 +2259,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
 
 
 uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
-  // throw all read
+
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   std::map<std::string, bool> migration_done;
@@ -2289,7 +2289,9 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   //  struct iocb* iocb_arr[extent_n];
   //  memset(iocb_arr, 0, sizeof(iocb_arr));
   // struct iocb* iocb_arr[extent_n];
-  int index = 0;
+  // int index = 0;
+
+  // throw all read
   for (auto* ext : extents) {
     
    
@@ -2324,7 +2326,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if(err==-errno){
       printf("io_uring_submit err? %d\n",err);
     }
-    index++;
+    // index++;
     file_extents[ext->filename].emplace_back(ext);
     migration_done[ext->filename]= false;
   }
@@ -3217,10 +3219,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     timeout.tv_nsec = 10000; // 100ms
     // timeout.tv_sec = 0;
     // timeout.tv_nsec = 1000000000; // 1000ms
-    int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
+    // int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
     // write_reap_min_nr=1;
 
-    num_events = io_getevents(write_ioctx, write_reap_min_nr, extent_n, write_events,
+    num_events = io_getevents(write_ioctx, 1, extent_n, write_events,
                               &timeout);
     if(num_events<1){
       continue;
