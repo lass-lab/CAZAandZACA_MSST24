@@ -2616,7 +2616,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   // uint64_t running_thread = 0;
   // uint64_t reaped_thread = 0;
 
-  for (const auto& it : file_extents) {
+  for (auto& it : file_extents) {
 
 
 
