@@ -2674,15 +2674,15 @@ uint64_t ZenFS::AsyncMigrateExtents(
     // write_ioctxes.push_back(write_ioctx);
 
     bool success=false;
-    while(success==false){
-      for(uint64_t n = 0 ;n <max_structure_n;n++){
-        if(read_ring_to_be_reap_[n].load()==0){
-          read_ring_to_be_reap_[n]=(uint64_t)read_ring;
-          success=true;
-          break;
-        }
-      }
-    }
+    // while(success==false){
+    //   for(uint64_t n = 0 ;n <max_structure_n;n++){
+    //     if(read_ring_to_be_reap_[n].load()==0){
+    //       read_ring_to_be_reap_[n]=(uint64_t)read_ring;
+    //       success=true;
+    //       break;
+    //     }
+    //   }
+    // }
     success=false;
     while(success==false){
       for(uint64_t n = 0 ;n <max_structure_n;n++){
@@ -3135,14 +3135,14 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 
 void ZenFS::BackgroundAsyncStructureCleaner(void){
   while(run_gc_worker_){
-    for(uint64_t ring_n = 0 ;ring_n<max_structure_n;ring_n++){
-      io_uring* ptr= (io_uring*)read_ring_to_be_reap_[ring_n].load();
-      if(ptr!=nullptr){
-        io_uring_queue_exit(ptr);
-        delete ptr;
-        read_ring_to_be_reap_[ring_n].store(0);
-      }
-    }
+    // for(uint64_t ring_n = 0 ;ring_n<max_structure_n;ring_n++){
+    //   io_uring* ptr= (io_uring*)read_ring_to_be_reap_[ring_n].load();
+    //   if(ptr!=nullptr){
+    //     io_uring_queue_exit(ptr);
+    //     delete ptr;
+    //     read_ring_to_be_reap_[ring_n].store(0);
+    //   }
+    // }
     for(uint64_t ioctx_n = 0 ;ioctx_n<max_structure_n;ioctx_n++){
       io_context_t* ptr=(io_context_t*)write_ioctx_to_be_reap_[ioctx_n].load();
       if(ptr!=nullptr){
