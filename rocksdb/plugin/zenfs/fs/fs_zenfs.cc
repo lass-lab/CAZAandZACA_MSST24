@@ -2632,6 +2632,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
     }
 
 
+
     if(!run_gc_worker_){
       for(size_t t = 0 ;t < thread_pool.size(); t++){
         thread_pool[t]->join();
@@ -2639,8 +2640,8 @@ uint64_t ZenFS::AsyncMigrateExtents(
       return ret;
     }
     
-
   }
+  printf("\n");
 
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     thread_pool[t]->join();
@@ -3080,33 +3081,25 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   int read_fd=zbd_->GetFD(READ_FD);
   int extent_n = (int)migrate_exts->size();
   unsigned flags = IORING_SETUP_SQPOLL;
-  int err=io_uring_queue_init(extent_n, &read_ring, flags);
-  
+
  
-  if(err){
-    printf("\t\t\tAsyncMigrateFileExtentsWorker io_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
-  }
-  err = io_queue_init(extent_n,&write_ioctx);
-  if(err){
-    printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
-  }
+
+
 
   // The file may be deleted by other threads, better double check.
   auto zfile = GetFile(fname);
   if (zfile == nullptr) {
-    io_uring_queue_exit(&read_ring);
-    io_destroy(write_ioctx);
+    // io_uring_queue_exit(&read_ring);
     return IOStatus::OK();
   }
 
+  int err=io_uring_queue_init(extent_n, &read_ring, flags);
+  if(err){
+    printf("\t\t\tAsyncMigrateFileExtentsWorker io_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
+  }
+  
   // Don't migrate open for write files and prevent write reopens while we
   // migrate
-  if (!zfile->TryAcquireWRLock()) {
-
-    io_uring_queue_exit(&read_ring);
-    io_destroy(write_ioctx);
-    return IOStatus::OK();
-  }
 
 // read throw
   for(auto* ext : (*migrate_exts)){
@@ -3120,14 +3113,16 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                       async_zc_read_iocb->start_-async_zc_read_iocb->header_size_);
     io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
     err=io_uring_submit(&read_ring);
-
+    if(err==-errno){
+      printf("io_uring_submit err? %d\n",err);
+    }
     if (GetFileNoLock(fname) == nullptr) {
       Info(logger_, "Migrate file not exist anymore.");
       for(size_t a = 0 ;a < to_be_freed.size();a++){
         free(to_be_freed[a]);
       } 
       io_uring_queue_exit(&read_ring);
-      io_destroy(write_ioctx);
+
       return IOStatus::OK();
     }
   }
@@ -3153,17 +3148,31 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   struct __kernel_timespec kernel_timeout;
   kernel_timeout.tv_sec=0;
   kernel_timeout.tv_nsec=0;
+  (void)(kernel_timeout);
+
+
 // read reap, write throw
+  if (!zfile->TryAcquireWRLock()) {
+    io_uring_queue_exit(&read_ring);
+    return IOStatus::OK();
+  }
+
+  err = io_queue_init(extent_n,&write_ioctx);
+
+  if(err){
+    printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
+  }
+
   while(read_reaped_n < extent_n){
     struct io_uring_cqe* cqe = nullptr;
 
 
     // int result = io_uring_wait_cqe(&read_ring, &cqe);
-    // int result = io_uring_peek_cqe(&read_ring, &cqe);
+    int result = io_uring_peek_cqe(&read_ring, &cqe);
 
 
 
-    int result = io_uring_wait_cqe_timeout(&read_ring, &cqe, &kernel_timeout);
+    // int result = io_uring_wait_cqe_timeout(&read_ring, &cqe, &kernel_timeout);
     if(result!=0){
       continue;
     }
@@ -3225,6 +3234,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     if (GetFileNoLock(fname) == nullptr) {
       Info(logger_, "Migrate file not exist anymore.");
       zbd_->ReleaseMigrateZone(target_zone);
+      zfile->ReleaseWRLock();
       break;
     }
     zbd_->ReleaseMigrateZone(target_zone);
