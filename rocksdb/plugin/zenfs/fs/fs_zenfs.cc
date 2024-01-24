@@ -3156,7 +3156,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
 
-    int result = io_uring_wait_cqe_timeout(&ring, &cqe, &timeout);
+    int result = io_uring_wait_cqe_timeout(&read_ring, &cqe, &timeout);
     if(result!=0){
       continue;
     }
