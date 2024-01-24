@@ -2666,25 +2666,13 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
   for (auto& it : file_extents) {
 
-    // bool success=false;
     io_context_t* write_ioctx=nullptr;
-    // write_ioctx= new io_context_t;
-    // if(write_ioctx==nullptr){
-    //   printf("AsyncMigrateExtents write_ioctx == nullptr\n");
-    // }
-
-
     io_uring* read_ring= nullptr;
+    
     int err=GetAsyncStructure(&read_ring,&write_ioctx);
     if(err){
       printf("GetAsyncStructure Err @@@\n");
     }
-    // read_ring= new io_uring;
-    
-    // if(write_ioctx==nullptr){
-    //   printf("AsyncMigrateExtents read_ring == nullptr\n");
-    // }
-
 
     if(zbd_->AsyncZCEnabled()>=2){ //single thread
 

@@ -211,8 +211,8 @@ class ZenFS : public FileSystemWrapper {
       err= io_uring_queue_init(1000, ret_read_ring, flags);
       if(err){
         printf("\t\t\tGetAsyncStructure io_uring_queue_init error@@@@@ %d \n",err);
+        return err;
       }
-      return err;
     }else{
       ret_read_ring=io_uring_queue_.front();
       io_uring_queue_.pop();
