@@ -191,8 +191,8 @@ class ZenFS : public FileSystemWrapper {
   std::condition_variable async_zc_wake_up_cv_;
 
   uint64_t max_structure_n = 1000;
-  io_uring* read_ring_to_be_reap_[1000];
-  io_context_t* write_ioctx_to_be_reap_[1000];
+  std::atomic<uint64_t> read_ring_to_be_reap_[1000];
+  std::atomic<uint64_t> write_ioctx_to_be_reap_[1000];
 
   struct ZenFSMetadataWriter : public MetadataWriter {
     ZenFS* zenFS;
