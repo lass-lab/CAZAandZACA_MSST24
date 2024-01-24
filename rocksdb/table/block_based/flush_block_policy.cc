@@ -43,7 +43,7 @@ class FlushBlockBySizePolicy : public FlushBlockPolicy {
     }
 
     auto curr_size = data_block_builder_.CurrentSizeEstimate();
-
+    printf("FlushBlockBySizePolicy::Update  curr_size %lu block_size_ %lu block_size_deviation_limit_%lu\n",curr_size,block_size_,block_size_deviation_limit_)
     // Do flush if one of the below two conditions is true:
     // 1) if the current estimated size already exceeds the block size,
     // 2) block_size_deviation is set and the estimated size after appending
