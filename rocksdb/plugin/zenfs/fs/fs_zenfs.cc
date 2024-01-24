@@ -987,7 +987,7 @@ IOStatus ZenFS::DeleteFileNoLock(std::string fname, const IOOptions& options,
     } else {
       if (zoneFile->GetNrLinks() > 0) return s;
       /* Mark up the file as deleted so it won't be migrated by GC */
-      printf("\t\t\t\t%s : extent n : %lu\n",fname.c_str(),zoneFile->extents_.size());
+      // printf("\t\t\t\t%s : extent n : %lu\n",fname.c_str(),zoneFile->extents_.size());
       zoneFile->SetDeleted();
       zoneFile.reset();
     }
@@ -2383,14 +2383,14 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
         file_extents[it.first.c_str()].clear();
         migration_done[it.first.c_str()]=true;
-        writer_thread_pool.push_back(
-          new std::thread(&ZenFS::AsyncUringMigrateFileExtentsWorker,this,
-              it.first, &reaped_read_file_extents[it.first.c_str()]  )
-          );
         // writer_thread_pool.push_back(
-        //   new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+        //   new std::thread(&ZenFS::AsyncUringMigrateFileExtentsWorker,this,
         //       it.first, &reaped_read_file_extents[it.first.c_str()]  )
         //   );
+        writer_thread_pool.push_back(
+          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+              it.first, &reaped_read_file_extents[it.first.c_str()]  )
+          );
       }
 
 
