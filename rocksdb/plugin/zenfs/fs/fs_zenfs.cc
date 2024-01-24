@@ -2696,7 +2696,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
        std::thread* t=new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
             it.first, &(it.second),write_ioctx, read_ring);
       // AsyncWorker* async_worker = new AsyncWorker(t,write_ioctx,read_ring);
-      thread_pool.emplace_back(t,write_ioctx,read_ring);
+      thread_pool.emplace_back(new AsyncWorker(t,write_ioctx,read_ring));
       // thread_pool.push_back(
       //   new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
       //       it.first, &(it.second),write_ioctx, read_ring)
