@@ -3153,6 +3153,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     }
     Zone* target_zone=nullptr;
     ZoneExtent* cur_ext = (*it);
+
     s = zbd_->TakeMigrateZone(zfile->smallest_,zfile->largest_,zfile->level_, &target_zone, zfile->GetWriteLifeTimeHint(),
                                 zfile->predicted_size_,
                                 cur_ext->length_,&run_gc_worker_,zfile->IsSST());
@@ -3173,8 +3174,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
     target_zone->ThrowAsyncZCWrite(write_ioctx,reaped_read_iocb);
     target_zone->PushExtent(cur_ext);
-    ext->zone_->used_capacity_ += ext->length_;
-    copied+=ext->length_;
+    cur_ext->zone_->used_capacity_ += cur_ext->length_;
+    copied+=cur_ext->length_;
     read_reaped_n++;
 
     if (GetFileNoLock(fname) == nullptr) {
