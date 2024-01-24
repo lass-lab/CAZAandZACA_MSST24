@@ -3210,7 +3210,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   // *ret_read_ring=read_ring;
   int write_reaped_n = 0;
   int read_reaped_n = 0;
-  std::vector<AsyncZoneCleaningIocb*> to_be_freed;
+  // std::vector<AsyncZoneCleaningIocb*> to_be_freed;
   uint64_t copied = 0;
   int read_fd=zbd_->GetFD(READ_FD);
   int extent_n = (int)migrate_exts->size();
@@ -3247,7 +3247,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   for(auto* ext : (*migrate_exts)){
     struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
           new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
-    to_be_freed.push_back(async_zc_read_iocb);
+    // to_be_freed.push_back(async_zc_read_iocb);
     struct io_uring_sqe *sqe = io_uring_get_sqe(read_ring);
     io_uring_sqe_set_data(sqe,async_zc_read_iocb);
     io_uring_prep_read(sqe,read_fd,async_zc_read_iocb->buffer_,
@@ -3260,9 +3260,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     }
     if (GetFileNoLock(fname) == nullptr) {
       Info(logger_, "Migrate file not exist anymore.");
-      for(size_t a = 0 ;a < to_be_freed.size();a++){
-        free(to_be_freed[a]);
-      } 
+      // for(size_t a = 0 ;a < to_be_freed.size();a++){
+      //   free(to_be_freed[a]);
+      // } 
       // io_uring_queue_exit(read_ring);
 
       return IOStatus::OK();
