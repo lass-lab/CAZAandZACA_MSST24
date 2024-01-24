@@ -771,7 +771,7 @@ class ZonedBlockDevice {
     return async_zc_enabled_;
   }
   uint64_t GetDefaultExtentSize(){
-    return default_extent_size;
+    return default_extent_size_;
   }
 
   int GetFD(int i) {
