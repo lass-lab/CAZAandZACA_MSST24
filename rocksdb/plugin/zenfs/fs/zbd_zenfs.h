@@ -34,7 +34,7 @@
 #include "rocksdb/comparator.h"
 #include <libaio.h>
 #include <liburing.h>
-
+#include <queue>
 namespace ROCKSDB_NAMESPACE {
 
 class ZonedBlockDevice;
