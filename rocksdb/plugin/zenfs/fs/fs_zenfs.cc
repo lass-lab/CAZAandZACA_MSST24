@@ -485,7 +485,14 @@ size_t ZenFS::ZoneCleaning(bool forced){
     Info(logger_, "Garbage collecting %d extents \n",
          (int)migrate_exts.size());
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-    s = MigrateExtents(migrate_exts);
+    
+    if(zbd_->AsyncZCEnabled()){
+        // AsyncZoneCleaning();
+        AsyncMigrateExtents(migrate_exts);
+    }else{
+        MigrateExtents(migrate_exts);
+    }
+
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
 
     if(!run_gc_worker_){
@@ -702,11 +709,11 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
             ){
         zbd_->SetZCRunning(true);  
         before_free_percent=free_percent_;
-        if(zbd_->AsyncZCEnabled()){
-          AsyncZoneCleaning();
-        }else{
-          ZoneCleaning(force);
-        }
+        // if(zbd_->AsyncZCEnabled()){
+        //   AsyncZoneCleaning();
+        // }else{
+        ZoneCleaning(force);
+        // }
         zbd_->ResetUnusedIOZones();
         free_percent_ = zbd_->CalculateFreePercent();
         force=(before_free_percent==free_percent_);
