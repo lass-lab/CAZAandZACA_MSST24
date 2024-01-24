@@ -3146,7 +3146,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
 
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       std::string fname,
-      std::vector<ZoneExtentSnapshot*>* migrate_exts
+      std::vector<ZoneExtentSnapshot*>* migrate_exts,
       io_context_t* write_ioctx,
       io_uring* read_ring){
   struct timespec start_timespec, end_timespec;
