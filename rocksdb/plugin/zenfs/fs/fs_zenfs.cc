@@ -3142,6 +3142,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     new_ext->zone_=ext->zone_;
     new_extent_list.push_back(new_ext);    
   }
+  struct timespec timeout;
+  timeout.tv_sec = 0;
+  timeout.tv_nsec = 0;
 
 // read reap, write throw
   while(read_reaped_n < extent_n){
@@ -3149,7 +3152,11 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
     // int result = io_uring_wait_cqe(&read_ring, &cqe);
-    int result = io_uring_peek_cqe(&read_ring, &cqe);
+    // int result = io_uring_peek_cqe(&read_ring, &cqe);
+
+
+
+    int result = io_uring_wait_cqe_timeout(&ring, &cqe, &timeout);
     if(result!=0){
       continue;
     }
@@ -3221,14 +3228,14 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
 
-
+    timeout.tv_sec = 0;
+    timeout.tv_nsec = 10000; // 100us
 // write reap
   struct io_event write_events[extent_n];
   while(write_reaped_n<read_reaped_n){
     int num_events;
-    struct timespec timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_nsec = 10000; // 100us
+    // timeout;
+
     // timeout.tv_sec = 0;
     // timeout.tv_nsec = 1000000000; // 1000ms
     // int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
