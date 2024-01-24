@@ -1136,7 +1136,7 @@ ZonedWritableFile::ZonedWritableFile(ZonedBlockDevice* zbd, bool _buffered,
   sparse_buffer = nullptr;
   buffer = nullptr;
 
-  uint64_t default_buffer_size = zbd_->GetDefaultExtentSize();
+  uint64_t default_buffer_size = zbd->GetDefaultExtentSize();
 
   if (buffered) {
     if (zoneFile->IsSparse()) {
