@@ -3066,6 +3066,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       std::string fname,
       std::vector<ZoneExtentSnapshot*>* migrate_exts){
+  struct timespec start_timespec, end_timespec;
+
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+
   IOStatus s;
   io_uring read_ring;
   io_context_t write_ioctx = 0;
@@ -3077,7 +3081,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   int extent_n = (int)migrate_exts->size();
   unsigned flags = IORING_SETUP_SQPOLL;
   int err=io_uring_queue_init(extent_n, &read_ring, flags);
-
+  
+ 
   if(err){
     printf("\t\t\tAsyncMigrateFileExtentsWorker io_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
   }
@@ -3126,8 +3131,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       return IOStatus::OK();
     }
   }
-
-
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  printf("read throw breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
   std::vector<ZoneExtent*> new_extent_list;
   std::vector<ZoneExtent*> extents = zfile->GetExtents(); // old ext
@@ -3224,8 +3231,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
   }
-
-
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  printf("read reap, write throw breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
 
     timeout.tv_sec = 0;
@@ -3249,7 +3258,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     write_reaped_n+=num_events;
   }
 
-
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  printf("write reap breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
 // sync
   for(size_t a = 0 ;a < to_be_freed.size();a++){
     free(to_be_freed[a]);
