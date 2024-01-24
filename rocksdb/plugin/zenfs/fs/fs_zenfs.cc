@@ -500,7 +500,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       zbd_->ZCorPartialUnLock();
       return 0;
     }
-    zc_triggerd_count_.fetch_add(1);
+
     if (!s.ok()) {
       Error(logger_, "Garbage collection failed");
     }
@@ -515,6 +515,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
                           migrate_zones_start.size(),should_be_copied, forced);
     }
+    zc_triggerd_count_.fetch_add(1);
   }
   // zbd_->SetZCRunning(false);
   // for(size_t i = 0; i<zone_read_locks.size();i++){
@@ -2301,8 +2302,8 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     
 
   io_uring read_ring;
-  // unsigned flags = IORING_SETUP_SQPOLL;
-  unsigned flags = 0;
+  unsigned flags = IORING_SETUP_SQPOLL;
+  // unsigned flags = 0;
   int err=io_uring_queue_init(extent_n, &read_ring, flags);
 
 
