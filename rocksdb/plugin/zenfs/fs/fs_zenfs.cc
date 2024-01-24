@@ -2623,7 +2623,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
 
     if(zbd_->AsyncZCEnabled()>=2){
-      AsyncMigrateFileExtentsWorker(it.first,it.second);
+      AsyncMigrateFileExtentsWorker(it.first,&(it.second));
     }else{
       thread_pool.push_back(
         new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
