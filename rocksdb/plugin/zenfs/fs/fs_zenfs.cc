@@ -3144,8 +3144,9 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
     }
     for(uint64_t ioctx_n = 0 ;ioctx_n<max_structure_n;ioctx_n++){
       if(write_ioctx_to_be_reap_[ioctx_n].load()!=0){
-        io_destroy((* ((io_context_t*)write_ioctx_to_be_reap_[ioctx_n]) ));
-        delete (io_context_t*)write_ioctx_to_be_reap_[ioctx_n];
+        io_context_t* ptr=(io_context_t*)write_ioctx_to_be_reap_[ioctx_n];
+        io_destroy((*ptr));
+        delete ptr;
         write_ioctx_to_be_reap_[ioctx_n]=0;
       }
     }
