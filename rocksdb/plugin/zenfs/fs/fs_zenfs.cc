@@ -2620,16 +2620,18 @@ uint64_t ZenFS::AsyncMigrateExtents(
           );
     // if (!s.ok()) break;
     if(!run_gc_worker_){
-      // return IOStatus::OK();
+      for(size_t t = 0 ;t < thread_pool.size(); t++){
+        thread_pool[t]->join();
+      }
       return ret;
     }
     
     // if (!s.ok()) break;
   }
+
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     thread_pool[t]->join();
   }
-
   s=zbd_->ResetUnusedIOZones();
   return ret;
 }
