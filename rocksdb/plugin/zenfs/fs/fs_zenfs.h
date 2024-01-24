@@ -214,7 +214,7 @@ class ZenFS : public FileSystemWrapper {
       }
       return err;
     }else{
-      ret_read_ring=io_uring_queue_.top();
+      ret_read_ring=io_uring_queue_.front();
       io_uring_queue_.pop();
     }
 
@@ -227,7 +227,7 @@ class ZenFS : public FileSystemWrapper {
         return err;
       }
     }else{
-      ret_write_ioctx=io_ctx_queue_.top();
+      ret_write_ioctx=io_ctx_queue_.front();
       io_ctx_queue_.pop();
     }
 
