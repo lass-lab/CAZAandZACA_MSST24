@@ -3290,11 +3290,15 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     free(to_be_freed[a]);
   }
 
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
   zfile->ReleaseWRLock();
   io_uring_queue_exit(&read_ring);
   io_destroy(write_ioctx);
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  printf("cleanup breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
   return IOStatus::OK();
 }
 
