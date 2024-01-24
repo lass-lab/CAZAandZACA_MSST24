@@ -2725,7 +2725,8 @@ uint64_t ZenFS::AsyncMigrateExtents(
   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
   for(size_t t = 0 ;t < thread_pool.size(); t++){
-    thread_pool[t]->join();
+    // thread_pool[t]->join();
+    delete thread_pool;
   }
   s=zbd_->ResetUnusedIOZones();
   elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
