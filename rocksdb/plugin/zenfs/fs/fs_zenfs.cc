@@ -2666,7 +2666,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
   for (auto& it : file_extents) {
 
-    bool success=false;
+    // bool success=false;
     io_context_t* write_ioctx=nullptr;
     // write_ioctx= new io_context_t;
     // if(write_ioctx==nullptr){
@@ -3226,7 +3226,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     // io_uring_queue_exit(&read_ring);
     return IOStatus::OK();
   }
-
+  int err;
   ///////////////////
   // unsigned flags = IORING_SETUP_SQPOLL;
   // int err=io_uring_queue_init(extent_n, read_ring, flags);
