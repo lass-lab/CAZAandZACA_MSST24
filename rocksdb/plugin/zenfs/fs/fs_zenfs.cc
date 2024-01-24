@@ -1990,7 +1990,7 @@ Status ZenFS::Mount(bool readonly) {
     }
 
     if(async_cleaner_worker_==nullptr){
-      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this))
+      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this));
     }
 
   }
