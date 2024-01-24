@@ -3136,18 +3136,19 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 void ZenFS::BackgroundAsyncStructureCleaner(void){
   while(run_gc_worker_){
     for(uint64_t ring_n = 0 ;ring_n<max_structure_n;ring_n++){
-      if(read_ring_to_be_reap_[ring_n].load()!=0){
-        io_uring_queue_exit((io_uring*)read_ring_to_be_reap_[ring_n]);
-        delete (io_uring*)read_ring_to_be_reap_[ring_n];
-        read_ring_to_be_reap_[ring_n]=0;
+      io_uring* ptr= (io_uring*)read_ring_to_be_reap_[ring_n].load();
+      if(ptr!=nullptr){
+        io_uring_queue_exit(ptr);
+        delete ptr;
+        read_ring_to_be_reap_[ring_n].store(0);
       }
     }
     for(uint64_t ioctx_n = 0 ;ioctx_n<max_structure_n;ioctx_n++){
-      if(write_ioctx_to_be_reap_[ioctx_n].load()!=0){
-        io_context_t* ptr=(io_context_t*)write_ioctx_to_be_reap_[ioctx_n];
+      io_context_t* ptr=(io_context_t*)write_ioctx_to_be_reap_[ioctx_n].load();
+      if(ptr!=nullptr){
         io_destroy((*ptr));
         delete ptr;
-        write_ioctx_to_be_reap_[ioctx_n]=0;
+        write_ioctx_to_be_reap_[ioctx_n].store(0);
       }
     }
   }
