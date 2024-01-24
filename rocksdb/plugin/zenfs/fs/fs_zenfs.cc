@@ -3148,7 +3148,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                            });
 
     if (it == new_extent_list.end()) {
-      Info(logger_, "Migrate extent not found, ext_start: %lu", read_reaped_n->start_);
+      Info(logger_, "Migrate extent not found, ext_start: %lu", reaped_read_iocb->start_);
       continue;
     }
     Zone* target_zone=nullptr;
