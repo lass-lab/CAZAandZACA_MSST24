@@ -3172,7 +3172,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     cur_ext->zone_= target_zone;
 
     target_zone->ThrowAsyncZCWrite(write_ioctx,reaped_read_iocb);
-    target_zone->PushExtent(ext);
+    target_zone->PushExtent(cur_ext);
     ext->zone_->used_capacity_ += ext->length_;
     copied+=ext->length_;
     read_reaped_n++;
