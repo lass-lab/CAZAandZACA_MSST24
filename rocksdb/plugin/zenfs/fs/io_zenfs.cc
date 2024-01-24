@@ -1136,12 +1136,14 @@ ZonedWritableFile::ZonedWritableFile(ZonedBlockDevice* zbd, bool _buffered,
   sparse_buffer = nullptr;
   buffer = nullptr;
 
+  uint64_t default_buffer_size = 256<<20;
+
   if (buffered) {
     if (zoneFile->IsSparse()) {
       size_t sparse_buffer_sz;
 
       sparse_buffer_sz =
-          1024 * 1024 + block_sz; /* one extra block size for padding */
+          default_buffer_size + block_sz; /* one extra block size for padding */
       int ret = posix_memalign((void**)&sparse_buffer, sysconf(_SC_PAGESIZE),
                                sparse_buffer_sz);
 
@@ -1152,7 +1154,7 @@ ZonedWritableFile::ZonedWritableFile(ZonedBlockDevice* zbd, bool _buffered,
       buffer_sz = sparse_buffer_sz - ZoneFile::SPARSE_HEADER_SIZE - block_sz;
       buffer = sparse_buffer + ZoneFile::SPARSE_HEADER_SIZE;
     } else {
-      buffer_sz = 1024 * 1024;
+      buffer_sz = default_buffer_size;
       int ret =
           posix_memalign((void**)&buffer, sysconf(_SC_PAGESIZE), buffer_sz);
 
