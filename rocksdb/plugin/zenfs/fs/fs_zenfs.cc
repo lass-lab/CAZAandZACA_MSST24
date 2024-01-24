@@ -3349,9 +3349,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     cur_ext->header_size_=(*it)->header_size_;
     cur_ext->start_=target_start;
     cur_ext->zone_= target_zone;
-    reaped_read_iocb->iocb_.data=reaped_read_iocb;
+    // reaped_read_iocb->iocb_.data=reaped_read_iocb;
 
-    
+
     target_zone->ThrowAsyncZCWrite((*write_ioctx),reaped_read_iocb);
 
     target_zone->PushExtent(cur_ext);
@@ -3398,8 +3398,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       AsyncZoneCleaningIocb* reaped_write_iocb = static_cast<AsyncZoneCleaningIocb*>(event.data);
       if(reaped_write_iocb&&reaped_write_iocb->filename_==fname){
         write_reaped_n++;
+        free(reaped_write_iocb);
       }
-      free(reaped_write_iocb);
     }
     // write_reaped_n+=num_events;
   }
