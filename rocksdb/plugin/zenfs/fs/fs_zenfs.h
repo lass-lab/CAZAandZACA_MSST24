@@ -156,6 +156,8 @@ class ZenFS : public FileSystemWrapper {
 
   std::unique_ptr<std::thread> bg_stats_worker_ = nullptr;
 
+  std::unique_ptr<std::thread> async_cleaner_worker_=nullptr;
+
   uint64_t free_percent_ = 100;
   int ZC_not_working = 0;
   bool run_gc_worker_ = false;
@@ -180,11 +182,17 @@ class ZenFS : public FileSystemWrapper {
 
 
 
+
+
   
   bool async_zc_done_ = false;
   std::mutex async_zc_wake_up_mutex_;
   bool async_zc_reader_done_=false;
   std::condition_variable async_zc_wake_up_cv_;
+
+  uint64_t max_structure_n = 1000;
+  io_uring* read_ring_to_be_reap_[1000];
+  io_context_t* write_ioctx_to_be_reap_[1000];
 
   struct ZenFSMetadataWriter : public MetadataWriter {
     ZenFS* zenFS;
@@ -566,6 +574,8 @@ ret:
 
   void BackgroundStatTimeLapse();
 
+  void BackgroundAsyncStructureCleaner();
+
   void GetZenFSSnapshot(ZenFSSnapshot& snapshot,
                         const ZenFSSnapshotOptions& options);
   
@@ -582,7 +592,10 @@ ret:
       const std::vector<ZoneExtentSnapshot*>& migrate_exts);
   IOStatus AsyncMigrateFileExtentsWorker(
       std::string fname,
-      std::vector<ZoneExtentSnapshot*>* migrate_exts);
+      std::vector<ZoneExtentSnapshot*>* migrate_exts,
+            io_context_t* write_ioctx,
+             io_uring* read_ring
+            );
 
   IOStatus MigrateFileExtentsWorker(
     std::string fname,

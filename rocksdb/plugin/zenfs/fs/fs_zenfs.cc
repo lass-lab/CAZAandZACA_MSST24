@@ -253,6 +253,11 @@ ZenFS::ZenFS(ZonedBlockDevice* zbd, std::shared_ptr<FileSystem> aux_fs,
   metadata_writer_.zenFS = this;
   zbd_->SetFSptr(this);
   printf("zenfs ptr %p\n",this);
+  //   io_uring* read_ring_to_be_reap_[1000];
+  // io_context_t* write_ioctx_to_be_reap_[1000];
+
+  memset(read_ring_to_be_reap_,0,sizeof(read_ring_to_be_reap_));
+  memset(write_ioctx_to_be_reap_,0,sizeof(write_ioctx_to_be_reap_));
   // printf("Reset scheme :: %d\n",reset_scheme_);
 }
 
@@ -278,9 +283,14 @@ ZenFS::~ZenFS() {
   if(bg_partial_reset_worker_){
     bg_partial_reset_worker_->join();
   }
+  if(async_cleaner_worker_){
+    async_cleaner_worker_->join();
+  }
   if (gc_worker_) {
     gc_worker_->join();
   }
+
+
 
 
 
@@ -1978,6 +1988,11 @@ Status ZenFS::Mount(bool readonly) {
     if(bg_stats_worker_==nullptr){
         bg_stats_worker_.reset(new std::thread(&ZenFS::BackgroundStatTimeLapse, this));
     }
+
+    if(async_cleaner_worker_==nullptr){
+      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this))
+    }
+
   }
 
   LogFiles();
@@ -2521,6 +2536,7 @@ uint64_t ZenFS::AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& 
 
 
     // throw write
+
     for (const auto& it : file_extents) {
       if( migration_done[it.first.c_str()]==false &&
         it.second.size() == reaped_read_file_extents[it.first.c_str()].size() ){
@@ -2534,10 +2550,12 @@ uint64_t ZenFS::AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& 
 
 
 
+
         writer_thread_pool.push_back(
           new std::thread(&ZenFS::AsyncMigrateFileExtentsWriteWorker,this,
-              it.first, &reaped_read_file_extents[it.first.c_str()]  )
+              it.first, &reaped_read_file_extents[it.first.c_str()])
           );
+
         // AsyncMigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
 
         // MigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
@@ -2623,21 +2641,49 @@ uint64_t ZenFS::AsyncMigrateExtents(
   printf("prepare breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
   
   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+
+    // std::vector<io_context_t*> write_ioctxes;
+    // std::vector<read_ring*> read_rings;
+
   for (auto& it : file_extents) {
 
+    io_context_t* write_ioctx = new io_context_t;
 
-
+    io_uring* read_ring= new io_uring;
 
 
     if(zbd_->AsyncZCEnabled()>=2){
-      AsyncMigrateFileExtentsWorker(it.first,&(it.second));
+      AsyncMigrateFileExtentsWorker(it.first,&(it.second),
+     write_ioctx, read_ring);
     }else{
       thread_pool.push_back(
         new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
             it.first, &(it.second))
         );
     }
+    // read_rings.push_back(read_ring);
+    // write_ioctxes.push_back(write_ioctx);
 
+    bool success=false;
+    while(success==false){
+      for(uint64_t n = 0 ;n <max_structure_n;n++){
+        if(read_ring_to_be_reap_[n]==nullptr){
+          read_ring_to_be_reap_[n]=read_ring;
+          success=true;
+          break;
+        }
+      }
+    }
+    success=false;
+    while(success==false){
+      for(uint64_t n = 0 ;n <max_structure_n;n++){
+        if(write_ioctx_to_be_reap_[n]==nullptr){
+          write_ioctx_to_be_reap_[n]=write_ioctx;
+          success=true;
+          break;
+        }
+      }
+    }
 
 
     if(!run_gc_worker_){
@@ -3078,16 +3124,41 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
   return IOStatus::OK();
 }
 
+void ZenFS::BackgroundAsyncStructureCleaner(void){
+  while(run_gc_worker_){
+    for(uint64_t ring_n = 0 ;ring_n<max_structure_n;ring_n++){
+      if(read_ring_to_be_reap_[ring_n]!=nullptr){
+        io_uring_queue_exit(read_ring_to_be_reap_[ring_n]);
+        delete read_ring_to_be_reap_[ring_n];
+        read_ring_to_be_reap_[ring_n]=nullptr;
+      }
+    }
+    for(uint64_t ioctx_n = 0 ;ioctx_n<max_structure_n;ioctx_n++){
+      if(write_ioctx_to_be_reap_[ioctx_n]!=nullptr){
+        io_destroy((*write_ioctx_to_be_reap_[ioctx_n]));
+        delete write_ioctx_to_be_reap_[ioctx_n];
+        write_ioctx_to_be_reap_[ioctx_n]=nullptr;
+      }
+    }
+  }
+}
+
+
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       std::string fname,
-      std::vector<ZoneExtentSnapshot*>* migrate_exts){
+      std::vector<ZoneExtentSnapshot*>* migrate_exts
+      io_context_t* write_ioctx,
+      io_uring* read_ring){
   struct timespec start_timespec, end_timespec;
 
   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
   IOStatus s;
-  io_uring read_ring;
-  io_context_t write_ioctx = 0;
+  // io_uring* read_ring= new io_uring;
+  // io_context_t* write_ioctx = new io_context_t;
+
+  // *ret_write_ioctx=write_ioctx;
+  // *ret_read_ring=read_ring;
   int write_reaped_n = 0;
   int read_reaped_n = 0;
   std::vector<AsyncZoneCleaningIocb*> to_be_freed;
@@ -3107,7 +3178,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     return IOStatus::OK();
   }
 
-  int err=io_uring_queue_init(extent_n, &read_ring, flags);
+  int err=io_uring_queue_init(extent_n, read_ring, flags);
   if(err){
     printf("\t\t\tAsyncMigrateFileExtentsWorker io_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
   }
@@ -3120,13 +3191,13 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
           new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
     to_be_freed.push_back(async_zc_read_iocb);
-    struct io_uring_sqe *sqe = io_uring_get_sqe(&read_ring);
+    struct io_uring_sqe *sqe = io_uring_get_sqe(read_ring);
     io_uring_sqe_set_data(sqe,async_zc_read_iocb);
     io_uring_prep_read(sqe,read_fd,async_zc_read_iocb->buffer_,
                       async_zc_read_iocb->length_+async_zc_read_iocb->header_size_,
                       async_zc_read_iocb->start_-async_zc_read_iocb->header_size_);
     io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
-    err=io_uring_submit(&read_ring);
+    err=io_uring_submit(read_ring);
     if(err==-errno){
       printf("io_uring_submit err? %d\n",err);
     }
@@ -3135,7 +3206,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       for(size_t a = 0 ;a < to_be_freed.size();a++){
         free(to_be_freed[a]);
       } 
-      io_uring_queue_exit(&read_ring);
+      io_uring_queue_exit(read_ring);
 
       return IOStatus::OK();
     }
@@ -3167,11 +3238,11 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 // read reap, write throw
   if (!zfile->TryAcquireWRLock()) {
-    io_uring_queue_exit(&read_ring);
+    // io_uring_queue_exit(read_ring);
     return IOStatus::OK();
   }
 
-  err = io_queue_init(extent_n,&write_ioctx);
+  err = io_queue_init(extent_n,write_ioctx);
 
   if(err){
     printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
@@ -3182,7 +3253,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
     // int result = io_uring_wait_cqe(&read_ring, &cqe);
-    int result = io_uring_peek_cqe(&read_ring, &cqe);
+    int result = io_uring_peek_cqe(read_ring, &cqe);
 
 
 
@@ -3192,7 +3263,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     }
 
     AsyncZoneCleaningIocb* reaped_read_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
-    io_uring_cqe_seen(&read_ring,cqe);
+    io_uring_cqe_seen(read_ring,cqe);
 
 
     auto it = std::find_if(new_extent_list.begin(), new_extent_list.end(),
@@ -3226,8 +3297,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
         free(to_be_freed[a]);
       }
 
-      io_uring_queue_exit(&read_ring);
-      io_destroy(write_ioctx);
+      // io_uring_queue_exit(read_ring);
+      // io_destroy(*write_ioctx);
       zbd_->ReleaseMigrateZone(target_zone);
       return IOStatus::OK();
     }
@@ -3239,7 +3310,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     cur_ext->start_=target_start;
     cur_ext->zone_= target_zone;
 
-    target_zone->ThrowAsyncZCWrite(write_ioctx,reaped_read_iocb);
+    target_zone->ThrowAsyncZCWrite((*write_ioctx),reaped_read_iocb);
     target_zone->PushExtent(cur_ext);
     cur_ext->zone_->used_capacity_ += cur_ext->length_;
     copied+=cur_ext->length_;
@@ -3294,8 +3365,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
   zfile->ReleaseWRLock();
-  io_uring_queue_exit(&read_ring);
-  io_destroy(write_ioctx);
+  
+  // io_uring_queue_exit(&read_ring);
+  // io_destroy(write_ioctx);
+
   clock_gettime(CLOCK_MONOTONIC, &end_timespec);
   elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   printf("cleanup breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
