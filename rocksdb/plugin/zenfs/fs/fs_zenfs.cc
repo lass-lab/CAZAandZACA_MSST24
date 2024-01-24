@@ -2619,6 +2619,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   // uint64_t running_thread = 0;
   // uint64_t reaped_thread = 0;
   clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   printf("prepare breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
   
   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
