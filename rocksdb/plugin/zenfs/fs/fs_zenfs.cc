@@ -3097,6 +3097,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   // Don't migrate open for write files and prevent write reopens while we
   // migrate
   if (!zfile->TryAcquireWRLock()) {
+
     io_uring_queue_exit(&read_ring);
     io_destroy(write_ioctx);
     return IOStatus::OK();
@@ -3114,6 +3115,16 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                       async_zc_read_iocb->start_-async_zc_read_iocb->header_size_);
     io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
     err=io_uring_submit(&read_ring);
+
+    if (GetFileNoLock(fname) == nullptr) {
+      Info(logger_, "Migrate file not exist anymore.");
+      for(size_t a = 0 ;a < to_be_freed.size();a++){
+        free(to_be_freed[a]);
+      } 
+      io_uring_queue_exit(&read_ring);
+      io_destroy(write_ioctx);
+      return IOStatus::OK();
+    }
   }
 
 
@@ -3174,6 +3185,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
                                 cur_ext->length_,&run_gc_worker_,zfile->IsSST());
   
     if(!run_gc_worker_){
+      for(size_t a = 0 ;a < to_be_freed.size();a++){
+        free(to_be_freed[a]);
+      }
+
       io_uring_queue_exit(&read_ring);
       io_destroy(write_ioctx);
       zbd_->ReleaseMigrateZone(target_zone);
@@ -3196,9 +3211,6 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     if (GetFileNoLock(fname) == nullptr) {
       Info(logger_, "Migrate file not exist anymore.");
       zbd_->ReleaseMigrateZone(target_zone);
-      // for (ZoneExtent* de : new_extent_list) {
-      //   de->is_invalid_=true;
-      // }
       break;
     }
     zbd_->ReleaseMigrateZone(target_zone);
@@ -3216,7 +3228,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     int num_events;
     struct timespec timeout;
     timeout.tv_sec = 0;
-    timeout.tv_nsec = 10000; // 100ms
+    timeout.tv_nsec = 10000; // 100us
     // timeout.tv_sec = 0;
     // timeout.tv_nsec = 1000000000; // 1000ms
     // int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
@@ -3232,6 +3244,10 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
 // sync
+  for(size_t a = 0 ;a < to_be_freed.size();a++){
+    free(to_be_freed[a]);
+  }
+
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
   zfile->ReleaseWRLock();
