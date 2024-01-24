@@ -259,6 +259,10 @@ ZenFS::ZenFS(ZonedBlockDevice* zbd, std::shared_ptr<FileSystem> aux_fs,
   memset(read_ring_to_be_reap_,0,sizeof(read_ring_to_be_reap_));
   memset(write_ioctx_to_be_reap_,0,sizeof(write_ioctx_to_be_reap_));
   // printf("Reset scheme :: %d\n",reset_scheme_);
+
+  
+
+
 }
 
 ZenFS::~ZenFS() {
@@ -488,8 +492,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
     
     if(zbd_->AsyncZCEnabled()){
         // AsyncZoneCleaning();
-        // AsyncMigrateExtents(migrate_exts);
-        AsyncUringMigrateExtents(migrate_exts);
+        AsyncMigrateExtents(migrate_exts);
+        // AsyncUringMigrateExtents(migrate_exts);
     }else{
         MigrateExtents(migrate_exts);
     }
@@ -1998,9 +2002,9 @@ Status ZenFS::Mount(bool readonly) {
         bg_stats_worker_.reset(new std::thread(&ZenFS::BackgroundStatTimeLapse, this));
     }
 
-    if(async_cleaner_worker_==nullptr){
-      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this));
-    }
+    // if(async_cleaner_worker_==nullptr){
+    //   async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this));
+    // }
 
   }
 
@@ -2664,40 +2668,47 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
     bool success=false;
     io_context_t* write_ioctx=nullptr;
-    write_ioctx= new io_context_t;
-    if(write_ioctx==nullptr){
-      printf("AsyncMigrateExtents write_ioctx == nullptr\n");
-    }
+    // write_ioctx= new io_context_t;
+    // if(write_ioctx==nullptr){
+    //   printf("AsyncMigrateExtents write_ioctx == nullptr\n");
+    // }
 
 
     io_uring* read_ring= nullptr;
-    read_ring= new io_uring;
-    if(write_ioctx==nullptr){
-      printf("AsyncMigrateExtents read_ring == nullptr\n");
+    int err=GetAsyncStructure(&read_ring,&write_ioctx);
+    if(err){
+      printf("GetAsyncStructure Err @@@\n");
     }
+    // read_ring= new io_uring;
+    
+    // if(write_ioctx==nullptr){
+    //   printf("AsyncMigrateExtents read_ring == nullptr\n");
+    // }
+
+
     if(zbd_->AsyncZCEnabled()>=2){ //single thread
 
       AsyncMigrateFileExtentsWorker(it.first,&(it.second),
      write_ioctx, read_ring);
-      while(success==false){
-        for(uint64_t n = 0 ;n <max_structure_n;n++){
-          if(read_ring_to_be_reap_[n].load()==0){
-            read_ring_to_be_reap_[n]=(uint64_t)read_ring;
-            success=true;
-            break;
-          }
-        }
-      }
-      success=false;
-      while(success==false){
-        for(uint64_t n = 0 ;n <max_structure_n;n++){
-          if(write_ioctx_to_be_reap_[n].load()==0){
-            write_ioctx_to_be_reap_[n]=(uint64_t)write_ioctx;
-            success=true;
-            break;
-          }
-        }
-      }
+      // while(success==false){
+      //   for(uint64_t n = 0 ;n <max_structure_n;n++){
+      //     if(read_ring_to_be_reap_[n].load()==0){
+      //       read_ring_to_be_reap_[n]=(uint64_t)read_ring;
+      //       success=true;
+      //       break;
+      //     }
+      //   }
+      // }
+      // success=false;
+      // while(success==false){
+      //   for(uint64_t n = 0 ;n <max_structure_n;n++){
+      //     if(write_ioctx_to_be_reap_[n].load()==0){
+      //       write_ioctx_to_be_reap_[n]=(uint64_t)write_ioctx;
+      //       success=true;
+      //       break;
+      //     }
+      //   }
+      // }
     }else{
        std::thread* t=new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
             it.first, &(it.second),write_ioctx, read_ring);
@@ -2718,7 +2729,10 @@ uint64_t ZenFS::AsyncMigrateExtents(
     if(!run_gc_worker_){
       for(size_t t = 0 ;t < thread_pool.size(); t++){
         // thread_pool[t]->join();
+
+
         delete thread_pool[t];
+
       }
       return ret;
     }
@@ -3200,7 +3214,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   uint64_t copied = 0;
   int read_fd=zbd_->GetFD(READ_FD);
   int extent_n = (int)migrate_exts->size();
-  unsigned flags = IORING_SETUP_SQPOLL;
+
 
  
 
@@ -3213,10 +3227,18 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     return IOStatus::OK();
   }
 
-  int err=io_uring_queue_init(extent_n, read_ring, flags);
-  if(err){
-    printf("\t\t\tAsyncMigrateFileExtentsWorker io_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
-  }
+  ///////////////////
+  // unsigned flags = IORING_SETUP_SQPOLL;
+  // int err=io_uring_queue_init(extent_n, read_ring, flags);
+  // if(err){
+  //   printf("\t\t\tAsyncMigrateFileExtentsWorker io_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
+  // }
+  // err = io_queue_init(extent_n,write_ioctx);
+
+  // if(err){
+  //   printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
+  // }
+  //////////////////////////////
   
   // Don't migrate open for write files and prevent write reopens while we
   // migrate
@@ -3277,11 +3299,6 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     return IOStatus::OK();
   }
 
-  err = io_queue_init(extent_n,write_ioctx);
-
-  if(err){
-    printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
-  }
 
   while(read_reaped_n < extent_n){
     struct io_uring_cqe* cqe = nullptr;
@@ -3344,8 +3361,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     cur_ext->header_size_=(*it)->header_size_;
     cur_ext->start_=target_start;
     cur_ext->zone_= target_zone;
-
+    reaped_read_iocb->iocb_.data=reaped_read_iocb;
     target_zone->ThrowAsyncZCWrite((*write_ioctx),reaped_read_iocb);
+
     target_zone->PushExtent(cur_ext);
     cur_ext->zone_->used_capacity_ += cur_ext->length_;
     copied+=cur_ext->length_;
@@ -3370,7 +3388,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     timeout.tv_sec = 0;
     timeout.tv_nsec = 10000; // 100us
 // write reap
-  struct io_event write_events[extent_n];
+  struct io_event write_events[1000];
   while(write_reaped_n<read_reaped_n){
     int num_events;
     // timeout;
@@ -3380,13 +3398,22 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     // int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
     // write_reap_min_nr=1;
 
-    num_events = io_getevents((*write_ioctx), 1, extent_n, write_events,
+    num_events = io_getevents((*write_ioctx), 1, 1000, write_events,
                               &timeout);
     if(num_events<1){
       continue;
     }
-    write_reaped_n+=num_events;
+    for(int e = 0 ;e <num_events;e++){
+      struct io_event event = read_events[e];
+      AsyncZoneCleaningIocb* reaped_write_iocb = static_cast<AsyncZoneCleaningIocb*>(event.data);
+      if(reaped_write_iocb->filename_==fname){
+        write_reaped_n++;
+      }
+    }
+    // write_reaped_n+=num_events;
   }
+  PushBackAsyncStructure(read_ring,write_ioctx);
+
 
   clock_gettime(CLOCK_MONOTONIC, &end_timespec);
   elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);

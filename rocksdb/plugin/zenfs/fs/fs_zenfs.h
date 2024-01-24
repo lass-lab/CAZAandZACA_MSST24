@@ -194,6 +194,55 @@ class ZenFS : public FileSystemWrapper {
   std::atomic<uint64_t> read_ring_to_be_reap_[1000];
   std::atomic<uint64_t> write_ioctx_to_be_reap_[1000];
 
+
+  std::mutex async_struture_mutex_;
+  std::queue<io_uring*> io_uring_queue_;
+  std::queue<io_context_t*> io_ctx_queue_;
+
+
+  uint64_t GetAsyncStructure(io_uring** read_ring,io_context_t** write_ioctx){
+    std::lock_guard<std::mutex> lg(async_struture_mutex_);
+    unsigned flags = IORING_SETUP_SQPOLL;
+    int err;
+    io_uring* ret_read_ring= nullptr;
+    io_context_t* ret_write_ioctx=nullptr;
+    if(io_uring_queue_.empty()){
+      ret_read_ring=new io_uring;
+      err= io_uring_queue_init(1000, ret_read_ring, flags);
+      if(err){
+        printf("\t\t\tGetAsyncStructure io_uring_queue_init error@@@@@ %d \n",err);
+      }
+      return err;
+    }else{
+      ret_read_ring=io_uring_queue_.top();
+      io_uring_queue_.pop();
+    }
+
+
+    if(io_ctx_queue_.empty()){
+      ret_write_ioctx= new io_context_t;
+      io_queue_init(1000,ret_write_ioctx);
+      if(err){
+        printf("\t\t\t\t GetAsyncStructure io_queue_init err %d",err);
+        return err;
+      }
+    }else{
+      ret_write_ioctx=io_ctx_queue_.top();
+      io_ctx_queue_.pop();
+    }
+
+    *read_ring=ret_read_ring;
+    *write_ioctx=ret_write_ioctx;
+    return 0;
+  }
+
+  void PushBackAsyncStructure(io_uring* read_ring,io_context_t* write_ioctx){
+    std::lock_guard<std::mutex> lg(async_struture_mutex_);
+
+    io_uring_queue_.push(read_ring);
+    io_ctx_queue_.push(write_ioctx);
+  }
+
   struct ZenFSMetadataWriter : public MetadataWriter {
     ZenFS* zenFS;
     IOStatus Persist(ZoneFile* zoneFile) {
@@ -598,9 +647,9 @@ ret:
     }
     ~AsyncWorker(){
       async_thread->join();
-      io_destroy(*write_ioctx);
-      delete write_ioctx;
-      delete read_ring;
+      // io_destroy(*write_ioctx);
+      // delete write_ioctx;
+      // delete read_ring;
     }
     std::thread* async_thread;
     io_context_t* write_ioctx;
