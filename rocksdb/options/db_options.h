@@ -121,6 +121,7 @@ struct ImmutableDBOptions {
 
   uint64_t input_aware_scheme;
   uint64_t async_zc_enabled;
+  uint64_t default_extent_size;
 
   uint64_t max_compaction_kick;
 

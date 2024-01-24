@@ -675,6 +675,7 @@ struct DBOptions {
   uint64_t max_compaction_kick;
 
   uint64_t async_zc_enabled;
+  uint64_t default_extent_size;
 
   uint32_t partial_reset_scheme;
 

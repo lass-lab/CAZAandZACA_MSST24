@@ -546,6 +546,10 @@ class ZonedBlockDevice {
   uint64_t input_aware_scheme_;
   uint64_t tuning_point_;
   uint64_t async_zc_enabled_;
+
+
+  uint64_t default_extent_size_ = 256<<20;
+
   enum {
     kEager = 0,
     kLazy = 1,
@@ -766,6 +770,10 @@ class ZonedBlockDevice {
   uint64_t AsyncZCEnabled(){
     return async_zc_enabled_;
   }
+  uint64_t GetDefaultExtentSize(){
+    return default_extent_size;
+  }
+
   int GetFD(int i) {
     return zbd_be_->GetFD(i);
   }
@@ -1186,6 +1194,7 @@ class ZonedBlockDevice {
     tuning_point_=T;
     input_aware_scheme_ = other_options[0];
     async_zc_enabled_ = other_options[1];
+    default_extent_size_ = other_options[2];
     if(zc!=0){
       zc_until_set_=true;
       zc_=zc;
