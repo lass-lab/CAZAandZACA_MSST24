@@ -614,10 +614,8 @@ void ZenFS::AsyncZoneCleaning(void){
     
     
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-    if(zbd_->AsyncZCEnabled()==1){
+    if(zbd_->AsyncZCEnabled()){
       should_be_copied = AsyncMigrateExtents(migrate_exts);
-    }else{
-      should_be_copied = AsyncUringMigrateExtents(migrate_exts);
     }
     
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
@@ -2612,13 +2610,26 @@ uint64_t ZenFS::AsyncMigrateExtents(
     ret+=ext->length;
   }
   //  printf("after MigrateExtents\n");e
+
+  // uint64_t running_thread = 0;
+  // uint64_t reaped_thread = 0;
+
   for (const auto& it : file_extents) {
 
+
+
+
+
+    if(zbd_->AsyncZCEnabled()>=2){
+      AsyncMigrateFileExtentsWorker(it.first,it.second);
+    }else{
       thread_pool.push_back(
-          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
-              it.first, (it.second))
-          );
-    // if (!s.ok()) break;
+        new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+            it.first, (it.second))
+        );
+    }
+
+
     if(!run_gc_worker_){
       for(size_t t = 0 ;t < thread_pool.size(); t++){
         thread_pool[t]->join();
@@ -2626,7 +2637,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
       return ret;
     }
     
-    // if (!s.ok()) break;
+
   }
 
   for(size_t t = 0 ;t < thread_pool.size(); t++){
