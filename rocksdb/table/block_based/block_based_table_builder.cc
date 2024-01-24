@@ -940,6 +940,7 @@ void BlockBasedTableBuilder::Add(const Slice& key, const Slice& value) {
     if (should_flush) {
       assert(!r->data_block.empty());
       r->first_key_in_next_block = &key;
+      // printf("")
       Flush();
       if (r->state == Rep::State::kBuffered) {
         bool exceeds_buffer_limit =
