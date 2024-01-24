@@ -581,8 +581,8 @@ ret:
       const std::string& fname,
       const std::vector<ZoneExtentSnapshot*>& migrate_exts);
   IOStatus AsyncMigrateFileExtentsWorker(
-      const std::string& fname,
-      const std::vector<ZoneExtentSnapshot*>& migrate_exts);
+      std::string fname,
+      std::vector<ZoneExtentSnapshot*> migrate_exts);
 
   IOStatus MigrateFileExtentsWorker(
     std::string fname,

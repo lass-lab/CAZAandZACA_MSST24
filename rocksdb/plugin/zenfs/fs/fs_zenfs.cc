@@ -2286,7 +2286,6 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
   if(err){
-    // EINVAL;
     printf("\t\t\tio_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
   }
   //  struct iocb* iocb_arr[extent_n];
@@ -2598,37 +2597,41 @@ IOStatus ZenFS::MigrateExtents(
 }
 
 
-IOStatus ZenFS::AsyncMigrateExtents(
+uint64_t ZenFS::AsyncMigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
   IOStatus s;
   // (void) run_once;
   // Group extents by their filename
   std::vector<std::thread*> thread_pool;
-
+  uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   // printf("before MigrateExtents\n");
   for (auto* ext : extents) {
     std::string fname = ext->filename;
     file_extents[fname].emplace_back(ext);
+    ret+=ext->length;
   }
   //  printf("after MigrateExtents\n");e
   for (const auto& it : file_extents) {
-    // s = MigrateFileExtents(it.first, it.second);
 
-    // AsyncMigrateFileExtentsWorker
       thread_pool.push_back(
           new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
-              it.first, it.second)
+              it.first, (it.second))
           );
     // if (!s.ok()) break;
     if(!run_gc_worker_){
-      return IOStatus::OK();
+      // return IOStatus::OK();
+      return ret;
     }
     
     // if (!s.ok()) break;
   }
+  for(size_t t = 0 ;t < thread_pool.size(); t++){
+    thread_pool[t]->join();
+  }
+
   s=zbd_->ResetUnusedIOZones();
-  return s;
+  return ret;
 }
 
 
@@ -2921,6 +2924,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
   int extent_n = (int)migrate_exts->size();
   int write_reaped_n = 0;
   int err = io_queue_init(extent_n,&write_ioctx);
+
   if(err){
     printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
   }
@@ -3045,17 +3049,179 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 }
 
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
-      const std::string& fname,
-      const std::vector<ZoneExtentSnapshot*>& migrate_exts){
+      std::string fname,
+      std::vector<ZoneExtentSnapshot*> migrate_exts){
+  
+  io_uring read_ring;
+  io_context_t write_ioctx = 0;
+  int write_reaped_n = 0;
+  int read_reaped_n = 0;
+  std::vector<AsyncZoneCleaningIocb*> to_be_freed;
+  uint64_t copied = 0;
+  int read_fd=zbd_->GetFD(READ_FD);
+  int extent_n = (int)migrate_exts.size();
+  unsigned flags = IORING_SETUP_SQPOLL;
+  int err=io_uring_queue_init(extent_n, &read_ring, flags);
+
+  if(err){
+    printf("\t\t\tAsyncMigrateFileExtentsWorker io_uring_queue_init error@@@@@ %d %d\n",err,extent_n);
+  }
+  err = io_queue_init(extent_n,&write_ioctx);
+  if(err){
+    printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
+  }
+
+  // The file may be deleted by other threads, better double check.
+  auto zfile = GetFile(fname);
+  if (zfile == nullptr) {
+    io_uring_queue_exit(&read_ring);
+    io_destroy(write_ioctx);
+    return IOStatus::OK();
+  }
+
+  // Don't migrate open for write files and prevent write reopens while we
+  // migrate
+  if (!zfile->TryAcquireWRLock()) {
+    io_uring_queue_exit(&read_ring);
+    io_destroy(write_ioctx);
+    return IOStatus::OK();
+  }
 
 // read throw
+  for(auto* ext : extents){
+    struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
+          new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
+    to_be_freed.push_back(async_zc_read_iocb);
+    struct io_uring_sqe *sqe = io_uring_get_sqe(&read_ring);
+    io_uring_sqe_set_data(sqe,async_zc_read_iocb);
+    io_uring_prep_read(sqe,read_fd,async_zc_read_iocb->buffer_,
+                      async_zc_read_iocb->length_+async_zc_read_iocb->header_size_,
+                      async_zc_read_iocb->start_-async_zc_read_iocb->header_size_);
+    io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
+    err=io_uring_submit(&read_ring);
+  }
+
+
+
+  std::vector<ZoneExtent*> new_extent_list;
+  std::vector<ZoneExtent*> extents = zfile->GetExtents(); // old ext
+
+
+
+
+  for (size_t i = 0; i < extents.size();i++) {
+    ZoneExtent* ext=extents[i];
+    ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
+          ext->fname_,ext->header_size_);
+    new_ext->zone_=ext->zone_;
+    new_extent_list.push_back(new_ext);    
+  }
 
 // read reap, write throw
+  while(read_reaped_n < extent_n){
+    struct io_uring_cqe* cqe = nullptr;
+
+
+    // int result = io_uring_wait_cqe(&read_ring, &cqe);
+    int result = io_uring_peek_cqe(&read_ring, &cqe);
+    if(result!=0){
+      continue;
+    }
+
+    AsyncZoneCleaningIocb* reaped_read_iocb=reinterpret_cast<AsyncZoneCleaningIocb*>(cqe->user_data);
+    io_uring_cqe_seen(&read_ring,cqe);
+
+
+    auto it = std::find_if(new_extent_list.begin(), new_extent_list.end(),
+                           [&](const ZoneExtent* new_ext) {
+                              if(new_ext==nullptr){
+                                printf("new_ext nullptr\n");
+                                return false;
+                              }
+                              if(reaped_read_iocb==nullptr){
+                                printf("reaped_read_iocb nullptr\n");
+                                return false;
+                              }
+                                                            // new ext
+                             return new_ext->start_ == reaped_read_iocb->start_ &&
+                                    new_ext->length_ == reaped_read_iocb->length_;
+                           });
+
+    if (it == new_extent_list.end()) {
+      Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
+      continue;
+    }
+
+    ZoneExtent* cur_ext = (*it);
+    s = zbd_->TakeMigrateZone(zfile->smallest_,zfile->largest_,zfile->level_, &target_zone, zfile->GetWriteLifeTimeHint(),
+                                zfile->predicted_size_,
+                                ext->length_,&run_gc_worker_,zfile->IsSST());
+  
+    if(!run_gc_worker_){
+      io_uring_queue_exit(&read_ring);
+      io_destroy(write_ioctx);
+      zbd_->ReleaseMigrateZone(target_zone);
+      return IOStatus::OK();
+    }
+    if(target_zone!=nullptr&&target_zone->lifetime_==Env::WriteLifeTimeHint::WLTH_NOT_SET){
+      target_zone->lifetime_=Env::WriteLifeTimeHint::WLTH_LONG;
+    }
+    uint64_t target_start = target_zone->wp_ + reaped_read_iocb->header_size_;
+    cur_ext->header_size_=(*it)->header_size_;
+    cur_ext->start_=target_start;
+    cur_ext->zone_= target_zone;
+
+    target_zone->ThrowAsyncZCWrite(write_ioctx,reaped_read_iocb);
+    target_zone->PushExtent(ext);
+    ext->zone_->used_capacity_ += ext->length_;
+    copied+=ext->length_;
+    read_reaped_n++;
+
+    if (GetFileNoLock(fname) == nullptr) {
+      Info(logger_, "Migrate file not exist anymore.");
+      zbd_->ReleaseMigrateZone(target_zone);
+      // for (ZoneExtent* de : new_extent_list) {
+      //   de->is_invalid_=true;
+      // }
+      break;
+    }
+    zbd_->ReleaseMigrateZone(target_zone);
+
+
+  }
+
+
+
+
 
 // write reap
+  struct io_event write_events[extent_n];
+  while(write_reaped_n<read_reaped_n){
+    int num_events;
+    struct timespec timeout;
+    timeout.tv_sec = 0;
+    timeout.tv_nsec = 10000; // 100ms
+    // timeout.tv_sec = 0;
+    // timeout.tv_nsec = 1000000000; // 1000ms
+    int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
+    // write_reap_min_nr=1;
+
+    num_events = io_getevents(write_ioctx, write_reap_min_nr, extent_n, write_events,
+                              &timeout);
+    if(num_events<1){
+      continue;
+    }
+    write_reaped_n+=num_events;
+  }
+
 
 // sync
-
+  zbd_->AddGCBytesWritten(copied);
+  SyncFileExtents(zfile.get(), new_extent_list);
+  zfile->ReleaseWRLock();
+  io_uring_queue_exit(&read_ring);
+  io_destroy(write_ioctx);
+  return IOStatus::OK();
 }
 
 IOStatus ZenFS::MigrateFileExtents(
