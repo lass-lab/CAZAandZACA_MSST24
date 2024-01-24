@@ -614,9 +614,9 @@ void ZenFS::AsyncZoneCleaning(void){
     
     
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-    if(zbd_->AsyncZCEnabled()){
+    // if(zbd_->AsyncZCEnabled()){
       should_be_copied = AsyncMigrateExtents(migrate_exts);
-    }
+    // }
     
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
 
@@ -2600,6 +2600,9 @@ IOStatus ZenFS::MigrateExtents(
 uint64_t ZenFS::AsyncMigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
   IOStatus s;
+  struct timespec start_timespec, end_timespec;
+  long elapsed_ns_timespec;
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   // (void) run_once;
   // Group extents by their filename
   std::vector<std::thread*> thread_pool;
@@ -2615,7 +2618,10 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
   // uint64_t running_thread = 0;
   // uint64_t reaped_thread = 0;
-
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  printf("prepare breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   for (auto& it : file_extents) {
 
 
@@ -2641,12 +2647,19 @@ uint64_t ZenFS::AsyncMigrateExtents(
     }
     
   }
-  printf("\n");
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  printf("sum breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     thread_pool[t]->join();
   }
   s=zbd_->ResetUnusedIOZones();
+  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  printf("end breaktown %lu ms\n\n",(elapsed_ns_timespec/1000)/1000 );
+  
   return ret;
 }
 
