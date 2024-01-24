@@ -2262,7 +2262,6 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
 
 uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
   // throw all read
-  // printf("AsyncMigrateExtents\n");
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   std::map<std::string, bool> migration_done;
@@ -2388,7 +2387,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         //       it.first, &reaped_read_file_extents[it.first.c_str()]  )
         //   );
         writer_thread_pool.push_back(
-          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+          new std::thread(&ZenFS::AsyncMigrateFileExtentsWriteWorker,this,
               it.first, &reaped_read_file_extents[it.first.c_str()]  )
           );
       }
@@ -2418,9 +2417,9 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
 
-uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
+uint64_t ZenFS::AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents){
   // throw all read
-  // printf("AsyncMigrateExtents\n");
+
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   std::map<std::string, bool> migration_done;
@@ -2537,7 +2536,7 @@ uint64_t ZenFS::AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& exte
 
 
         writer_thread_pool.push_back(
-          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+          new std::thread(&ZenFS::AsyncMigrateFileExtentsWriteWorker,this,
               it.first, &reaped_read_file_extents[it.first.c_str()]  )
           );
         // AsyncMigrateFileExtentsWorker(it.first,reaped_read_file_extents[it.first.c_str()]);
@@ -2597,6 +2596,43 @@ IOStatus ZenFS::MigrateExtents(
   s=zbd_->ResetUnusedIOZones();
   return s;
 }
+
+
+IOStatus ZenFS::AsyncMigrateExtents(
+    const std::vector<ZoneExtentSnapshot*>& extents) {
+  IOStatus s;
+  // (void) run_once;
+  // Group extents by their filename
+  std::vector<std::thread*> thread_pool;
+
+  std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
+  // printf("before MigrateExtents\n");
+  for (auto* ext : extents) {
+    std::string fname = ext->filename;
+    file_extents[fname].emplace_back(ext);
+  }
+  //  printf("after MigrateExtents\n");e
+  for (const auto& it : file_extents) {
+    // s = MigrateFileExtents(it.first, it.second);
+
+    // AsyncMigrateFileExtentsWorker
+      thread_pool.push_back(
+          new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+              it.first, it.second)
+          );
+    // if (!s.ok()) break;
+    if(!run_gc_worker_){
+      return IOStatus::OK();
+    }
+    
+    // if (!s.ok()) break;
+  }
+  s=zbd_->ResetUnusedIOZones();
+  return s;
+}
+
+
+
 IOStatus ZenFS::MigrateFileExtentsWorker(
     std::string fname,
     std::vector<AsyncZoneCleaningIocb*> migrate_exts) {
@@ -2876,7 +2912,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
 
 
 
-IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
+IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
     std::string fname,
     std::vector<AsyncZoneCleaningIocb*>* migrate_exts) {
   IOStatus s = IOStatus::OK();
@@ -2934,8 +2970,6 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
       continue;
     }
-    // copied+=ext->length_;
-
 
 
     Zone* target_zone = nullptr; 
@@ -3008,6 +3042,20 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     zfile->ReleaseWRLock();
     io_destroy(write_ioctx);
   return IOStatus::OK();
+}
+
+IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
+      const std::string& fname,
+      const std::vector<ZoneExtentSnapshot*>& migrate_exts){
+
+// read throw
+
+// read reap, write throw
+
+// write reap
+
+// sync
+
 }
 
 IOStatus ZenFS::MigrateFileExtents(

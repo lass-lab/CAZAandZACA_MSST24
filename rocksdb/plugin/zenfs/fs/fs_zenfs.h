@@ -545,15 +545,7 @@ ret:
 
   // void AsyncZoneCleaningWorker(void);
   void AsyncZoneCleaning(void);
-  IOStatus MigrateFileExtentsWorker(
-    std::string fname,
-    std::vector<AsyncZoneCleaningIocb*> migrate_exts);
-  IOStatus AsyncMigrateFileExtentsWorker(
-    std::string fname,
-    std::vector<AsyncZoneCleaningIocb*>* migrate_exts);
-  IOStatus AsyncUringMigrateFileExtentsWorker(
-    std::string fname,
-    std::vector<AsyncZoneCleaningIocb*>* migrate_exts);
+
   void PartialResetWorker(uint64_t T);
 
   size_t ZoneCleaning(bool forced) override;
@@ -580,12 +572,29 @@ ret:
 
 
   IOStatus MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
+
   uint64_t AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
+  uint64_t AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
+  
   uint64_t AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
   IOStatus MigrateFileExtents(
       const std::string& fname,
       const std::vector<ZoneExtentSnapshot*>& migrate_exts);
+  IOStatus AsyncMigrateFileExtentsWorker(
+      const std::string& fname,
+      const std::vector<ZoneExtentSnapshot*>& migrate_exts);
 
+  IOStatus MigrateFileExtentsWorker(
+    std::string fname,
+    std::vector<AsyncZoneCleaningIocb*> migrate_exts);
+
+  
+  IOStatus AsyncMigrateFileExtentsWriteWorker(
+    std::string fname,
+    std::vector<AsyncZoneCleaningIocb*>* migrate_exts);
+  IOStatus AsyncUringMigrateFileExtentsWorker(
+    std::string fname,
+    std::vector<AsyncZoneCleaningIocb*>* migrate_exts);
  private:
   const uint64_t GC_START_LEVEL =
       20;                      /* Enable GC when < 20% free space available */
