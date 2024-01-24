@@ -3394,7 +3394,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     for(int e = 0 ;e <num_events;e++){
       struct io_event event = write_events[e];
       AsyncZoneCleaningIocb* reaped_write_iocb = static_cast<AsyncZoneCleaningIocb*>(event.data);
-      if(reaped_write_iocb->filename_==fname){
+      if(reaped_write_iocb&&reaped_write_iocb->filename_==fname){
         write_reaped_n++;
       }
       free(reaped_write_iocb);
