@@ -590,6 +590,22 @@ ret:
   IOStatus MigrateFileExtents(
       const std::string& fname,
       const std::vector<ZoneExtentSnapshot*>& migrate_exts);
+  struct AsyncWorker{
+    AsyncWorker(std::thread* t,    io_context_t* ioctx,io_uring* ring )
+    :async_thread(t),write_ioctx(ioctx),read_ring(ring)
+    {
+
+    }
+    ~AsyncWorker(){
+      async_thread->join();
+      io_destroy(*write_ioctx);
+      delete write_ioctx;
+      delete read_ring;
+    }
+    std::thread* async_thread;
+    io_context_t* write_ioctx;
+    io_uring* read_ring;
+  };
   IOStatus AsyncMigrateFileExtentsWorker(
       std::string fname,
       std::vector<ZoneExtentSnapshot*>* migrate_exts,

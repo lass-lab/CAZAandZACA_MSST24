@@ -2632,7 +2632,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   // (void) run_once;
   // Group extents by their filename
-  std::vector<std::thread*> thread_pool;
+  std::vector<AsyncWorker*> thread_pool;
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   // printf("before MigrateExtents\n");
@@ -2656,48 +2656,63 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
   for (auto& it : file_extents) {
 
-    io_context_t* write_ioctx = new io_context_t;
+    bool success=false;
+    io_context_t* write_ioctx=nullptr;
+    write_ioctx= new io_context_t;
+    if(write_ioctx==nullptr){
+      prinf("AsyncMigrateExtents write_ioctx == nullptr\n");
+    }
 
-    io_uring* read_ring= new io_uring;
 
+    io_uring* read_ring= nullptr;
+    read_ring= new io_uring;
+    if(write_ioctx==nullptr){
+      prinf("AsyncMigrateExtents read_ring == nullptr\n");
+    }
+    if(zbd_->AsyncZCEnabled()>=2){ //single thread
 
-    if(zbd_->AsyncZCEnabled()>=2){
       AsyncMigrateFileExtentsWorker(it.first,&(it.second),
      write_ioctx, read_ring);
+      while(success==false){
+        for(uint64_t n = 0 ;n <max_structure_n;n++){
+          if(read_ring_to_be_reap_[n].load()==0){
+            read_ring_to_be_reap_[n]=(uint64_t)read_ring;
+            success=true;
+            break;
+          }
+        }
+      }
+      success=false;
+      while(success==false){
+        for(uint64_t n = 0 ;n <max_structure_n;n++){
+          if(write_ioctx_to_be_reap_[n].load()==0){
+            write_ioctx_to_be_reap_[n]=(uint64_t)write_ioctx;
+            success=true;
+            break;
+          }
+        }
+      }
     }else{
-      thread_pool.push_back(
-        new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+       std::thread* t=new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
             it.first, &(it.second),write_ioctx, read_ring)
-        );
+      // AsyncWorker* async_worker = new AsyncWorker(t,write_ioctx,read_ring);
+      thread_pool.emplace_back(t,write_ioctx,read_ring);
+      // thread_pool.push_back(
+      //   new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
+      //       it.first, &(it.second),write_ioctx, read_ring)
+      //   );
     }
     // read_rings.push_back(read_ring);
     // write_ioctxes.push_back(write_ioctx);
 
-    bool success=false;
-    // while(success==false){
-    //   for(uint64_t n = 0 ;n <max_structure_n;n++){
-    //     if(read_ring_to_be_reap_[n].load()==0){
-    //       read_ring_to_be_reap_[n]=(uint64_t)read_ring;
-    //       success=true;
-    //       break;
-    //     }
-    //   }
-    // }
-    success=false;
-    while(success==false){
-      for(uint64_t n = 0 ;n <max_structure_n;n++){
-        if(write_ioctx_to_be_reap_[n].load()==0){
-          write_ioctx_to_be_reap_[n]=(uint64_t)write_ioctx;
-          success=true;
-          break;
-        }
-      }
-    }
+
+
 
 
     if(!run_gc_worker_){
       for(size_t t = 0 ;t < thread_pool.size(); t++){
-        thread_pool[t]->join();
+        // thread_pool[t]->join();
+        delete thread_pool;
       }
       return ret;
     }
@@ -3135,14 +3150,16 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 
 void ZenFS::BackgroundAsyncStructureCleaner(void){
   while(run_gc_worker_){
-    // for(uint64_t ring_n = 0 ;ring_n<max_structure_n;ring_n++){
-    //   io_uring* ptr= (io_uring*)read_ring_to_be_reap_[ring_n].load();
-    //   if(ptr!=nullptr){
-    //     io_uring_queue_exit(ptr);
-    //     delete ptr;
-    //     read_ring_to_be_reap_[ring_n].store(0);
-    //   }
-    // }
+    if(zbd_->AsyncZCEnabled()>=2){ // single thread
+      for(uint64_t ring_n = 0 ;ring_n<max_structure_n;ring_n++){
+        io_uring* ptr= (io_uring*)read_ring_to_be_reap_[ring_n].load();
+        if(ptr!=nullptr){
+          io_uring_queue_exit(ptr);
+          delete ptr;
+          read_ring_to_be_reap_[ring_n].store(0);
+        }
+      }
+    }
     for(uint64_t ioctx_n = 0 ;ioctx_n<max_structure_n;ioctx_n++){
       io_context_t* ptr=(io_context_t*)write_ioctx_to_be_reap_[ioctx_n].load();
       if(ptr!=nullptr){
