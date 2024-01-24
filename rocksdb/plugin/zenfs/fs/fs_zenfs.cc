@@ -2712,7 +2712,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
     if(!run_gc_worker_){
       for(size_t t = 0 ;t < thread_pool.size(); t++){
         // thread_pool[t]->join();
-        delete thread_pool;
+        delete thread_pool[t];
       }
       return ret;
     }
@@ -2726,7 +2726,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     // thread_pool[t]->join();
-    delete thread_pool;
+    delete thread_pool[t];
   }
   s=zbd_->ResetUnusedIOZones();
   elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
