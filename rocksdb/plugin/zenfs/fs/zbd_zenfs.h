@@ -1251,7 +1251,7 @@ class ZonedBlockDevice {
   IOStatus GetZoneDeferredStatus();
   bool GetActiveIOZoneTokenIfAvailable();
   void WaitForOpenIOZoneToken(bool prioritized);
-  void WaitForMigrationIOZoneToken(void);
+  void GetMigrationIOZoneToken(void);
   IOStatus ApplyFinishThreshold();
   IOStatus FinishCheapestIOZone();
   IOStatus GetBestOpenZoneMatch(Env::WriteLifeTimeHint file_lifetime,
