@@ -462,7 +462,7 @@ class ZenFS : public FileSystemWrapper {
       // sleep(1);
       clock_gettime(CLOCK_MONOTONIC, &start_timespec);
       // while(zbd_->GetZCRunning() );
-      while(zbd_->CalculateFreePercent()<=zbd_->GetZoneCleaningKickingPoint())
+      while(zbd_->CalculateFreePercent()<=zbd_->GetZoneCleaningKickingPoint());
       clock_gettime(CLOCK_MONOTONIC, &end_timespec);
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       // goto loop;
