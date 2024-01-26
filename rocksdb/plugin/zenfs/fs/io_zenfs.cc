@@ -600,15 +600,15 @@ void ZoneFile::PushExtent() {
 
 IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
   Zone* zone;
-  struct timespec start_timespec, end_timespec;
-  if(zbd_->GetZCRunning() ){
-      clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-      while(zbd_->GetZCRunning() );
-      clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-      long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-      // goto loop;
-      zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec);
-  }
+  // struct timespec start_timespec, end_timespec;
+  // if(zbd_->GetZCRunning() ){
+  //     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  //     while(zbd_->GetZCRunning() );
+  //     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  //     long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  //     // goto loop;
+  //     zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec);
+  // }
 
 
   IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_,predicted_size_ ,&zone,min_capacity);
