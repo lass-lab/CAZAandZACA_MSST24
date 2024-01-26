@@ -3168,7 +3168,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
       while(zbd_->GetZCRunning() && run_gc_worker_);
       clock_gettime(CLOCK_MONOTONIC, &end_timespec);
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-      printf("\t\t\t\t\t %lu (ms)", (elapsed_ns_timespec/1000)/1000);
+      printf("\t\t\t\t\t %lu (ms)\n", (elapsed_ns_timespec/1000)/1000);
     }
 
   }
