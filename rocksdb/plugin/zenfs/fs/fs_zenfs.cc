@@ -705,9 +705,8 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
 
 
       (void)(reclaim_until);
-      // if(zbd_->PartialResetWithZoneReset()){
-      //   reclaim_until=MODIFIED_ZC_KICKING_POINT;
-      // }
+{
+    ZenFSStopWatch("While ZoneCleaning Sum");
       while(
           free_percent_< (reclaim_until)&&
             run_gc_worker_
@@ -727,6 +726,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
         //   ZC_not_working++;
         // }
       }
+}
     }else if(zbd_->ProactiveZoneCleaning() 
           && free_percent_>MODIFIED_ZC_KICKING_POINT
           && run_gc_worker_){
