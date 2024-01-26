@@ -779,8 +779,8 @@ class ZonedBlockDevice {
   uint64_t max_bytes_for_level_base_ = 256<<20;
 
   bool zc_until_set_=false;
-  uint64_t zc_;
-  uint64_t until_;
+  uint64_t zc_=20;
+  uint64_t until_=20;
   
 
   std::atomic<bool> zc_running_=false;
