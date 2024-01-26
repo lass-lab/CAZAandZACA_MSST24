@@ -543,9 +543,9 @@ class ZonedBlockDevice {
 
 
 
-  int max_nr_active_io_zones_;
+  std::atomic<int> max_nr_active_io_zones_;
   int max_nr_open_io_zones_;
-  int max_migrate_zones_ = 2;
+  std::atomic<int> max_migrate_zones_ {2};
 
   std::vector<std::pair<int,uint64_t>> sst_file_size_last_;
   std::mutex sst_file_size_last_lock_;
@@ -988,7 +988,7 @@ class ZonedBlockDevice {
   void PutOpenIOZoneToken();
   void PutMigrationIOZoneToken(void);
   void PutActiveIOZoneToken();
-
+  void MoveResources(bool to_migration);
   void EncodeJson(std::ostream &json_stream);
 
   void SetZoneDeferredStatus(IOStatus status);

@@ -1757,6 +1757,19 @@ bool ZonedBlockDevice::GetMigrationIOZoneToken(void){
   return false;
 }
 
+void ZonedBlockDevice::MoveResources(bool to_migration){
+  if(to_migration){
+    if(GetActiveIOZoneTokenIfAvailable()){
+      PutMigrationIOZoneToken();
+    }
+  }else{
+    if(GetMigrationIOZoneToken()){
+      PutMigrationIOZoneToken();
+    }
+  }
+}
+
+
 void ZonedBlockDevice::PutMigrationIOZoneToken(void) {
   {
     std::unique_lock<std::mutex> lk(migrate_zone_mtx_);
@@ -3457,17 +3470,18 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     // sleep(1);
     blocking_time++;
     if(blocking_time>5){
-      FinishCheapestIOZone(false);
-      s=AllocateEmptyZone(out_zone); 
-      if (s.ok() && (*out_zone) != nullptr) {
-        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-        (*out_zone)->lifetime_=file_lifetime;
-        break;
-      }
-      // else{
-      //   // PutActiveIOZoneToken();
-      //   // PutMigrationIOZoneToken();
+      MoveResources(true);
+      // FinishCheapestIOZone(false);
+      // s=AllocateEmptyZone(out_zone); 
+      // if (s.ok() && (*out_zone) != nullptr) {
+      //   Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+      //   (*out_zone)->lifetime_=file_lifetime;
+      //   break;
       // }
+      // // else{
+      // //   // PutActiveIOZoneToken();
+      // //   // PutMigrationIOZoneToken();
+      // // }
     }
     if(!s.ok()){
       return s;
