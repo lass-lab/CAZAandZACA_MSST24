@@ -2642,7 +2642,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
 
 {  // long elapsed_ns_timespec;
-  ZenFSStopWatch("Prepare\n");
+  ZenFSStopWatch("Prepare");
   // (void) run_once;
   // Group extents by their filename
 
@@ -2662,7 +2662,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 {
-  ZenFSStopWatch("Sum\n");
+  ZenFSStopWatch("Sum");
   for (auto& it : file_extents) {
 
     io_context_t* write_ioctx=nullptr;
