@@ -715,11 +715,11 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
             ){
         zbd_->SetZCRunning(true);  
         before_free_percent=free_percent_;
-        // if(zbd_->AsyncZCEnabled()){
-        //   AsyncZoneCleaning();
-        // }else{
-        ZoneCleaning(force);
-        // }
+
+        {
+          ZenFSStopWatch("ZoneCleaning Sum");
+          ZoneCleaning(force);
+        }
         zbd_->ResetUnusedIOZones();
         free_percent_ = zbd_->CalculateFreePercent();
         force=(before_free_percent==free_percent_);
