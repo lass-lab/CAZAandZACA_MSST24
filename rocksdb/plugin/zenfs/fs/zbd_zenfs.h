@@ -387,6 +387,7 @@ class ZonedBlockDevice {
   uint64_t reset_threshold_arr_[101];
   std::atomic<long> active_io_zones_;
   std::atomic<long> open_io_zones_;
+  std::atomic<long> migration_io_zones_{0};
 
   std::atomic<size_t> reset_count_{0};
 
@@ -528,6 +529,7 @@ class ZonedBlockDevice {
 
   int max_nr_active_io_zones_;
   int max_nr_open_io_zones_;
+  int max_migrate_zones_ = 2;
 
   std::vector<std::pair<int,uint64_t>> sst_file_size_last_;
   std::mutex sst_file_size_last_lock_;
@@ -963,6 +965,7 @@ class ZonedBlockDevice {
   void SetFinishTreshold(uint64_t threshold) { finish_threshold_ = threshold; }
 
   void PutOpenIOZoneToken();
+  void PutMigrationIOZoneToken(void);
   void PutActiveIOZoneToken();
 
   void EncodeJson(std::ostream &json_stream);
@@ -1246,6 +1249,7 @@ class ZonedBlockDevice {
   IOStatus GetZoneDeferredStatus();
   bool GetActiveIOZoneTokenIfAvailable();
   void WaitForOpenIOZoneToken(bool prioritized);
+  void WaitForMigrationIOZoneToken(void);
   IOStatus ApplyFinishThreshold();
   IOStatus FinishCheapestIOZone();
   IOStatus GetBestOpenZoneMatch(Env::WriteLifeTimeHint file_lifetime,
