@@ -635,7 +635,7 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
       try_n++;
       // usleep(1000 * 1000);
       if(try_n>100){
-        MoveResources(false);
+        zbd_->MoveResources(false);
       }
       if(zone!=nullptr){
         break;
