@@ -391,7 +391,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t zone_per_erase_unit_ratio=(zbd_->GetEraseUnitSize()*100)/zone_size;
   // uint64_t erase_unit_size=zbd_->GetEraseUnitSize();
   int start = GetMountTime();
-  auto start_chrono = std::chrono::high_resolution_clock::now();
+  // auto start_chrono = std::chrono::high_resolution_clock::now();
     struct timespec start_timespec, end_timespec;
   
   // zc_lock_.lock();
@@ -490,7 +490,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
          (int)migrate_exts.size());
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     {    
-        ZenFSStopWatch("measure here");
+        ZenFSStopWatch stopwatch("measure here");
+        start_timespec=stopwatch.start_timespec;
         if(zbd_->AsyncZCEnabled()){
             // AsyncZoneCleaning();
             AsyncMigrateExtents(migrate_exts);
@@ -498,8 +499,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
         }else{
             MigrateExtents(migrate_exts);
         }
+        clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     }
-    clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+    
 
     if(!run_gc_worker_){
       zbd_->SetZCRunning(false);
@@ -512,9 +514,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
     }
     int end=GetMountTime();
     if(should_be_copied>0){
-      auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
-      long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-      (void)(microseconds);
+      // auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
+      // long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+      // (void)(microseconds);
       
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       
