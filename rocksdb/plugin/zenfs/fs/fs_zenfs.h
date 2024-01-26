@@ -165,7 +165,7 @@ class ZenFS : public FileSystemWrapper {
   bool run_bg_stats_worker_ = false;
 
 
-  uint64_t one_zc_reclaimed_zone_n_ = 6;
+  uint64_t one_zc_reclaimed_zone_n_ = 5;
 
   std::atomic<int> zc_triggerd_count_{0};
 
