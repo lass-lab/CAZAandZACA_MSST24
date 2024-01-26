@@ -1998,7 +1998,7 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
         continue;
       }
 
-      if(z->capacity_<min_capacity_){
+      if(z->capacity_<min_capacity){
         z->Release();
         continue;
       }
@@ -3313,10 +3313,10 @@ IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
     
       zone->Release();
 
-      zbd_->PutOpenIOZoneToken();
+      PutOpenIOZoneToken();
 
       if(full){
-        zbd_->PutActiveIOZoneToken();
+        PutActiveIOZoneToken();
       }
 
       Info(logger_, "ReleaseMigrateZone: %lu", zone->start_);
