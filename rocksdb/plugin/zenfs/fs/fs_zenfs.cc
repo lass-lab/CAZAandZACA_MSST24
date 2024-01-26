@@ -2637,8 +2637,9 @@ IOStatus ZenFS::MigrateExtents(
 uint64_t ZenFS::AsyncMigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
   IOStatus s;
-  struct timespec start_timespec, end_timespec;
-  long elapsed_ns_timespec;
+  // struct timespec start_timespec, end_timespec;
+{  // long elapsed_ns_timespec;
+  ZenFSStopWatch("Prepare\n");
   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   // (void) run_once;
   // Group extents by their filename
@@ -2652,12 +2653,15 @@ uint64_t ZenFS::AsyncMigrateExtents(
     ret+=ext->length;
   }
 
-  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-  printf("prepare breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-
+  }
+  // printf("prepare breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  
+  // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+{
+  ZenFSStopWatch("Sum\n");
   for (auto& it : file_extents) {
 
     io_context_t* write_ioctx=nullptr;
@@ -2698,21 +2702,25 @@ uint64_t ZenFS::AsyncMigrateExtents(
     }
     
   }
-  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-  printf("sum breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
+  }
+  // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  // printf("sum breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
   
   
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-
+  // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+{
+  ZenFSStopWatch("End");
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     // thread_pool[t]->join();
     delete thread_pool[t];
   }
   s=zbd_->ResetUnusedIOZones();
-  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-  elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-  printf("end breaktown %lu ms\n\n",(elapsed_ns_timespec/1000)/1000 );
+
+  }
+  // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  // printf("end breaktown %lu ms\n\n",(elapsed_ns_timespec/1000)/1000 );
   
   return ret;
 }

@@ -1375,9 +1375,13 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
 
   for (size_t i =0;i<io_zones.size();i++) {
     const auto z = io_zones[i];
-  
+        bool full=z->IsFull() ;
+    if(!full){
+      continue;
+    }
     if ( z->Acquire() ) {
-      bool full=z->IsFull() ;
+
+
       if(z->IsEmpty()){
         z->Release();
         continue;

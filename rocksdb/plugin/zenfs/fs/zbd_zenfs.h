@@ -194,12 +194,16 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
 }
 
 struct ZenFSStopWatch{
+  std::string name;
   struct timespec start_timespec, end_timespec;
-  ZenFSStopWatch(){
+  ZenFSStopWatch(char* _name){
+    name=_name;
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   }
   ~ZenFSStopWatch(){
-    
+    clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+    long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+    printf("\t\t\t\t\t%s breakdown %lu\n",name.c_str(),elapsed_ns_timespec);
   }
 };
 struct AsyncZoneCleaningIocb{
