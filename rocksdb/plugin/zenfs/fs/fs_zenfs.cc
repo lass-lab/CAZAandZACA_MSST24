@@ -698,7 +698,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
       {
         ZenFSStopWatch("While ZoneCleaning Sum");
         while(
-            free_percent_< (reclaim_until)&&
+            free_percent_<= (reclaim_until)&&
               run_gc_worker_
               &&zbd_->GetFullZoneN()
               ){
