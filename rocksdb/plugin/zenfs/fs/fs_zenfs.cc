@@ -408,7 +408,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   options.log_garbage_ = 1;
   // zbd_->EntireZoneReadLock();
   {
-    ZenFSStopWatch stopwatch("GetZenFSSnapshot");
+    ZenFSStopWatch ("GetZenFSSnapshot");
     GetZenFSSnapshot(snapshot, options);
   }
   size_t all_inval_zone_n = 0;
