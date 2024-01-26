@@ -3162,13 +3162,16 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 void ZenFS::BackgroundAsyncStructureCleaner(void){
   
   while(run_gc_worker_){
+    uint64_t prev= zbd_->GetGCBytesWritten();
     if(zbd_->GetZCRunning()){
+    
       struct timespec start_timespec, end_timespec;
       clock_gettime(CLOCK_MONOTONIC, &start_timespec);
       while(zbd_->GetZCRunning() && run_gc_worker_);
       clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+      uint64_t after = zbd_->GetGCBytesWritten();
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-      printf("\t\t\t\t\t %lu (ms)\n", (elapsed_ns_timespec/1000)/1000);
+      printf("\t\t\t\t\t %lu\t(ms)\t%lu\t(MB)\t\n", (elapsed_ns_timespec/1000)/1000,(after-prev)>>20 );
     }
 
   }
