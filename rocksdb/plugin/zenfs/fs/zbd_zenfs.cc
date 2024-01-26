@@ -1893,7 +1893,7 @@ IOStatus ZonedBlockDevice::ApplyFinishThreshold() {
   return IOStatus::OK();
 }
 
-IOStatus ZonedBlockDevice::FinishCheapestIOZone() {
+IOStatus ZonedBlockDevice::FinishCheapestIOZone(bool put_token) {
   IOStatus s;
   Zone *finish_victim = nullptr;
 
@@ -1928,7 +1928,9 @@ IOStatus ZonedBlockDevice::FinishCheapestIOZone() {
   finish_victim->Release();
 
   // if (s.ok()) {
-  PutActiveIOZoneToken();
+  if(put_token){
+    PutActiveIOZoneToken();
+  }
   // }
 
 
@@ -3455,16 +3457,17 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     // sleep(1);
     blocking_time++;
     if(blocking_time>5){
-      FinishCheapestIOZone();
+      FinishCheapestIOZone(false);
       s=AllocateEmptyZone(out_zone); 
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
         (*out_zone)->lifetime_=file_lifetime;
         break;
-      }else{
-        // PutActiveIOZoneToken();
-        // PutMigrationIOZoneToken();
       }
+      // else{
+      //   // PutActiveIOZoneToken();
+      //   // PutMigrationIOZoneToken();
+      // }
     }
     if(!s.ok()){
       return s;

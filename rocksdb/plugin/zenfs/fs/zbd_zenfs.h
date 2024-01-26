@@ -1272,7 +1272,7 @@ class ZonedBlockDevice {
   void WaitForOpenIOZoneToken(bool prioritized);
   bool GetMigrationIOZoneToken(void);
   IOStatus ApplyFinishThreshold();
-  IOStatus FinishCheapestIOZone();
+  IOStatus FinishCheapestIOZone(bool put_token = true);
   IOStatus GetBestOpenZoneMatch(Env::WriteLifeTimeHint file_lifetime,
                                 unsigned int *best_diff_out,std::vector<uint64_t> input_fno, Zone **zone_out,
                                 uint64_t min_capacity = 0);
