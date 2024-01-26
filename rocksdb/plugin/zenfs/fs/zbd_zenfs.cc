@@ -3308,7 +3308,17 @@ IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
     // migrating_ = false;
     if (zone != nullptr) {
       // PutActiveIOZoneToken();
+      bool full = zone->IsFull();
+      zone->Close();
+    
       zone->Release();
+
+      zbd_->PutOpenIOZoneToken();
+
+      if(full){
+        zbd_->PutActiveIOZoneToken();
+      }
+
       Info(logger_, "ReleaseMigrateZone: %lu", zone->start_);
     }
   }
@@ -3344,6 +3354,8 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   (void)(level);
   std::vector<uint64_t> none;
   //  no_input_fno_(0);
+  WaitForOpenIOZoneToken(true);
+
   while(CalculateCapacityRemain()>min_capacity){
     if((*run_gc_worker_)==false){
       migrating_=false;
@@ -3499,57 +3511,63 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
 
   // Holding allocated_zone if != nullptr
 
-  if (allocated_zone==nullptr) {
-    bool got_token = GetActiveIOZoneTokenIfAvailable();
+  if (allocated_zone==nullptr && GetActiveIOZoneTokenIfAvailable()) {
+
+    // while(!GetActiveIOZoneTokenIfAvailable()){
+    //   s = FinishCheapestIOZone();
+    //   if (!s.ok()) {
+    //     PutOpenIOZoneToken();
+    //     return s;
+    //   }
+    // }
+    // if(GetActiveIOZoneTokenIfAvailable()){
+    s = AllocateEmptyZone(&allocated_zone);
+    if (allocated_zone != nullptr&&s.ok()) {
+      // assert(allocated_zone->IsBusy());
+      allocated_zone->lifetime_ = file_lifetime;
+      new_zone = true;
+    } else {
+      PutActiveIOZoneToken();
+    }
+    // }
+
+
+
+    // bool got_token = GetActiveIOZoneTokenIfAvailable();
 
     /* If we did not get a token, try to use the best match, even if the life
      * time diff not good but a better choice than to finish an existing zone
      * and open a new one
      */
-    // if (allocated_zone != nullptr) {
-    //   if (!got_token && best_diff == LIFETIME_DIFF_COULD_BE_WORSE) {
-    //     Debug(logger_,
-    //           "Allocator: avoided a finish by relaxing lifetime diff "
-    //           "requirement\n");
-    //   } else {
-    //     allocated_zone->Release();
-    //     if (!s.ok()) {
-    //       PutOpenIOZoneToken();
-    //       if (got_token) PutActiveIOZoneToken();
-    //       return s;
-    //     }
-    //     allocated_zone = nullptr;
-    //   }
-    // }
 
     /* If we haven't found an open zone to fill, open a new zone */
-    if (allocated_zone == nullptr) {
-      /* We have to make sure we can open an empty zone */
-      while (!got_token && !GetActiveIOZoneTokenIfAvailable()) {
-        // printf("AllocateIOZone :: Sucks here?\n");
-        s = FinishCheapestIOZone();
-        if (!s.ok()) {
-          PutOpenIOZoneToken();
-          return s;
-        }
-      }
+    // if (allocated_zone == nullptr) {
+    //   /* We have to make sure we can open an empty zone */
+    //   while (!got_token && !GetActiveIOZoneTokenIfAvailable()) {
+    //     // printf("AllocateIOZone :: Sucks here?\n");
+    //     s = FinishCheapestIOZone();
+    //     if (!s.ok()) {
+    //       PutOpenIOZoneToken();
+    //       return s;
+    //     }
+    //   }
 
-      s = AllocateEmptyZone(&allocated_zone);
+    //   s = AllocateEmptyZone(&allocated_zone);
 
-      if (!s.ok()) {
-        PutActiveIOZoneToken();
-        PutOpenIOZoneToken();
-        return s;
-      }
+    //   if (!s.ok()) {
+    //     PutActiveIOZoneToken();
+    //     PutOpenIOZoneToken();
+    //     return s;
+    //   }
 
-      if (allocated_zone != nullptr) {
-        // assert(allocated_zone->IsBusy());
-        allocated_zone->lifetime_ = file_lifetime;
-        new_zone = true;
-      } else {
-        PutActiveIOZoneToken();
-      }
-    }
+    //   if (allocated_zone != nullptr) {
+    //     // assert(allocated_zone->IsBusy());
+    //     allocated_zone->lifetime_ = file_lifetime;
+    //     new_zone = true;
+    //   } else {
+    //     PutActiveIOZoneToken();
+    //   }
+    // }
   }
   if(s.ok()&&allocated_zone==nullptr){
     s=GetAnyLargestRemainingZone(&allocated_zone,false,min_capacity);
@@ -3559,7 +3577,6 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   }
 
   if (allocated_zone) {
-    // assert(allocated_zone->IsBusy());
     Debug(logger_,
           "Allocating zone(new=%d) start: 0x%lx wp: 0x%lx lt: %d file lt: %d\n",
           new_zone, allocated_zone->start_, allocated_zone->wp_,
