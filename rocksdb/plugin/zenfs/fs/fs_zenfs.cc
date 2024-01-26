@@ -683,17 +683,18 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
   (void) run_once;
   bool force=false;
   uint64_t before_free_percent;
-
+   MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
+  reclaim_until=zbd_->GetReclaimUntil();
   while (run_gc_worker_) {
     usleep(100 * 1000);
-    MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
+   
     free_percent_ = zbd_->CalculateFreePercent();
     zbd_->SetZCRunning(false);
     if(free_percent_<=MODIFIED_ZC_KICKING_POINT&&
         run_gc_worker_){ // IO BLOCK
       free_percent_ = zbd_->CalculateFreePercent();
       force=false;
-      reclaim_until=zbd_->GetReclaimUntil();
+      
       (void)(reclaim_until);
       {
         ZenFSStopWatch("While ZoneCleaning Sum");
