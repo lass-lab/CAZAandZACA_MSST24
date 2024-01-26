@@ -694,8 +694,8 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
       force=false;
       reclaim_until=zbd_->GetReclaimUntil();
       (void)(reclaim_until);
-    {
-      ZenFSStopWatch("While ZoneCleaning Sum");
+      {
+        ZenFSStopWatch("While ZoneCleaning Sum");
         while(
             free_percent_< (reclaim_until)&&
               run_gc_worker_
@@ -716,14 +716,9 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
           // }
         }
 
-      }else if(zbd_->ProactiveZoneCleaning() 
-            && free_percent_>MODIFIED_ZC_KICKING_POINT
-            && run_gc_worker_){
-
-          ZoneCleaning(false);
       }
-
     }
+  }
     zbd_->SetZCRunning(false);
     // if(db_ptr_){
     //     db_ptr_->ZenFSInstallSuperVersionAndScheduleWork();
