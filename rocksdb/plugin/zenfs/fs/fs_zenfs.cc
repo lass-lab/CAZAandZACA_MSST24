@@ -690,7 +690,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
     
     if(free_percent_<=MODIFIED_ZC_KICKING_POINT&&
         run_gc_worker_){ // IO BLOCK
-      zbd_->RuntimeReset();
+      // zbd_->RuntimeReset();
       free_percent_ = zbd_->CalculateFreePercent();
 
       force=false;
