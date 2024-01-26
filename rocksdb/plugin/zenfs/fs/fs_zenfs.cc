@@ -2808,6 +2808,8 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
 
 
     Zone* target_zone = nullptr; 
+    // if(target_zone->)
+
     s = zbd_->TakeMigrateZone(zfile->smallest_,zfile->largest_,zfile->level_, &target_zone, zfile->GetWriteLifeTimeHint(),
                               zfile->predicted_size_,
                               ext->length_,&run_gc_worker_,zfile->IsSST());
@@ -3180,7 +3182,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
   }
 }
 
-
+///////////// this async
 IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       std::string fname,
       std::vector<ZoneExtentSnapshot*>* migrate_exts,
@@ -3286,7 +3288,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     // io_uring_queue_exit(read_ring);
     return IOStatus::OK();
   }
-
+  Zone* target_zone=nullptr;
 
   while(read_reaped_n < extent_n){
     struct io_uring_cqe* cqe = nullptr;
@@ -3325,12 +3327,20 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       Info(logger_, "Migrate extent not found, ext_start: %lu", reaped_read_iocb->start_);
       continue;
     }
-    Zone* target_zone=nullptr;
-    ZoneExtent* cur_ext = (*it);
 
-    s = zbd_->TakeMigrateZone(zfile->smallest_,zfile->largest_,zfile->level_, &target_zone, zfile->GetWriteLifeTimeHint(),
-                                zfile->predicted_size_,
-                                cur_ext->length_,&run_gc_worker_,zfile->IsSST());
+    ZoneExtent* cur_ext = (*it);
+    if(target_zone==nullptr){
+      s = zbd_->TakeMigrateZone(zfile->smallest_,zfile->largest_,zfile->level_, &target_zone, zfile->GetWriteLifeTimeHint(),
+                                  zfile->predicted_size_,
+                                  cur_ext->length_,&run_gc_worker_,zfile->IsSST());
+    }
+    if(target_zone && target_zone->capacity_<cur_ext->length_){
+      zbd_->ReleaseMigrateZone(target_zone);
+      s = zbd_->TakeMigrateZone(zfile->smallest_,zfile->largest_,zfile->level_, &target_zone, zfile->GetWriteLifeTimeHint(),
+                                  zfile->predicted_size_,
+                                  cur_ext->length_,&run_gc_worker_,zfile->IsSST());
+    }
+
   
     if(!run_gc_worker_){
       // for(size_t a = 0 ;a < to_be_freed.size();a++){
@@ -3365,7 +3375,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       zfile->ReleaseWRLock();
       break;
     }
-    zbd_->ReleaseMigrateZone(target_zone);
+    // zbd_->ReleaseMigrateZone(target_zone);
 
 
   }
@@ -3415,6 +3425,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   // }
 
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  zbd_->ReleaseMigrateZone(target_zone);
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
   zfile->ReleaseWRLock();
