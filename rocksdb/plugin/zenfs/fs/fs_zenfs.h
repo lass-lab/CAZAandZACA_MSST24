@@ -667,7 +667,7 @@ ret:
       std::vector<ZoneExtentSnapshot*>* migrate_exts,
             io_context_t* write_ioctx,
              io_uring* read_ring
-            );
+            ) __attribute__((hot));
 
   IOStatus MigrateFileExtentsWorker(
     std::string fname,
