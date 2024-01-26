@@ -3454,9 +3454,18 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     // usleep(1000 * 1000);
     // sleep(1);
     blocking_time++;
-    // if(blocking_time>5){
-    //   FinishCheapestIOZone();
-    // }
+    if(blocking_time>5){
+      FinishCheapestIOZone();
+      s=AllocateEmptyZone(out_zone); 
+      if (s.ok() && (*out_zone) != nullptr) {
+        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+        (*out_zone)->lifetime_=file_lifetime;
+        break;
+      }else{
+        // PutActiveIOZoneToken();
+        PutMigrationIOZoneToken();
+      }
+    }
     if(!s.ok()){
       return s;
     }
