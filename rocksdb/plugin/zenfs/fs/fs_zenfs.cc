@@ -683,11 +683,12 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
   (void) run_once;
   bool force=false;
   uint64_t before_free_percent;
-   MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
-  reclaim_until=zbd_->GetReclaimUntil();
+
   while (run_gc_worker_) {
     usleep(100 * 1000);
-   
+    MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
+    reclaim_until=zbd_->GetReclaimUntil();
+    
     free_percent_ = zbd_->CalculateFreePercent();
     zbd_->SetZCRunning(false);
     if(free_percent_<=MODIFIED_ZC_KICKING_POINT&&
@@ -721,9 +722,6 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
       }
     }
     zbd_->SetZCRunning(false);
-    // if(db_ptr_){
-    //     db_ptr_->ZenFSInstallSuperVersionAndScheduleWork();
-    // }
   }
 }
 
