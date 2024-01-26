@@ -2626,7 +2626,7 @@ IOStatus ZenFS::MigrateExtents(
 
 
 uint64_t ZenFS::AsyncMigrateExtents(
-    const std::vector<ZoneExtentSnapshot*>& extents) {
+    const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot)) {
   IOStatus s;
   std::vector<AsyncWorker*> thread_pool;
   uint64_t ret = 0;

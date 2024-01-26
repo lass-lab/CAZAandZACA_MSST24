@@ -637,7 +637,7 @@ ret:
   
 
 
-  IOStatus MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
+  IOStatus MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot)) ;
 
   uint64_t AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot));
   uint64_t AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
