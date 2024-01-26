@@ -687,54 +687,43 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
   while (run_gc_worker_) {
     usleep(100 * 1000);
     MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
-    
+    free_percent_ = zbd_->CalculateFreePercent();
     if(free_percent_<=MODIFIED_ZC_KICKING_POINT&&
         run_gc_worker_){ // IO BLOCK
-      // zbd_->RuntimeReset();
       free_percent_ = zbd_->CalculateFreePercent();
-
       force=false;
-      // ZC_not_working=0;
-
       reclaim_until=zbd_->GetReclaimUntil();
-      // if(zbd_->RuntimeZoneResetDisabled()){
-      //   reclaim_until=100;
-      // }else if(zbd_->RuntimeZoneResetOnly()&&){
-      //   reclaim_until=MODIFIED_ZC_KICKING_POINT+30;
-      // }
-
-
       (void)(reclaim_until);
-{
-    ZenFSStopWatch("While ZoneCleaning Sum");
-      while(
-          free_percent_< (reclaim_until)&&
-            run_gc_worker_
-            &&zbd_->GetFullZoneN()
-            ){
-        zbd_->SetZCRunning(true);  
-        before_free_percent=free_percent_;
+    {
+      ZenFSStopWatch("While ZoneCleaning Sum");
+        while(
+            free_percent_< (reclaim_until)&&
+              run_gc_worker_
+              &&zbd_->GetFullZoneN()
+              ){
+          zbd_->SetZCRunning(true);  
+          before_free_percent=free_percent_;
 
-        {
-          ZenFSStopWatch("ZoneCleaning Sum");
-          ZoneCleaning(force);
+          {
+            ZenFSStopWatch("ZoneCleaning Sum");
+            ZoneCleaning(force);
+          }
+          zbd_->ResetUnusedIOZones();
+          free_percent_ = zbd_->CalculateFreePercent();
+          force=(before_free_percent==free_percent_);
+          // if(force&&before_free_percent==free_percent_){
+          //   ZC_not_working++;
+          // }
         }
-        zbd_->ResetUnusedIOZones();
-        free_percent_ = zbd_->CalculateFreePercent();
-        force=(before_free_percent==free_percent_);
-        // if(force&&before_free_percent==free_percent_){
-        //   ZC_not_working++;
-        // }
+
+      }else if(zbd_->ProactiveZoneCleaning() 
+            && free_percent_>MODIFIED_ZC_KICKING_POINT
+            && run_gc_worker_){
+
+          ZoneCleaning(false);
       }
-}
-    }else if(zbd_->ProactiveZoneCleaning() 
-          && free_percent_>MODIFIED_ZC_KICKING_POINT
-          && run_gc_worker_){
 
-        ZoneCleaning(false);
     }
-
-
     zbd_->SetZCRunning(false);
     // if(db_ptr_){
     //     db_ptr_->ZenFSInstallSuperVersionAndScheduleWork();
