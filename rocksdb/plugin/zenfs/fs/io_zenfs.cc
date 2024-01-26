@@ -634,7 +634,7 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
       // zenfs_->ZCUnLock();
       try_n++;
       // usleep(1000 * 1000);
-      if(try_n>100){
+      if(try_n>100&& zbd_->CalculateFreePercent()<25){
         zbd_->MoveResources(false);
       }
       if(zone!=nullptr){
