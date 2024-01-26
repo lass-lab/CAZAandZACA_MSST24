@@ -3354,7 +3354,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   (void)(level);
   std::vector<uint64_t> none;
   //  no_input_fno_(0);
-  WaitForOpenIOZoneToken(true);
+  WaitForOpenIOZoneToken(false);
 
   while(CalculateCapacityRemain()>min_capacity){
     if((*run_gc_worker_)==false){
