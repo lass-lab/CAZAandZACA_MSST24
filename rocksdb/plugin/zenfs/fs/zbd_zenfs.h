@@ -196,7 +196,7 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
 struct ZenFSStopWatch{
   std::string name;
   struct timespec start_timespec, end_timespec;
-  ZenFSStopWatch(char* _name){
+  ZenFSStopWatch(const char* _name){
     name=_name;
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   }

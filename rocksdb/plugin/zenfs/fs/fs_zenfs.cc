@@ -2637,15 +2637,16 @@ IOStatus ZenFS::MigrateExtents(
 uint64_t ZenFS::AsyncMigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
   IOStatus s;
-  // struct timespec start_timespec, end_timespec;
-{  // long elapsed_ns_timespec;
-  ZenFSStopWatch("Prepare\n");
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-  // (void) run_once;
-  // Group extents by their filename
   std::vector<AsyncWorker*> thread_pool;
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
+
+{  // long elapsed_ns_timespec;
+  ZenFSStopWatch("Prepare\n");
+  // (void) run_once;
+  // Group extents by their filename
+
+
   // printf("before MigrateExtents\n");
   for (auto* ext : extents) {
     std::string fname = ext->filename;
