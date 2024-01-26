@@ -490,8 +490,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
          (int)migrate_exts.size());
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     {    
-        ZenFSStopWatch stopwatch("measure here");
-        start_timespec=stopwatch.start_timespec;
+        // ZenFSStopWatch stopwatch("measure here");
+        // start_timespec=stopwatch.start_timespec;
+        clock_gettime(CLOCK_MONOTONIC, &start_timespec);
         if(zbd_->AsyncZCEnabled()){
             // AsyncZoneCleaning();
             AsyncMigrateExtents(migrate_exts);
@@ -701,7 +702,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
       
       (void)(reclaim_until);
       {
-        ZenFSStopWatch("While ZoneCleaning Sum");
+        // ZenFSStopWatch("While ZoneCleaning Sum");
         while(
             free_percent_<= (reclaim_until)&&
               run_gc_worker_
@@ -711,7 +712,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
           before_free_percent=free_percent_;
 
           {
-            ZenFSStopWatch("ZoneCleaning Sum");
+            // ZenFSStopWatch("ZoneCleaning Sum");
             ZoneCleaning(force);
           }
           zbd_->ResetUnusedIOZones();
@@ -2626,9 +2627,9 @@ uint64_t ZenFS::AsyncMigrateExtents(
   std::vector<AsyncWorker*> thread_pool;
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
-
+ZenFSStopWatch('AsyncMigrateExtents');
 {  // long elapsed_ns_timespec;
-  ZenFSStopWatch("Prepare");
+  // ZenFSStopWatch("Prepare");
   // (void) run_once;
   // Group extents by their filename
 
@@ -2648,7 +2649,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 {
-  ZenFSStopWatch("Sum");
+  // ZenFSStopWatch("Sum");
   for (auto& it : file_extents) {
 
     io_context_t* write_ioctx=nullptr;
@@ -2697,7 +2698,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 {
-  ZenFSStopWatch("End");
+  // ZenFSStopWatch("End");
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     // thread_pool[t]->join();
     delete thread_pool[t];
