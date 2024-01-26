@@ -612,7 +612,7 @@ ret:
 
   void PartialResetWorker(uint64_t T);
 
-  size_t ZoneCleaning(bool forced) __attribute__((hot)) override;
+  size_t ZoneCleaning(bool forced) override __attribute__((hot));
   int GetMountTime(void) override { return mount_time_.load(); }
   bool IsZCRunning(void) { return run_gc_worker_; }
   void ZCLock(void) override { zc_lock_.lock(); }
