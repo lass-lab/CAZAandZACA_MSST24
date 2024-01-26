@@ -565,7 +565,7 @@ class ZonedBlockDevice {
   uint64_t tuning_point_;
   uint64_t async_zc_enabled_;
 
-  std::atomic<long> cumulative_io_blocking_{0}; //us
+  std::atomic<long> cumulative_io_blocking_{0}; //ms
 
 
   uint64_t default_extent_size_ = 256<<20;
@@ -962,7 +962,7 @@ class ZonedBlockDevice {
   }
   void AddTimeLapse(int T,uint64_t cur_ops);
   void AddCumulativeIOBlocking(long ns){
-    cumulative_io_blocking_.fetch_add((ns/1000));
+    cumulative_io_blocking_.fetch_add(((ns/1000)/1000));
   }
   
   
