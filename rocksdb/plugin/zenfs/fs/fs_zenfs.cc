@@ -395,7 +395,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
     struct timespec start_timespec, end_timespec;
   
   // zc_lock_.lock();
-  zbd_->ZCorPartialLock();
+  // zbd_->ZCorPartialLock();
+  ZenFSStopWatch stopwatch("ZC");
   // if(zbd_->ProactiveZoneCleaning()){
   //   MODIFIED_ZC_KICKING_POINT+=10;
   // }
@@ -506,7 +507,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
     if(!run_gc_worker_){
       zbd_->SetZCRunning(false);
-      zbd_->ZCorPartialUnLock();
+      // zbd_->ZCorPartialUnLock();
       return 0;
     }
 
@@ -543,7 +544,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
 
 
-zbd_->ZCorPartialUnLock();
+// zbd_->ZCorPartialUnLock();
   return migrate_zones_start.size() + all_inval_zone_n;
 }
 
@@ -559,7 +560,7 @@ void ZenFS::AsyncZoneCleaning(void){
     struct timespec start_timespec, end_timespec;
   
 
-  zbd_->ZCorPartialLock();
+  // zbd_->ZCorPartialLock();
 
   ZenFSSnapshot snapshot;
   ZenFSSnapshotOptions options;
@@ -650,7 +651,7 @@ void ZenFS::AsyncZoneCleaning(void){
 
     if(!run_gc_worker_){
       zbd_->SetZCRunning(false);
-      zbd_->ZCorPartialUnLock();
+      // zbd_->ZCorPartialUnLock();
       // return 0;
       return;
     }
@@ -672,7 +673,7 @@ void ZenFS::AsyncZoneCleaning(void){
 
 
 
-  zbd_->ZCorPartialUnLock();
+  // zbd_->ZCorPartialUnLock();
 }
 
 
