@@ -407,8 +407,10 @@ size_t ZenFS::ZoneCleaning(bool forced){
   options.zone_file_ = 1;
   options.log_garbage_ = 1;
   // zbd_->EntireZoneReadLock();
-  GetZenFSSnapshot(snapshot, options);
-  
+  {
+    ZenFSStopWatch stopwatch("GetZenFSSnapshot");
+    GetZenFSSnapshot(snapshot, options);
+  }
   size_t all_inval_zone_n = 0;
   // std::vector<VictimZoneCandiate> victim_candidate;
   std::vector<std::pair<uint64_t, uint64_t>> victim_candidate;
