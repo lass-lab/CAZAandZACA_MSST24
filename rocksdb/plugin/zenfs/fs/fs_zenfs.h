@@ -208,7 +208,7 @@ class ZenFS : public FileSystemWrapper {
     io_context_t* ret_write_ioctx=nullptr;
     if(io_uring_queue_.empty()){
       ret_read_ring=new io_uring;
-      err= io_uring_queue_init(1000, ret_read_ring, flags);
+      err= io_uring_queue_init(1000*one_zc_reclaimed_zone_n_, ret_read_ring, flags);
       if(err){
         printf("\t\t\tGetAsyncStructure io_uring_queue_init error@@@@@ %d \n",err);
         return err;
@@ -221,7 +221,7 @@ class ZenFS : public FileSystemWrapper {
 
     if(io_ctx_queue_.empty()){
       ret_write_ioctx= new io_context_t;
-      err=io_queue_init(1000,ret_write_ioctx);
+      err=io_queue_init(1000*one_zc_reclaimed_zone_n_,ret_write_ioctx);
       if(err){
         printf("\t\t\t\t GetAsyncStructure io_queue_init err %d",err);
         return err;
