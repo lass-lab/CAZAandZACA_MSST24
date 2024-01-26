@@ -2627,7 +2627,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   std::vector<AsyncWorker*> thread_pool;
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
-ZenFSStopWatch('AsyncMigrateExtents');
+ZenFSStopWatch("AsyncMigrateExtents");
 {  // long elapsed_ns_timespec;
   // ZenFSStopWatch("Prepare");
   // (void) run_once;
