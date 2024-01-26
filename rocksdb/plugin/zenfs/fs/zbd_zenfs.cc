@@ -3468,12 +3468,12 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
     return s;
   }
 
-  if (io_type != IOType::kWAL) {
-    s = ApplyFinishThreshold();
-    if (!s.ok()) {
-      return s;
-    }
-  }
+  // if (io_type != IOType::kWAL) {
+  //   s = ApplyFinishThreshold();
+  //   if (!s.ok()) {
+  //     return s;
+  //   }
+  // }
 
   WaitForOpenIOZoneToken(io_type == IOType::kWAL);
   
