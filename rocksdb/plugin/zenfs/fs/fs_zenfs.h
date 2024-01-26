@@ -447,8 +447,9 @@ class ZenFS : public FileSystemWrapper {
                         const IOOptions& /*options*/, uint64_t* diskfree,
                         uint64_t* free_percent,
                         IODebugContext* /*dbg*/) override {
-loop:
+// loop:
     // uint64_t fr;
+    struct timespec start_timespec, end_timespec;
     // printf("ZenFS::GetFreeSPace %lu %p\n",free_percent_,this);
     if(diskfree!=nullptr){
       *diskfree = zbd_->GetFreeSpace();
@@ -456,10 +457,16 @@ loop:
     else{ // if nullptr
       goto ret;
     }
-
+    // while()
     if(zbd_->GetZCRunning() ){
       // sleep(1);
-      goto loop;
+      clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+      while(zbd_->GetZCRunning() );
+      clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+      long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+      // goto loop;
+      zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec);
+
     }
 ret:
     *free_percent=free_percent_;
