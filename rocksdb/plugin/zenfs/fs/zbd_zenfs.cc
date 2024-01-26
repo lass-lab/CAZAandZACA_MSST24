@@ -1735,7 +1735,7 @@ IOStatus ZonedBlockDevice::RuntimePartialZoneReset(std::vector<bool>& is_reseted
 }
 
 
-void ZonedBlockDevice::GetMigrationIOZoneToken(void){
+bool ZonedBlockDevice::GetMigrationIOZoneToken(void){
   std::unique_lock<std::mutex> lk(migrate_zone_mtx_);
   // migrate_resource_.wait(lk,[this]{
   //   if(migration_io_zones_.load()<max_migrate_zones_){
