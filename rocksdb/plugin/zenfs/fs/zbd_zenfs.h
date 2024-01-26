@@ -192,6 +192,16 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
   if (ending.size() > value.size()) return false;
   return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
+
+struct ZenFSStopWatch{
+  struct timespec start_timespec, end_timespec;
+  ZenFSStopWatch(){
+    clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  }
+  ~ZenFSStopWatch(){
+    
+  }
+};
 struct AsyncZoneCleaningIocb{
     AsyncZoneCleaningIocb(std::string fname,uint64_t start,uint64_t length,uint64_t header_size)
     : start_(start),length_(length) ,header_size_(header_size)

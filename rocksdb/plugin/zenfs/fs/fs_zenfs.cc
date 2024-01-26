@@ -2672,34 +2672,12 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
       AsyncMigrateFileExtentsWorker(it.first,&(it.second),
      write_ioctx, read_ring);
-      // while(success==false){
-      //   for(uint64_t n = 0 ;n <max_structure_n;n++){
-      //     if(read_ring_to_be_reap_[n].load()==0){
-      //       read_ring_to_be_reap_[n]=(uint64_t)read_ring;
-      //       success=true;
-      //       break;
-      //     }
-      //   }
-      // }
-      // success=false;
-      // while(success==false){
-      //   for(uint64_t n = 0 ;n <max_structure_n;n++){
-      //     if(write_ioctx_to_be_reap_[n].load()==0){
-      //       write_ioctx_to_be_reap_[n]=(uint64_t)write_ioctx;
-      //       success=true;
-      //       break;
-      //     }
-      //   }
-      // }
+
     }else{
        std::thread* t=new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
             it.first, &(it.second),write_ioctx, read_ring);
-      // AsyncWorker* async_worker = new AsyncWorker(t,write_ioctx,read_ring);
       thread_pool.push_back(new AsyncWorker(t,write_ioctx,read_ring));
-      // thread_pool.push_back(
-      //   new std::thread(&ZenFS::AsyncMigrateFileExtentsWorker,this,
-      //       it.first, &(it.second),write_ioctx, read_ring)
-      //   );
+
     }
     // read_rings.push_back(read_ring);
     // write_ioctxes.push_back(write_ioctx);
@@ -2724,14 +2702,15 @@ uint64_t ZenFS::AsyncMigrateExtents(
   elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   printf("sum breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
   
-
+  
+  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     // thread_pool[t]->join();
     delete thread_pool[t];
   }
   s=zbd_->ResetUnusedIOZones();
-  clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
   elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   printf("end breaktown %lu ms\n\n",(elapsed_ns_timespec/1000)/1000 );
   
