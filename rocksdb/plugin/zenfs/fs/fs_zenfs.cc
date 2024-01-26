@@ -2002,9 +2002,9 @@ Status ZenFS::Mount(bool readonly) {
         bg_stats_worker_.reset(new std::thread(&ZenFS::BackgroundStatTimeLapse, this));
     }
 
-    // if(async_cleaner_worker_==nullptr){
-    //   async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this));
-    // }
+    if(async_cleaner_worker_==nullptr){
+      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this));
+    }
 
   }
 
@@ -3160,25 +3160,17 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 }
 
 void ZenFS::BackgroundAsyncStructureCleaner(void){
+  
   while(run_gc_worker_){
-    if(zbd_->AsyncZCEnabled()>=2){ // single thread
-      for(uint64_t ring_n = 0 ;ring_n<max_structure_n;ring_n++){
-        io_uring* ptr= (io_uring*)read_ring_to_be_reap_[ring_n].load();
-        if(ptr!=nullptr){
-          io_uring_queue_exit(ptr);
-          delete ptr;
-          read_ring_to_be_reap_[ring_n].store(0);
-        }
-      }
+    if(zbd_->GetZCRunning()){
+      struct timespec start_timespec, end_timespec;
+      clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+      while(zbd_->GetZCRunning() && run_gc_worker_);
+      clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+      long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+      printf("\t\t\t\t\t %lu (ms)", (elapsed_ns_timespec/1000)/1000);
     }
-    for(uint64_t ioctx_n = 0 ;ioctx_n<max_structure_n;ioctx_n++){
-      io_context_t* ptr=(io_context_t*)write_ioctx_to_be_reap_[ioctx_n].load();
-      if(ptr!=nullptr){
-        io_destroy((*ptr));
-        delete ptr;
-        write_ioctx_to_be_reap_[ioctx_n].store(0);
-      }
-    }
+
   }
 }
 
