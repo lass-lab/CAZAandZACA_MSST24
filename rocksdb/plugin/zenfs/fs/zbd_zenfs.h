@@ -762,7 +762,7 @@ class ZonedBlockDevice {
   uint64_t zc_;
   uint64_t until_;
 
-  bool zc_running_=false;
+  std::atomic<bool> zc_running_=false;
   std::mutex zc_or_partial_lock_;
   void ZCorPartialLock(); 
   bool ZCorPartialTryLock();
@@ -855,8 +855,8 @@ class ZonedBlockDevice {
     }
     return GetZoneCleaningKickingPoint()+20;
   }
-  void SetZCRunning(bool v){ zc_running_=v; }
-  bool GetZCRunning(void) {return zc_running_; }
+  void SetZCRunning(bool v){ zc_running_.store(v); }
+  bool GetZCRunning(void) {return zc_running_.load(); }
   uint64_t GetFullZoneN(){
     // uint64_t threshold = (100 - 3 * (GetZoneCleaningKickingPoint() - cur_free_percent_));
     uint64_t ret = 0;
