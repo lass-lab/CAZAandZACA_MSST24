@@ -3463,7 +3463,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
         break;
       }else{
         // PutActiveIOZoneToken();
-        PutMigrationIOZoneToken();
+        // PutMigrationIOZoneToken();
       }
     }
     if(!s.ok()){
