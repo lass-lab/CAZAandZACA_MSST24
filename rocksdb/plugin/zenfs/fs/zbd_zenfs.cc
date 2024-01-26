@@ -479,7 +479,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   uint64_t sp = 0;
 #endif
   // Reserve one zone for metadata and another one for extent migration
-  int reserved_zones = 4;
+  int reserved_zones = 2;
   // printf("ZonedBlockDevice::Open@@\n");
   if (!readonly && !exclusive)
     return IOStatus::InvalidArgument("Write opens must be exclusive");
@@ -1993,25 +1993,51 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
       continue;
     }
     if (z->Acquire()) {
-      if ((z->used_capacity_ > 0) && !z->IsFull() &&
-          z->capacity_ >= min_capacity) {
-                // printf("2 : [%d]\n",i);
-        unsigned int diff = GetLifeTimeDiff(z->lifetime_, file_lifetime);
-        if (diff < best_diff) {
-          if (allocated_zone != nullptr) {
-            allocated_zone->Release();
-          }
-          allocated_zone = z;
-          best_diff = diff;
-        } else {
-          z->Release();
-          if (!s.ok()) return s;
-        }
+      if(z->IsEmpty()){
+        z->Release();
+        continue;
+      }
+
+      if(z->capacity_<min_capacity_){
+        z->Release();
+        continue;
+      }
+      if(z->IsFull()){
+        z->Release();
+        continue;
+      }
+      unsigned int diff = GetLifeTimeDiff(z->lifetime_, file_lifetime);
+      if (diff < best_diff) {
+        if (allocated_zone != nullptr) {
+          allocated_zone->Release();
+      }
+        allocated_zone = z;
+        best_diff = diff;
       } else {
-            // printf("4 : [%d]\n",i);
         z->Release();
         if (!s.ok()) return s;
       }
+
+
+      // if ((z->used_capacity_ > 0) && !z->IsFull() &&
+      //     z->capacity_ >= min_capacity) {
+      //           // printf("2 : [%d]\n",i);
+      //   unsigned int diff = GetLifeTimeDiff(z->lifetime_, file_lifetime);
+      //   if (diff < best_diff) {
+      //     if (allocated_zone != nullptr) {
+      //       allocated_zone->Release();
+      //     }
+      //     allocated_zone = z;
+      //     best_diff = diff;
+      //   } else {
+      //     z->Release();
+      //     if (!s.ok()) return s;
+      //   }
+      // } else {
+      //       // printf("4 : [%d]\n",i);
+      //   z->Release();
+      //   if (!s.ok()) return s;
+      // }
     }
     i++;
   }
@@ -3377,7 +3403,9 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     // usleep(1000 * 1000);
     // sleep(1);
     blocking_time++;
-
+    if(blocking_time>5){
+      FinishCheapestIOZone();
+    }
     if(!s.ok()){
       return s;
     }
