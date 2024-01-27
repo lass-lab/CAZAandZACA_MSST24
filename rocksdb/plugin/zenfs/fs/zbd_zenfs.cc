@@ -1455,8 +1455,8 @@ IOStatus ZonedBlockDevice::AsyncResetUnusedIOZones(void) {
         // z->AsyncReset();
 
         std::thread* _thread= new std::thread(&Zone::AsyncReset,z);
-        AsyncReset* asyc_reset= new AsyncReset(_thread,z);
-        async_pool.push_back(asyc_reset);
+        AsyncReset* async_reset= new AsyncReset(_thread,z);
+        async_pool.push_back(async_reset);
 
 
         reset_count_zc_.fetch_add(1);

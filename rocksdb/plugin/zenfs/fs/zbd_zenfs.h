@@ -289,6 +289,7 @@ class Zone {
   }
   inline ZonedBlockDevice* GetZBD(void) { return zbd_;}
   IOStatus Reset();
+  IOStatus AsyncReset();
   IOStatus PartialReset(size_t* erase_sz);
   IOStatus PartialResetToAllInvalidZone(size_t erase_sz);
   IOStatus Finish();
@@ -314,6 +315,7 @@ class Zone {
   void Release() {
     zone_lock_.unlock();
   }
+
 
   void EncodeJson(std::ostream &json_stream);
 
