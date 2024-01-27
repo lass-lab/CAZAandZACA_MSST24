@@ -157,8 +157,8 @@ IOStatus Zone::Reset() {
   uint64_t max_capacity;
 
   assert(!IsUsed());
-  ZenFSStopWatch z1("zone-reset");
 
+  ZenFSStopWatch z1("zone-reset");
 
   IOStatus ios = zbd_be_->Reset(start_, &offline, &max_capacity);
   if (ios != IOStatus::OK()) return ios;
@@ -1373,6 +1373,7 @@ void ZonedBlockDevice::CalculateResetThreshold(uint64_t free_percent) {
   // uint64_t max_capacity = (1<<io_zones[0]->log2_erase_unit_size_);
   // uint64_t free_percent = cur_free_percent_;
   uint64_t max_capacity = io_zones[0]->max_capacity_;
+
   // printf("CalculateResetThreshold : %lu\n",max_capacity);
   switch (reset_scheme_)
   {
@@ -1406,6 +1407,7 @@ void ZonedBlockDevice::CalculateResetThreshold(uint64_t free_percent) {
   }
   reset_threshold_ = rt;
   reset_threshold_arr_[free_percent]=rt;
+  printf("%lu : %lu\n",free_percent,rt);
 }
 
 
