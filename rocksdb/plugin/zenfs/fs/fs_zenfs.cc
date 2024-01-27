@@ -3208,7 +3208,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 // read throw
 
 {
-  ZenFSStopWatch z1("Sum-read throw")
+  ZenFSStopWatch z1("Sum-read throw");
   for(auto* ext : (*migrate_exts)){
     struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
           new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
@@ -3262,7 +3262,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 // read reap, write throw
 {
-  ZenFSStopWatch z1("Sum-read reap write throw")
+  ZenFSStopWatch z1("Sum-read reap write throw");
   if (!zfile->TryAcquireWRLock()) {
     // io_uring_queue_exit(read_ring);
     return IOStatus::OK();
@@ -3356,7 +3356,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     timeout.tv_nsec = 10000; // 100us
 // write reap
 {
-    ZenFSStopWatch z1("Sum-write reap")
+    ZenFSStopWatch z1("Sum-write reap");
   struct io_event write_events[1000];
   while(write_reaped_n<read_reaped_n){
     int num_events;
@@ -3393,7 +3393,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   //   free(to_be_freed[a]);
   // }
 {
-  ZenFSStopWatch z1("Sum-sync")
+  ZenFSStopWatch z1("Sum-sync");
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
