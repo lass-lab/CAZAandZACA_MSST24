@@ -695,7 +695,11 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
     usleep(100 * 1000);
     MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
     reclaim_until=zbd_->GetReclaimUntil();
-
+    if(free_percent_<MODIFIED_ZC_KICKING_POINT+10
+      && free_percent_>=MODIFIED_ZC_KICKING_POINT+5
+    ){
+      zbd_->ResetUnusedIOZones();
+    }
     free_percent_ = zbd_->CalculateFreePercent();
     zbd_->SetZCRunning(false);
     if(free_percent_<=MODIFIED_ZC_KICKING_POINT&&

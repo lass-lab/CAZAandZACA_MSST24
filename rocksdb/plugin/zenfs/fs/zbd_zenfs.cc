@@ -123,7 +123,7 @@ IOStatus Zone::Reset() {
   uint64_t max_capacity;
 
   assert(!IsUsed());
-  // ZenFSStopWatch z1("zone-reset");
+  ZenFSStopWatch z1("zone-reset");
 
 
   IOStatus ios = zbd_be_->Reset(start_, &offline, &max_capacity);
