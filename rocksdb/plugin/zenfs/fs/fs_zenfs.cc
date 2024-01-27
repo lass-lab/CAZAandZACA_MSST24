@@ -3206,6 +3206,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   // migrate
 
 // read throw
+
+{
+  ZenFSStopWatch z1("Sum-read throw")
   for(auto* ext : (*migrate_exts)){
     struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
           new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
@@ -3230,6 +3233,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       return IOStatus::OK();
     }
   }
+}
+
   // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
   // long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   // printf("read throw breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
@@ -3256,6 +3261,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
 // read reap, write throw
+{
+  ZenFSStopWatch z1("Sum-read reap write throw")
   if (!zfile->TryAcquireWRLock()) {
     // io_uring_queue_exit(read_ring);
     return IOStatus::OK();
@@ -3343,15 +3350,13 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
   }
-  // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-  // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-  // printf("read reap, write throw breaktown %lu ms\n",(elapsed_ns_timespec/1000)/1000 );
-  // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-
+}
 
     timeout.tv_sec = 0;
     timeout.tv_nsec = 10000; // 100us
 // write reap
+{
+    ZenFSStopWatch z1("Sum-write reap")
   struct io_event write_events[1000];
   while(write_reaped_n<read_reaped_n){
     int num_events;
@@ -3378,7 +3383,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     // write_reaped_n+=num_events;
   }
   PushBackAsyncStructure(read_ring,write_ioctx);
-
+}
 
   // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
   // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
@@ -3387,12 +3392,13 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   // for(size_t a = 0 ;a < to_be_freed.size();a++){
   //   free(to_be_freed[a]);
   // }
-
+{
+  ZenFSStopWatch z1("Sum-sync")
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
   zfile->ReleaseWRLock();
-  
+  }
   // io_uring_queue_exit(&read_ring);
   // io_destroy(write_ioctx);
 
