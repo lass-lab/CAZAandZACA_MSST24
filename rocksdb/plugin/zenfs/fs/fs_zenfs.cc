@@ -2620,7 +2620,10 @@ IOStatus ZenFS::MigrateExtents(
     
     // if (!s.ok()) break;
   }
+  {
+      ZenFSStopWatch z1("ResetUnsedZones");
   s=zbd_->ResetUnusedIOZones();
+  }
   return s;
 }
 
@@ -3438,7 +3441,8 @@ IOStatus ZenFS::MigrateFileExtents(
     new_ext->zone_=ext->zone_;
     new_extent_list.push_back(new_ext);    
   }
-
+{
+    ZenFSStopWatch z1("Sum-pread pwrite");
   // Modify the new extent list
   // printf("before finding in MigrateFileExtents\n");
   for (ZoneExtent* ext : new_extent_list) {
@@ -3544,6 +3548,9 @@ IOStatus ZenFS::MigrateFileExtents(
     }
     zbd_->ReleaseMigrateZone(target_zone);
   }
+}
+{
+    ZenFSStopWatch z1("Sum-sync");
   // printf("after finding in MigrateFileExtents 1\n");
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
@@ -3552,6 +3559,8 @@ IOStatus ZenFS::MigrateFileExtents(
   Info(logger_, "MigrateFileExtents Finished, fname: %s, extent count: %lu",
        fname.data(), migrate_exts.size());
     // printf("after finding in MigrateFileExtents 22\n");
+
+    }
   return s;
 }
 
