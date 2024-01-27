@@ -708,7 +708,7 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
   }
 
   std::shared_ptr<FileSystem> fs;
-  std::string fs_uri = "zenfs://dev:nvme0n1";
+  std::string fs_uri = "zenfs://dev:nvme1n2";
   status = FileSystem::CreateFromString(config_options, fs_uri, &fs);
   if (status.ok()) {
     guard->reset(new CompositeEnvWrapper(*result, fs));
