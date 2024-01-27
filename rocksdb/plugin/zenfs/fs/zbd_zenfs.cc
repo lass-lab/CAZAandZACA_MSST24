@@ -511,7 +511,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   Info(logger_, "Zone block device nr zones: %lu max active: %u max open: %u \n",
        zbd_be_->GetNrZones(), max_nr_active_zones, max_nr_open_zones);
   printf("Zone block device nr zones: %lu(%d) max active: %u max open: %u(%d) \n",
-       zbd_be_->GetNrZones(), max_nr_active_zones,max_nr_open_io_zones_.load(), max_nr_open_zones,max_nr_open_io_zones_.load());
+       zbd_be_->GetNrZones(), max_nr_active_zones,max_nr_open_io_zones_.load(), max_nr_open_zones,max_nr_open_io_zones_);
   zone_rep = zbd_be_->ListZones();
 
   if(log2_erase_unit_size_>0){
