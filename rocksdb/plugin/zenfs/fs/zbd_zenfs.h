@@ -971,7 +971,7 @@ class ZonedBlockDevice {
   
   
   
-  IOStatus ResetUnusedIOZones(void);
+  IOStatus ResetUnusedIOZones(void) __attribute__((hot));
   IOStatus RuntimeZoneReset(std::vector<bool>& is_reseted);
   IOStatus RuntimePartialZoneReset(std::vector<bool>& is_reseted);
   void StatsPartialReset(uint64_t to_be_erased_unit_n){

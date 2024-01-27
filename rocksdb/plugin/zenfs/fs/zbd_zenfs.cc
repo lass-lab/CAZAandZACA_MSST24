@@ -1379,6 +1379,9 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
     if(!full){
       continue;
     }
+    if(z->IsUsed()){
+      continue;
+    }
     if ( z->Acquire() ) {
 
 
@@ -3470,8 +3473,9 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     // sleep(1);
     blocking_time++;
     if(blocking_time>5){
+      FinishCheapestIOZone(false);
       MoveResources(true);
-      // FinishCheapestIOZone(false);
+
       // s=AllocateEmptyZone(out_zone); 
       // if (s.ok() && (*out_zone) != nullptr) {
       //   Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
