@@ -3221,7 +3221,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     io_uring_prep_read(sqe,read_fd,async_zc_read_iocb->buffer_,
                       async_zc_read_iocb->length_+async_zc_read_iocb->header_size_,
                       async_zc_read_iocb->start_-async_zc_read_iocb->header_size_);
-    // io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
+    io_uring_sqe_set_flags(sqe, IOSQE_ASYNC);
     err=io_uring_submit(read_ring);
     if(err==-errno){
       printf("io_uring_submit err? %d\n",err);
