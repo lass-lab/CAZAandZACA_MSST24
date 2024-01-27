@@ -57,7 +57,7 @@ class ZoneFile;
 
 #define MB (1024 * KB)
 
-#define ZENFS_SPARE_ZONES (70)
+#define ZENFS_SPARE_ZONES (0)
 
 #define ZENFS_META_ZONES (3)
 
