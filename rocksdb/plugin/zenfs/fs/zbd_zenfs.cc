@@ -72,6 +72,7 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
     // capacity_ = max_capacity_ - (wp_ - start_);
   
   }
+  printf("max %lu cap %lu\n",max_capacity_,capacity_);
 }
 Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
            std::unique_ptr<ZoneList> &zones, uint64_t idx,
