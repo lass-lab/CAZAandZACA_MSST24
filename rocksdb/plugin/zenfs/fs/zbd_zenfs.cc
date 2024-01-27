@@ -1756,13 +1756,15 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
 
 
       bool full = z->IsFull();
-      total_invalid=(z->wp_ - z->start_);
+
+      total_invalid= z->wp_-z->start_ < z->max_capacity_  ? (z->wp_ - z->start_) : z->max_capacity_;
+
       // printf("total invalid %lu end erase unit wrttien %lu total_full_erase_unit written %lu erase unit size %lu\n",total_invalid,end_erase_unit_written,total_full_erase_unit_written,erase_unit_size);
       // if(end_erase_unit_written>reset_threshold_){ //eu
       // printf("end")
       // }
       // 
-      if(total_invalid>reset_threshold_arr_[cur_free_percent_]){
+      if((z->max_capacity_-total_invalid)>reset_threshold_arr_[cur_free_percent_]){
         goto no_reset;
       }
       erase_size_.fetch_add(total_invalid);
