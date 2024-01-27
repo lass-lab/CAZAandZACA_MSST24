@@ -545,6 +545,9 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   }
   while (m < ZENFS_META_ZONES && i < zone_rep->ZoneCount()) {
     /* Only use sequential write required zones */
+    if(i<73){
+      continue;
+    }
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
       if (!zbd_be_->ZoneIsOffline(zone_rep, i)) {
         meta_zones.push_back(new Zone(this, zbd_be_.get(), zone_rep, i));
@@ -560,6 +563,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   device_io_capacity=device_io_capacity<<30;
   for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i++) {
     /* Only use sequential write required zones */
+
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
       if (!zbd_be_->ZoneIsOffline(zone_rep, i)) {
         Zone *newZone = new Zone(this, zbd_be_.get(), zone_rep, i,log2_erase_unit_size_);
