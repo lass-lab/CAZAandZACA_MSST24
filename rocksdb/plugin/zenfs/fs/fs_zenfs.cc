@@ -3257,11 +3257,13 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     new_extent_list.push_back(new_ext);    
   }
   struct timespec timeout;
+  timeout.tv_sec=0;
+  timeout.tv_nsec=0;
   struct __kernel_timespec kernel_timeout;
   kernel_timeout.tv_sec=0;
   kernel_timeout.tv_nsec=0;
   (void)(kernel_timeout);
-
+  struct io_event write_events[1000];
 
 // read reap, write throw
 {
@@ -3356,15 +3358,35 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     zbd_->ReleaseMigrateZone(target_zone);
 
     io_uring_cqe_seen(read_ring,cqe);
+
+    
+    
+    // aggresive write reap
+    int num_events;
+    num_events = io_getevents((*write_ioctx), 1, 1000, write_events,
+                              &timeout);
+    if(num_events>=1){
+      for(int e = 0 ;e <num_events;e++){
+        struct io_event event = write_events[e];
+        AsyncZoneCleaningIocb* reaped_write_iocb = static_cast<AsyncZoneCleaningIocb*>(event.data);
+        if(reaped_write_iocb&&reaped_write_iocb->filename_==fname){
+          write_reaped_n++;
+          free(reaped_write_iocb);
+        }
+      }
+    }
+
+
+
   }
 }
 
     timeout.tv_sec = 0;
-    timeout.tv_nsec = 30000000; // 30ms
+    timeout.tv_nsec = 1000; // 30ms
 // write reap
 {
     ZenFSStopWatch z1("Sum-write reap");
-  struct io_event write_events[1000];
+
   while(write_reaped_n<read_reaped_n){
     int num_events;
     // timeout;
