@@ -556,7 +556,9 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   open_io_zones_ = 0;
   uint64_t device_io_capacity= (1<<log2_DEVICE_IO_CAPACITY);
   device_io_capacity=device_io_capacity<<30;
-  for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i++) {
+  // for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i++) {
+  for ( i = zone_rep->ZoneCount()-1; i >= 0&& (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i--) {
+  
     /* Only use sequential write required zones */
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
       if (!zbd_be_->ZoneIsOffline(zone_rep, i)) {
