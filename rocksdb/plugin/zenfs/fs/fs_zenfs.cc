@@ -544,12 +544,12 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // zc_lock_.unlock();
   // zbd_->ExchangeSpareZone(migrate_zones_);
 
-  for(auto zone_start : migrate_zones_start){
-    Zone* z =zbd_->GetIOZone(zone_start);
-    if(z->Acquire()){
-      z->Reset();
-    }
-  }
+  // for(auto zone_start : migrate_zones_start){
+  //   Zone* z =zbd_->GetIOZone(zone_start);
+  //   if(z->Acquire()){
+  //     z->Reset();
+  //   }
+  // }
 
 // zbd_->ZCorPartialUnLock();
   return migrate_zones_start.size() + all_inval_zone_n;
@@ -911,7 +911,11 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
       zoneFile->extents_[i]=new_extents[i];
       old_ext->zone_->used_capacity_ -= old_ext->length_;
       // old_ext->is_invalid_=true;
-
+      if(old_ext->zone_->used_capacity_==0){
+        if(old_ext->zone_->Acquire()){
+          old_ext->zone_->Reset();
+        }
+      }
     }else{
       delete new_extents[i];
     }
