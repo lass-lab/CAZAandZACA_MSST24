@@ -556,13 +556,15 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   open_io_zones_ = 0;
   uint64_t device_io_capacity= (1<<log2_DEVICE_IO_CAPACITY);
   device_io_capacity=device_io_capacity<<30;
+  int zone_index= i;
   // for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i++) {
   for ( i = zone_rep->ZoneCount()-1;  (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i--) {
-  
+
     /* Only use sequential write required zones */
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
       if (!zbd_be_->ZoneIsOffline(zone_rep, i)) {
-        Zone *newZone = new Zone(this, zbd_be_.get(), zone_rep, i,log2_erase_unit_size_);
+        Zone *newZone = new Zone(this, zbd_be_.get(), zone_rep, zone_index,log2_erase_unit_size_);
+            zone_index++;
         if (!newZone->Acquire()) {
           assert(false);
           return IOStatus::Corruption("Failed to set busy flag of zone " +
