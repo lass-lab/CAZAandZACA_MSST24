@@ -200,6 +200,10 @@ struct ZenFSStopWatch{
     name=_name;
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   }
+
+  End(){
+    
+  }
   ~ZenFSStopWatch(){
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);

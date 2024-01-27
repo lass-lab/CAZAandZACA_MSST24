@@ -396,7 +396,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   
   // zc_lock_.lock();
   // zbd_->ZCorPartialLock();
-  ZenFSStopWatch stopwatch("ZC");
+  ZenFSStopWatch z1("ZC");
   // if(zbd_->ProactiveZoneCleaning()){
   //   MODIFIED_ZC_KICKING_POINT+=10;
   // }
@@ -408,7 +408,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   options.log_garbage_ = 1;
   // zbd_->EntireZoneReadLock();
   {
-    ZenFSStopWatch ("GetZenFSSnapshot");
+    ZenFSStopWatch z2("GetZenFSSnapshot");
     GetZenFSSnapshot(snapshot, options);
   }
   size_t all_inval_zone_n = 0;
@@ -493,7 +493,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
          (int)migrate_exts.size());
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     {    
-        // ZenFSStopWatch stopwatch("measure here");
+        ZenFSStopWatch z3("measure here");
         // start_timespec=stopwatch.start_timespec;
         clock_gettime(CLOCK_MONOTONIC, &start_timespec);
         if(zbd_->AsyncZCEnabled()){
@@ -2631,7 +2631,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   std::vector<AsyncWorker*> thread_pool;
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
-ZenFSStopWatch("AsyncMigrateExtents");
+ZenFSStopWatch z4("AsyncMigrateExtents");
 {  // long elapsed_ns_timespec;
   // ZenFSStopWatch("Prepare");
   // (void) run_once;
@@ -2653,7 +2653,7 @@ ZenFSStopWatch("AsyncMigrateExtents");
   
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 {
-  // ZenFSStopWatch("Sum");
+  ZenFSStopWatch z5("Sum");
   for (auto& it : file_extents) {
 
     io_context_t* write_ioctx=nullptr;
@@ -2702,7 +2702,7 @@ ZenFSStopWatch("AsyncMigrateExtents");
   
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 {
-  // ZenFSStopWatch("End");
+  ZenFSStopWatch z6("End");
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     // thread_pool[t]->join();
     delete thread_pool[t];
