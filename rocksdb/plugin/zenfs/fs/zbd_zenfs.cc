@@ -121,8 +121,8 @@ IOStatus Zone::Reset() {
   uint64_t max_capacity;
 
   assert(!IsUsed());
+  ZenFSStopWatch z1("zone-reset");
 
-  ZenFSStopWatch reset("zone-reset\n");
 
   IOStatus ios = zbd_be_->Reset(start_, &offline, &max_capacity);
   if (ios != IOStatus::OK()) return ios;
@@ -556,17 +556,11 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   open_io_zones_ = 0;
   uint64_t device_io_capacity= (1<<log2_DEVICE_IO_CAPACITY);
   device_io_capacity=device_io_capacity<<30;
-  // int zone_index= i;
   for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i++) {
-  // for ( i = zone_rep->ZoneCount()-1;  (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i--) {
-    // if(zone_rep->ZoneCount()-i> 70){
-    //   continue;
-    // }
     /* Only use sequential write required zones */
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
       if (!zbd_be_->ZoneIsOffline(zone_rep, i)) {
         Zone *newZone = new Zone(this, zbd_be_.get(), zone_rep, i,log2_erase_unit_size_);
-            // zone_index++;
         if (!newZone->Acquire()) {
           assert(false);
           return IOStatus::Corruption("Failed to set busy flag of zone " +
@@ -3399,7 +3393,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
                                            uint64_t min_capacity, bool* run_gc_worker_,
                                            bool is_sst) {
   // std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
-  // ZenFSStopWatch z1("TakeMigrateZone");
+  ZenFSStopWatch z1("TakeMigrateZone");
   if((*run_gc_worker_)==false){
       migrating_=false;
       return IOStatus::OK();
