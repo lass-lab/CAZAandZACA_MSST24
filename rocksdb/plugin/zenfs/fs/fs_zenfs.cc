@@ -3276,8 +3276,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     struct io_uring_cqe* cqe = nullptr;
 
 
-    // int result = io_uring_wait_cqe(&read_ring, &cqe);
-    int result = io_uring_peek_cqe(read_ring, &cqe);
+    int result = io_uring_wait_cqe(read_ring, &cqe);
+    // int result = io_uring_peek_cqe(read_ring, &cqe);
 
 
 
@@ -3370,7 +3370,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     // int write_reap_min_nr = (extent_n-write_reaped_n) > 1 ? (extent_n-write_reaped_n) : 1;
     // write_reap_min_nr=1;
 
-    num_events = io_getevents((*write_ioctx), 1, 1000, write_events,
+    num_events = io_getevents((*write_ioctx), read_reaped_n, 1000, write_events,
                               &timeout);
     if(num_events<1){
       continue;
