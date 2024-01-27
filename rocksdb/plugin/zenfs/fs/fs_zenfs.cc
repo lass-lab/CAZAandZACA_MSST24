@@ -545,7 +545,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // zbd_->ExchangeSpareZone(migrate_zones_);
 
   for(auto zone_start : migrate_zones_start){
-    Zone* z =zbd_->GetIOZone();
+    Zone* z =zbd_->GetIOZone(zone_start);
     if(z->Acquire()){
       z->Reset();
     }
