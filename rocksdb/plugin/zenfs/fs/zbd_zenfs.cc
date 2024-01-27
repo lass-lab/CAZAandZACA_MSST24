@@ -510,7 +510,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
 
   Info(logger_, "Zone block device nr zones: %lu max active: %u max open: %u \n",
        zbd_be_->GetNrZones(), max_nr_active_zones, max_nr_open_zones);
-  printf("Zone block device nr zones: %lu(%d) max active: %u max open: %u(%d) \n",
+  printf("Zone block device nr zones: %lu max active: %u (%d) max open: %u(%d) \n",
        zbd_be_->GetNrZones(), max_nr_active_zones,max_nr_active_io_zones_.load(), max_nr_open_zones,max_nr_open_io_zones_);
   zone_rep = zbd_be_->ListZones();
 
@@ -575,6 +575,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
         }
         io_zones.push_back(newZone);
         if (zbd_be_->ZoneIsActive(zone_rep, i)) {
+          printf("active resoruced %lu\n",active_io_zones_.load());
           active_io_zones_++;
           if (zbd_be_->ZoneIsOpen(zone_rep, i)) {
             if (!readonly) {
