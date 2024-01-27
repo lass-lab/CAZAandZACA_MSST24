@@ -545,10 +545,10 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   }
   while (m < ZENFS_META_ZONES && i < zone_rep->ZoneCount()) {
     /* Only use sequential write required zones */
-    if(i<73){
-      i++;
-      continue;
-    }
+    // if(i<73){
+    //   i++;
+    //   continue;
+    // }
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
       if (!zbd_be_->ZoneIsOffline(zone_rep, i)) {
         meta_zones.push_back(new Zone(this, zbd_be_.get(), zone_rep, i));
