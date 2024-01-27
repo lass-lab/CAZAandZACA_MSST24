@@ -213,7 +213,10 @@ struct ZenFSStopWatch{
 
 struct AsyncReset{
   std::thread* thread_;
-  Zone* zone;
+  Zone* zone_;
+  AsyncReset(std::thread* t,Zone* z) : thread_(t),zone_(z) {
+    
+  }
   ~AsyncReset(){
     thread_->join();
   }
