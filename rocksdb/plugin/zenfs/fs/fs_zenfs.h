@@ -203,7 +203,7 @@ class ZenFS : public FileSystemWrapper {
   uint64_t GetAsyncStructure(io_uring** read_ring,io_context_t** write_ioctx){
     std::lock_guard<std::mutex> lg(async_struture_mutex_);
     // unsigned flags = IORING_SETUP_SQPOLL;
-    unsigned flasg = 0;
+    unsigned flags = 0;
     int err=0;
     io_uring* ret_read_ring= nullptr;
     io_context_t* ret_write_ioctx=nullptr;
