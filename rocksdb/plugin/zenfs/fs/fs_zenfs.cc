@@ -3355,7 +3355,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     }
     zbd_->ReleaseMigrateZone(target_zone);
 
-
+    io_uring_cqe_seen(read_ring,cqe);
   }
 }
 
