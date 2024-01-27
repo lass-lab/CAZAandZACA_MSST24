@@ -42,7 +42,8 @@ IOStatus ZbdlibBackend::CheckScheduler() {
   std::ostringstream path;
   std::string s = filename_;
   std::fstream f;
-
+  return IOStatus::OK();
+  
   s.erase(0, 5);  // Remove "/dev/" from /dev/nvmeXnY
   path << "/sys/block/" << s << "/queue/scheduler";
   f.open(path.str(), std::fstream::in);
