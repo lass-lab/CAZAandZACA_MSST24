@@ -546,6 +546,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   while (m < ZENFS_META_ZONES && i < zone_rep->ZoneCount()) {
     /* Only use sequential write required zones */
     if(i<73){
+      i++;
       continue;
     }
     if (zbd_be_->ZoneIsSwr(zone_rep, i)) {
