@@ -201,8 +201,8 @@ struct ZenFSStopWatch{
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   }
 
-  End(){
-    
+  uint64_t End(){
+    return 0;
   }
   ~ZenFSStopWatch(){
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
