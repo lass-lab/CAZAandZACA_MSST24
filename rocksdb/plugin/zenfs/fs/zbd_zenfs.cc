@@ -1407,7 +1407,7 @@ void ZonedBlockDevice::CalculateResetThreshold(uint64_t free_percent) {
   }
   reset_threshold_ = rt;
   reset_threshold_arr_[free_percent]=rt;
-  printf("%lu : %lu\n",free_percent,rt);
+  // printf("%lu : %lu\n",free_percent,rt);
 }
 
 
