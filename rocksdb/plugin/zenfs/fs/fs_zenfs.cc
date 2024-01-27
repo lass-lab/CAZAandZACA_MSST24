@@ -915,6 +915,7 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
         if(!old_ext->zone_->IsUsed()){
           old_ext->zone_->Reset();
         }
+        old_ext->zone_->Release();
       }
     }else{
       delete new_extents[i];
