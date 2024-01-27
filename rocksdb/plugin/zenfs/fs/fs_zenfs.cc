@@ -2702,14 +2702,17 @@ ZenFSStopWatch z4("AsyncMigrateExtents");
   
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 {
-  ZenFSStopWatch z6("End");
+  ZenFSStopWatch z6("Delete thread");
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     // thread_pool[t]->join();
     delete thread_pool[t];
   }
+}
+{
+    ZenFSStopWatch z7("ResetUnusedZone");
   s=zbd_->ResetUnusedIOZones();
 
-  }
+}  
   // clock_gettime(CLOCK_MONOTONIC, &end_timespec);
   // elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   // printf("end breaktown %lu ms\n\n",(elapsed_ns_timespec/1000)/1000 );
