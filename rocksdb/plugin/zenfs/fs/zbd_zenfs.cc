@@ -3393,7 +3393,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
                                            uint64_t min_capacity, bool* run_gc_worker_,
                                            bool is_sst) {
   // std::unique_lock<std::mutex> lock(migrate_zone_mtx_);
-  ZenFSStopWatch z1("TakeMigrateZone");
+  // ZenFSStopWatch z1("TakeMigrateZone");
   if((*run_gc_worker_)==false){
       migrating_=false;
       return IOStatus::OK();

@@ -3278,8 +3278,12 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     struct io_uring_cqe* cqe = nullptr;
 
 
-    // int result = io_uring_wait_cqe(read_ring, &cqe);
-    int result = io_uring_peek_cqe(read_ring, &cqe);
+    int result;
+    {
+      ZenFSStopWatch("io_uring_wait_cqe");
+      result=io_uring_wait_cqe(read_ring, &cqe);
+    }
+    // int result = io_uring_peek_cqe(read_ring, &cqe);
 
 
 
