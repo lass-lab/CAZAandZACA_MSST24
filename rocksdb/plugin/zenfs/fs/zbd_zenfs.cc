@@ -96,6 +96,7 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
       capacity_=max_capacity_-relative_wp;
     }
   }
+  printf("max %lu cap %lu\n",max_capacity_,capacity_);
   erase_unit_size_=(1<<log2_erase_unit_size_);
 }
 
