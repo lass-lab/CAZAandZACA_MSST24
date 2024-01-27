@@ -3595,7 +3595,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     // sleep(1);
     blocking_time++;
     if(blocking_time>5){
-      FinishCheapestIOZone(false);
+      // FinishCheapestIOZone(false);
       MoveResources(true);
 
       // s=AllocateEmptyZone(out_zone); 
