@@ -72,7 +72,7 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
     // capacity_ = max_capacity_ - (wp_ - start_);
   
   }
-  printf("max %lu cap %lu\n",max_capacity_,capacity_);
+  // printf("max %lu cap %lu\n",max_capacity_,capacity_);
 }
 Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
            std::unique_ptr<ZoneList> &zones, uint64_t idx,
@@ -97,7 +97,7 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
       capacity_=max_capacity_-relative_wp;
     }
   }
-  printf("max %lu cap %lu\n",max_capacity_,capacity_);
+  // printf("max %lu cap %lu\n",max_capacity_,capacity_);
   erase_unit_size_=(1<<log2_erase_unit_size_);
 }
 
@@ -510,8 +510,8 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
 
   Info(logger_, "Zone block device nr zones: %lu max active: %u max open: %u \n",
        zbd_be_->GetNrZones(), max_nr_active_zones, max_nr_open_zones);
-  printf("Zone block device nr zones: %lu max active: %u max open: %u \n",
-       zbd_be_->GetNrZones(), max_nr_active_zones, max_nr_open_zones);
+  printf("Zone block device nr zones: %lu(%lu) max active: %u max open: %u(%lu) \n",
+       zbd_be_->GetNrZones(), max_nr_active_zones,max_nr_open_io_zones_.load(), max_nr_open_zones,max_nr_open_io_zones_.load());
   zone_rep = zbd_be_->ListZones();
 
   if(log2_erase_unit_size_>0){
