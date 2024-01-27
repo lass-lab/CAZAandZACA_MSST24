@@ -210,6 +210,14 @@ struct ZenFSStopWatch{
     printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
   }
 };
+
+struct AsyncReset{
+  std::thread* thread_;
+  Zone* zone;
+  ~AsyncReset(){
+    thread_->join();
+  }
+};
 struct AsyncZoneCleaningIocb{
     AsyncZoneCleaningIocb(std::string fname,uint64_t start,uint64_t length,uint64_t header_size)
     : start_(start),length_(length) ,header_size_(header_size)
@@ -969,7 +977,7 @@ class ZonedBlockDevice {
     cumulative_io_blocking_.fetch_add(((ns/1000)/1000));
   }
   
-  
+  IOStatus AsyncResetUnusedIOZones(void)__attribute__((hot));
   
   IOStatus ResetUnusedIOZones(void) __attribute__((hot));
   IOStatus RuntimeZoneReset(std::vector<bool>& is_reseted);

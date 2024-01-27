@@ -692,7 +692,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
   uint64_t before_free_percent;
 
   while (run_gc_worker_) {
-    usleep(100 * 1000);
+
     MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
     reclaim_until=zbd_->GetReclaimUntil();
     if(free_percent_<MODIFIED_ZC_KICKING_POINT+10
@@ -700,6 +700,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
     ){
       zbd_->ResetUnusedIOZones();
     }
+    usleep(100 * 1000);
     free_percent_ = zbd_->CalculateFreePercent();
     zbd_->SetZCRunning(false);
     if(free_percent_<=MODIFIED_ZC_KICKING_POINT&&
@@ -733,7 +734,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
       }
     }
     zbd_->SetZCRunning(false);
-    zbd_->ResetUnusedIOZones();
+    // zbd_->ResetUnusedIOZones();
   }
 }
 
@@ -2626,8 +2627,8 @@ IOStatus ZenFS::MigrateExtents(
     // if (!s.ok()) break;
   }
   {
-    // ZenFSStopWatch z1("ResetUnsedZones");
-    // s=zbd_->ResetUnusedIOZones();
+    ZenFSStopWatch z1("ResetUnsedZones");
+    s=zbd_->ResetUnusedIOZones();
   }
   return s;
 }
@@ -2717,8 +2718,9 @@ ZenFSStopWatch z4("AsyncMigrateExtents");
   }
 }
 {
-  //   ZenFSStopWatch z7("ResetUnusedZone");
+  ZenFSStopWatch z7("AsyncResetUnusedZone");
   // s=zbd_->ResetUnusedIOZones();
+  s=zbd_->AsyncResetUnusedIOZones();
 
 }  
   // clock_gettime(CLOCK_MONOTONIC, &end_timespec);

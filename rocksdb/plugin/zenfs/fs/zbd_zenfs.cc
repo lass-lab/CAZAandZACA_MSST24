@@ -118,6 +118,37 @@ void Zone::EncodeJson(std::ostream &json_stream) {
   json_stream << "}";
 }
 
+IOStatus Zone::AsyncReset(){
+  bool offline;
+  uint64_t max_capacity;
+
+  assert(!IsUsed());
+  ZenFSStopWatch z1("zone-reset");
+
+
+  IOStatus ios = zbd_be_->Reset(start_, &offline, &max_capacity);
+  if (ios != IOStatus::OK()) return ios;
+
+  if (offline)
+    capacity_ = 0;
+  else
+    max_capacity_ = capacity_ = max_capacity;
+
+
+
+  wp_ = start_;
+  lifetime_ = Env::WLTH_NOT_SET;
+
+
+
+    for(ZoneExtent* ze : zone_extents_ ){
+      delete ze;
+    }
+    zone_extents_.clear();
+  Release();
+  return IOStatus::OK();
+}
+
 IOStatus Zone::Reset() {
   bool offline;
   uint64_t max_capacity;
@@ -1376,6 +1407,77 @@ void ZonedBlockDevice::CalculateResetThreshold(uint64_t free_percent) {
 
 
 // only called at zone cleaning
+
+IOStatus ZonedBlockDevice::AsyncResetUnusedIOZones(void) {
+
+  IOStatus reset_status;
+  std::vector<AsyncReset*> async_pool;
+
+  for (size_t i =0;i<io_zones.size();i++) {
+    const auto z = io_zones[i];
+    bool full=z->IsFull() ;
+    if(!full){
+      continue;
+    }
+    if(z->IsUsed()){
+      continue;
+    }
+    if(z->IsEmpty()){
+      continue;
+    }
+    
+    if ( z->Acquire() ) {
+
+
+      if(z->IsEmpty()){
+        z->Release();
+        continue;
+      }
+      // if(!ProactiveZoneCleaning() && !full){
+      //   z->Release();
+      //   continue;
+      // }
+      if(!full){
+        z->Release();
+        continue;  
+      }
+
+      if (!z->IsUsed()) {
+        // bool full=
+        if(full){
+          erase_size_zc_.fetch_add(io_zones[i]->max_capacity_);
+        }else{
+          erase_size_proactive_zc_.fetch_add(io_zones[i]->wp_-io_zones[i]->start_);
+        }
+        wasted_wp_.fetch_add(io_zones[i]->capacity_);
+        
+        // reset_status = z->Reset();
+        // z->AsyncReset();
+
+        std::thread* _thread= new std::thread(&Zone::AsyncReset,z);
+        AsyncReset* asyc_reset= new AsyncReset(_thread,z);
+        async_pool.push_back(asyc_reset);
+
+
+        reset_count_zc_.fetch_add(1);
+        // if (!reset_status.ok()) {
+        //   z->Release();
+        //   return reset_status;
+        // }
+        // if (!full) PutActiveIOZoneToken();
+        continue;
+      } 
+
+      z->Release();
+    }
+  }
+  for(size_t azr= 0 ; azr<async_pool.size();azr++){
+    delete async_pool[azr];
+  }
+  return IOStatus::OK();
+}
+
+
 IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
 
   IOStatus reset_status;
