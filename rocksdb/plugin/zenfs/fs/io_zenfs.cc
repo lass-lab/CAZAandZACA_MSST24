@@ -343,7 +343,10 @@ void ZoneFile::SetFileSize(uint64_t sz) { file_size_ = sz; }
 void ZoneFile::SetFileModificationTime(time_t mt) { m_time_ = mt; }
 void ZoneFile::SetIOType(IOType io_type) { io_type_ = io_type; }
 
-ZoneFile::~ZoneFile() { ClearExtents(); }
+ZoneFile::~ZoneFile() { 
+  ClearExtents();
+  ReleaseWRLock();
+ }
 
 void ZoneFile::ClearExtents() {
   for (auto e = std::begin(extents_); e != std::end(extents_); ++e) {
