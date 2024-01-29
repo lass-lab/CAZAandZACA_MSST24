@@ -476,7 +476,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   //   return;
   // }
   
-  std::vector<ZoneExtentSnapshot*> migrate_exts;
+  std::vector<ZoneExtentSnapshot*> s;
   for (auto& ext : snapshot.extents_) {
     if (migrate_zones_start.find(ext.zone_start) !=
         migrate_zones_start.end()) {
@@ -535,6 +535,11 @@ size_t ZenFS::ZoneCleaning(bool forced){
          (int)migrate_exts.size(),(int)migrate_zones_start.size());
     for(auto zstart : migrate_zones_start){
       printf("used capacity %lu\n",zbd_->GetIOZone((zstart))->used_capacity_.load()   );
+      if(zbd_->GetIOZone((zstart))->used_capacity_.load() ){
+        zbd_->GetIOZone((zstart))->used_capacity_.store(0);
+      }
+      
+
     }
     return 0;
   }
@@ -938,7 +943,8 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
         }
         old_ext->zone_->Release();
       }
-    }else{
+    }
+    else{
       delete new_extents[i];
     }
   }
@@ -2867,7 +2873,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
 
     if (GetFileNoLock(fname) == nullptr) {
       Info(logger_, "Migrate file not exist anymore.");
-      zbd_->ReleaseMigrateZone(target_zone);
+      // zbd_->ReleaseMigrateZone(target_zone);
       // for (ZoneExtent* de : new_extent_list) {
       //   de->is_invalid_=true;
       // }
@@ -3311,6 +3317,8 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     return IOStatus::OK();
   }
 
+  // std::vector<ZoneExtent*> tmp_migrated_ext;
+
 
   while(read_reaped_n < extent_n){
     struct io_uring_cqe* cqe = nullptr;
@@ -3353,8 +3361,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
     if (it == new_extent_list.end()) {
       Info(logger_, "Migrate extent not found, ext_start: %lu", reaped_read_iocb->start_);
-       io_uring_cqe_seen(read_ring,cqe);
-       free(reaped_read_iocb);
+      
+      io_uring_cqe_seen(read_ring,cqe);
+      free(reaped_read_iocb);
       continue;
       
     }
@@ -3384,11 +3393,12 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     cur_ext->start_=target_start;
     cur_ext->zone_= target_zone;
     // reaped_read_iocb->iocb_.data=reaped_read_iocb;
-
+    
 
     target_zone->ThrowAsyncZCWrite((*write_ioctx),reaped_read_iocb);
 
     target_zone->PushExtent(cur_ext);
+    // tmp_migrated_ext.push_back(cur_ext);
     cur_ext->zone_->used_capacity_.fetch_add(cur_ext->length_);
     copied+=cur_ext->length_;
     read_reaped_n++;
@@ -3398,6 +3408,14 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
       Info(logger_, "Migrate file not exist anymore.");
       zbd_->ReleaseMigrateZone(target_zone);
       // zfile->ReleaseWRLock();
+      // for(ZoneExtent* de : new_extent_list){
+        
+      //   if(de==cur_ext){
+      //     break;
+      //   }
+      // }
+
+
       break;
     }
     zbd_->ReleaseMigrateZone(target_zone);
