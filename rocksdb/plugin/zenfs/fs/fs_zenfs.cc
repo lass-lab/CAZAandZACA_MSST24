@@ -634,19 +634,19 @@ size_t ZenFS::ZoneCleaning(bool forced){
     }
     zc_triggerd_count_.fetch_add(1);
   }else{
-    // printf("ERROR : Garbage collecting %d extents in %d \n",
-    //      (int)migrate_exts.size(),(int)migrate_zones_start.size());
-    // for(auto zstart : migrate_zones_start){
-    //   printf("used capacity %lu\n",zbd_->GetIOZone((zstart))->used_capacity_.load()   );
-    //   if(zbd_->GetIOZone((zstart))->used_capacity_.load() ){
-    //     // zbd_->GetIOZone((zstart))->used_capacity_.store(0);
-    //     if(zbd_->GetIOZone((zstart))->Acquire()){
-    //       zbd_->GetIOZone((zstart))->Reset();
-    //       zbd_->GetIOZone((zstart))->Release();
-    //     }
-    //   }
+    printf("ERROR : Garbage collecting %d extents in %d \n",
+         (int)migrate_exts.size(),(int)migrate_zones_start.size());
+    for(auto zstart : migrate_zones_start){
+      printf("used capacity %lu\n",zbd_->GetIOZone((zstart))->used_capacity_.load()   );
+      if(zbd_->GetIOZone((zstart))->used_capacity_.load() ){
+        zbd_->GetIOZone((zstart))->used_capacity_.store(0);
+        // if(zbd_->GetIOZone((zstart))->Acquire()){
+        //   zbd_->GetIOZone((zstart))->Reset();
+        //   zbd_->GetIOZone((zstart))->Release();
+        // }
+      }
 
-    // }
+    }
     // return 0;
   }
   // zbd_->SetZCRunning(false);
