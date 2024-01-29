@@ -517,18 +517,6 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
   // uint64_t zidx
   for (const auto& zone : snapshot.zones_) {
-    // if(zbd_->ProactiveZoneCleaning()){
-    //   if(zone.capacity==zone.max_capacity){ // if empty, pass
-    //     continue;
-    //   }
-    //   if(free_percent_<=MODIFIED_ZC_KICKING_POINT){ // if FG GC, SELECT FULL
-    //     if(zone.capacity !=0 ){
-    //       continue;
-    //     } 
-    //   }  
-    //   goto select;
-    // }
-// zone_size=zone.max_capacity;
 
     if(zone.capacity !=0 ){
       continue;
@@ -748,9 +736,9 @@ void ZenFS::AsyncZoneCleaning(void){
 
   uint64_t threshold = 0;
   uint64_t reclaimed_zone_n=one_zc_reclaimed_zone_n_;
-  if(forced){
-    reclaimed_zone_n++;
-  }
+  // if(forced){
+  //   reclaimed_zone_n++;
+  // }
 
 
   reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
