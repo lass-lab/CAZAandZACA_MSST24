@@ -1050,13 +1050,13 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
       zoneFile->extents_[i]=new_extents[i];
       old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
       // old_ext->is_invalid_=true;
-      if(old_ext->zone_->used_capacity_==0&&old_ext->zone_->Acquire()){
-        if(!old_ext->zone_->IsUsed()){
-          old_ext->zone_->Reset();
-          zbd_->AddEraseSizeZC();
-        }
-        old_ext->zone_->Release();
-      }
+      // if(old_ext->zone_->used_capacity_==0&&old_ext->zone_->Acquire()){
+      //   if(!old_ext->zone_->IsUsed()){
+      //     old_ext->zone_->Reset();
+      //     zbd_->AddEraseSizeZC();
+      //   }
+      //   old_ext->zone_->Release();
+      // }
     }
     else{
       delete new_extents[i];
@@ -1071,7 +1071,7 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
     return s;
   }
 
-
+  zbd_->ResetUnusedIOZones();
   return IOStatus::OK();
 }
 
