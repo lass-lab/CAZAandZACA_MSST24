@@ -3147,8 +3147,8 @@ std::set<uint64_t> DBImpl::GetSoonCompactionInvalidatedSSTFileNo(int level,int d
     ret.emplace(*pivot_sst_fno);
     vstorage->GetOverlappingInputs(level+1,&file->smallest,&file->largest,&output_i.files);
     
-    for(auto file :output_i.files ){
-      ret.emplace(file->fd.GetNumber());
+    for(auto o_file :output_i.files ){
+      ret.emplace(o_file->fd.GetNumber());
     }
   }
 
