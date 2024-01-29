@@ -736,9 +736,6 @@ void ZenFS::AsyncZoneCleaning(void){
 
   uint64_t threshold = 0;
   uint64_t reclaimed_zone_n=one_zc_reclaimed_zone_n_;
-  // if(forced){
-  //   reclaimed_zone_n++;
-  // }
 
 
   reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
@@ -1039,6 +1036,9 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
                                 std::vector<ZoneExtent*> new_extents) {
   IOStatus s;
   ZoneExtent* old_ext;
+
+
+
   for (size_t i = 0; i < new_extents.size(); ++i) {
     if (zoneFile->extents_[i]->start_ != new_extents[i]->start_) {
       old_ext=zoneFile->extents_[i];
@@ -1135,7 +1135,9 @@ IOStatus ZenFS::DeleteFileNoLock(std::string fname, const IOOptions& options,
 
   fname = FormatPathLexically(fname);
   zoneFile = GetFileNoLock(fname);
+
   if (zoneFile != nullptr) {
+    zoneFile->AcquireWRLock();
     std::string record;
 
     files_.erase(fname);
@@ -2774,7 +2776,7 @@ IOStatus ZenFS::MigrateExtents(
   }
   {
     // ZenFSStopWatch z1("ResetUnsedZones");
-    // s=zbd_->ResetUnusedIOZones();
+    s=zbd_->ResetUnusedIOZones();
   }
   return s;
 }
