@@ -379,6 +379,8 @@ class DB {
   // ListColumnFamilies to check the result.
   virtual Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families);
+  virtual std::set<uint64_t> GetAlreadyBeingCompactedSSTFileNo(void);
+  virtual std::set<uint64_t> GetSoonCompactionInvalidatedSSTFileNo(int level,int depth,uint64_t* pivot_sst_fno);
   virtual uint64_t MostLargeUpperAdjacentFile(Slice& s, Slice& l, int level);
   virtual uint64_t MostSmallDownwardAdjacentFile(Slice& s, Slice& l, int level);
   virtual void AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);

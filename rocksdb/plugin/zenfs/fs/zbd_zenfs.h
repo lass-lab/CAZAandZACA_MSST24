@@ -784,6 +784,9 @@ class ZonedBlockDevice {
   std::mutex migrate_zone_mtx_;
   
   std::atomic<uint64_t> lsm_tree_[10];
+
+  
+
   /*
   0 : 256
   1 : 256
@@ -815,6 +818,15 @@ class ZonedBlockDevice {
   int GetFD(int i) {
     return zbd_be_->GetFD(i);
   }
+
+  uint64_t GetLevelSizeLimit(int level){
+    uint64_t max_bytes_for_level = max_bytes_for_level_base_;
+    for(int l = 1 ; l<level;l++){
+      max_bytes_for_level*=10;
+    }
+    return max_bytes_for_level;
+  }
+
   double PredictCompactionScore(int level){
 
     // if(db_ptr_!=nullptr){
@@ -924,7 +936,9 @@ class ZonedBlockDevice {
   IOStatus Open(bool readonly, bool exclusive);
 
   Zone *GetIOZone(uint64_t offset);
-
+  uint64_t GetIOZoneN(){
+    return io_zones.size();
+  }
   IOStatus AllocateIOZone(bool is_sst,Slice& smallest, Slice& largest ,int level,
                             Env::WriteLifeTimeHint file_lifetime, IOType io_type,
                             std::vector<uint64_t>& input_fno,uint64_t predicted_size,

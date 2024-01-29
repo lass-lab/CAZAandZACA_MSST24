@@ -3094,6 +3094,67 @@ std::vector<double> DBImpl::LevelsCompactionScore(void){
   return versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info()->GetCompactionScores();
 }
 
+std::set<uint64_t> DBImpl::GetAlreadyBeingCompactedSSTFileNo(void){
+  std::set<uint64_t> ret;
+  ret.clear();
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+  for(int l = 0 ; l < vstorage->num_levels();l++){
+    auto files = vstorage->LevelFiles(l);
+    for(auto f : files){
+      if(f->being_compacted){
+        ret.emplace(f->fd.GetNumber());
+      }
+    }
+  }
+  return ret;
+}
+
+std::set<uint64_t> DBImpl::GetSoonCompactionInvalidatedSSTFileNo(int level,int depth,uint64_t* pivot_sst_fno){
+  std::set<uint64_t> ret;
+  auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
+  // for(int l = 0 ; l < vstorage->num_levels();l++){
+  //   auto files = vstorage->LevelFiles(l);
+  //   for(auto f : files){
+  //     if(f->being_compacted){
+  //       ret.emplace(f->fd.GetNumber());
+  //     }
+  //   }
+  // }
+  
+
+  if(level==0){
+    // return all l0 l1 files
+    auto l0files=vstorage->LevelFiles(0);
+    auto l1files=vstorage->LevelFiles(1);
+    for(auto file : l0files){
+      *pivot_sst_fno=file->fd.GetNumber();
+      ret.emplace(file->fd.GetNumber());
+    }
+    for(auto file : l1files){
+      ret.emplace(file->fd.GetNumber());
+    }
+    return ret;
+  }
+  const std::vector<int>& file_size = vstorage->FilesByCompactionPri(level);
+  const std::vector<FileMetaData*>& level_files =
+      vstorage->LevelFiles(level);
+
+  if((int)file_size.size()>=depth+1){
+    CompactionInputFiles output_i;
+    int index=file_size[depth];
+    FileMetaData* file =level_files[index];
+    *pivot_sst_fno=file->fd.GetNumber();
+    ret.emplace(*pivot_sst_fno);
+    vstorage->GetOverlappingInputs(level+1,&file->smallest,&file->largest,&output_i.files);
+    
+    for(auto file :output_i.files ){
+      ret.emplace(file->fd.GetNumber());
+    }
+  }
+
+  return ret; 
+}
+
 double DBImpl::ReCalculateCompactionScore(int level){
   // immutable_db_options_;
   // mutable_db_options_;
@@ -4562,7 +4623,12 @@ void DB::SameLevelFileList(int , std::vector<uint64_t>&,bool ){
 double DB::ReCalculateCompactionScore(int){
   return 0.0;
 }
-
+std::set<uint64_t> DB::GetAlreadyBeingCompactedSSTFileNo(void){
+  return std::set<uint64_t>();
+}
+std::set<uint64_t> DB::GetSoonCompactionInvalidatedSSTFileNo(int level,int depth,uint64_t* pivot_sst_fno){
+  return std::set<uint64_t>();
+}
 std::vector<int> DB::NumLevelsFiles(void) { return std::vector<int>(0); }
 std::vector<double> DB::LevelsCompactionScore(void) { return std::vector<double>(0); }
 

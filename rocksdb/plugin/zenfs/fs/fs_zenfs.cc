@@ -273,6 +273,7 @@ ZenFS::~ZenFS() {
 
 
   LogFiles();
+  db_ptr_ = nullptr;
 
   run_bg_partial_reset_worker_=false;
   run_bg_stats_worker_= false;
@@ -392,11 +393,11 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t erase_unit_size=zbd_->GetEraseUnitSize();
   int start = GetMountTime();
   // auto start_chrono = std::chrono::high_resolution_clock::now();
-    struct timespec start_timespec, end_timespec;
+  struct timespec start_timespec, end_timespec;
   
   // zc_lock_.lock();
   // zbd_->ZCorPartialLock();
-  ZenFSStopWatch z1("ZC");
+  // ZenFSStopWatch z1("ZC");
   // if(zbd_->ProactiveZoneCleaning()){
   //   MODIFIED_ZC_KICKING_POINT+=10;
   // }
@@ -408,7 +409,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   options.log_garbage_ = 1;
   // zbd_->EntireZoneReadLock();
   {
-    ZenFSStopWatch z2("GetZenFSSnapshot");
+    // ZenFSStopWatch z2("GetZenFSSnapshot");
     GetZenFSSnapshot(snapshot, options);
   }
   size_t all_inval_zone_n = 0;
@@ -421,6 +422,97 @@ size_t ZenFS::ZoneCleaning(bool forced){
   
 
 
+
+
+  uint64_t compaction_predicted_depth = zbd_->AsyncZCEnabled();
+  std::vector<uint64_t> soon_invalidation_zone_per_size((ZENFS_SPARE_ZONES+ZENFS_META_ZONES+zbd_->GetIOZoneN()),0);
+  
+  std::set<uint64_t> aggregated_soon_compaction_invalidated_fno;
+  soon_compaction_invalidated_fno.clear();
+  
+  if(compaction_predicted_depth>0){
+    aggregated_soon_compaction_invalidated_fno = 
+            db_ptr_ ? db_ptr_->GetAlreadyBeingCompactedSSTFileNo() : 
+            std::set<uint64_t>();
+  }
+
+
+  uint64_t current_lsm_tree[10];
+  int level_predicted_depth[10];
+  memset(level_predicted_depth,0,sizeof(level_predicted_depth));
+
+  for(int l=0;l<10;l++){
+    current_lsm_tree[l]=zbd_->lsm_tree_[l].load();
+  }
+
+
+  for(uint64_t p= 0 ; p < compaction_predicted_depth; p++){
+    int max_score_level = -1;
+    double max_level_score = 0.0;
+
+
+    for(int l = 0; l <10;l++){
+      // if(current_lsm_tree[l]/)
+      double this_level_score = double((double)current_lsm_tree[l]/(double)GetLevelSizeLimit(l));
+      if(this_level_score>max_level_score&&this_level_score>=1.0){
+        max_score_level=l;
+      }
+    }
+
+
+    if(max_score_level==-1){
+      break;
+    }
+    uint64_t pivot_sst_fno=0;
+    std::set<uint64_t> soon_compaction_invalidated_fno=
+              db_ptr_ ?  db_ptr_->GetSoonCompactionInvalidatedSSTFileNo(max_score_level,
+                                    level_predicted_depth[max_score_level], &pivot_sst_fno) : std::set<uint64_t>();
+
+    if(db_ptr_==nullptr){
+      break;
+    }
+    // uint64_t ZoneFile* pivot_sst=GetSSTZoneFileInZBDNoLock();
+    if(aggregated_soon_compaction_invalidated_fno.find(pivot_sst_fno)
+          == aggregated_soon_compaction_invalidated_fno.end()){
+      continue;
+    }
+
+    for(auto fno : soon_compaction_invalidated_fno){
+      
+      if(aggregated_soon_compaction_invalidated_fno.find(fno)
+        == aggregated_soon_compaction_invalidated_fno.end( ) ){
+          continue;
+      }
+
+      if(soon_compaction_invalidated_fno.size()>1){
+        aggregated_soon_compaction_invalidated_fno.emplace(fno);
+      }
+
+      ZoneFile* zfile= GetSSTZoneFileInZBDNoLock(fno);
+      if(zfile&&zfile->level_==max_score_level){
+        uint64_t file_size= zfile->GetFileSize();
+        current_lsm_tree[zfile->level_]-=file_size;
+        current_lsm_tree[zfile->level_+1]+=file_size;
+      }
+    }
+  }
+
+  for(auto fno : aggregated_soon_compaction_invalidated_fno){
+    zfile= GetSSTZoneFileInZBDNoLock(fno);
+
+
+    if(zfile){
+       std::vector<ZoneExtent*> extents=zfile->GetExtents();
+       for(auto ext : extents){
+          if(ext->zone_){
+            // uint64_t zidx = ext->zone_->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+            soon_invalidation_zone_per_size[ext->zone_->zidx_]+=ext->length_;
+          }
+       }
+    }
+  }
+
+  // uint64_t zidx
   for (const auto& zone : snapshot.zones_) {
     // if(zbd_->ProactiveZoneCleaning()){
     //   if(zone.capacity==zone.max_capacity){ // if empty, pass
@@ -441,12 +533,20 @@ size_t ZenFS::ZoneCleaning(bool forced){
     if(zone.used_capacity==zone.max_capacity){
       continue;
     }
-// zone_size=zone.max_capacity;
-    // if (zone.capacity == 0) { 
-//  select:   
+
+    uint64_t compensated_used_capacity = zone.used_capacity - soon_invalidation_zone_per_size[zone.zidx];
+    if(compensated_used_capacity>(zone.max_capacity*2)){ // error exception
+      printf("compensated_used_capacity %lu\n",compensated_used_capacity);
+      compensated_used_capacity=0;
+    }
+
+
       uint64_t garbage_percent_approx =
-        100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
-      // uint64_t garbage_percent_approx=zone.max_capacity-zone.used_capacity;
+        100 - 100 * compensated_used_capacity / zone.max_capacity; // invalid capacity
+
+
+
+
       if(zone.used_capacity>0){ // valid copy zone
         // victim_candidate.push_back({garbage_percent_approx, zone.start});
         victim_candidate.emplace_back(garbage_percent_approx,zone.start);
@@ -495,16 +595,16 @@ size_t ZenFS::ZoneCleaning(bool forced){
          (int)migrate_exts.size());
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     {    
-        ZenFSStopWatch z3("measure here");
+        // ZenFSStopWatch z3("measure here");
         // start_timespec=stopwatch.start_timespec;
         clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-        if(zbd_->AsyncZCEnabled()){
-            // AsyncZoneCleaning();
-            AsyncMigrateExtents(migrate_exts);
-            // AsyncUringMigrateExtents(migrate_exts);
-        }else{
-            MigrateExtents(migrate_exts);
-        }
+        // if(zbd_->AsyncZCEnabled()){
+        //     // AsyncZoneCleaning();
+        //     AsyncMigrateExtents(migrate_exts);
+        //     // AsyncUringMigrateExtents(migrate_exts);
+        // }else{
+        MigrateExtents(migrate_exts);
+        // }
         clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     }
     
@@ -736,7 +836,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
       
       (void)(reclaim_until);
       {
-        ZenFSStopWatch("While ZoneCleaning Sum");
+        // ZenFSStopWatch("While ZoneCleaning Sum");
         // while(
         //     free_percent_<= (reclaim_until)&&
         //       run_gc_worker_
@@ -2647,7 +2747,7 @@ uint64_t ZenFS::AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& 
 IOStatus ZenFS::MigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
   IOStatus s;
-  ZenFSStopWatch("MigrateExtents");
+  // ZenFSStopWatch("MigrateExtents");
   // (void) run_once;
   // Group extents by their filename
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
@@ -2680,7 +2780,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   std::vector<AsyncWorker*> thread_pool;
   uint64_t ret = 0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
-ZenFSStopWatch z4("AsyncMigrateExtents");
+// ZenFSStopWatch z4("AsyncMigrateExtents");
 {  // long elapsed_ns_timespec;
   // ZenFSStopWatch("Prepare");
   // (void) run_once;
@@ -2702,7 +2802,7 @@ ZenFSStopWatch z4("AsyncMigrateExtents");
   
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 {
-  ZenFSStopWatch z5("Sum");
+  // ZenFSStopWatch z5("Sum");
   for (auto& it : file_extents) {
 
     io_context_t* write_ioctx=nullptr;
@@ -2751,7 +2851,7 @@ ZenFSStopWatch z4("AsyncMigrateExtents");
   
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
 {
-  ZenFSStopWatch z6("Delete thread");
+  // ZenFSStopWatch z6("Delete thread");
   for(size_t t = 0 ;t < thread_pool.size(); t++){
     // thread_pool[t]->join();
     delete thread_pool[t];
@@ -3258,7 +3358,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 // read throw
 
 {
-  ZenFSStopWatch z1("Sum-read throw");
+  // ZenFSStopWatch z1("Sum-read throw");
   for(auto* ext : (*migrate_exts)){
     struct AsyncZoneCleaningIocb* async_zc_read_iocb = 
           new AsyncZoneCleaningIocb(ext->filename,ext->start,ext->length,ext->header_size);
@@ -3314,7 +3414,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 // read reap, write throw
 {
-  ZenFSStopWatch z1("Sum-read reap write throw");
+  // ZenFSStopWatch z1("Sum-read reap write throw");
   if (!zfile->TryAcquireWRLock()) {
     // io_uring_queue_exit(read_ring);
     return IOStatus::OK();
@@ -3328,7 +3428,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
 
 
     {
-      ZenFSStopWatch cqewait("io_uring_wait_cqe");
+      // ZenFSStopWatch cqewait("io_uring_wait_cqe");
       int result=io_uring_wait_cqe(read_ring, &cqe);
       if(result!=0){
         continue;
@@ -3451,7 +3551,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
     timeout.tv_nsec = 1000; // 30ms
 // write reap
 {
-    ZenFSStopWatch z1("Sum-write reap");
+    // ZenFSStopWatch z1("Sum-write reap");
 
   while(write_reaped_n<read_reaped_n){
     int num_events;
@@ -3494,7 +3594,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   //   free(to_be_freed[a]);
   // }
 {
-  ZenFSStopWatch z1("Sum-sync");
+  // ZenFSStopWatch z1("Sum-sync");
   // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);
@@ -3540,7 +3640,7 @@ IOStatus ZenFS::MigrateFileExtents(
     new_extent_list.push_back(new_ext);    
   }
 {
-    ZenFSStopWatch z1("Sum-pread pwrite");
+    // ZenFSStopWatch z1("Sum-pread pwrite");
   // Modify the new extent list
   // printf("before finding in MigrateFileExtents\n");
   for (ZoneExtent* ext : new_extent_list) {
@@ -3648,7 +3748,7 @@ IOStatus ZenFS::MigrateFileExtents(
   }
 }
 {
-    ZenFSStopWatch z1("Sum-sync");
+    // ZenFSStopWatch z1("Sum-sync");
   // printf("after finding in MigrateFileExtents 1\n");
   zbd_->AddGCBytesWritten(copied);
   SyncFileExtents(zfile.get(), new_extent_list);

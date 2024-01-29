@@ -50,6 +50,7 @@ class ZoneSnapshot {
   uint64_t capacity;
   uint64_t used_capacity;
   uint64_t max_capacity;
+  uint64_t zidx;
   Zone* zone_p;
  public:
   ZoneSnapshot(Zone* zone)
@@ -58,6 +59,7 @@ class ZoneSnapshot {
         capacity(zone->capacity_),
         used_capacity(zone->used_capacity_),
         max_capacity(zone->max_capacity_),
+        zidx(zone->zidx_),
         zone_p(zone) {}
 };
 
