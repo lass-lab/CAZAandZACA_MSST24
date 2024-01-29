@@ -461,9 +461,11 @@ class ZenFS : public FileSystemWrapper {
     // while()
     if(zbd_->GetZCRunning() ){
       // sleep(1);
+      zbd_->ResetUnusedIOZones();
       clock_gettime(CLOCK_MONOTONIC, &start_timespec);
       while(zbd_->GetZCRunning() ){
         sleep(1);
+
       }
       // while(zbd_->CalculateFreePercent()<=zbd_->GetZoneCleaningKickingPoint()
       //   &&zbd_->GetZCRunning() 
