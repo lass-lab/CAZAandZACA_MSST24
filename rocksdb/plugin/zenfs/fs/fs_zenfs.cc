@@ -476,7 +476,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   //   return;
   // }
   
-  std::vector<ZoneExtentSnapshot*> s;
+  std::vector<ZoneExtentSnapshot*> migrate_exts;
   for (auto& ext : snapshot.extents_) {
     if (migrate_zones_start.find(ext.zone_start) !=
         migrate_zones_start.end()) {
@@ -538,7 +538,6 @@ size_t ZenFS::ZoneCleaning(bool forced){
       if(zbd_->GetIOZone((zstart))->used_capacity_.load() ){
         zbd_->GetIOZone((zstart))->used_capacity_.store(0);
       }
-      
 
     }
     return 0;
