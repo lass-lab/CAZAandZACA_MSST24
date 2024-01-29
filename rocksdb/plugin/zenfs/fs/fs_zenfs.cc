@@ -488,7 +488,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         aggregated_soon_compaction_invalidated_fno.emplace(fno);
       }
 
-      ZoneFile* zfile= GetSSTZoneFileInZBDNoLock(fno);
+      ZoneFile* zfile= zbd_->GetSSTZoneFileInZBDNoLock(fno);
       if(zfile&&zfile->level_==max_score_level){
         uint64_t file_size= zfile->GetFileSize();
         current_lsm_tree[zfile->level_]-=file_size;
