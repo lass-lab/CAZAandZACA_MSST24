@@ -425,6 +425,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
 
   uint64_t compaction_predicted_depth = zbd_->AsyncZCEnabled();
+  if(forced){
+    compaction_predicted_depth=0;
+  }
   std::vector<uint64_t> soon_invalidation_zone_per_size((ZENFS_SPARE_ZONES+ZENFS_META_ZONES+zbd_->GetIOZoneN()),0);
   
   std::set<uint64_t> aggregated_soon_compaction_invalidated_fno;
@@ -865,9 +868,9 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
         zbd_->SetZCRunning(true);
         for(int zc=0;zc<5&&zbd_->GetFullZoneN()&&free_percent_<= (reclaim_until);zc++){
            
-          ZoneCleaning(force);
+          force=ZoneCleaning(force);
           free_percent_ = zbd_->CalculateFreePercent();
-          force=(before_free_percent==free_percent_);
+          // force=(before_free_percent==free_percent_);
         }
 
       }
