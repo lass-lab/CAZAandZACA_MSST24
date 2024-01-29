@@ -525,11 +525,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
       continue;
     }
 
-    uint64_t compensated_used_capacity = zone.used_capacity - soon_invalidation_zone_per_size[zone.zidx];
+    uint64_t compensated_used_capacity = zone.used_capacity + soon_invalidation_zone_per_size[zone.zidx];
 
-    if(compensated_used_capacity==0){
-      continue;
-    }
 
 
     // if(compensated_used_capacity>(zone.max_capacity*2)){ // error exception
@@ -540,13 +537,13 @@ size_t ZenFS::ZoneCleaning(bool forced){
       //   continue;
       // }
 
-      // uint64_t valid_approx = 100 * compensated_used_capacity / zone.max_capacity;
-      // uint64_t garbage_percent_approx= 200-valid_approx;
+      uint64_t valid_approx = 100 * compensated_used_capacity / zone.max_capacity;
+      uint64_t garbage_percent_approx= 200-valid_approx;
 
       // uint64_t garbage_percent_approx =
       //   100 - 100 * compensated_used_capacity / zone.max_capacity; // invalid capacity
-      uint64_t garbage_percent_approx =
-        100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
+      // uint64_t garbage_percent_approx =
+      //   100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
 
 
 

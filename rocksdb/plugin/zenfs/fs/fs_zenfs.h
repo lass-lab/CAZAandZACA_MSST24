@@ -175,6 +175,7 @@ class ZenFS : public FileSystemWrapper {
 
   DB* db_ptr_ = nullptr;
   std::condition_variable		cv_;
+  // std::shared_ptr<ZoneFile> active_wal_ = nullptr;
 
 
   // std::condition_variable async_zc_reader_wake_up_cv_;
