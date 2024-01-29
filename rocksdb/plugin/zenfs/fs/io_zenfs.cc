@@ -345,7 +345,7 @@ void ZoneFile::SetIOType(IOType io_type) { io_type_ = io_type; }
 
 ZoneFile::~ZoneFile() { 
   ClearExtents();
-  ReleaseWRLock();
+  // ReleaseWRLock();
  }
 
 void ZoneFile::ClearExtents() {
