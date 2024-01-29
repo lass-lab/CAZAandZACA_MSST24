@@ -474,6 +474,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
     if(db_ptr_==nullptr){
       break;
     }
+    level_predicted_depth[max_score_level]++;
     // uint64_t ZoneFile* pivot_sst=GetSSTZoneFileInZBDNoLock();
     if(aggregated_soon_compaction_invalidated_fno.find(pivot_sst_fno)
           == aggregated_soon_compaction_invalidated_fno.end()){
