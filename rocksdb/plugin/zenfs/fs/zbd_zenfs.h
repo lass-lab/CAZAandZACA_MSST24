@@ -842,12 +842,12 @@ class ZonedBlockDevice {
     if(level == 1){
       return (double)((double)( lsm_tree_[level].load()) / (double)(max_bytes_for_level_base_));
     }
-    uint64_t max_bytes_for_level = max_bytes_for_level_base_;
-    for(int l = 1 ; l<level;l++){
-      max_bytes_for_level*=10;
-    }
+    // uint64_t max_bytes_for_level = max_bytes_for_level_base_;
+    // for(int l = 1 ; l<level;l++){
+    //   max_bytes_for_level*=10;
+    // }
 
-    return (double)( (double)(lsm_tree_[level].load()) /(double) max_bytes_for_level);
+    return (double)( (double)(lsm_tree_[level].load()) /(double) GetLevelSizeLimit(level));
   }
   inline uint64_t GetAllocationScheme() { return allocation_scheme_;}
 
