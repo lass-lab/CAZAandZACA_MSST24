@@ -871,6 +871,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
           force=ZoneCleaning(force);
           free_percent_ = zbd_->CalculateFreePercent();
           // force=(before_free_percent==free_percent_);
+          (void)before_free_percent;
         }
 
       }
