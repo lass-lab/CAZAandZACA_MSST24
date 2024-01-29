@@ -534,7 +534,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
     printf("ERROR : Garbage collecting %d extents in %d \n",
          (int)migrate_exts.size(),(int)migrate_zones_start.size());
     for(auto zstart : migrate_zones_start){
-      printf("used capacity %lu\n",zbd_->GetIOZone((zstart)->used_capacity_));
+      printf("used capacity %lu\n",zbd_->GetIOZone((zstart))->used_capacity_.load()   );
     }
     return 0;
   }
