@@ -746,7 +746,9 @@ void ZenFS::AsyncZoneCleaning(void){
 
   uint64_t threshold = 0;
   uint64_t reclaimed_zone_n=one_zc_reclaimed_zone_n_;
-
+  if(forced){
+    reclaimed_zone_n++;
+  }
 
 
   reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
