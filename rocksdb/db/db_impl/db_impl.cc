@@ -4626,7 +4626,7 @@ double DB::ReCalculateCompactionScore(int){
 std::set<uint64_t> DB::GetAlreadyBeingCompactedSSTFileNo(void){
   return std::set<uint64_t>();
 }
-std::set<uint64_t> DB::GetSoonCompactionInvalidatedSSTFileNo(int level,int depth,uint64_t* pivot_sst_fno){
+std::set<uint64_t> DB::GetSoonCompactionInvalidatedSSTFileNo(int ,int ,uint64_t* ){
   return std::set<uint64_t>();
 }
 std::vector<int> DB::NumLevelsFiles(void) { return std::vector<int>(0); }
