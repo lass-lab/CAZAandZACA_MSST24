@@ -428,8 +428,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
   std::vector<uint64_t> soon_invalidation_zone_per_size((ZENFS_SPARE_ZONES+ZENFS_META_ZONES+zbd_->GetIOZoneN()),0);
   
   std::set<uint64_t> aggregated_soon_compaction_invalidated_fno;
-  soon_compaction_invalidated_fno.clear();
-  
+  aggregated_soon_compaction_invalidated_fno.clear();
+
   if(compaction_predicted_depth>0){
     aggregated_soon_compaction_invalidated_fno = 
             db_ptr_ ? db_ptr_->GetAlreadyBeingCompactedSSTFileNo() : 
@@ -453,7 +453,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
     for(int l = 0; l <10;l++){
       // if(current_lsm_tree[l]/)
-      double this_level_score = double((double)current_lsm_tree[l]/(double)GetLevelSizeLimit(l));
+      double this_level_score = double((double)current_lsm_tree[l]/(double)zbd_->GetLevelSizeLimit(l));
       if(this_level_score>max_level_score&&this_level_score>=1.0){
         max_score_level=l;
       }
@@ -498,7 +498,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   }
 
   for(auto fno : aggregated_soon_compaction_invalidated_fno){
-    zfile= GetSSTZoneFileInZBDNoLock(fno);
+    zfile= zbd_->GetSSTZoneFileInZBDNoLock(fno);
 
 
     if(zfile){
