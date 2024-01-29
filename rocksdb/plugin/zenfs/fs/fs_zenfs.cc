@@ -498,7 +498,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   }
 
   for(auto fno : aggregated_soon_compaction_invalidated_fno){
-    zfile= zbd_->GetSSTZoneFileInZBDNoLock(fno);
+    ZoneFile* zfile= zbd_->GetSSTZoneFileInZBDNoLock(fno);
 
 
     if(zfile){
