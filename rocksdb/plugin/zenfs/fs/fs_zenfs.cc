@@ -707,8 +707,12 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
     ){
       zbd_->ResetUnusedIOZones();
     }
-    usleep(100 * 1000);
     free_percent_ = zbd_->CalculateFreePercent();
+    
+    if(free_percent_>MODIFIED_ZC_KICKING_POINT){
+      usleep(100 * 1000);
+    }
+
     zbd_->SetZCRunning(false);
     if(free_percent_<=MODIFIED_ZC_KICKING_POINT&&
         run_gc_worker_){ // IO BLOCK
@@ -717,25 +721,31 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
       
       (void)(reclaim_until);
       {
-        // ZenFSStopWatch("While ZoneCleaning Sum");
-        while(
-            free_percent_<= (reclaim_until)&&
-              run_gc_worker_
-              &&zbd_->GetFullZoneN()
-              ){
-          zbd_->SetZCRunning(true);  
-          before_free_percent=free_percent_;
+        ZenFSStopWatch("While ZoneCleaning Sum");
+        // while(
+        //     free_percent_<= (reclaim_until)&&
+        //       run_gc_worker_
+        //       &&zbd_->GetFullZoneN()
+        //       ){
+        //   zbd_->SetZCRunning(true);  
+        //   before_free_percent=free_percent_;
 
-          {
-            // ZenFSStopWatch("ZoneCleaning Sum");
-            ZoneCleaning(force);
-          }
+        //   {
+        //     // ZenFSStopWatch("ZoneCleaning Sum");
+        //     ZoneCleaning(force);
+        //   }
 
+        //   free_percent_ = zbd_->CalculateFreePercent();
+        //   force=(before_free_percent==free_percent_);
+        //   // if(force&&before_free_percent==free_percent_){
+        //   //   ZC_not_working++;
+        //   // }
+        // }
+
+        for(int zc=0;zc<5&&zbd_->GetFullZoneN()&&free_percent_<= (reclaim_until);zc++){
+          ZoneCleaning(force);
           free_percent_ = zbd_->CalculateFreePercent();
           force=(before_free_percent==free_percent_);
-          // if(force&&before_free_percent==free_percent_){
-          //   ZC_not_working++;
-          // }
         }
 
       }
