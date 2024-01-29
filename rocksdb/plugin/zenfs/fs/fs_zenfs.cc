@@ -537,7 +537,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       continue;
     }
 
-    // uint64_t compensated_used_capacity = zone.used_capacity - soon_invalidation_zone_per_size[zone.zidx];
+    uint64_t compensated_used_capacity = zone.used_capacity + soon_invalidation_zone_per_size[zone.zidx];
 
 
 
@@ -545,13 +545,14 @@ size_t ZenFS::ZoneCleaning(bool forced){
     //   printf("compensated_used_capacity %lu\n",compensated_used_capacity);
     //   compensated_used_capacity=0;
     // }
-      if(soon_invalidation_zone_per_size[zone.zidx]){
-        continue;
-      }
-
+      // if(soon_invalidation_zone_per_size[zone.zidx]){
+      //   continue;
+      // }
 
       uint64_t garbage_percent_approx =
-        100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
+        100 - 100 * compensated_used_capacity / zone.max_capacity; // invalid capacity
+      // uint64_t garbage_percent_approx =
+      //   100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
 
 
 
@@ -640,20 +641,20 @@ size_t ZenFS::ZoneCleaning(bool forced){
     }
     zc_triggerd_count_.fetch_add(1);
   }else{
-    printf("ERROR : Garbage collecting %d extents in %d \n",
-         (int)migrate_exts.size(),(int)migrate_zones_start.size());
-    for(auto zstart : migrate_zones_start){
-      printf("used capacity %lu\n",zbd_->GetIOZone((zstart))->used_capacity_.load()   );
-      if(zbd_->GetIOZone((zstart))->used_capacity_.load() ){
-        // zbd_->GetIOZone((zstart))->used_capacity_.store(0);
-        if(zbd_->GetIOZone((zstart))->Acquire()){
-          zbd_->GetIOZone((zstart))->Reset();
-          zbd_->GetIOZone((zstart))->Release();
-        }
-      }
+    // printf("ERROR : Garbage collecting %d extents in %d \n",
+    //      (int)migrate_exts.size(),(int)migrate_zones_start.size());
+    // for(auto zstart : migrate_zones_start){
+    //   printf("used capacity %lu\n",zbd_->GetIOZone((zstart))->used_capacity_.load()   );
+    //   if(zbd_->GetIOZone((zstart))->used_capacity_.load() ){
+    //     // zbd_->GetIOZone((zstart))->used_capacity_.store(0);
+    //     if(zbd_->GetIOZone((zstart))->Acquire()){
+    //       zbd_->GetIOZone((zstart))->Reset();
+    //       zbd_->GetIOZone((zstart))->Release();
+    //     }
+    //   }
 
-    }
-    return 0;
+    // }
+    // return 0;
   }
   // zbd_->SetZCRunning(false);
   // for(size_t i = 0; i<zone_read_locks.size();i++){
