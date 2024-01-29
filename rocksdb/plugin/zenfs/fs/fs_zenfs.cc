@@ -868,10 +868,10 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
         zbd_->SetZCRunning(true);
         for(int zc=0;zc<5&&zbd_->GetFullZoneN()&&free_percent_<= (reclaim_until);zc++){
            
-          force=ZoneCleaning(force);
+          ZoneCleaning(force);
           free_percent_ = zbd_->CalculateFreePercent();
-          // force=(before_free_percent==free_percent_);
-          (void)before_free_percent;
+          force=(before_free_percent==free_percent_);
+          // (void)before_free_percent;
         }
 
       }
