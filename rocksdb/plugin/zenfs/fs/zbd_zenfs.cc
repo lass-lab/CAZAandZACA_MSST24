@@ -625,6 +625,8 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
         }
         newZone->Release();
       }
+    }else{
+      ZENFS_CONVENTIONAL_ZONE++;
     }
   }
     for(uint64_t f=0;f<=100;f++){
