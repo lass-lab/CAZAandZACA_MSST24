@@ -8,7 +8,7 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 #include <cinttypes>
 #include <deque>
-#include <sys/syscall.h>
+
 // #include <linux/sched.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -25,6 +25,18 @@
 #include "test_util/sync_point.h"
 #include "util/cast_util.h"
 #include "util/concurrent_task_limiter_impl.h"
+
+
+
+// static inline int ioprio_set (int which, int who, int ioprio)
+// {
+//   return syscall (__NR_ioprio_set, which, who, ioprio);
+// }
+
+// static inline int ioprio_get (int which, int who)
+// {
+//   return syscall (__NR_ioprio_get, which, who);
+// }
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -226,7 +238,12 @@ Status DBImpl::FlushMemTableToOutputFile(
       io_tracer_, db_id_, db_session_id_, cfd->GetFullHistoryTsLow(),
       &blob_callback_);
   FileMetaData file_meta;
-
+  if(immutable_db_options_.async_zc_enabled){
+    int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,FLUSH_IO_PRIORITY);
+    if(ret_ioprio){
+      printf("ioprio_set error %d , %d\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+    }
+  }
   Status s;
   bool need_cancel = false;
   IOStatus log_io_s = IOStatus::OK();
@@ -2776,24 +2793,28 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
                                LogBuffer* log_buffer, FlushReason* reason,
                                Env::Priority thread_pri) {
   mutex_.AssertHeld();
-  pid_t tid = gettid();
+
+//   #define FLUSH_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_RT,0)
+
+
+  // pid_t tid = gettid();
 
     // Get the I/O priority using ioprio_get
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
-  int retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
+  // int retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
 
-  printf("BackgroundFlush :: %d\n",retrieved_ioprio_value);
+  // printf("\t\t\tBackgroundFlush :: %d\n",retrieved_ioprio_value);
 
-    int io_priority = retrieved_ioprio_value+1; // Adjust as needed
-    // int ioprio_value = (1 << IOPRIO_CLASS_SHIFT) | io_priority;
-     int ioprio_value = (io_priority & 0x7) | (1 << 13);
-    if (syscall(SYS_ioprio_set, 1, tid, ioprio_value) == -1) {
-        // perror("ioprio_set");
-        // exit(EXIT_FAILURE);
-    }
-   retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
+  //   int io_priority = retrieved_ioprio_value+1; // Adjust as needed
+  //   // int ioprio_value = (1 << IOPRIO_CLASS_SHIFT) | io_priority;
+  //    int ioprio_value = (io_priority & 0x7) | (1 << 13);
+  //   if (syscall(SYS_ioprio_set, 1, tid, ioprio_value) == -1) {
+  //       // perror("ioprio_set");
+  //       // exit(EXIT_FAILURE);
+  //   }
+  //  retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
 
-  printf("after BackgroundFlush :: %d\n",retrieved_ioprio_value);
+  // printf("\t\t\tafter BackgroundFlush :: %d\n",retrieved_ioprio_value);
 
 
 
@@ -3105,7 +3126,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
   int retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
 
-  printf("BackgroundCompaction :: %d\n",retrieved_ioprio_value);
+  printf("\t\t\tBackgroundCompaction :: %d\n",retrieved_ioprio_value);
   bool is_manual = (manual_compaction != nullptr);
   std::unique_ptr<Compaction> c;
   if (prepicked_compaction != nullptr &&
@@ -3386,6 +3407,21 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       }
       c->immutable_options()->fs->GiveZenFStoLSMTreeHint(trivial_move_inputs,
                                           none,c->output_level(),true);
+      
+      if(c->immutable_options()->async_zc_enabled){
+        if(c->output_level()==1){
+          int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L0_to_L1_COMPACTION_IO_PRIORITY);
+          if(ret_ioprio){
+            printf("ioprio_set error %d , %d\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+          }
+        }else{
+          int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ELSE_COMPACTION_IO_PRIORITY);
+          if(ret_ioprio){
+            printf("ioprio_set error %d , %d\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+          }
+        }
+      }
+    
     }
 
     status = versions_->LogAndApply(c->column_family_data(),

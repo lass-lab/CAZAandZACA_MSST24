@@ -67,6 +67,15 @@
 #include "util/stop_watch.h"
 #include "util/thread_local.h"
 
+#include <sys/syscall.h>
+#include <linux/ioprio.h>
+#define WAL_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_RT,1)
+#define FLUSH_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_RT,2)
+#define L0_to_L1_COMPACTION_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_RT,3)
+// #define ZC_COMPACTION_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_RT,4)
+#define ELSE_COMPACTION_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_IDLE,1)
+
+
 namespace ROCKSDB_NAMESPACE {
 
 class Arena;

@@ -814,6 +814,11 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
   if(zbd_->ProactiveZoneCleaning()){
     MODIFIED_ZC_KICKING_POINT+=10;
   }
+  int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ZC_COMPACTION_IO_PRIORITY);
+  if(ret_ioprio){
+    printf("ioprio_set error %d , %d\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+  }
+
   (void) run_once;
   bool force=false;
   uint64_t before_free_percent;
@@ -2892,9 +2897,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
   int extent_n = (int)migrate_exts.size();
   // int write_reaped_n = 0;
   // int err = io_queue_init(extent_n,&write_ioctx);
-  // if(err){
-  //   printf("\t\t\t\t AsyncMigrateFileExtentsWorker io_queue_init err %d %d",err,extent_n);
-  // }
+
   Info(logger_, "MigrateFileExtents, fname: %s, extent count: %lu",
        fname.data(), migrate_exts.size());
   

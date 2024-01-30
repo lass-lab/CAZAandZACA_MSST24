@@ -35,6 +35,8 @@
 #include <libaio.h>
 #include <liburing.h>
 #include <queue>
+#include <sys/syscall.h> /* For xxx definitions */
+#include <linux/ioprio.h>
 // +#include <shared_mutex>
 
 namespace ROCKSDB_NAMESPACE {
@@ -62,6 +64,8 @@ class ZoneFile;
 #define ZENFS_META_ZONES (3)
 
 #define log2_DEVICE_IO_CAPACITY (6) //64GB
+
+#define ZC_COMPACTION_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_RT,3)
 
 
 // #define ZENFS_IO_ZONES (40) // 20GB
