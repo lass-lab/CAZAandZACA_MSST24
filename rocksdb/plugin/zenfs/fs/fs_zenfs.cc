@@ -593,6 +593,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
       should_be_copied+=ext.length + ext.header_size;
     }
   }
+  std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
+
 
   if (migrate_exts.size() > 0) {
 
@@ -2468,6 +2470,8 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   unsigned flags = IORING_SETUP_SQPOLL;
   // unsigned flags = 0;
   int err=io_uring_queue_init(extent_n, &read_ring, flags);
+
+
 
 
   if(err){
