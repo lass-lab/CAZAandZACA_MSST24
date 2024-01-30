@@ -815,11 +815,11 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
   if(zbd_->ProactiveZoneCleaning()){
     MODIFIED_ZC_KICKING_POINT+=10;
   }
-  // int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ZC_COMPACTION_IO_PRIORITY);
-  // if(ret_ioprio){
-  //   printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-  // }
-  // printf("ZC ioprio_set , %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
+  int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ZC_COMPACTION_IO_PRIORITY);
+  if(ret_ioprio){
+    printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+  }
+  printf("ZC ioprio_set , %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
 
   (void) run_once;
   bool force=false;
