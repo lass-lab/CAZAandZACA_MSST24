@@ -609,8 +609,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
         clock_gettime(CLOCK_MONOTONIC, &start_timespec);
         if(zbd_->AsyncZCEnabled()){
             // AsyncZoneCleaning();
-            AsyncMigrateExtents(migrate_exts);
-            // AsyncUringMigrateExtents(migrate_exts);
+            // AsyncMigrateExtents(migrate_exts);
+            AsyncUringMigrateExtents(migrate_exts);
         }else{
           MigrateExtents(migrate_exts);
         }
@@ -2572,14 +2572,15 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         //   new std::thread(&ZenFS::AsyncUringMigrateFileExtentsWorker,this,
         //       it.first, &reaped_read_file_extents[it.first.c_str()]  )
         //   );
-        if(zbd_->AsyncZCEnabled()>=2){ //single thread
-          AsyncMigrateFileExtentsWriteWorker(it.first, &reaped_read_file_extents[it.first.c_str()]);
-        }else{
-          writer_thread_pool.push_back(
-            new std::thread(&ZenFS::AsyncMigrateFileExtentsWriteWorker,this,
-                it.first, &reaped_read_file_extents[it.first.c_str()]  )
-            );
-        }
+        // if(zbd_->AsyncZCEnabled()>=2){ //single thread
+        //   AsyncMigrateFileExtentsWriteWorker(it.first, &reaped_read_file_extents[it.first.c_str()]);
+        // }else{
+        //   writer_thread_pool.push_back(
+        //     new std::thread(&ZenFS::AsyncMigrateFileExtentsWriteWorker,this,
+        //         it.first, &reaped_read_file_extents[it.first.c_str()]  )
+        //     );
+        MigrateFileExtentsWorker(it.first, &reaped_read_file_extents[it.first.c_str()]);
+        // }
 
       }
 
