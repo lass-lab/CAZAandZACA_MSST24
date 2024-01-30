@@ -2764,16 +2764,13 @@ l0:
 
 
   // Empty zone allocation should set lifetime for zone
-  if(GetActiveIOZoneTokenIfAvailable()){
-  s = AllocateEmptyZone(&allocated_zone);
-  }
-  // if(!s.ok()){
-  //   return s;
+  // if(GetActiveIOZoneTokenIfAvailable()){
+  // s = AllocateEmptyZone(&allocated_zone);
   // }
-  if(allocated_zone!=nullptr){
-    *zone_out=allocated_zone;
-    allocated_zone->lifetime_ = file_lifetime;
-  }
+  // if(allocated_zone!=nullptr){
+  //   *zone_out=allocated_zone;
+  //   allocated_zone->lifetime_ = file_lifetime;
+  // }
 
 
   // if(!s.ok()){
@@ -3548,13 +3545,27 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       }else if(allocation_scheme_==CAZA_ADV){
         // printf("AllocateCompactionAwaredZoneV2\n");
         AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t> (0),file_size,out_zone,min_capacity);
+        if (s.ok() && (*out_zone) != nullptr) {
+          break;
+        }
+
+        if(GetMigrationIOZoneToken()){
+        s=AllocateEmptyZone(out_zone); 
+        if (s.ok() && (*out_zone) != nullptr) {
+          Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+          (*out_zone)->lifetime_=file_lifetime;
+          break;
+        }else{
+          // PutActiveIOZoneToken();
+          PutMigrationIOZoneToken();
+        }
+      } 
+      
       }else{
         // printf("I am LIZA!\n");
       }
       
       if (s.ok() && (*out_zone) != nullptr) {
-
-        // printf("TakeMigrateZone :: CAZA allocated : %lu\n",(*out_zone)-        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);>zidx_);
         break;
       }
     }
@@ -3670,8 +3681,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   
   if(is_sst&&level>=0 && allocation_scheme_==CAZA){
     s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
-    // printf("AllocateCompactionAwaredZone\n");
-    
+
     if(!s.ok()){
       PutOpenIOZoneToken();
       return s;
@@ -3683,13 +3693,19 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
       PutOpenIOZoneToken();
       return s;
     }
-  }else{
-    // printf("I AM LIZA\n");
+
+    if(allocated_zone!=nullptr){
+      goto end;
+    }
+    if(GetActiveIOZoneTokenIfAvailable()){
+      s = AllocateEmptyZone(&allocated_zone);
+      if(allocated_zone==nullptr){
+        PutActiveIOZoneToken();
+      }
+    }
   }
 
-
   if(allocated_zone!=nullptr){
-    // printf("AllocateIOZone :: CAZA allocated : %lu\n",allocated_zone->zidx_);
     goto end;
   }
 
