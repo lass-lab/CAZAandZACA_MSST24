@@ -2148,7 +2148,7 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
   Zone *allocated_zone = nullptr;
   IOStatus s;
   int i =0;
-  uint64_t zidx;
+  // uint64_t zidx;
   (void)(input_fno);
   // bool input_in_zone[io_zones.size()];
   // std::vector<bool> is_input_in_zone(io_zones.size(),false);
