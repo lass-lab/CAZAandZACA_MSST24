@@ -424,7 +424,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
 
 
-  // uint64_t compaction_predicted_depth = zbd_->AsyncZCEnabled();
+  uint64_t compaction_predicted_depth = zbd_->AsyncZCEnabled();
   compaction_predicted_depth=0;
   if(forced){
     compaction_predicted_depth=0;
