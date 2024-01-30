@@ -2906,7 +2906,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
 
 IOStatus ZenFS::MigrateFileExtentsWorker(
     std::string fname,
-    std::vector<AsyncZoneCleaningIocb*> migrate_exts) {
+    std::vector<AsyncZoneCleaningIocb*>* migrate_exts) {
   IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
   // io_context_t write_ioctx = 0;
