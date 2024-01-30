@@ -3121,7 +3121,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   *made_progress = false;
   mutex_.AssertHeld();
   TEST_SYNC_POINT("DBImpl::BackgroundCompaction:Start");
-  pid_t tid = gettid();
+  // pid_t tid = gettid();
 
     // Get the I/O priority using ioprio_get
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
@@ -3413,7 +3413,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
         if(c->output_level()==1){
           int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L0_to_L1_COMPACTION_IO_PRIORITY);
           if(ret_ioprio){
-            printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+            printf("l0 to l1 ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
           }
               printf("l0 to l1 io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
         }else{
@@ -3421,6 +3421,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
           if(ret_ioprio){
             printf("l%d to l%d ioprio_set error %d , %ld\n",c->output_level()-1,c->output_level()==1,ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
           }
+          printf("l%d to l%d ioprio_set %d , %ld\n",c->output_level()-1,c->output_level()==1,ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
         }
       }
     

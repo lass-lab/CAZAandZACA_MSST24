@@ -819,6 +819,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
   if(ret_ioprio){
     printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
   }
+  printf("ZC ioprio_set , %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
 
   (void) run_once;
   bool force=false;
