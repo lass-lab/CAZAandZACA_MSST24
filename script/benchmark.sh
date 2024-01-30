@@ -56,7 +56,7 @@ HEAVY=$G72
 ## Tuning Point
 T=100
 T_COMPACTION=1
-T_SUBCOMPACTION=8
+T_SUBCOMPACTION=1
 T_FLUSH=1
 ZC_KICKS=20
 UNTIL=20
@@ -122,13 +122,10 @@ do
         fi
             for IO_SIZE in $MB256 $MB1
                 do
-                    if [ $COMPACTION_ALGORITHM -eq $BASELINE_COMPACTION ]; then
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_BASELINE_FAR_${i}.txt
-                        # INPUT_AWARE_SCHEME=0
-                    elif [ $COMPACTION_ALGORITHM -eq $MAX_INVALIDATION_COMPACTION ]; then
-                        MAX_COMPACTION_KICK=${i}
-                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_ZACA_${MAX_COMPACTION_START_LEVEL}_KICK_${MAX_COMPACTION_KICK}_${i}.txt
-                        # INPUT_AWARE_SCHEME=1
+                    if [ $IO_SIZE -eq $MB256 ]; then
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_256MB_${T_FLUSH}_${T_COMPACTION}_${T_SUBCOMPACTION}_${i}
+                    elif [ $IO_SIZE -eq $MB1 ]; then
+                        RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_1MB_${T_FLUSH}_${T_COMPACTION}_${T_SUBCOMPACTION}_${i}
                     # elif [ $COMPACTION_ALGORITHM -eq $EXP ]; then
                     #     RESULT_PATH=${RESULT_DIR_PATH}/result_${T}_${SIZE}_EXP_${i}.txt
                     # elif [ $COMPACTION_ALGORITHM -eq $EAGER ]; then
