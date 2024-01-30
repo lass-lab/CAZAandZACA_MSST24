@@ -461,9 +461,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
       if(this_level_score>max_level_score&&this_level_score>=1.0){
         max_score_level=l;
       }
-      if(this_level_score>max_level_score){
-        max_score_level=l;
-      }
+      // if(this_level_score>max_level_score){
+      //   max_score_level=l;
+      // }
     }
 
 
