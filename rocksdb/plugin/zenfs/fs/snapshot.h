@@ -91,7 +91,7 @@ class ZoneExtentSnapshot {
           filename=fname;
         }
   static bool SortByLBA(ZoneExtentSnapshot* za,ZoneExtentSnapshot* zb){
-    return za->zone_start < zb->zone_start;
+    return za->start < zb->start;
   }
     // ZoneExtentSnapshot(const ZoneExtent& extent, const std::string fname,bool debug)
     //   : start(extent.start_),
