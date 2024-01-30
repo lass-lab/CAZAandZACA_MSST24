@@ -2778,7 +2778,7 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
 
     // Get the I/O priority using ioprio_get
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
-  int retrieved_ioprio_value = syscall(SYS_ioprio_get, IOPRIO_WHO_PROCESS, tid);
+  int retrieved_ioprio_value = syscall(SYS_ioprio_get, 0, tid);
 
   printf("BackgroundFlush :: %d\n",retrieved_ioprio_value);
   Status status;
