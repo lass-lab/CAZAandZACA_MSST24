@@ -3124,9 +3124,9 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
     // Get the I/O priority using ioprio_get
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
-  int retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
+  // int retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
 
-  printf("\t\t\tBackgroundCompaction :: %d\n",retrieved_ioprio_value);
+  // printf("\t\t\tBackgroundCompaction :: %d\n",retrieved_ioprio_value);
   bool is_manual = (manual_compaction != nullptr);
   std::unique_ptr<Compaction> c;
   if (prepicked_compaction != nullptr &&
