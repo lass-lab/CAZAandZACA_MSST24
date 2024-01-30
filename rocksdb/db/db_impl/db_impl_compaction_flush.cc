@@ -239,11 +239,11 @@ Status DBImpl::FlushMemTableToOutputFile(
       &blob_callback_);
   FileMetaData file_meta;
   if(immutable_db_options_.async_zc_enabled){
-    int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,FLUSH_IO_PRIORITY);
-    if(ret_ioprio){
-      printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-    }
-    printf("flush io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
+    // int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,FLUSH_IO_PRIORITY);
+    // if(ret_ioprio){
+    //   printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+    // }
+    // printf("flush io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
   }
   Status s;
   bool need_cancel = false;
