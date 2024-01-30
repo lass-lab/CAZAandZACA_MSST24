@@ -2780,7 +2780,7 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
 
     // Get the I/O priority using ioprio_get
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
-  int retrieved_ioprio_value = syscall(SYS_ioprio_get, tid, 0);
+  int retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
 
   printf("BackgroundFlush :: %d\n",retrieved_ioprio_value);
 
@@ -2791,7 +2791,7 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
         // perror("ioprio_set");
         // exit(EXIT_FAILURE);
     }
-   retrieved_ioprio_value = syscall(SYS_ioprio_get, tid, 0);
+   retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
 
   printf("after BackgroundFlush :: %d\n",retrieved_ioprio_value);
 
@@ -3103,7 +3103,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
     // Get the I/O priority using ioprio_get
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
-  int retrieved_ioprio_value = syscall(SYS_ioprio_get, tid, 0);
+  int retrieved_ioprio_value = syscall(SYS_ioprio_get, 1, tid);
 
   printf("BackgroundCompaction :: %d\n",retrieved_ioprio_value);
   bool is_manual = (manual_compaction != nullptr);
