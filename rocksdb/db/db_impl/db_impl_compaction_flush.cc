@@ -2787,7 +2787,7 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
     int io_priority = retrieved_ioprio_value+1; // Adjust as needed
     // int ioprio_value = (1 << IOPRIO_CLASS_SHIFT) | io_priority;
      int ioprio_value = (io_priority & 0x7) | (1 << 13);
-    if (syscall(SYS_ioprio_set, 0, tid, ioprio_value) == -1) {
+    if (syscall(SYS_ioprio_set, 1, tid, ioprio_value) == -1) {
         // perror("ioprio_set");
         // exit(EXIT_FAILURE);
     }
