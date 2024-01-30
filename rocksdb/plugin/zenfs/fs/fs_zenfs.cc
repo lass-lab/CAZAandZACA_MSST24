@@ -2579,7 +2579,7 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         //     new std::thread(&ZenFS::AsyncMigrateFileExtentsWriteWorker,this,
         //         it.first, &reaped_read_file_extents[it.first.c_str()]  )
         //     );
-        MigrateFileExtentsWorker(it.first, &reaped_read_file_extents[it.first.c_str()]);
+        
         // }
 
       }
@@ -2589,10 +2589,19 @@ uint64_t ZenFS::AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     // read_reaped_n+=num_events;
   }
   
+  for(auto file : reaped_read_file_extents){
+    // std::string filename = file.first;
+    MigrateFileExtentsWorker(file.first,&(file.second));
+  }
+  // MigrateFileExtentsWorker(it.first, &reaped_read_file_extents[it.first.c_str()]);
+
+
 
   // io_destroy(read_ioctx);
 
    io_uring_queue_exit(&read_ring);
+
+  
   // free(read_events);
 
   for(size_t t = 0; t <writer_thread_pool.size(); t++){
