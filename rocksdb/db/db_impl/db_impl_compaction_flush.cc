@@ -8,7 +8,8 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 #include <cinttypes>
 #include <deque>
-
+#include <sys/syscall.h>
+#include <unistd.h>
 #include "db/builder.h"
 #include "db/db_impl/db_impl.h"
 #include "db/error_handler.h"
@@ -2773,7 +2774,11 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
                                LogBuffer* log_buffer, FlushReason* reason,
                                Env::Priority thread_pri) {
   mutex_.AssertHeld();
+  pid_t tid = gettid();
 
+    // Get the I/O priority using ioprio_get
+  int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
+  printf("BackgroundFlush :: ");
   Status status;
   *reason = FlushReason::kOthers;
   // If BG work is stopped due to an error, but a recovery is in progress,

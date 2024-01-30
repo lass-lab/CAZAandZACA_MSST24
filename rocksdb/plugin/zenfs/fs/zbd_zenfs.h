@@ -822,7 +822,7 @@ class ZonedBlockDevice {
   uint64_t GetLevelSizeLimit(int level){
     uint64_t max_bytes_for_level = max_bytes_for_level_base_;
     for(int l = 1 ; l<level;l++){
-      max_bytes_for_level*=5;
+      max_bytes_for_level*=10;
     }
     return max_bytes_for_level;
   }
