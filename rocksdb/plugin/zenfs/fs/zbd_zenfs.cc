@@ -1119,7 +1119,9 @@ void  ZonedBlockDevice::GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction
                             std::vector<uint64_t>& compaction_inputs_output_level_fno,int output_level,bool trivial_move){
   ZoneFile* zfile=nullptr;
 
-
+  if(allocation_scheme_==LIZA){
+    return;
+  }
   if(trivial_move){
     // if(! ( compaction_inputs_input_level_fno.size()!=1 && compaction_inputs_output_level_fno.size()!=0 ) ){
     //   printf("????? %lu %lu\n",compaction_inputs_input_level_fno.size(),compaction_inputs_output_level_fno.size());
