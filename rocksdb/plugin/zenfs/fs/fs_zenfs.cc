@@ -2910,12 +2910,12 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
   IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
   // io_context_t write_ioctx = 0;
-  int extent_n = (int)migrate_exts.size();
+  int extent_n = (int)migrate_exts->size();
   // int write_reaped_n = 0;
   // int err = io_queue_init(extent_n,&write_ioctx);
 
   Info(logger_, "MigrateFileExtents, fname: %s, extent count: %lu",
-       fname.data(), migrate_exts.size());
+       fname.data(), migrate_exts->size());
   
   // The file may be deleted by other threads, better double check.
   auto zfile = GetFile(fname);
@@ -2942,7 +2942,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
   }
   extent_n = 0;
   for (ZoneExtent* ext : new_extent_list) {
-    auto it = std::find_if(migrate_exts.begin(), migrate_exts.end(),
+    auto it = std::find_if(migrate_exts->begin(), migrate_exts->end(),
                            [&](const AsyncZoneCleaningIocb* ext_snapshot) {
                               if(ext_snapshot==nullptr){
                                 printf("ext_snapshot nullptr\n");
@@ -2956,7 +2956,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
                              return ext_snapshot->start_ == ext->start_ &&
                                     ext_snapshot->length_ == ext->length_;
                            });
-    if (it == migrate_exts.end()) {
+    if (it == migrate_exts->end()) {
       Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
       continue;
     }
