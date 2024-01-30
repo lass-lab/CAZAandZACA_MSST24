@@ -503,6 +503,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         current_lsm_tree[zfile->level_+1]+=file_size;
       }
     }
+    current_lsm_tree[0]+=(64<<20);
   }
 
   for(auto fno : aggregated_soon_compaction_invalidated_fno){
