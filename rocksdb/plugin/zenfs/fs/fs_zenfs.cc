@@ -593,7 +593,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       should_be_copied+=ext.length + ext.header_size;
     }
   }
-  std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
+  
 
 
   if (migrate_exts.size() > 0) {
@@ -612,7 +612,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
         if(zbd_->AsyncZCEnabled()){
             // AsyncZoneCleaning();
             // AsyncMigrateExtents(migrate_exts);
-            AsyncUringMigrateExtents(migrate_exts);
+          std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
+          AsyncUringMigrateExtents(migrate_exts);
         }else{
           MigrateExtents(migrate_exts);
         }
