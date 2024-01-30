@@ -2143,27 +2143,28 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
   IOStatus s;
   int i =0;
   uint64_t zidx;
+  (void)(input_fno);
   // bool input_in_zone[io_zones.size()];
-  std::vector<bool> is_input_in_zone(io_zones.size(),false);
-  for(uint64_t fno : input_fno){
-    ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
-    if(zFile==nullptr){
-      continue;
-    }
-    auto extents=zFile->GetExtents();
-    for(ZoneExtent* extent : extents){
-      zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
-      is_input_in_zone[zidx]=true;
-    }
-  }
+  // std::vector<bool> is_input_in_zone(io_zones.size(),false);
+  // for(uint64_t fno : input_fno){
+  //   ZoneFile* zFile=GetSSTZoneFileInZBDNoLock(fno);
+  //   if(zFile==nullptr){
+  //     continue;
+  //   }
+  //   auto extents=zFile->GetExtents();
+  //   for(ZoneExtent* extent : extents){
+  //     zidx=extent->zone_->zidx_ - ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+  //     is_input_in_zone[zidx]=true;
+  //   }
+  // }
 
   for (const auto z : io_zones) {
     // printf("1 : [%d]\n",i);
     // if()
     zidx = z->zidx_- ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
-    if(is_input_in_zone[zidx]){
-      continue;
-    }
+    // if(is_input_in_zone[zidx]){
+    //   continue;
+    // }
     if(z->lifetime_==Env::WLTH_NOT_SET || z->lifetime_==Env::WLTH_NONE){
       continue;
     }
