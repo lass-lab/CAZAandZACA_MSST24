@@ -3421,7 +3421,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
           if(ret_ioprio){
             printf("l%d to l%d ioprio_set error %d , %ld\n",c->output_level()-1,c->output_level()==1,ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
           }
-          printf("l%d to l%d ioprio_set %d , %ld\n",c->output_level()-1,c->output_level()==1,ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+          printf("l%d to l%d ioprio_set %d , %ld\n",c->output_level()-1,c->output_level(),ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
         }
       }
     
