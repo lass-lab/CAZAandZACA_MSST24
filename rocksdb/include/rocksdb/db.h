@@ -40,7 +40,7 @@
 #endif
 
 
-#define ioprio_set(which,who,prio) ( syscall (__NR_ioprio_set, (which), (who), (ioprio)) )
+#define ioprio_set(which,who,prio) ( syscall (__NR_ioprio_set, (which), (who), (prio)) )
 #define ioprio_get(which,who) (syscall (__NR_ioprio_get, (which), (who)))
 
 namespace ROCKSDB_NAMESPACE {

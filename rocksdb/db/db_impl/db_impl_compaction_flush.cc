@@ -241,7 +241,7 @@ Status DBImpl::FlushMemTableToOutputFile(
   if(immutable_db_options_.async_zc_enabled){
     int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,FLUSH_IO_PRIORITY);
     if(ret_ioprio){
-      printf("ioprio_set error %d , %d\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+      printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
     }
   }
   Status s;
@@ -3412,12 +3412,12 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
         if(c->output_level()==1){
           int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L0_to_L1_COMPACTION_IO_PRIORITY);
           if(ret_ioprio){
-            printf("ioprio_set error %d , %d\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+            printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
           }
         }else{
           int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ELSE_COMPACTION_IO_PRIORITY);
           if(ret_ioprio){
-            printf("ioprio_set error %d , %d\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+            printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
           }
         }
       }
