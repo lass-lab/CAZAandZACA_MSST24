@@ -2781,6 +2781,8 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
   int retrieved_ioprio_value = syscall(SYS_ioprio_get, 0, tid);
 
   printf("BackgroundFlush :: %d\n",retrieved_ioprio_value);
+
+
   Status status;
   *reason = FlushReason::kOthers;
   // If BG work is stopped due to an error, but a recovery is in progress,
@@ -3082,7 +3084,13 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   *made_progress = false;
   mutex_.AssertHeld();
   TEST_SYNC_POINT("DBImpl::BackgroundCompaction:Start");
+  pid_t tid = gettid();
 
+    // Get the I/O priority using ioprio_get
+  // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
+  int retrieved_ioprio_value = syscall(SYS_ioprio_get, 0, tid);
+
+  printf("BackgroundCompaction :: %d\n",retrieved_ioprio_value);
   bool is_manual = (manual_compaction != nullptr);
   std::unique_ptr<Compaction> c;
   if (prepicked_compaction != nullptr &&
