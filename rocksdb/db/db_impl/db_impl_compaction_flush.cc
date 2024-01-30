@@ -2791,7 +2791,7 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
         // perror("ioprio_set");
         // exit(EXIT_FAILURE);
     }
-  int retrieved_ioprio_value = syscall(SYS_ioprio_get, tid, 0);
+   retrieved_ioprio_value = syscall(SYS_ioprio_get, tid, 0);
 
   printf("after BackgroundFlush :: %d\n",retrieved_ioprio_value);
 
