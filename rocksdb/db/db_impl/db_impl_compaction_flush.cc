@@ -2777,8 +2777,10 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
   pid_t tid = gettid();
 
     // Get the I/O priority using ioprio_get
-  int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
-  printf("BackgroundFlush :: ");
+  // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
+  int retrieved_ioprio_value = syscall(SYS_ioprio_get, IOPRIO_WHO_PROCESS, tid);
+
+  printf("BackgroundFlush :: %d\n",retrieved_ioprio_value);
   Status status;
   *reason = FlushReason::kOthers;
   // If BG work is stopped due to an error, but a recovery is in progress,
