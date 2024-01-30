@@ -3409,30 +3409,30 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       c->immutable_options()->fs->GiveZenFStoLSMTreeHint(trivial_move_inputs,
                                           none,c->output_level(),true);
       
-      if(c->immutable_options()->async_zc_enabled){
-        if(c->output_level()==1){
-          // int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L0_to_L1_COMPACTION_IO_PRIORITY);
-          // if(ret_ioprio){
-          //   printf("l0 to l1 ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-          // }
-          //     printf("l0 to l1 io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
-        }else if(c->output_level()==2){
-          // L1_to_L2_COMPACTION_IO_PRIORITY
-          int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L1_to_L2_COMPACTION_IO_PRIORITY);
-          if(ret_ioprio){
-            printf("l0 to l1 ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-          }
-          printf("l0 to l1 io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
-        }
+      // if(c->immutable_options()->async_zc_enabled){
+      //   if(c->output_level()==1){
+      //     int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L0_to_L1_COMPACTION_IO_PRIORITY);
+      //     if(ret_ioprio){
+      //       printf("l0 to l1 ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+      //     }
+      //         printf("l0 to l1 io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
+      //   }else if(c->output_level()==2){
+      //     // L1_to_L2_COMPACTION_IO_PRIORITY
+      //     int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L1_to_L2_COMPACTION_IO_PRIORITY);
+      //     if(ret_ioprio){
+      //       printf("l1 to l2 ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+      //     }
+      //     printf("l1 to l2 io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
+      //   }
         
-        else{
-          int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ELSE_COMPACTION_IO_PRIORITY);
-          if(ret_ioprio){
-            printf("l%d to l%d ioprio_set error %d , %ld\n",c->output_level()-1,c->output_level()==1,ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-          }
-          printf("l%d to l%d ioprio_set %d , %ld\n",c->output_level()-1,c->output_level(),ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-        }
-      }
+      //   else{
+      //     int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ELSE_COMPACTION_IO_PRIORITY);
+      //     if(ret_ioprio){
+      //       printf("l%d to l%d ioprio_set error %d , %ld\n",c->output_level()-1,c->output_level()==1,ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+      //     }
+      //     printf("l%d to l%d ioprio_set %d , %ld\n",c->output_level()-1,c->output_level(),ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+      //   }
+      // }
     
     }
 
