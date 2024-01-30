@@ -9,6 +9,8 @@
 #include <cinttypes>
 #include <deque>
 #include <sys/syscall.h>
+// #include <linux/sched.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include "db/builder.h"
 #include "db/db_impl/db_impl.h"
@@ -2778,9 +2780,18 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
 
     // Get the I/O priority using ioprio_get
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
-  int retrieved_ioprio_value = syscall(SYS_ioprio_get, 0, tid);
+  int retrieved_ioprio_value = syscall(SYS_ioprio_get, tid, 0);
 
   printf("BackgroundFlush :: %d\n",retrieved_ioprio_value);
+
+    int io_priority = retrieved_ioprio_value+1; // Adjust as needed
+    int ioprio_value = (1 << IOPRIO_CLASS_SHIFT) | io_priority;
+    if (syscall(SYS_ioprio_set, 0, tid, ioprio_value) == -1) {
+        perror("ioprio_set");
+        exit(EXIT_FAILURE);
+    }
+  
+
 
 
   Status status;
@@ -3088,7 +3099,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
     // Get the I/O priority using ioprio_get
   // int ioprio_value = ioprio_get(IOPRIO_WHO_PROCESS, tid);
-  int retrieved_ioprio_value = syscall(SYS_ioprio_get, 0, tid);
+  int retrieved_ioprio_value = syscall(SYS_ioprio_get, tid, 0);
 
   printf("BackgroundCompaction :: %d\n",retrieved_ioprio_value);
   bool is_manual = (manual_compaction != nullptr);
