@@ -243,6 +243,7 @@ Status DBImpl::FlushMemTableToOutputFile(
     if(ret_ioprio){
       printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
     }
+    printf("flush io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
   }
   Status s;
   bool need_cancel = false;
@@ -3414,10 +3415,11 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
           if(ret_ioprio){
             printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
           }
+              printf("l0 to l1 io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
         }else{
           int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ELSE_COMPACTION_IO_PRIORITY);
           if(ret_ioprio){
-            printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
+            printf("l%d to l%d ioprio_set error %d , %ld\n",c->output_level()-1,c->output_level()==1,ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
           }
         }
       }
