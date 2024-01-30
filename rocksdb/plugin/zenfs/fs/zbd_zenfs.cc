@@ -2161,7 +2161,7 @@ IOStatus ZonedBlockDevice::GetBestOpenZoneMatch(
   for (const auto z : io_zones) {
     // printf("1 : [%d]\n",i);
     // if()
-    zidx = z->zidx_- ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
+    // zidx = z->zidx_- ZENFS_META_ZONES-ZENFS_SPARE_ZONES;
     // if(is_input_in_zone[zidx]){
     //   continue;
     // }
