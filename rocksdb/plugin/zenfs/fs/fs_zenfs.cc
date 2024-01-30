@@ -425,7 +425,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
 
   uint64_t compaction_predicted_depth = zbd_->AsyncZCEnabled();
-  compaction_predicted_depth=0;
+  // compaction_predicted_depth=0;
   if(forced){
     compaction_predicted_depth=0;
   }
@@ -459,6 +459,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // if(current_lsm_tree[l]/)
       double this_level_score = double((double)current_lsm_tree[l]/(double)zbd_->GetLevelSizeLimit(l));
       if(this_level_score>max_level_score&&this_level_score>=1.0){
+        max_score_level=l;
+      }
+      if(this_level_score>max_level_score){
         max_score_level=l;
       }
     }
