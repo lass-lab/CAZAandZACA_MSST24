@@ -72,6 +72,7 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
     // capacity_ = max_capacity_ - (wp_ - start_);
   
   }
+  zidx_=idx-zbd_->ZENFS_CONVENTIONAL_ZONE;
   // printf("max %lu cap %lu\n",max_capacity_,capacity_);
 }
 Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
@@ -97,6 +98,7 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
       capacity_=max_capacity_-relative_wp;
     }
   }
+  zidx_=idx-(zbd_->ZENFS_CONVENTIONAL_ZONE);
   // printf("max %lu cap %lu\n",max_capacity_,capacity_);
   erase_unit_size_=(1<<log2_erase_unit_size_);
 }
@@ -565,6 +567,8 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
         spare_zones.push_back(new Zone(this,zbd_be_.get(),zone_rep,i));
       }
       sp++;
+    }else{
+      ZENFS_CONVENTIONAL_ZONE++;
     }
     i++;
   }
@@ -588,6 +592,8 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
         meta_zones.push_back(new Zone(this, zbd_be_.get(), zone_rep, i));
       }
       m++;
+    }else{
+      ZENFS_CONVENTIONAL_ZONE++;
     }
     i++;
   }

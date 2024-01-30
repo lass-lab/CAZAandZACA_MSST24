@@ -407,6 +407,7 @@ enum class ZbdBackendType {
 class ZonedBlockDevice {
  private:
   FileSystemWrapper* zenfs_;
+
   std::unique_ptr<ZonedBlockDeviceBackend> zbd_be_;
   std::vector<Zone *> spare_zones;
   std::vector<Zone *> io_zones;
@@ -789,7 +790,7 @@ class ZonedBlockDevice {
   
   std::atomic<uint64_t> lsm_tree_[10];
 
-  
+    uint64_t ZENFS_CONVENTIONAL_ZONE = 0;
 
   /*
   0 : 256
