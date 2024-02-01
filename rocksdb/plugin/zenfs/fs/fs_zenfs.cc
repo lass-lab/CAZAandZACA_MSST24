@@ -2885,7 +2885,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     uint64_t target_start = new_zone->wp_ + (*pos);
 
     if(zfile->IsSparse()){
-      target_start = new_zone->start_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
+      target_start = new_zone->wp_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
       ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
       copied+=ZoneFile::SPARSE_HEADER_SIZE;
     }else{
@@ -2961,11 +2961,11 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   //   AllocateEmptyZone(&new_zone);
   // }
   zbd_->TakeSMRMigrateZone(&new_zone,victim_zone->lifetime_,should_be_copied);
-  if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
-    ||new_zone->wp_!=new_zone->start_){
-      printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start %lu\n",
-        new_zone->used_capacity_.load(),new_zone->capacity_,new_zone->wp_,new_zone->start_);
-  }
+  // if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
+  //   ||new_zone->wp_!=new_zone->start_){
+  //     printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start %lu\n",
+  //       new_zone->used_capacity_.load(),new_zone->capacity_,new_zone->wp_,new_zone->start_);
+  // }
 
   for (auto* ext : extents) {
     std::string fname = ext->filename;
