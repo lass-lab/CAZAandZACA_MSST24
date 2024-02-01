@@ -2898,7 +2898,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
     ||new_zone->wp_!=new_zone->start_){
       printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start\n",
-        new_zone->used_capacity_.load(),new_zone->capacity_,new_zone->wp_,new_zone->start_)
+        new_zone->used_capacity_.load(),new_zone->capacity_,new_zone->wp_,new_zone->start_);
   }
 
   for (auto* ext : extents) {
