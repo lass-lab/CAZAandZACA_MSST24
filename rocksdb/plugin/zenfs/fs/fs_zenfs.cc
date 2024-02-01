@@ -1176,6 +1176,7 @@ void ZenFS::LargeZCSyncFileMetadata(std::vector<ZoneFile*>& zfiles){
   if (s.ok()){ 
     for(auto zfile: zfiles){
       zfile->MetadataSynced();
+      zfile->ReleaseWRLock();
     }
   }
 }
@@ -3009,12 +3010,12 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   zbd_->ReleaseSMRMigrateZone(new_zone);
 
 
-  // for(auto it : lock_acquired_zfiles){
-  //   SyncFileExtents(it.first, it.second);
-  //   it.first->ReleaseWRLock();
-  // }
+  for(auto it : lock_acquired_zfiles){
+    SyncFileExtents(it.first, it.second);
+    it.first->ReleaseWRLock();
+  }
 
-  LargeIOSyncFileExtents(lock_acquired_zfiles);
+  // LargeIOSyncFileExtents(lock_acquired_zfiles);
 
 
   // zbd_->AddGCBytesWritten(pos);
