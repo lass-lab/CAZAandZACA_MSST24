@@ -568,9 +568,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
   uint64_t threshold = 0;
   uint64_t reclaimed_zone_n=one_zc_reclaimed_zone_n_;
-  if(forced){
-    reclaimed_zone_n++;
-  }
+  // if(forced){
+  //   reclaimed_zone_n++;
+  // }
 
   reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
   for (size_t i = 0; (i < reclaimed_zone_n && migrate_zones_start.size()<reclaimed_zone_n ); i++) {
@@ -2862,7 +2862,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
 }
 
 IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) {
-  Zone* victim_zone= extents[0]->zone_p;
+  Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
   int read_fd=zbd_->GetFD(READ_FD);
   // int write_fd= zbd_->GetFD(WRITE_DIRECT_FD);
