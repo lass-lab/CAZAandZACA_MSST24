@@ -1111,7 +1111,7 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
     return s;
   }
 {
-  ZenFSStopWatch z3("ZC reset",zbd_);
+  ZenFSStopWatch z4("ZC reset",zbd_);
   zbd_->ResetUnusedIOZones();
 }
   return IOStatus::OK();
