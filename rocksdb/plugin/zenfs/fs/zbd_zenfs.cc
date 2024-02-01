@@ -3485,7 +3485,7 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
 
 
   void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone){
-    zbd_->WaitForOpenIOZoneToken(true);
+    WaitForOpenIOZoneToken(true);
     while(GetActiveIOZoneTokenIfAvailable()==false);
     while((*out_zone)==nullptr){
       AllocateEmptyZone(out_zone);
