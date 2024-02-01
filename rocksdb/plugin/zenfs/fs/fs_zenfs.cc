@@ -2922,6 +2922,9 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
                           ZC_write_buffer_,
                           new_zone,&pos);
     
+    if(pos>new_zone->max_capacity_){
+      printf("???? pos %lu\n",pos);
+    }
   }
 
   new_zone->Append(ZC_write_buffer_,pos);
@@ -2934,6 +2937,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     it.first->ReleaseWRLock();
   }
   zbd_->AddGCBytesWritten(pos);
+
+  return IOStatus::OK();
 }
 
 IOStatus ZenFS::MigrateExtents(
