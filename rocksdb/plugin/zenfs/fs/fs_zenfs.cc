@@ -2882,10 +2882,10 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     }
     uint64_t prev_relative_start = ext->start_ - ext->zone_->start_;
 
-    uint64_t target_start = new_zone->wp_ + (*pos);
+    uint64_t target_start = new_zone->start_ + (*pos);
 
     if(zfile->IsSparse()){
-      target_start = new_zone->wp_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
+      target_start = new_zone->start_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
       ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
       copied+=ZoneFile::SPARSE_HEADER_SIZE;
     }else{
