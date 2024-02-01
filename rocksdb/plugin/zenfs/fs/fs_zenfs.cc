@@ -1059,10 +1059,16 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
     std::vector<ZoneExtent*> new_extents = file.second;
     for(size_t i = 0 ;i < new_extents.size(); i ++){
       ZoneExtent* old_ext=zfile->extents_[i];
-      ZoneExtent* new_ext=new_extents[i];
-      if(old_ext->start_!=new_ext->start_){
+      
+
+      // ZoneExtent* new_ext=;
+      if(old_ext->start_!=new_extents[i]->start_){
+
+        zoneFile->extents_[i]=new_extents[i];
+
         old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
       }
+     
     }
     zfile->MetadataUnsynced();
     zfiles.push_back(zfile);
@@ -1176,7 +1182,7 @@ void ZenFS::LargeZCSyncFileMetadata(std::vector<ZoneFile*>& zfiles){
   if (s.ok()){ 
     for(auto zfile: zfiles){
       zfile->MetadataSynced();
-      zfile->ReleaseWRLock();
+      // zfile->ReleaseWRLock();
     }
   }
 }
@@ -2886,7 +2892,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     uint64_t target_start = new_zone->wp_ + (*pos);
 
     if(zfile->IsSparse()){
-      target_start = new_zone->start_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
+      target_start = new_zone->wp_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
       ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
       copied+=ZoneFile::SPARSE_HEADER_SIZE;
     }else{
@@ -3010,13 +3016,15 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   zbd_->ReleaseSMRMigrateZone(new_zone);
 
 
+  // for(auto it : lock_acquired_zfiles){
+  //   SyncFileExtents(it.first, it.second);
+  //   it.first->ReleaseWRLock();
+  // }
+
+  LargeIOSyncFileExtents(lock_acquired_zfiles);
   for(auto it : lock_acquired_zfiles){
-    SyncFileExtents(it.first, it.second);
     it.first->ReleaseWRLock();
   }
-
-  // LargeIOSyncFileExtents(lock_acquired_zfiles);
-
 
   // zbd_->AddGCBytesWritten(pos);
 
