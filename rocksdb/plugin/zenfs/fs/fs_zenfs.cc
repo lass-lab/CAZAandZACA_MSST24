@@ -2865,6 +2865,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
   int read_fd=zbd_->GetFD(READ_FD);
+  // uint64_t copied = 0;
   // int write_fd= zbd_->GetFD(WRITE_DIRECT_FD);
   int err;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
@@ -2927,12 +2928,14 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
                           new_zone,&pos);
     new_zone->lifetime_=zfile->GetWriteLifeTimeHint();
     if(pos>new_zone->max_capacity_){
-      printf("???? pos %lu\n",pos);
+      printf("SMRLargeIOMigrateExtents ???? pos %lu\n",pos);
     }
   }
 
   new_zone->Append(ZC_write_buffer_,pos);
-
+  if(new_zone->wp_-new_zone->start_ != pos){
+    printf("SMRLargeIOMigrateExtents after append pos : %lu , relative wp %lu\n",pos,new_zone->wp_-new_zone->start_);
+  }
   zbd_->ReleaseSMRMigrateZone(new_zone);
 
 
@@ -2940,7 +2943,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     SyncFileExtents(it.first, it.second);
     it.first->ReleaseWRLock();
   }
-  zbd_->AddGCBytesWritten(pos);
+  // zbd_->AddGCBytesWritten(pos);
 
   return IOStatus::OK();
 }
