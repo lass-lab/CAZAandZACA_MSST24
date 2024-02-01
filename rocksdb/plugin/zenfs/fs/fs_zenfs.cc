@@ -2954,7 +2954,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
   uint64_t min_start=victim_zone->start_+victim_zone->max_capacity_;
   uint64_t max_end=victim_zone->start_;
-
+   char* tmp_buf=nullptr;
   {  
 
     for(auto ext: extents){
@@ -2980,7 +2980,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     ZenFSStopWatch z1("Large IO pread",zbd_);
     // err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->max_capacity_,victim_zone->start_);
-    char* tmp_buf=nullptr;
+   
     err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
 
     if(err){
