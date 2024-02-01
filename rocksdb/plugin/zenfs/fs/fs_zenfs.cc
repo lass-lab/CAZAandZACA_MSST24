@@ -1061,6 +1061,8 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
     if (zoneFile->extents_[i]->start_ != new_extents[i]->start_) {
       old_ext=zoneFile->extents_[i];
       zoneFile->extents_[i]=new_extents[i];
+
+      
       old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
       // old_ext->is_invalid_=true;
       // if(old_ext->zone_->used_capacity_==0&&old_ext->zone_->Acquire()){

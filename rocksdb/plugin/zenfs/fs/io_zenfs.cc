@@ -355,6 +355,7 @@ void ZoneFile::ClearExtents() {
     }
     Zone* zone = (*e)->zone_;
     if(!zone){
+      printf("why zone nullptr? ext start : %lu\n",(*e)->start_);
       continue;
     }
     assert(zone && zone->used_capacity_ >= (*e)->length_);
