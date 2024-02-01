@@ -2952,8 +2952,9 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       printf("SMRLargeIOMigrateExtents fail to allocate ZC_read_buffer_\n");
     }
   }
-  uint64_t min_start=victim_zone->start_;
-  uint64_t max_end=victim_zone->start_+victim_zone->max_capacity_;
+  uint64_t min_start=victim_zone->start_+victim_zone->max_capacity_;
+  uint64_t max_end=victim_zone->start_;
+
   {  
 
     for(auto ext: extents){
@@ -2966,7 +2967,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
     
     uint64_t align=min_start %4096;
-    
+
     if(align){
       min_start-=align;
     }
