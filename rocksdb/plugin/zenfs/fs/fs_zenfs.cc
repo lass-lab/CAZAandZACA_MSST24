@@ -2960,7 +2960,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       if(ext->start<min_start){
         min_start=ext->start;
       }
-      if(ext->start>max_end){
+      if((ext->start+ext->length)>max_end){
         max_end=ext->start+ext->length;
       }
     }
