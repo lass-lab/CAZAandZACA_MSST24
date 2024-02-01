@@ -2884,7 +2884,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
   }
 
-  err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->start_,victim_zone->max_capacity_);
+  err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->max_capacity_,victim_zone->start_);
   if(err!=(int)victim_zone->max_capacity_){
     printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
   }
