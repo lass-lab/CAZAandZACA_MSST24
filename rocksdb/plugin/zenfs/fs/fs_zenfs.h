@@ -647,7 +647,7 @@ ret:
                         const ZenFSSnapshotOptions& options);
   
 
-  std::vector<ZoneExtent*> MemoryMoveExtents(ZoneFile* zfile,std::vector<ZoneExtentSnapshot*>& migrate_exts,
+  std::vector<ZoneExtent*> MemoryMoveExtents(ZoneFile* zfile,const std::vector<ZoneExtentSnapshot*>& migrate_exts,
                               char*read_buf,char* write_buf,Zone* new_zone,size_t* pos);
 
   IOStatus MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot)) ;

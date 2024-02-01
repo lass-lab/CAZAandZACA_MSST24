@@ -2782,7 +2782,7 @@ uint64_t ZenFS::AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& 
 }
 
 std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
-                                std::vector<ZoneExtentSnapshot*>& migrate_exts,
+                                const std::vector<ZoneExtentSnapshot*>& migrate_exts,
                               char*read_buf,char* write_buf,Zone* new_zone,size_t* pos){
   
   std::vector<ZoneExtent*> new_extent_list;
