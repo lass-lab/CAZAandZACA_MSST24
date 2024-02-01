@@ -1064,7 +1064,7 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
         old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
       }
     }
-    zoneFile->MetadataUnsynced();
+    zfile->MetadataUnsynced();
     zfiles.push_back(zfile);
 
   }
