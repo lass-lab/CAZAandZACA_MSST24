@@ -1064,7 +1064,7 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
       // ZoneExtent* new_ext=;
       if(old_ext->start_!=new_extents[i]->start_){
 
-        zoneFile->extents_[i]=new_extents[i];
+        zfile->extents_[i]=new_extents[i];
 
         old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
       }
