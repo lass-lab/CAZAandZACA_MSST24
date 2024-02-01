@@ -2852,7 +2852,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     }
 
 
-    memmove(write_buf+(*pos), read_buf+(prev_relative_start-ext->header_size_)  ,tmp)
+    memmove(write_buf+(*pos), read_buf+(prev_relative_start-ext->header_size_)  ,tmp);
     
     (*pos)+=tmp;
 
@@ -2885,7 +2885,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
 
   err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->start_,victim_zone->max_capacity_);
-  if(err!=victim_zone->max_capacity_){
+  if(err!=(int)victim_zone->max_capacity_){
     printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
   }
   // zbd_->WaitForOpenIOZoneToken(true);
