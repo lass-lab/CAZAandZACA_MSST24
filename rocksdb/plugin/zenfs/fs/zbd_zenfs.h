@@ -200,8 +200,8 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
 struct ZenFSStopWatch{
   std::string name;
   struct timespec start_timespec, end_timespec;
-  ZonedBlockDevice* zbd_;
-  ZenFSStopWatch(const char* _name,ZonedBlockDevice* zbd){
+  ZonedBlockDevice* zbd_=nullptr;
+  ZenFSStopWatch(const char* _name,ZonedBlockDevice* zbd=nullptr){
     name=_name;
     zbd_=zbd;
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);

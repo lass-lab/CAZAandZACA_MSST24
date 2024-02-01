@@ -146,8 +146,11 @@ ZenFSStopWatch::~ZenFSStopWatch(){
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
     // printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
-
-    zbd_->AddBreakDown(name,elapsed_ns_timespec/1000);
+    if(zbd_!=nullptr){
+      zbd_->AddBreakDown(name,elapsed_ns_timespec/1000);
+    }else{
+      printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
+    }
 }
 
 IOStatus Zone::AsyncReset(){

@@ -1103,13 +1103,17 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
 
 
   zoneFile->MetadataUnsynced();
+{
+  ZenFSStopWatch z3("metadata sync",zbd_);  
   s = SyncFileMetadata(zoneFile, true);
-
+}
   if (!s.ok()) {
     return s;
   }
-
+{
+  ZenFSStopWatch z3("ZC reset",zbd_);
   zbd_->ResetUnusedIOZones();
+}
   return IOStatus::OK();
 }
 
@@ -3005,7 +3009,7 @@ IOStatus ZenFS::MigrateExtents(
   // (void) run_once;
   // Group extents by their filename
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
-  // printf("before MigrateExtents\n");
+
   for (auto* ext : extents) {
     std::string fname = ext->filename;
     file_extents[fname].emplace_back(ext);
@@ -4001,7 +4005,10 @@ IOStatus ZenFS::MigrateFileExtents(
     // ZenFSStopWatch z1("Sum-sync");
   // printf("after finding in MigrateFileExtents 1\n");
   zbd_->AddGCBytesWritten(copied);
+// {
+
   SyncFileExtents(zfile.get(), new_extent_list);
+  // }
   zfile->ReleaseWRLock();
   // printf("after finding in MigrateFileExtents 1.5\n");
   Info(logger_, "MigrateFileExtents Finished, fname: %s, extent count: %lu",
