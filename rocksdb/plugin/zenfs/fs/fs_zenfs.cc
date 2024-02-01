@@ -613,7 +613,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
             // AsyncZoneCleaning();
             // AsyncMigrateExtents(migrate_exts);
           std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
-          AsyncUringMigrateExtents(migrate_exts);
+          // AsyncUringMigrateExtents(migrate_exts);
+          SMRLargeIOMigrateExtents(migrate_exts);
         }else{
           MigrateExtents(migrate_exts);
         }
@@ -2780,6 +2781,160 @@ uint64_t ZenFS::AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& 
   return ret;
 }
 
+std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
+                                std::vector<ZoneExtentSnapshot*>& migrate_exts,
+                              char*read_buf,char* write_buf,Zone* new_zone,size_t* pos);
+  
+  std::vector<ZoneExtent*> new_extent_list;
+  std::vector<ZoneExtent*> extents = zfile->GetExtents(); // old ext
+
+  for (size_t i = 0; i < extents.size();i++) {
+    ZoneExtent* ext=extents[i];
+    ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
+          ext->fname_,ext->header_size_);
+    new_ext->zone_=ext->zone_;
+    new_extent_list.push_back(new_ext);    
+  }
+  
+  
+  uint64_t copied = 0;
+
+  for (ZoneExtent* ext : new_extent_list) {
+    auto it = std::find_if(migrate_exts.begin(), migrate_exts.end(),
+                           [&](const ZoneExtentSnapshot* ext_snapshot) {
+                              if(ext_snapshot==nullptr){
+                                printf("ext_snapshot nullptr\n");
+                                return false;
+                              }
+                              if(ext==nullptr){
+                                printf("ext nullptr\n");
+                                return false;
+                              }
+                                                            // new ext
+                             return ext_snapshot->start == ext->start_ &&
+                                    ext_snapshot->length == ext->length_;
+                           });  
+  
+    if (it == migrate_exts.end()) {
+      Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
+      continue;
+    }
+    uint64_t prev_relative_start = ext->start_ - ext->zone_->start_;
+
+    uint64_t target_start = new_zone->start_ + (*pos);
+
+    if(zfile->IsSparse()){
+      target_start = new_zone->start_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
+      ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
+      copied+=ZoneFile::SPARSE_HEADER_SIZE;
+    }else{
+      ext->header_size_=0;
+    }
+    
+
+    
+
+    ext->start_=target_start;
+    ext->zone_=new_zone;
+    new_zone->PushExtent(ext);
+    new_zone->used_capacity_+=ext->length_;
+    
+    copied+=ext->length_;
+
+    uint64_t align = (ext->header_size_ + ext->length_) % 4096;
+
+
+    uint64_t tmp;
+    if(align){
+      tmp= ext->header_size_ + ext->length_ + (4096-align);
+    }else{
+      tmp= ext->header_size_ + ext->length_;
+    }
+
+
+    memmove(write_buf+(*pos), read_buf+(prev_relative_start-ext->header_size)  ,tmp)
+    
+    (*pos)+=tmp;
+
+  }
+  zbd_->AddGCBytesWritten(copied);
+  return new_extent_list;
+}
+
+IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) {
+  Zone* victim_zone= extents[0]->zone_p;
+  Zone* new_zone =nullptr;
+  int read_fd=zbd_->GetFD(READ_FD);
+  // int write_fd= zbd_->GetFD(WRITE_DIRECT_FD);
+  int err;
+  std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
+  // std::vector<ZoneFile*> lock_acquired_zfiles;
+  std::map<ZoneFile*,std::vector<ZoneExtent*>> lock_acquired_zfiles;
+
+  if(ZC_write_buffer_==nullptr){
+    err=posix_memalign((void**)&ZC_write_buffer_, sysconf(_SC_PAGESIZE), victim_zone->max_capacity_);
+    if(err){
+      printf("SMRLargeIOMigrateExtents fail to allocate ZC_write_buffer_\n");
+    }
+  }
+  if(ZC_read_buffer_==nullptr){
+    err=posix_memalign((void**)&ZC_read_buffer_, sysconf(_SC_PAGESIZE), victim_zone->max_capacity_);
+    if(err){
+      printf("SMRLargeIOMigrateExtents fail to allocate ZC_read_buffer_\n");
+    }
+  }
+
+  err=pread(read_fd,ZC_read_buffer_,victim_zone->start_,victim_zone->max_capacity_);
+  if(err!=victim_zone->max_capacity_){
+    printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
+  }
+  // zbd_->WaitForOpenIOZoneToken(true);
+  // // GetActiveIOZoneTokenIfAvailable()
+  // while(GetActiveIOZoneTokenIfAvailable()==false);
+  // while(new_zone==nullptr){
+  //   AllocateEmptyZone(&new_zone);
+  // }
+  zbd_->TakeSMRMigrateZone(&new_zone);
+  
+
+  for (auto* ext : extents) {
+    std::string fname = ext->filename;
+    file_extents[fname].emplace_back(ext);
+  }
+
+
+  size_t pos = 0;
+  for (const auto& it : file_extents) {
+    std::string fname =it.first;
+    auto zfile = GetFile(fname);
+    if (zfile == nullptr) {
+      continue;
+    }
+    if (!zfile->TryAcquireWRLock()) {
+      continue;
+    }
+    // lock_acquired_zfiles.push_back(zfile);
+
+
+    lock_acquired_zfiles[zfile.get()]=
+                          MemoryMoveExtents(zfile.get(),it.second,
+                          ZC_read_buffer_,
+                          ZC_write_buffer_,
+                          new_zone,&pos);
+    
+  }
+
+  new_zone->Append(ZC_write_buffer_,pos);
+
+  zbd_->ReleaseSMRMigrateZone(new_zone);
+
+
+  for(auto it : lock_acquired_zfiles){
+    SyncFileExtents(it.first, it.second);
+    it.first->ReleaseWRLock();
+  }
+  zbd_->AddGCBytesWritten(pos);
+}
 
 IOStatus ZenFS::MigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
@@ -2800,8 +2955,6 @@ IOStatus ZenFS::MigrateExtents(
     if(!run_gc_worker_){
       return IOStatus::OK();
     }
-    
-    // if (!s.ok()) break;
   }
   {
     // ZenFSStopWatch z1("ResetUnsedZones");

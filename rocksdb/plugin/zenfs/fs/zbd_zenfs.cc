@@ -3483,6 +3483,28 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
   return ret;
 }
 
+
+  void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone){
+    zbd_->WaitForOpenIOZoneToken(true);
+    while(GetActiveIOZoneTokenIfAvailable()==false);
+    while((*out_zone)==nullptr){
+      AllocateEmptyZone(out_zone);
+    }
+  }
+  void ZonedBlockDevice::ReleaseSMRMigrateZone(Zone* zone){
+    if (zone != nullptr) {
+      bool full = zone->IsFull();
+      zone->Close();
+      zone->Release();
+      PutOpenIOZoneToken();
+      if(full){
+        PutActiveIOZoneToken();
+      }
+    }
+  }
+
+
+
 IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
   IOStatus s = IOStatus::OK();
   {

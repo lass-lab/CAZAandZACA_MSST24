@@ -1099,6 +1099,10 @@ class ZonedBlockDevice {
 
   // IOStatus TakeMigrateZone(Zone **out_zone, Env::WriteLifeTimeHint lifetime,
   //                          uint64_t min_capacity,bool* run_gc_worker_);
+  void TakeSMRMigrateZone(Zone** out_zone);
+  void ReleaseSMRMigrateZone(Zone* zone);
+
+
   IOStatus TakeMigrateZone(Slice& smallest,Slice& largest, int level,Zone **out_zone,
                                            Env::WriteLifeTimeHint file_lifetime,uint64_t file_size,
                                            uint64_t min_capacity,bool* run_gc_worker_,bool is_sst);
