@@ -2968,8 +2968,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   // while(new_zone==nullptr){
   //   AllocateEmptyZone(&new_zone);
   // }
-  // zbd_->TakeSMRMigrateZone(&new_zone,victim_zone->lifetime_,should_be_copied);
-  zbd_->TakeSMRMigrateZone(&new_zone);
+  zbd_->TakeSMRMigrateZone(&new_zone,victim_zone->lifetime_,should_be_copied);
+  // zbd_->TakeSMRMigrateZone(&new_zone);
   if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
     ||new_zone->wp_!=new_zone->start_){
       printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start %lu\n",
@@ -3000,7 +3000,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
                           ZC_read_buffer_,
                           ZC_write_buffer_,
                           new_zone,&pos);
-    new_zone->lifetime_=zfile->GetWriteLifeTimeHint();
+    // new_zone->lifetime_=zfile->GetWriteLifeTimeHint();
     if(pos>new_zone->max_capacity_){
       printf("SMRLargeIOMigrateExtents ???? pos %lu\n",pos);
     }
