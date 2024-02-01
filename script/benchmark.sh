@@ -120,7 +120,7 @@ do
             echo "NO ${RESULT_DIR_PATH}"
             mkdir ${RESULT_DIR_PATH}
         fi
-            for IO_SIZE in $MB256 $MB1
+            for IO_SIZE in $MB1
                 do
                     if [ $IO_SIZE -eq $MB256 ]; then
                         RESULT_PATH=${RESULT_DIR_PATH}/result_${SIZE}_256MB_${T_FLUSH}_${T_COMPACTION}_${T_SUBCOMPACTION}_${i}
