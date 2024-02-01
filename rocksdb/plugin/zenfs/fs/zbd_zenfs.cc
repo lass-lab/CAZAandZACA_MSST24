@@ -3528,7 +3528,7 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
 }
 
 
-void TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint file_lifetime,uint64_t should_be_copied){
+void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint file_lifetime,uint64_t should_be_copied){
     // 
     // while(GetActiveIOZoneTokenIfAvailable()==false);
     // while((*out_zone)==nullptr){
@@ -3548,7 +3548,7 @@ void TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint file_lifetime,uin
       break;
     }
 
-    
+
     if(GetActiveIOZoneTokenIfAvailable()){
       AllocateEmptyZone(out_zone);
       if((*out_zone)!=nullptr){
