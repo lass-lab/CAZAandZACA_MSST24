@@ -3537,6 +3537,7 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
 
 
   should_be_copied+=4096*256;
+  unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
   WaitForOpenIOZoneToken(false);
 
   while((*out_zone)==nullptr){
