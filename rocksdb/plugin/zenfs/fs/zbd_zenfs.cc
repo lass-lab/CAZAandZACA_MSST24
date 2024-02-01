@@ -3528,13 +3528,45 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
 }
 
 
-  void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone){
-    WaitForOpenIOZoneToken(true);
-    while(GetActiveIOZoneTokenIfAvailable()==false);
-    while((*out_zone)==nullptr){
+void TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint file_lifetime,uint64_t should_be_copied){
+    // 
+    // while(GetActiveIOZoneTokenIfAvailable()==false);
+    // while((*out_zone)==nullptr){
+    //   AllocateEmptyZone(out_zone);
+    // }
+
+
+  should_be_copied+=4096*256;
+  WaitForOpenIOZoneToken(false);
+
+  while((*out_zone)==nullptr){
+    
+    
+    GetBestOpenZoneMatch(file_lifetime, &best_diff,std::vector<uint64_t>() ,out_zone, should_be_copied);
+
+    if((*out_zone)!=nullptr){
+      break;
+    }
+
+    
+    if(GetActiveIOZoneTokenIfAvailable()){
       AllocateEmptyZone(out_zone);
+      if((*out_zone)!=nullptr){
+        (*out_zone)->lifetime_=file_lifetime;
+        break;
+      }else{
+        PutActiveIOZoneToken();
+      }
+    }
+    
+      
+
+    GetAnyLargestRemainingZone(out_zone,false,should_be_copied);
+    if((*out_zone)!=nullptr){
+      break;
     }
   }
+}
   void ZonedBlockDevice::ReleaseSMRMigrateZone(Zone* zone){
     if (zone != nullptr) {
       bool full = zone->IsFull();

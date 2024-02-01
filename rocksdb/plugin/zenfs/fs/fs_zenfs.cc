@@ -614,7 +614,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
             // AsyncMigrateExtents(migrate_exts);
           std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
           // AsyncUringMigrateExtents(migrate_exts);
-          SMRLargeIOMigrateExtents(migrate_exts);
+          SMRLargeIOMigrateExtents(migrate_exts,should_be_copied);
         }else{
           MigrateExtents(migrate_exts);
         }
@@ -2922,7 +2922,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
   return new_extent_list;
 }
 
-IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) {
+IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,uint64_t should_be_copied) {
   Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
   int read_fd=zbd_->GetFD(READ_FD);
@@ -2960,7 +2960,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   // while(new_zone==nullptr){
   //   AllocateEmptyZone(&new_zone);
   // }
-  zbd_->TakeSMRMigrateZone(&new_zone);
+  zbd_->TakeSMRMigrateZone(&new_zone,victim_zone->lifetime_,should_be_copied);
   if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
     ||new_zone->wp_!=new_zone->start_){
       printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start %lu\n",
@@ -2991,7 +2991,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
                           ZC_read_buffer_,
                           ZC_write_buffer_,
                           new_zone,&pos);
-    new_zone->lifetime_=zfile->GetWriteLifeTimeHint();
+    // new_zone->lifetime_=zfile->GetWriteLifeTimeHint();
     if(pos>new_zone->max_capacity_){
       printf("SMRLargeIOMigrateExtents ???? pos %lu\n",pos);
     }
@@ -3041,7 +3041,7 @@ IOStatus ZenFS::MigrateExtents(
   }
   {
     // ZenFSStopWatch z1("ResetUnsedZones");
-    s=zbd_->ResetUnusedIOZones();
+    // s=zbd_->ResetUnusedIOZones();
   }
   return s;
 }

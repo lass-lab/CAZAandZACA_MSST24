@@ -579,7 +579,7 @@ class ZonedBlockDevice {
 
   std::atomic<int> max_nr_active_io_zones_;
   int max_nr_open_io_zones_;
-  std::atomic<int> max_migrate_zones_ {2};
+  std::atomic<int> max_migrate_zones_ {0};
 
   std::vector<std::pair<int,uint64_t>> sst_file_size_last_;
   std::mutex sst_file_size_last_lock_;
@@ -1114,7 +1114,7 @@ class ZonedBlockDevice {
 
   // IOStatus TakeMigrateZone(Zone **out_zone, Env::WriteLifeTimeHint lifetime,
   //                          uint64_t min_capacity,bool* run_gc_worker_);
-  void TakeSMRMigrateZone(Zone** out_zone);
+  void TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint file_lifetime,uint64_t should_be_copied);
   void ReleaseSMRMigrateZone(Zone* zone);
 
 
