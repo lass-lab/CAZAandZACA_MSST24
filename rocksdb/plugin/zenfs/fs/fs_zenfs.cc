@@ -2980,15 +2980,23 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     ZenFSStopWatch z1("Large IO pread",zbd_);
     // err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->max_capacity_,victim_zone->start_);
-    err=(int)pread(read_fd,(ZC_read_buffer_+min_start),(max_end-min_start),min_start);
+    char* tmp_buf=nullptr;
+    err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
+
+    if(err){
+      printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
+    }
+    // err=(int)pread(read_fd,(ZC_read_buffer_+min_start),(max_end-min_start),min_start);
+    err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
   }
 
   if(err!=(int)(max_end-min_start)){
-    printf("err %d max_end-min_start %lu\n",err,max_end-min_start);
+    printf("err %d max_end-min_start %lu(%lu-%lu)\n",err,max_end-min_start,max_end,min_start);
   }else{
     zbd_->AddZCRead(err);
   }
-
+  memmove(ZC_read_buffer_+min_start,tmp_buf,max_end-min_start);
+  free(tmp_buf);
   // if(err!=(int)(victim_zone->max_capacity_)){
   //   printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
   // }
