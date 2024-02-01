@@ -276,6 +276,7 @@ class ZenFS : public FileSystemWrapper {
   IOStatus PersistRecord(std::string record);
 
   void LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>& zfiles);
+  void LargeZCSyncFileMetadata(std::vector<ZoneFile*>& zfiles);
   IOStatus SyncFileExtents(ZoneFile* zoneFile,
                            std::vector<ZoneExtent*> new_extents);
   /* Must hold files_mtx_ */

@@ -1538,7 +1538,7 @@ IOStatus ZoneFile::MigrateData(uint64_t offset, uint64_t length,
   while (length > 0) {
     read_sz = length > read_sz ? read_sz : length;
     pad_sz = read_sz % block_sz == 0 ? 0 : (block_sz - (read_sz % block_sz));
-    int r 
+    int r;
     {
         ZenFSStopWatch z1("READ",zbd_);
         r= zbd_->Read(buf, offset, read_sz + pad_sz, true);
