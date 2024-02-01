@@ -120,13 +120,43 @@ void Zone::EncodeJson(std::ostream &json_stream) {
   json_stream << "}";
 }
 
+
+void ZonedBlockDevice::AddBreakDown(std::string name, uint64_t us){
+// std::map<std::string, std::pair<std::atomic<uint64_t>,std::atomic<uint64_t>>> breakdown_map;
+  if(breakdown_map.find(name)==breakdown_map.end()){
+    breakdown_map[name].first=1;
+    breakdown_map[name].second=us/1000;
+  }else{
+     breakdown_map[name].first++;
+     breakdown_map[name].second+=us/1000;
+  }
+}
+
+void ZonedBlockDevice::PrintCumulativeBreakDown(){
+  for(auto it : breakdown_map){
+    std::string name = it.first;
+    uint64_t count=it.second.first;
+    uint64_t ms = it.second.second;
+    printf("%s : %lu/%lu = %lu\n",name.c_str(),ms,count,ms/count);
+
+  }
+}
+
+ZenFSStopWatch::~ZenFSStopWatch(){
+    clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+    long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+    // printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
+
+    zbd_->AddBreakDown(name,elapsed_ns_timespec/1000);
+}
+
 IOStatus Zone::AsyncReset(){
   bool offline;
   uint64_t max_capacity;
 
   assert(!IsUsed());
  {
-  ZenFSStopWatch z1("async-reset");
+  // ZenFSStopWatch z1("async-reset");
 
 
   IOStatus ios = zbd_be_->Reset(start_, &offline, &max_capacity);
@@ -154,13 +184,14 @@ IOStatus Zone::AsyncReset(){
   return IOStatus::OK();
 }
 
+
 IOStatus Zone::Reset() {
   bool offline;
   uint64_t max_capacity;
 
   assert(!IsUsed());
 
-  ZenFSStopWatch z1("zone-reset");
+  // ZenFSStopWatch z1("zone-reset");
 
   IOStatus ios = zbd_be_->Reset(start_, &offline, &max_capacity);
   if (ios != IOStatus::OK()) return ios;

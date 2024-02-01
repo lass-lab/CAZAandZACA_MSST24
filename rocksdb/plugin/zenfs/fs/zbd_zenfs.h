@@ -200,19 +200,22 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
 struct ZenFSStopWatch{
   std::string name;
   struct timespec start_timespec, end_timespec;
-  ZenFSStopWatch(const char* _name){
+  ZonedBlockDevice* zbd_;
+  ZenFSStopWatch(const char* _name,ZonedBlockDevice* zbd){
     name=_name;
+    zbd_=zbd;
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   }
 
   uint64_t End(){
     return 0;
   }
-  ~ZenFSStopWatch(){
-    clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-    long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-    printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
-  }
+  ~ZenFSStopWatch();
+  // {
+  //   clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  //   long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  //   printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
+  // }
 };
 
 struct AsyncReset{
@@ -788,6 +791,9 @@ class ZonedBlockDevice {
   std::condition_variable migrate_resource_;
   std::mutex migrate_zone_mtx_;
   
+  std::map<std::string, std::pair<std::atomic<uint64_t>,std::atomic<uint64_t>>> breakdown_map;
+  void AddBreakDown(std::string name, uint64_t us);
+  void PrintCumulativeBreakDown();
   std::atomic<uint64_t> lsm_tree_[10];
 
     uint64_t ZENFS_CONVENTIONAL_ZONE = 0;
