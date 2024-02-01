@@ -2948,7 +2948,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
   }
 {  
-  ZenFSStopWatch z1("Large IO pread");
+  ZenFSStopWatch z1("Large IO pread",zbd_);
   err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->max_capacity_,victim_zone->start_);
 }
 
@@ -3001,7 +3001,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
 
   {
-    ZenFSStopWatch z2("Large IO pwrite");
+    ZenFSStopWatch z2("Large IO pwrite",zbd_);
     new_zone->Append(ZC_write_buffer_,pos);
   }
   if(new_zone->wp_-new_zone->start_ != pos){
