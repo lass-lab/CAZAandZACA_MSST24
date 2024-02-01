@@ -2821,7 +2821,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     }
     uint64_t prev_relative_start = ext->start_ - ext->zone_->start_;
 
-    uint64_t target_start = new_zone->start_ + (*pos);
+    uint64_t target_start = new_zone->wp_ + (*pos);
 
     if(zfile->IsSparse()){
       target_start = new_zone->start_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
@@ -2897,7 +2897,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   zbd_->TakeSMRMigrateZone(&new_zone);
   if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
     ||new_zone->wp_!=new_zone->start_){
-      printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start\n",
+      printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start %lu\n",
         new_zone->used_capacity_.load(),new_zone->capacity_,new_zone->wp_,new_zone->start_);
   }
 
