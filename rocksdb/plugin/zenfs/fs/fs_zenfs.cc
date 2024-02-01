@@ -1164,11 +1164,15 @@ void ZenFS::LargeZCSyncFileMetadata(std::vector<ZoneFile*>& zfiles){
       continue;
     }
     PutFixed32(&output, kFileReplace);
-    zoneFile->EncodeUpdateTo(&fileRecord);
+    zfile->EncodeUpdateTo(&fileRecord);
     PutLengthPrefixedSlice(&output, Slice(fileRecord));
   }
   s = PersistRecord(output);
-  if (s.ok()) zoneFile->MetadataSynced();
+  if (s.ok()){ 
+    for(auto zfile: zfiles){
+      zfile->MetadataSynced();
+    }
+  }
 }
 
 IOStatus ZenFS::SyncFileMetadata(ZoneFile* zoneFile, bool replace) {
