@@ -3527,50 +3527,57 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
   return ret;
 }
 
-
-void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint file_lifetime,uint64_t should_be_copied){
-    // 
-    WaitForOpenIOZoneToken(false);
+  void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone){
+    WaitForOpenIOZoneToken(true);
     while(GetActiveIOZoneTokenIfAvailable()==false);
     while((*out_zone)==nullptr){
       AllocateEmptyZone(out_zone);
     }
-    (void)(should_be_copied);
-    (*out_zone)->lifetime_=file_lifetime;
+  }
+
+// void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint file_lifetime,uint64_t should_be_copied){
+//     // 
+//     WaitForOpenIOZoneToken(false);
+//     while(GetActiveIOZoneTokenIfAvailable()==false);
+//     while((*out_zone)==nullptr){
+//       AllocateEmptyZone(out_zone);
+//     }
+//     (void)(should_be_copied);
+//     (*out_zone)->lifetime_=file_lifetime;
 
 
-  // should_be_copied+=4096*256;
-  // unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
-  // WaitForOpenIOZoneToken(false);
+//   // should_be_copied+=4096*256;
+//   // unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
+//   // WaitForOpenIOZoneToken(false);
 
-  // while((*out_zone)==nullptr){
+//   // while((*out_zone)==nullptr){
     
     
-  //   GetBestOpenZoneMatch(file_lifetime, &best_diff,std::vector<uint64_t>() ,out_zone, should_be_copied);
+//   //   GetBestOpenZoneMatch(file_lifetime, &best_diff,std::vector<uint64_t>() ,out_zone, should_be_copied);
 
-  //   if((*out_zone)!=nullptr){
-  //     break;
-  //   }
+//   //   if((*out_zone)!=nullptr){
+//   //     break;
+//   //   }
 
 
-  //   if(GetActiveIOZoneTokenIfAvailable()){
-  //     AllocateEmptyZone(out_zone);
-  //     if((*out_zone)!=nullptr){
-  //       (*out_zone)->lifetime_=file_lifetime;
-  //       break;
-  //     }else{
-  //       PutActiveIOZoneToken();
-  //     }
-  //   }
+//   //   if(GetActiveIOZoneTokenIfAvailable()){
+//   //     AllocateEmptyZone(out_zone);
+//   //     if((*out_zone)!=nullptr){
+//   //       (*out_zone)->lifetime_=file_lifetime;
+//   //       break;
+//   //     }else{
+//   //       PutActiveIOZoneToken();
+//   //     }
+//   //   }
     
       
 
-  //   GetAnyLargestRemainingZone(out_zone,false,should_be_copied);
-  //   if((*out_zone)!=nullptr){
-  //     break;
-  //   }
-  // }
-}
+//   //   GetAnyLargestRemainingZone(out_zone,false,should_be_copied);
+//   //   if((*out_zone)!=nullptr){
+//   //     break;
+//   //   }
+//   // }
+// }
   void ZonedBlockDevice::ReleaseSMRMigrateZone(Zone* zone){
     if (zone != nullptr) {
       bool full = zone->IsFull();

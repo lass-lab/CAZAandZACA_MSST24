@@ -2880,9 +2880,9 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
       Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
       continue;
     }
-    uint64_t prev_relative_start = ext->start_ - ext->zone_->start_;
+      uint64_t prev_relative_start = ext->start_ - ext->zone_->start_;
 
-    uint64_t target_start = new_zone->start_ + (*pos);
+    uint64_t target_start = new_zone->wp_ + (*pos);
 
     if(zfile->IsSparse()){
       target_start = new_zone->start_ + (*pos) + ZoneFile::SPARSE_HEADER_SIZE;
