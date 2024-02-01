@@ -2914,7 +2914,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
 
 
     memmove(write_buf+(*pos), read_buf+(prev_relative_start-ext->header_size_)  ,tmp);
-    
+
     (*pos)+=tmp;
 
   }
