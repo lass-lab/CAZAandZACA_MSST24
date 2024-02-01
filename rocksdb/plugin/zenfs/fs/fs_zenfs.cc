@@ -1050,6 +1050,29 @@ IOStatus ZenFS::PersistRecord(std::string record) {
   return s;
 }
 
+
+void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>& lock_acquired_files){
+  
+  std::vector<ZoneFile*> zfiles;
+  for(auto file : lock_acquired_files){
+    ZoneFile* zfile=file.first;
+    std::vector<ZoneExtent*> new_extents = file.second;
+    for(size_t i = 0 ;i < new_extents.size(); i ++){
+      ZoneExtent* old_ext=zfile->extents_[i];
+      ZoneExtent* new_ext=new_extents[i];
+      if(old_ext->start_!=new_ext->start_){
+        old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
+      }
+    }
+    zoneFile->MetadataUnsynced();
+    zfiles.push_back(zfile);
+
+  }
+  LargeZCSyncFileMetadata(zfiles);
+
+  zbd_->ResetUnusedIOZones();
+}
+
 IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
                                 std::vector<ZoneExtent*> new_extents) {
   IOStatus s;
@@ -1062,7 +1085,7 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
       old_ext=zoneFile->extents_[i];
       zoneFile->extents_[i]=new_extents[i];
 
-      
+
       old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
       // old_ext->is_invalid_=true;
       // if(old_ext->zone_->used_capacity_==0&&old_ext->zone_->Acquire()){
@@ -1112,6 +1135,7 @@ IOStatus ZenFS::SyncFileMetadataNoLock(ZoneFile* zoneFile, bool replace) {
     zoneFile->SetFileModificationTime(time(0));
     PutFixed32(&output, kFileUpdate);
   }
+
   zoneFile->EncodeUpdateTo(&fileRecord);
   PutLengthPrefixedSlice(&output, Slice(fileRecord));
 
@@ -1119,6 +1143,28 @@ IOStatus ZenFS::SyncFileMetadataNoLock(ZoneFile* zoneFile, bool replace) {
   if (s.ok()) zoneFile->MetadataSynced();
 
   return s;
+}
+
+void ZenFS::LargeZCSyncFileMetadata(std::vector<ZoneFile*>& zfiles){
+  std::lock_guard<std::mutex> lock(files_mtx_);
+  ZenFSMetricsLatencyGuard guard(zbd_->GetMetrics(), ZENFS_META_SYNC_LATENCY,
+                                 Env::Default());
+  
+  IOStatus s;
+  std::string output;
+
+  for(auto zfile : zfiles){
+    std::string fileRecord;
+    fileRecord.clear();
+    if(zfile->IsDeleted()){
+      continue;
+    }
+    PutFixed32(&output, kFileReplace);
+    zoneFile->EncodeUpdateTo(&fileRecord);
+    PutLengthPrefixedSlice(&output, Slice(fileRecord));
+  }
+  s = PersistRecord(output);
+  if (s.ok()) zoneFile->MetadataSynced();
 }
 
 IOStatus ZenFS::SyncFileMetadata(ZoneFile* zoneFile, bool replace) {
@@ -2945,6 +2991,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     SyncFileExtents(it.first, it.second);
     it.first->ReleaseWRLock();
   }
+
+  // LargeIOSyncFileExtents(lock_acquired_zfiles);
   // zbd_->AddGCBytesWritten(pos);
 
   return IOStatus::OK();
