@@ -667,58 +667,6 @@ Status Env::LoadEnv(const std::string& value, Env** result,
   return CreateFromString(ConfigOptions(), value, result, guard);
 }
 
-Status Env::CreateFromString(const ConfigOptions& config_options,
-                             const std::string& value, Env** result,
-                             std::shared_ptr<Env>* guard) {
-  assert(result);
-  assert(guard != nullptr);
-  std::unique_ptr<Env> uniq;
-
-  Env* env = *result;
-  std::string id;
-  std::unordered_map<std::string, std::string> opt_map;
-
-  Status status =
-      Customizable::GetOptionsMap(config_options, env, value, &id, &opt_map);
-  if (!status.ok()) {  // GetOptionsMap failed
-    return status;
-  }
-  Env* base = Env::Default();
-  if (id.empty() || base->IsInstanceOf(id)) {
-    env = base;
-    status = Status::OK();
-  } else {
-    RegisterSystemEnvs();
-#ifndef ROCKSDB_LITE
-    // First, try to load the Env as a unique object.
-    status = config_options.registry->NewObject<Env>(id, &env, &uniq);
-#else
-    status =
-        Status::NotSupported("Cannot load environment in LITE mode", value);
-#endif
-  }
-  if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-    status = Status::OK();
-  } else if (status.ok()) {
-    status = Customizable::ConfigureNewObject(config_options, env, opt_map);
-  }
-  if (status.ok()) {
-    guard->reset(uniq.release());
-    *result = env;
-  }
-
-  std::shared_ptr<FileSystem> fs;
-  std::string fs_uri = "zenfs://dev:nvme1n2";
-  status = FileSystem::CreateFromString(config_options, fs_uri, &fs);
-  if (status.ok()) {
-    guard->reset(new CompositeEnvWrapper(*result, fs));
-    *result = guard->get();
-  }
-  return status;
-}
-
-
-
 // Status Env::CreateFromString(const ConfigOptions& config_options,
 //                              const std::string& value, Env** result,
 //                              std::shared_ptr<Env>* guard) {
@@ -758,8 +706,60 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
 //     guard->reset(uniq.release());
 //     *result = env;
 //   }
+
+//   std::shared_ptr<FileSystem> fs;
+//   std::string fs_uri = "zenfs://dev:nvme1n2";
+//   status = FileSystem::CreateFromString(config_options, fs_uri, &fs);
+//   if (status.ok()) {
+//     guard->reset(new CompositeEnvWrapper(*result, fs));
+//     *result = guard->get();
+//   }
 //   return status;
 // }
+
+
+
+Status Env::CreateFromString(const ConfigOptions& config_options,
+                             const std::string& value, Env** result,
+                             std::shared_ptr<Env>* guard) {
+  assert(result);
+  assert(guard != nullptr);
+  std::unique_ptr<Env> uniq;
+
+  Env* env = *result;
+  std::string id;
+  std::unordered_map<std::string, std::string> opt_map;
+
+  Status status =
+      Customizable::GetOptionsMap(config_options, env, value, &id, &opt_map);
+  if (!status.ok()) {  // GetOptionsMap failed
+    return status;
+  }
+  Env* base = Env::Default();
+  if (id.empty() || base->IsInstanceOf(id)) {
+    env = base;
+    status = Status::OK();
+  } else {
+    RegisterSystemEnvs();
+#ifndef ROCKSDB_LITE
+    // First, try to load the Env as a unique object.
+    status = config_options.registry->NewObject<Env>(id, &env, &uniq);
+#else
+    status =
+        Status::NotSupported("Cannot load environment in LITE mode", value);
+#endif
+  }
+  if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
+    status = Status::OK();
+  } else if (status.ok()) {
+    status = Customizable::ConfigureNewObject(config_options, env, opt_map);
+  }
+  if (status.ok()) {
+    guard->reset(uniq.release());
+    *result = env;
+  }
+  return status;
+}
 
 Status Env::CreateFromUri(const ConfigOptions& config_options,
                           const std::string& env_uri, const std::string& fs_uri,
