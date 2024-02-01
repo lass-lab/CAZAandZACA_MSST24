@@ -196,6 +196,15 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
   if (ending.size() > value.size()) return false;
   return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
+struct BreakDown{
+  std::atomic<uint64_t> count_{0};
+  std::atomic<uint64_t> ms_{0};
+
+  BreakDown(uint64_t count,uint64_t ms){
+    count_=count;
+    ms_=ms;
+  }
+};
 
 struct ZenFSStopWatch{
   std::string name;
@@ -791,7 +800,7 @@ class ZonedBlockDevice {
   std::condition_variable migrate_resource_;
   std::mutex migrate_zone_mtx_;
   
-  std::map<std::string, std::pair<std::atomic<uint64_t>,std::atomic<uint64_t>>> breakdown_map;
+  std::map<std::string, BreakDown*> breakdown_map;
   void AddBreakDown(std::string name, uint64_t us);
   void PrintCumulativeBreakDown();
   std::atomic<uint64_t> lsm_tree_[10];

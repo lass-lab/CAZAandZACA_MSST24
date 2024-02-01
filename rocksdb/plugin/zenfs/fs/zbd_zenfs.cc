@@ -124,19 +124,27 @@ void Zone::EncodeJson(std::ostream &json_stream) {
 void ZonedBlockDevice::AddBreakDown(std::string name, uint64_t us){
 // std::map<std::string, std::pair<std::atomic<uint64_t>,std::atomic<uint64_t>>> breakdown_map;
   if(breakdown_map.find(name)==breakdown_map.end()){
-    breakdown_map[name].first=1;
-    breakdown_map[name].second=us/1000;
+    // breakdown_map[name].first=1;
+    // breakdown_map[name].second=us/1000;
+
+    // BreakDown* new_breakdown= new BreakDown();
+    // new_breakdown
+    breakdown_map[name]=(new BreakDown(1,us/1000));
+
+
   }else{
-     breakdown_map[name].first++;
-     breakdown_map[name].second+=us/1000;
+    breakdown_map[name]->count_++;
+    breakdown_map[name]->ms_+=us/1000;
+    //  breakdown_map[name].first++;
+    //  breakdown_map[name].second+=us/1000;
   }
 }
 
 void ZonedBlockDevice::PrintCumulativeBreakDown(){
   for(auto it : breakdown_map){
     std::string name = it.first;
-    uint64_t count=it.second.first;
-    uint64_t ms = it.second.second;
+    uint64_t count=it.second.count_;
+    uint64_t ms = it.second.ms_;
     printf("%s : %lu/%lu = %lu\n",name.c_str(),ms,count,ms/count);
 
   }
