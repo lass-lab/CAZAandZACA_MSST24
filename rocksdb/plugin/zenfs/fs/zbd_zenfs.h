@@ -198,11 +198,11 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
 }
 struct BreakDown{
   std::atomic<uint64_t> count_{0};
-  std::atomic<uint64_t> ms_{0};
+  std::atomic<uint64_t> us_{0};
 
-  BreakDown(uint64_t count,uint64_t ms){
+  BreakDown(uint64_t count,uint64_t us){
     count_=count;
-    ms_=ms;
+    us_=us;
   }
 };
 

@@ -129,12 +129,12 @@ void ZonedBlockDevice::AddBreakDown(std::string name, uint64_t us){
 
     // BreakDown* new_breakdown= new BreakDown();
     // new_breakdown
-    breakdown_map[name]=(new BreakDown(1,us/1000));
+    breakdown_map[name]=(new BreakDown(1,us));
 
 
   }else{
     breakdown_map[name]->count_++;
-    breakdown_map[name]->ms_+=us/1000;
+    breakdown_map[name]->us_+=us;
     //  breakdown_map[name].first++;
     //  breakdown_map[name].second+=us/1000;
   }
@@ -144,7 +144,7 @@ void ZonedBlockDevice::PrintCumulativeBreakDown(){
   for(auto it : breakdown_map){
     std::string name = it.first;
     uint64_t count=it.second->count_;
-    uint64_t ms = it.second->ms_;
+    uint64_t ms = it.second->us_/1000;
     printf("%s : %lu/%lu = %lu\n",name.c_str(),ms,count,ms/count);
   }
 }
