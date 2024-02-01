@@ -432,6 +432,8 @@ class ZonedBlockDevice {
 /* FAR STATS */
   std::atomic<uint64_t> bytes_written_{0};
   std::atomic<uint64_t> gc_bytes_written_{0};
+  uint64_t zc_read_amp_=0;
+
   std::atomic<bool> force_zc_should_triggered_{false};
   uint64_t reset_threshold_ = 0;
   uint64_t reset_threshold_arr_[101];
@@ -1138,11 +1140,15 @@ class ZonedBlockDevice {
     gc_bytes_written_.fetch_add(written); 
     // zc_copied_timelapse_.push_back(written);
   };
-
+  inline void AddZCRead(uint64_t read){
+    zc_read_amp_+=read;
+  }
   uint64_t GetGCBytesWritten(void) { return gc_bytes_written_.load(); }
   uint64_t GetUserBytesWritten() {
     return bytes_written_.load() - gc_bytes_written_.load();
   };
+
+
   uint64_t GetTotalBytesWritten() { return bytes_written_.load(); };
   int GetResetCount() { return reset_count_.load(); }
   // int GetResetCountBG() {return reset_count_bg_.load();}

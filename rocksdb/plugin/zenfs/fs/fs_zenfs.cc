@@ -1182,7 +1182,6 @@ void ZenFS::LargeZCSyncFileMetadata(std::vector<ZoneFile*>& zfiles){
   if (s.ok()){ 
     for(auto zfile: zfiles){
       zfile->MetadataSynced();
-      // zfile->ReleaseWRLock();
     }
   }
 }
@@ -2953,15 +2952,43 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       printf("SMRLargeIOMigrateExtents fail to allocate ZC_read_buffer_\n");
     }
   }
-{  
-  ZenFSStopWatch z1("Large IO pread",zbd_);
-  err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->max_capacity_,victim_zone->start_);
-}
+  uint64_t min_start=victim_zone->start_;
+  uint64_t max_end=victim_zone->start_+victim_zone->max_capacity_;
+  {  
+
+    for(auto ext: extents){
+      if(ext->start<min_start){
+        min_start=ext->start;
+      }
+      if(ext->start>max_end){
+        max_end=ext->start+ext->length;
+      }
+    }
+    
+    uint64_t align=min_start %4096;
+    if(align){
+      min_start-=align;
+    }
+    align=max_end%4096;
+    if(align){
+      max_end+=4096-align;
+    }
 
 
-  if(err!=(int)victim_zone->max_capacity_){
-    printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
+    ZenFSStopWatch z1("Large IO pread",zbd_);
+    // err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->max_capacity_,victim_zone->start_);
+    err=(int)pread(read_fd,(ZC_read_buffer_+min_start),(max_end-min_start),min_start);
   }
+
+  if(err!=(int)(max_end-min_start)){
+    printf("err %d max_end-min_start %lu\n",err,max_end-min_start);
+  }else{
+    zbd_->AddZCRead(err);
+  }
+
+  // if(err!=(int)(victim_zone->max_capacity_)){
+  //   printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
+  // }
   // zbd_->WaitForOpenIOZoneToken(true);
   // // GetActiveIOZoneTokenIfAvailable()
   // while(GetActiveIOZoneTokenIfAvailable()==false);
@@ -2970,11 +2997,11 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   // }
   zbd_->TakeSMRMigrateZone(&new_zone,victim_zone->lifetime_,should_be_copied);
   // zbd_->TakeSMRMigrateZone(&new_zone);
-  if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
-    ||new_zone->wp_!=new_zone->start_){
-      printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start %lu\n",
-        new_zone->used_capacity_.load(),new_zone->capacity_,new_zone->wp_,new_zone->start_);
-  }
+  // if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
+  //   ||new_zone->wp_!=new_zone->start_){
+  //     printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start %lu\n",
+  //       new_zone->used_capacity_.load(),new_zone->capacity_,new_zone->wp_,new_zone->start_);
+  // }
 
   for (auto* ext : extents) {
     std::string fname = ext->filename;
@@ -3010,9 +3037,9 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     ZenFSStopWatch z2("Large IO pwrite",zbd_);
     new_zone->Append(ZC_write_buffer_,pos);
   }
-  if(new_zone->wp_-new_zone->start_ != pos){
-    printf("SMRLargeIOMigrateExtents after append pos : %lu , relative wp %lu\n",pos,new_zone->wp_-new_zone->start_);
-  }
+  // if(new_zone->wp_-new_zone->start_ != pos){
+  //   printf("SMRLargeIOMigrateExtents after append pos : %lu , relative wp %lu\n",pos,new_zone->wp_-new_zone->start_);
+  // }
   zbd_->ReleaseSMRMigrateZone(new_zone);
 
 

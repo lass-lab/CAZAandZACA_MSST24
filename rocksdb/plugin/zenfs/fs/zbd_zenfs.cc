@@ -935,6 +935,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   if(GetUserBytesWritten()){
     printf("copy/written ratio : %lu/%lu=%lu\n",gc_bytes_written_.load(),GetUserBytesWritten(),(gc_bytes_written_.load()*100)/GetUserBytesWritten());
   }
+  printf("ZC read amp %lu\n",zc_read_amp_);
   printf("TOTAL I/O BLOKCING TIME %d\n",io_blocking_sum);
   printf("TOTAL I/O BLOCKING TIME(ms) %llu\n",io_blocking_ms_sum);
   printf("TOTAL ERASED AT RZR DEVICE VIEW : %lu(MB)\n",(wasted_wp_.load()+erase_size_.load())>>20 );
