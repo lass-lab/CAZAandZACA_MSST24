@@ -143,8 +143,8 @@ void ZonedBlockDevice::AddBreakDown(std::string name, uint64_t us){
 void ZonedBlockDevice::PrintCumulativeBreakDown(){
   for(auto it : breakdown_map){
     std::string name = it.first;
-    uint64_t count=it.second.count_;
-    uint64_t ms = it.second.ms_;
+    uint64_t count=it.second->count_;
+    uint64_t ms = it.second->ms_;
     printf("%s : %lu/%lu = %lu\n",name.c_str(),ms,count,ms/count);
 
   }
