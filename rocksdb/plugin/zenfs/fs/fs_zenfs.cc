@@ -2966,12 +2966,14 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
     
     uint64_t align=min_start %4096;
+    
     if(align){
       min_start-=align;
     }
+
     align=max_end%4096;
     if(align){
-      max_end+=4096-align;
+      max_end+=(4096-align);
     }
 
 
