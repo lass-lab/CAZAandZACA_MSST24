@@ -146,7 +146,6 @@ void ZonedBlockDevice::PrintCumulativeBreakDown(){
     uint64_t count=it.second->count_;
     uint64_t ms = it.second->ms_;
     printf("%s : %lu/%lu = %lu\n",name.c_str(),ms,count,ms/count);
-
   }
 }
 
@@ -1043,6 +1042,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   //     read_latency_sum_.load(),read_n_.load(),read_latency_sum_.load()/read_n_.load());
   // }
   printf("Cumulative I/O Blocking %lu\n",cumulative_io_blocking_.load());
+  PrintCumulativeBreakDown();
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
   printf("============================================================\n\n");
