@@ -155,9 +155,11 @@ ZenFSStopWatch::~ZenFSStopWatch(){
     // printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
     if(zbd_!=nullptr){
       zbd_->AddBreakDown(name,elapsed_ns_timespec/1000);
-    }else{
-      printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
     }
+    // else{
+      
+    // }
+    printf("\t\t\t\t\t%s breakdown %lu (ms)\n",name.c_str(),(elapsed_ns_timespec/1000)/1000);
 }
 
 IOStatus Zone::AsyncReset(){

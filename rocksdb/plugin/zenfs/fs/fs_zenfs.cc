@@ -1068,9 +1068,14 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
     zfiles.push_back(zfile);
 
   }
+ { 
+ZenFSStopWatch z3("LARGE IO metadata sync",zbd_);  
   LargeZCSyncFileMetadata(zfiles);
-
+}
+{
+  ZenFSStopWatch z2("ZC Reset");
   zbd_->ResetUnusedIOZones();
+  }
 }
 
 IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
@@ -2940,8 +2945,12 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       printf("SMRLargeIOMigrateExtents fail to allocate ZC_read_buffer_\n");
     }
   }
-
+{  
+  ZenFSStopWatch z1("Large IO pread");
   err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->max_capacity_,victim_zone->start_);
+}
+
+
   if(err!=(int)victim_zone->max_capacity_){
     printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
   }
@@ -2987,20 +2996,24 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       printf("SMRLargeIOMigrateExtents ???? pos %lu\n",pos);
     }
   }
-
-  new_zone->Append(ZC_write_buffer_,pos);
+  {
+    ZenFSStopWatch z2("Large IO pwrite");
+    new_zone->Append(ZC_write_buffer_,pos);
+  }
   if(new_zone->wp_-new_zone->start_ != pos){
     printf("SMRLargeIOMigrateExtents after append pos : %lu , relative wp %lu\n",pos,new_zone->wp_-new_zone->start_);
   }
   zbd_->ReleaseSMRMigrateZone(new_zone);
 
 
-  for(auto it : lock_acquired_zfiles){
-    SyncFileExtents(it.first, it.second);
-    it.first->ReleaseWRLock();
-  }
+  // for(auto it : lock_acquired_zfiles){
+  //   SyncFileExtents(it.first, it.second);
+  //   it.first->ReleaseWRLock();
+  // }
 
-  // LargeIOSyncFileExtents(lock_acquired_zfiles);
+  LargeIOSyncFileExtents(lock_acquired_zfiles);
+
+
   // zbd_->AddGCBytesWritten(pos);
 
   return IOStatus::OK();
