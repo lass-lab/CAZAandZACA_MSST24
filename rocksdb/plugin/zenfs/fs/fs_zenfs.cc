@@ -1079,7 +1079,7 @@ ZenFSStopWatch z3("LARGE IO metadata sync",zbd_);
   LargeZCSyncFileMetadata(zfiles);
 }
 {
-  ZenFSStopWatch z2("ZC Reset");
+  ZenFSStopWatch z2("ZC Reset",zbd_);
   zbd_->ResetUnusedIOZones();
   }
 }
