@@ -1222,7 +1222,14 @@ IOStatus ZenFS::DeleteFileNoLock(std::string fname, const IOOptions& options,
   zoneFile = GetFileNoLock(fname);
 
   if (zoneFile != nullptr) {
-    zoneFile->AcquireWRLock();
+    if(zoneFile->on_zc.load()){
+      files_mtx_.unlock();
+      // while(zoneFile->TryAcquireWRLock()==false);
+      zoneFile->AcquireWRLock();
+      files_mtx_.lock();
+    }
+    
+
     std::string record;
 
     files_.erase(fname);
@@ -1548,8 +1555,8 @@ IOStatus ZenFS::DeleteFile(const std::string& fname, const IOOptions& options,
 
   Debug(logger_, "DeleteFile: %s \n", fname.c_str());
 
-  while(files_mtx_.try_lock()==false);
-
+  // while(files_mtx_.try_lock()==false);
+  files_mtx_.lock();
   s = DeleteFileNoLock(fname, options, dbg);
   files_mtx_.unlock();
   if (s.ok()){
@@ -3951,6 +3958,7 @@ IOStatus ZenFS::MigrateFileExtents(
   if (!zfile->TryAcquireWRLock()) {
     return IOStatus::OK();
   }
+  zfile->on_zc_.store(1);
 
   std::vector<ZoneExtent*> new_extent_list;
   std::vector<ZoneExtent*> extents = zfile->GetExtents(); // old ext
@@ -4079,6 +4087,7 @@ IOStatus ZenFS::MigrateFileExtents(
   SyncFileExtents(zfile.get(), new_extent_list);
   // }
   zfile->ReleaseWRLock();
+  zfile->on_zc_.store(0);
   // printf("after finding in MigrateFileExtents 1.5\n");
   Info(logger_, "MigrateFileExtents Finished, fname: %s, extent count: %lu",
        fname.data(), migrate_exts.size());
