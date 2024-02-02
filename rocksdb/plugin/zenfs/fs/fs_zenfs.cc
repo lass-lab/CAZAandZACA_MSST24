@@ -3021,6 +3021,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
   size_t pos = 0;
+{  
+  ZenFSStopWatch z2("MemoryMoveExtents",zbd_);
   for (const auto& it : file_extents) {
     std::string fname =it.first;
     auto zfile = GetFile(fname);
@@ -3043,7 +3045,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       printf("SMRLargeIOMigrateExtents ???? pos %lu\n",pos);
     }
   }
-
+}
   {
     ZenFSStopWatch z2("Large IO pwrite",zbd_);
     new_zone->Append(ZC_write_buffer_,pos);

@@ -3653,6 +3653,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   // WaitForOpenIOZoneToken(false);
 
   // WaitForMigrationIOZoneToken();
+  WaitForOpenIOZoneToken(false);
 
   while(CalculateCapacityRemain()>min_capacity){
     if((*run_gc_worker_)==false){
@@ -3672,7 +3673,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
           break;
         }
 
-        if(GetMigrationIOZoneToken()){
+        if(GetActiveIOZoneTokenIfAvailable()){
         s=AllocateEmptyZone(out_zone); 
         if (s.ok() && (*out_zone) != nullptr) {
           Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
@@ -3680,7 +3681,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
           break;
         }else{
           // PutActiveIOZoneToken();
-          PutMigrationIOZoneToken();
+          PutActiveIOZoneToken();
         }
       } 
       
@@ -3702,15 +3703,15 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
-    if(GetMigrationIOZoneToken()){
+    if(GetActiveIOZoneTokenIfAvailable()){
       s=AllocateEmptyZone(out_zone); 
       if (s.ok() && (*out_zone) != nullptr) {
         Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
         (*out_zone)->lifetime_=file_lifetime;
         break;
       }else{
-        // PutActiveIOZoneToken();
-        PutMigrationIOZoneToken();
+        PutActiveIOZoneToken();
+        // PutMigrationIOZoneToken();
       }
     }
 
