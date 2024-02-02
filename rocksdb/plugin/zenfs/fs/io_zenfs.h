@@ -115,7 +115,8 @@ class ZoneFile {
   std::atomic<int> readers_{0};
   FileSystemWrapper* zenfs_;
  public:
-  std::<atomic> uint64_t on_zc_{0};
+  // std::<atomic> uint64_t on_zc_{0};
+  std::atomic<uint64_t> on_zc_{0};
   bool is_sst_ = false;
   bool is_wal_ = false;
   uint64_t fno_;
