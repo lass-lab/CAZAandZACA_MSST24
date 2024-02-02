@@ -1548,7 +1548,7 @@ IOStatus ZenFS::DeleteFile(const std::string& fname, const IOOptions& options,
 
   Debug(logger_, "DeleteFile: %s \n", fname.c_str());
 
-  files_mtx_.lock();
+  while(files_mtx_.try_lock()==false);
 
   s = DeleteFileNoLock(fname, options, dbg);
   files_mtx_.unlock();
