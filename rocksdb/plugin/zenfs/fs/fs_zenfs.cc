@@ -1222,7 +1222,7 @@ IOStatus ZenFS::DeleteFileNoLock(std::string fname, const IOOptions& options,
   zoneFile = GetFileNoLock(fname);
 
   if (zoneFile != nullptr) {
-    if(zoneFile->on_zc.load()){
+    if(zoneFile->on_zc_.load()){
       files_mtx_.unlock();
       // while(zoneFile->TryAcquireWRLock()==false);
       zoneFile->AcquireWRLock();
