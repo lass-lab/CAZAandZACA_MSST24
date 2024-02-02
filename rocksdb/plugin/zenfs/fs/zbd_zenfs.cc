@@ -3607,11 +3607,11 @@ IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
       // PutMigrationIOZoneToken();
       zone->Release();
 
-      // PutOpenIOZoneToken();
+      PutOpenIOZoneToken();
 
       if(full){
-        // PutActiveIOZoneToken();
-        PutMigrationIOZoneToken();
+        PutActiveIOZoneToken();
+        // PutMigrationIOZoneToken();
       }
 
       Info(logger_, "ReleaseMigrateZone: %lu", zone->start_);
@@ -3686,7 +3686,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       } 
       
       }else{
-        
+
         // printf("I am LIZA!\n");
       }
       
