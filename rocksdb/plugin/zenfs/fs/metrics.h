@@ -164,10 +164,10 @@ struct ZenFSMetricsLatencyGuard {
         begin_time_micro_(GetTime()) {}
 
   virtual ~ZenFSMetricsLatencyGuard() {
-    uint64_t end_time_micro_ = GetTime();
-    assert(end_time_micro_ >= begin_time_micro_);
-    metrics_->ReportLatency(label_,
-                            Report(end_time_micro_ - begin_time_micro_));
+    // uint64_t end_time_micro_ = GetTime();
+    // assert(end_time_micro_ >= begin_time_micro_);
+    // metrics_->ReportLatency(label_,
+    //                         Report(end_time_micro_ - begin_time_micro_));
   }
   // overwrite this function if you wish to capture time by other methods.
   virtual uint64_t GetTime() { return env_->NowMicros(); }

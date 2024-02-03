@@ -1375,11 +1375,11 @@ IOStatus ZonedWritableFile::Append(const Slice& data,
                                    const IOOptions& /*options*/,
                                    IODebugContext* /*dbg*/) {
   IOStatus s;
-  ZenFSMetricsLatencyGuard guard(zoneFile_->GetZBDMetrics(),
-                                 zoneFile_->GetIOType() == IOType::kWAL
-                                     ? ZENFS_WAL_WRITE_LATENCY
-                                     : ZENFS_NON_WAL_WRITE_LATENCY,
-                                 Env::Default());
+  // ZenFSMetricsLatencyGuard guard(zoneFile_->GetZBDMetrics(),
+  //                                zoneFile_->GetIOType() == IOType::kWAL
+  //                                    ? ZENFS_WAL_WRITE_LATENCY
+  //                                    : ZENFS_NON_WAL_WRITE_LATENCY,
+  //                                Env::Default());
   zoneFile_->GetZBDMetrics()->ReportQPS(ZENFS_WRITE_QPS, 1);
   zoneFile_->GetZBDMetrics()->ReportThroughput(ZENFS_WRITE_THROUGHPUT,
                                                data.size());
