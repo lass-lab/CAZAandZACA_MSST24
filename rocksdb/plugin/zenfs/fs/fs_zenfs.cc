@@ -3019,7 +3019,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if(err){
       printf("mincore err %d\n",err);
     }
-    for(int i = 0; i<victim_zone->max_capacity_/page_size;i++ ){
+    for(uint64_t i = 0; i<victim_zone->max_capacity_/page_size;i++ ){
       if(page_cache_check_hit_buffer_[i] & 1){
         page_cache_hit++;
       }
