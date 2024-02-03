@@ -3013,7 +3013,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
 
-    page_cache_check_hit_buffer_=(unsigned char*)malloc((max_end-min_start)/page_size);
+    page_cache_check_hit_buffer_=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
 
 
     err=mincore(page_cache_hit_mmap_addr_+ (min_start -io_zone_start_offset),
@@ -3021,7 +3021,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if(err){
       printf("mincore err %d\n",err);
     }
-    for(uint64_t i = 0; i<max_end-min_start/page_size;i++ ){
+    for(uint64_t i = 0; i<(max_end-min_start)/page_size;i++ ){
       if(page_cache_check_hit_buffer_[i] & 1){
         page_cache_hit++;
       }else{
