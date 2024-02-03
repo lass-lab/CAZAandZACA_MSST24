@@ -2946,6 +2946,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
   uint64_t page_size= getpagesize();
   int page_cache_hit = 0;
+  int page_cache_failed = 0;
   // uint64_t copied = 0;
   // int write_fd= zbd_->GetFD(WRITE_DIRECT_FD);
   int err;
@@ -3012,7 +3013,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
 
-    page_cache_check_hit_buffer_=(unsigned char*)malloc(victim_zone->max_capacity_/page_size);
+    page_cache_check_hit_buffer_=(unsigned char*)malloc((max_end-min_start)/page_size);
 
 
     err=mincore(page_cache_hit_mmap_addr_+ (min_start -io_zone_start_offset),
@@ -3020,15 +3021,18 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if(err){
       printf("mincore err %d\n",err);
     }
-    for(uint64_t i = 0; i<victim_zone->max_capacity_/page_size;i++ ){
+    for(uint64_t i = 0; i<max_end-min_start/page_size;i++ ){
       if(page_cache_check_hit_buffer_[i] & 1){
         page_cache_hit++;
+      }else{
+        page_cache_failed++;
       }
     }
 
 
     err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
-    printf("page cache hit : %d %lu(us)\n",page_cache_hit,z1.RecordTickNS()/1000);
+    printf("page cache hit : %d/%d %lu(us)\n",page_cache_hit,page_cache_failed,z1.RecordTickNS()/1000);
+    free(page_cache_check_hit_buffer_);
   }
 
   if(err!=(int)(max_end-min_start)){
