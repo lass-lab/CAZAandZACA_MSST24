@@ -2972,7 +2972,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   // char* page_cache_hit_mmap_addr_ = nullptr;
   // char* page_cache_check_hit_buffer_ = nullptr;
     if(page_cache_hit_mmap_addr_==nullptr){
-      uint64_t device_total_size= log2_DEVICE_IO_CAPACITY<<30;
+      uint64_t device_total_size= 1<<30;
+      device_total_size =<<log2_DEVICE_IO_CAPACITY;
       page_cache_hit_mmap_addr_ = 
       (char*)mmap(NULL, device_total_size, PROT_READ, MAP_SHARED, read_fd, io_zone_start_offset);
     }
