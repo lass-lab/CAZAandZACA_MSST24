@@ -1326,34 +1326,27 @@ void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
 
   std::vector<uint64_t> invalid_percent_per_zone(101,0);
 
-  for(auto z : io_zones){
-    if(z==nullptr){
+  // for(auto z : io_zones){
+  //   if(z==nullptr){
 
-      break;
-    }
-    if(z->IsEmpty()){
-      // invalid_percent_per_zone.push_back(0);
-      invalid_percent_per_zone[0]++;
-      continue;
-    }
+  //     break;
+  //   }
+  //   if(z->IsEmpty()){
+  //     // invalid_percent_per_zone.push_back(0);
+  //     invalid_percent_per_zone[0]++;
+  //     continue;
+  //   }
     
-    uint64_t relative_wp = (z->wp_ -z->start_);
-    uint64_t invalid_size = relative_wp - z->used_capacity_;
-    uint64_t invalid_percent = (invalid_size*100)/(relative_wp) ;
-    if(invalid_percent >100){
-      printf("AddTimeLapse ?? %lu %lu %lu\n",relative_wp,invalid_size,invalid_percent);
-      invalid_percent_per_zone[0]++;
-      continue;
-    }
-    invalid_percent_per_zone[invalid_percent]++;
-    // uint64_t invalid_size = (z->wp_ -z->start_) - z->used_capacity_;
-    // ratio=(double)(invalid_size/(double)(z->max_capacity_));
-    // if(z->wp_ - z->start_){
-    //   ratio = (double)(invalid_size/(double)(z->wp_ -z->start_));
-    // }else{
-    //   ratio = 0.0;
-    // }
-  }
+  //   uint64_t relative_wp = (z->wp_ -z->start_);
+  //   uint64_t invalid_size = relative_wp - z->used_capacity_;
+  //   uint64_t invalid_percent = (invalid_size*100)/(relative_wp) ;
+  //   if(invalid_percent >100){
+  //     printf("AddTimeLapse ?? %lu %lu %lu\n",relative_wp,invalid_size,invalid_percent);
+  //     invalid_percent_per_zone[0]++;
+  //     continue;
+  //   }
+  //   invalid_percent_per_zone[invalid_percent]++;
+  // }
   // double avg_invalid_ratio = ratio_sum/(io_zones.size());
   if(cur_free_percent_>100){
     printf("Addtimelapse cur_free_percent_ ? %lu\n",cur_free_percent_);
