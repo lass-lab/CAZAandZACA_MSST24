@@ -148,7 +148,11 @@ void ZonedBlockDevice::PrintCumulativeBreakDown(){
     printf("%s : %lu/%lu = %lu\n",name.c_str(),ms,count,ms/count);
   }
 }
-
+uint64_t ZenFSStopWatch::RecordTickNS(){
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  return (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  // return 
+}
 ZenFSStopWatch::~ZenFSStopWatch(){
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);

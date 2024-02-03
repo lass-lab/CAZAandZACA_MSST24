@@ -216,9 +216,7 @@ struct ZenFSStopWatch{
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
   }
 
-  uint64_t End(){
-    return 0;
-  }
+  uint64_t RecordTickNS();
   ~ZenFSStopWatch();
   // {
   //   clock_gettime(CLOCK_MONOTONIC, &end_timespec);
@@ -1114,7 +1112,7 @@ class ZonedBlockDevice {
   Zone* GetIOZoneByIndex(int index){
     return io_zones[index];
   }
-  
+
 
   int Read(char *buf, uint64_t offset, int n, bool direct);
 

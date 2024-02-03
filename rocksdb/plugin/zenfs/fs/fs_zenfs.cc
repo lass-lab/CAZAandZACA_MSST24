@@ -2943,9 +2943,9 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   int read_fd=zbd_->GetFD(READ_FD);
   (void)(should_be_copied);
   
-  // uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
-  // uint64_t page_size= getpagesize();
-  // int page_cache_hit = 0;
+  uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
+  uint64_t page_size= getpagesize();
+  int page_cache_hit = 0;
   // uint64_t copied = 0;
   // int write_fd= zbd_->GetFD(WRITE_DIRECT_FD);
   int err;
@@ -2971,14 +2971,13 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
   // char* page_cache_hit_mmap_addr_ = nullptr;
   // char* page_cache_check_hit_buffer_ = nullptr;
-    // if(page_cache_hit_mmap_addr_==nullptr){
-    //   uint64_t device_total_size= log2_DEVICE_IO_CAPACITY<<30;
-    //   page_cache_hit_mmap_addr_ = 
-    //   (char*)mmap(NULL, device_total_size, PROT_READ, MAP_SHARED, read_fd, io_zone_start_offset);
-    // }
+    if(page_cache_hit_mmap_addr_==nullptr){
+      uint64_t device_total_size= log2_DEVICE_IO_CAPACITY<<30;
+      page_cache_hit_mmap_addr_ = 
+      (char*)mmap(NULL, device_total_size, PROT_READ, MAP_SHARED, read_fd, io_zone_start_offset);
+    }
 
   {  
-
     for(auto ext: extents){
       if(ext->start<min_start){
         min_start=ext->start;
@@ -3012,16 +3011,23 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
 
-    // page_cache_check_hit_buffer_=(unsigned char*)malloc(victim_zone->max_capacity_/page_size);
-    // err=mincore(page_cache_hit_mmap_addr_+ (victim_zone->start_-io_zone_start_offset),
-    //               victim_zone->max_capacity_, page_cache_check_hit_buffer_);
-    // if(err){
-    //   printf("mincore err %d\n",err);
-    // }
-    // for(int i = 0; i<victim_zone->max_capacity_/page_size;i++ ){
-    //   page_cache_hit++;
-    // }
+    page_cache_check_hit_buffer_=(unsigned char*)malloc(victim_zone->max_capacity_/page_size);
+
+
+    err=mincore(page_cache_hit_mmap_addr_+ (min_start -io_zone_start_offset),
+                  max_end-min_start, page_cache_check_hit_buffer_);
+    if(err){
+      printf("mincore err %d\n",err);
+    }
+    for(int i = 0; i<victim_zone->max_capacity_/page_size;i++ ){
+      if(page_cache_check_hit_buffer_[i] & 1){
+        page_cache_hit++;
+      }
+    }
+
+
     err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
+    printf("page cache hit : %d %lu(us)\n",page_cache_hit,z1.RecordTickNS()/1000);
   }
 
   if(err!=(int)(max_end-min_start)){
