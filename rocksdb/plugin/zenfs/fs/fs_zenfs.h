@@ -203,6 +203,9 @@ class ZenFS : public FileSystemWrapper {
   char* ZC_read_buffer_ = nullptr;
   char* ZC_write_buffer_ = nullptr;
 
+  char* page_cache_hit_mmap_addr_ = nullptr;
+  unsigned char* page_cache_check_hit_buffer_ = nullptr;
+
   uint64_t GetAsyncStructure(io_uring** read_ring,io_context_t** write_ioctx){
     std::lock_guard<std::mutex> lg(async_struture_mutex_);
     // unsigned flags = IORING_SETUP_SQPOLL;

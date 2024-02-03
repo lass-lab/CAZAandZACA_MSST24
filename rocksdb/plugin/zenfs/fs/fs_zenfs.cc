@@ -20,6 +20,8 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <sys/mman.h>
+
 
 #ifdef ZENFS_EXPORT_PROMETHEUS
 #include "metrics_prometheus.h"
@@ -2940,6 +2942,10 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   Zone* new_zone =nullptr;
   int read_fd=zbd_->GetFD(READ_FD);
   (void)(should_be_copied);
+  
+  uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
+  uint64_t page_size= getpagesize();
+  int page_cache_hit = 0;
   // uint64_t copied = 0;
   // int write_fd= zbd_->GetFD(WRITE_DIRECT_FD);
   int err;
@@ -2962,6 +2968,19 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   uint64_t min_start=victim_zone->start_+victim_zone->max_capacity_;
   uint64_t max_end=victim_zone->start_;
    char* tmp_buf=nullptr;
+
+  // char* page_cache_hit_mmap_addr_ = nullptr;
+  // char* page_cache_check_hit_buffer_ = nullptr;
+    if(page_cache_hit_mmap_addr_==nullptr){
+      uint64_t device_total_size= log2_DEVICE_IO_CAPACITY<<30;
+      page_cache_hit_mmap_addr_ = 
+      (char*)mmap(NULL, device_total_size, PROT_READ, MAP_SHARED, read_fd, io_zone_start_offset);
+      // if(page_cache_check_hit_buffer_==nullptr){
+      
+      // }
+      
+    }
+
   {  
 
     for(auto ext: extents){
@@ -2994,6 +3013,18 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
     }
     // err=(int)pread(read_fd,(ZC_read_buffer_+min_start),(max_end-min_start),min_start);
+
+
+
+    page_cache_check_hit_buffer_=(unsigned char*)malloc(victim_zone->max_capacity_/page_size);
+    err=mincore(page_cache_hit_mmap_addr_+ (victim_zone->start_-io_zone_start_offset),
+                  victim_zone->max_capacity_, page_cache_check_hit_buffer_);
+    if(err){
+      printf("mincore err %d\n",err);
+    }
+    for(int i = 0; i<victim_zone->max_capacity_/page_size;i++ ){
+      page_cache_hit++;
+    }
     err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
   }
 

@@ -1110,6 +1110,12 @@ class ZonedBlockDevice {
       z->zone_readers_.fetch_sub(1);
     }
   }
+
+  Zone* GetIOZoneByIndex(int index){
+    return io_zones[index];
+  }
+  
+
   int Read(char *buf, uint64_t offset, int n, bool direct);
 
   IOStatus ReleaseMigrateZone(Zone *zone);
