@@ -485,8 +485,8 @@ IOStatus Zone::ThrowAsyncUringZCWrite(io_uring* write_ring, AsyncZoneCleaningIoc
 }
 
 IOStatus Zone::Append(char *data, uint64_t size, bool zc) {
-  ZenFSMetricsLatencyGuard guard(zbd_->GetMetrics(), ZENFS_ZONE_WRITE_LATENCY,
-                                 Env::Default());
+  // ZenFSMetricsLatencyGuard guard(zbd_->GetMetrics(), ZENFS_ZONE_WRITE_LATENCY,
+  //                                Env::Default());
   // zbd_->GetMetrics()->ReportThroughput(ZENFS_ZONE_WRITE_THROUGHPUT, size);e
   char *ptr = data;
   uint64_t left = size;
