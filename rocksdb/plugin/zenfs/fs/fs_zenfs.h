@@ -470,7 +470,8 @@ class ZenFS : public FileSystemWrapper {
     // while()
     if(zbd_ && zbd_->GetZCRunning() ){
       // sleep(1);
-      zbd_->ResetUnusedIOZones();
+      zbd_->RuntimeReset();
+      
       clock_gettime(CLOCK_MONOTONIC, &start_timespec);
       while(zbd_->GetZCRunning() ){
         // sleep(1);
