@@ -3105,6 +3105,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     uint64_t front_valid_hit = failed_min;
     uint64_t to_be_direct_read = failed_max-failed_min+1;
     uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
+    mlock2((const void*)tmp_buf,max_end-min_start,MLOCK_ONFAULT);
     if(failed_min==UINT64_MAX){
       // every valid extents are in page cache
       ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
@@ -3155,6 +3156,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
                                             front_valid_hit,to_be_direct_read,back_valid_hit,
                                             failed_min,failed_max);
     munlock((const void*) min_start,(max_end-min_start));
+    
     free(page_cache_check_hit_buffer_);
     free(valid_bitmap);
   }
@@ -3166,7 +3168,9 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
   // }
+  mlock2((const void*)ZC_read_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
   memmove(ZC_read_buffer_+(min_start-victim_zone->start_),tmp_buf,max_end-min_start);
+  munlock((const void*)tmp_buf,max_end-min_start);
   free(tmp_buf);
   
   // if(err!=(int)(victim_zone->max_capacity_)){
@@ -3193,6 +3197,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
   size_t pos = 0;
+  mlock2((const void*)ZC_read_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
 {  
   ZenFSStopWatch z2("MemoryMoveExtents",zbd_);
   for (const auto& it : file_extents) {
@@ -3218,10 +3223,12 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
   }
 }
+  munlock((const void*)ZC_read_buffer_,victim_zone->max_capacity_);
   {
     ZenFSStopWatch z2("Large IO pwrite",zbd_);
     new_zone->Append(ZC_write_buffer_,pos);
   }
+  mlock2((const void*)ZC_write_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
   // if(new_zone->wp_-new_zone->start_ != pos){
   //   printf("SMRLargeIOMigrateExtents after append pos : %lu , relative wp %lu\n",pos,new_zone->wp_-new_zone->start_);
   // }
