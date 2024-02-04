@@ -3049,11 +3049,11 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     ZenFSStopWatch z1("Large IO pread",zbd_);
 
     // mlock2((const void*)min_start,(max_end-min_start),MLOCK_ONFAULT);
-    // err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
+    err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
 
-    // if(err){
-    //   printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
-    // }
+    if(err){
+      printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
+    }
 
 
 
