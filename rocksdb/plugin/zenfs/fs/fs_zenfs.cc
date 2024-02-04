@@ -725,7 +725,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // }
 
 // zbd_->ZCorPartialUnLock();
-  return migrate_zones_start.size() + all_inval_zone_n;
+  // return migrate_zones_start.size() + all_inval_zone_n;
+  return 1;
 }
 
 void ZenFS::AsyncZoneCleaning(void){
