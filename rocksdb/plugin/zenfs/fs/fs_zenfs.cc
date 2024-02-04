@@ -3197,7 +3197,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
   size_t pos = 0;
-  mlock2((const void*)ZC_read_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
+mlock2((const void*)ZC_write_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
 {  
   ZenFSStopWatch z2("MemoryMoveExtents",zbd_);
   for (const auto& it : file_extents) {
@@ -3228,7 +3228,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     ZenFSStopWatch z2("Large IO pwrite",zbd_);
     new_zone->Append(ZC_write_buffer_,pos);
   }
-  mlock2((const void*)ZC_write_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
+  munlock((const void*)ZC_write_buffer_,victim_zone->max_capacity_);
   // if(new_zone->wp_-new_zone->start_ != pos){
   //   printf("SMRLargeIOMigrateExtents after append pos : %lu , relative wp %lu\n",pos,new_zone->wp_-new_zone->start_);
   // }
