@@ -2534,7 +2534,8 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
       std::vector<ZoneExtent*> extents=file.GetExtents();
       for (ZoneExtent* ext : extents ) {
         if(ext->zone_==nullptr){
-            continue;
+            zbd_->GetIOZone(ext->start_);
+            // continue;
         }
         if(ext->is_invalid_==false){
 
