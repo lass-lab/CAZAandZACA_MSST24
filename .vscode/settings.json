@@ -67,6 +67,14 @@
         "stop_token": "cpp",
         "streambuf": "cpp",
         "thread": "cpp",
-        "cerrno": "cpp"
+        "cerrno": "cpp",
+        "__hash_table": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "__locale": "cpp",
+        "__string": "cpp",
+        "__bit_reference": "cpp"
     }
 }

@@ -523,7 +523,29 @@ size_t ZenFS::ZoneCleaning(bool forced){
     }
   }
 
-  // uint64_t zidx
+
+  std::vector<std::pair<uint64_t,uint64_t>> min_start_max_start;
+  if(zbd_->AsyncZCEnabled()>1){
+    ZenFSStopWatch z1("ReadAmpSelection",zbd_);
+      for(auto & zone : snapshot.zones_){
+        min_start_max_start.push_back({zone.start+zone.max_capacity,zone.start});
+      }
+      for (auto& ext : snapshot.extents_) {
+        uint64_t zidx= ext.zone_p->zidx_- ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+        if(ext.start < min_start_max_start[zidx].first){
+          min_start_max_start[zidx].first=ext.start;
+        }
+        if(ext.start+ext.length > 
+          min_start_max_start[zidx].second){
+          min_start_max_start[zidx].second=ext.start+ext.length;
+        }
+      }
+  }
+
+
+  uint64_t min_gc_cost= UINT64_MAX;
+  uint64_t min_read_amp = UINT64_MAX;
+  uint64_t selected_victim_zone_start = 0;
   for (const auto& zone : snapshot.zones_) {
 
     if(zone.capacity !=0 ){
@@ -532,55 +554,65 @@ size_t ZenFS::ZoneCleaning(bool forced){
     if(zone.used_capacity==zone.max_capacity){
       continue;
     }
+    uint64_t gc_cost;
+    if(zbd_->AsyncZCEnabled()>1){
+      ZenFSStopWatch z1("ReadAmpSelection",zbd_);
 
-    uint64_t compensated_used_capacity = zone.used_capacity + soon_invalidation_zone_per_size[zone.zidx];
-
-
-
-    // if(compensated_used_capacity>(zone.max_capacity*2)){ // error exception
-    //   printf("compensated_used_capacity %lu\n",compensated_used_capacity);
-    //   compensated_used_capacity=0;
-    // }
-      // if(soon_invalidation_zone_per_size[zone.zidx]){
-      //   continue;
-      // }
-
-      uint64_t valid_approx = 100 * compensated_used_capacity / zone.max_capacity;
-      uint64_t garbage_percent_approx= 200-valid_approx;
-
-      // uint64_t garbage_percent_approx =
-      //   100 - 100 * compensated_used_capacity / zone.max_capacity; // invalid capacity
-      // uint64_t garbage_percent_approx =
-      //   100 - 100 * zone.used_capacity / zone.max_capacity; // invalid capacity
-
-
-
-
-      if(zone.used_capacity>0){ // valid copy zone
-        // victim_candidate.push_back({garbage_percent_approx, zone.start});
-        victim_candidate.emplace_back(garbage_percent_approx,zone.start);
+      uint64_t zidx= zone.zone_p->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+      uint64_t min_start = min_start_max_start[zidx].first;
+      uint64_t max_end = min_start_max_start[zidx].second;
+      uint64_t to_be_read = max_end-min_start;
+      uint64_t read_amp = to_be_read - zone.used_capacity;
+      if(max_end<min_start){
+        read_amp = 0;
       }
-      else{ // no valid copy zone
-        all_inval_zone_n++;
+      gc_cost= zone.used_capacity>>20;
+
+      if(gc_cost<min_gc_cost){
+        min_gc_cost=gc_cost;
+        selected_victim_zone_start=zone.start;
+        min_read_amp=read_amp;
+      }else if(gc_cost==min_gc_cost && read_amp <min_read_amp ){
+        min_gc_cost=gc_cost;
+        selected_victim_zone_start=zone.start;
+        min_read_amp=read_amp;
       }
-    // }
-  }
-  // sort(victim_candidate.begin(), victim_candidate.end(),VictimZoneCandiate::cmp);
-  sort(victim_candidate.rbegin(), victim_candidate.rend());
 
-  uint64_t threshold = 0;
-  uint64_t reclaimed_zone_n=one_zc_reclaimed_zone_n_;
-  // if(forced){
-  //   reclaimed_zone_n++;
-  // }
-
-  reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
-  for (size_t i = 0; (i < reclaimed_zone_n && migrate_zones_start.size()<reclaimed_zone_n ); i++) {
-    if(victim_candidate[i].first>threshold){
-      // should_be_copied+=(zone_size-(victim_candidate[i].first*zone_size/100) );
-      migrate_zones_start.emplace(victim_candidate[i].second);
+    }else{
+      gc_cost=100 * zone.used_capacity / zone.max_capacity;
+      if(gc_cost<min_gc_cost){
+        min_gc_cost=gc_cost;
+        selected_victim_zone_start=zone.start;
+      }
     }
+    
+
+
+
+
+      // if(zone.used_capacity>0){ // valid copy zone
+      //   victim_candidate.emplace_back(gc_cost,zone.start);
+      // }
+      // else{ // no valid copy zone
+      //   all_inval_zone_n++;
+      // }
   }
+
+  // sort(victim_candidate.rbegin(), victim_candidate.rend());
+
+  // sort(victim_candidate.begin(), victim_candidate.end());
+  // uint64_t threshold = 0;
+  // uint64_t reclaimed_zone_n=one_zc_reclaimed_zone_n_;
+
+
+  // reclaimed_zone_n = reclaimed_zone_n > victim_candidate.size() ? victim_candidate.size() : reclaimed_zone_n;
+  
+  // for (size_t i = 0; (i < reclaimed_zone_n && migrate_zones_start.size()<reclaimed_zone_n ); i++) {
+  //   if(victim_candidate[i].first>threshold){
+  //     // should_be_copied+=(zone_size-(victim_candidate[i].first*zone_size/100) );
+  //     migrate_zones_start.emplace(victim_candidate[i].second);
+  //   }
+  // }
 
 
   // if(migrate_zones_.empty()){
@@ -589,8 +621,12 @@ size_t ZenFS::ZoneCleaning(bool forced){
   
   std::vector<ZoneExtentSnapshot*> migrate_exts;
   for (auto& ext : snapshot.extents_) {
-    if (migrate_zones_start.find(ext.zone_start) !=
-        migrate_zones_start.end()) {
+    // if (migrate_zones_start.find(ext.zone_start) !=
+    //     migrate_zones_start.end()) {
+    //   migrate_exts.push_back(&ext);
+    //   should_be_copied+=ext.length + ext.header_size;
+    // }
+    if(selected_victim_zone_start==ext.zone_start){
       migrate_exts.push_back(&ext);
       should_be_copied+=ext.length + ext.header_size;
     }
