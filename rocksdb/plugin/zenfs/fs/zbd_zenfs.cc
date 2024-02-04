@@ -1536,6 +1536,98 @@ IOStatus ZonedBlockDevice::AsyncResetUnusedIOZones(void) {
   return IOStatus::OK();
 }
 
+IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
+
+  IOStatus reset_status;
+  std::vector<std::pair<Zone*,bool>> to_be_reseted;
+  uint64_t next_offset = UINT64_MAX;
+  to_be_reseted.clear();
+  for (size_t i =0;i<io_zones.size();i++) {
+    const auto z = io_zones[i];
+    bool full=z->IsFull() ;
+    if(!full){
+      continue;
+    }
+    if(z->IsUsed()){
+      continue;
+    }
+    if(z->IsEmpty()){
+      continue;
+    }
+    
+    if ( z->Acquire() ) {
+
+
+      if(z->IsEmpty()){
+        z->Release();
+        continue;
+      }
+
+      if(!full){
+        z->Release();
+        continue;  
+      }
+
+      if (!z->IsUsed()) {
+        // bool full=
+        if(full){
+          erase_size_zc_.fetch_add(io_zones[i]->max_capacity_);
+        }else{
+          erase_size_proactive_zc_.fetch_add(io_zones[i]->wp_-io_zones[i]->start_);
+        }
+        wasted_wp_.fetch_add(io_zones[i]->capacity_);
+        if(next_offset==UINT64_MAX){
+          to_be_reseted.push_back({z,full});
+          next_offset=z->start_ + z->max_capacity_;
+          continue;
+        }
+
+        if(next_offset == z->start_){
+          to_be_reseted.push_back({z,full});
+          next_offset=z->start_ + z->max_capacity_;
+          continue;
+        }
+
+        if(next_offset!=z->start_){
+          next_offset=UINT64_MAX;
+          zbd_be_->MultiReset(to_be_reseted[0]->start_,(to_be_reseted[0]->max_capacity * to_be_reseted.size()));
+          
+          for(auto do_reset : to_be_reseted){
+            Zone* unused_zone= do_reset.first;
+            bool was_full = do_reset.second;
+            unused_zone->Release();
+            if(!was_full){
+              PutActiveIOZoneToken();
+            }
+          }
+          to_be_reseted.clear();
+        }
+
+
+        reset_count_zc_.fetch_add(1);
+      } 
+
+      z->Release();
+    }
+  }
+
+  if(to_be_reseted.size()){
+      zbd_be_->MultiReset(to_be_reseted[0]->start_,(to_be_reseted[0]->max_capacity * to_be_reseted.size()));
+    
+      for(auto do_reset : to_be_reseted){
+      Zone* unused_zone= do_reset.first;
+      bool was_full = do_reset.second;
+      unused_zone->Release();
+      if(!was_full){
+        PutActiveIOZoneToken();
+      }
+    }
+  }
+
+
+  return IOStatus::OK();
+}
+
 
 IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
 

@@ -153,6 +153,14 @@ std::unique_ptr<ZoneList> ZbdlibBackend::ListZones() {
   return zl;
 }
 
+IOStatus ZbdlibBackend::MultiReset(uint64_t start,uint64_t reset_size){
+  ret = zbd_reset_zones(write_f_, start, reset_size);
+  if (ret){
+    printf("ZbdlibBackend::MultiReset failed\n");
+    return IOStatus::IOError("failed\n");
+  }
+}
+
 IOStatus ZbdlibBackend::Reset(uint64_t start, bool *offline,
                               uint64_t *max_capacity) {
   unsigned int report = 1;

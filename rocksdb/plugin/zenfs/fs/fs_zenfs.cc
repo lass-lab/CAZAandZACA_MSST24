@@ -417,7 +417,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   size_t all_inval_zone_n = 0;
   // std::vector<VictimZoneCandiate> victim_candidate;
   std::vector<std::pair<uint64_t, uint64_t>> victim_candidate;
-  std::set<uint64_t> migrate_zones_start;
+  // std::set<uint64_t> migrate_zones_start;
   // std::vector<Zone*> migrate_zones_;
   std::vector<ZonedBlockDevice::ZoneReadLock> zone_read_locks;
   ZonedBlockDevice::ZoneReadLock zone_read_lock;
@@ -681,7 +681,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       
       zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
-                          migrate_zones_start.size(),should_be_copied, forced);
+                          1,should_be_copied, forced);
     }
     zc_triggerd_count_.fetch_add(1);
   }else{
@@ -2983,17 +2983,16 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   Zone* new_zone =nullptr;
   // int read_fd=zbd_->GetFD(READ_DIRECT_FD);
   int read_fd = zbd_->GetFD(READ_FD);
-  int read_direct_fd =zbd_->GetFD(READ_DIRECT_FD);
+  // int read_direct_fd =zbd_->GetFD(READ_DIRECT_FD);
 
 
   (void)(should_be_copied);
   
   uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
-  uint64_t page_size= getpagesize();
-  int page_cache_hit = 0;
-  int page_cache_failed = 0;
-  // uint64_t copied = 0;
-  // int write_fd= zbd_->GetFD(WRITE_DIRECT_FD);
+  // uint64_t page_size= getpagesize();
+  // int page_cache_hit = 0;
+  // int page_cache_failed = 0;
+
   int err;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
   // std::vector<ZoneFile*> lock_acquired_zfiles;
@@ -3015,14 +3014,13 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   uint64_t max_end=victim_zone->start_;
    char* tmp_buf=nullptr;
 
-  // char* page_cache_hit_mmap_addr_ = nullptr;
-  // char* page_cache_check_hit_buffer_ = nullptr;
-    if(page_cache_hit_mmap_addr_==nullptr){
-      uint64_t device_total_size= 1<<30;
-      device_total_size <<=log2_DEVICE_IO_CAPACITY;
-      page_cache_hit_mmap_addr_ = 
-      (char*)mmap(NULL, device_total_size, PROT_READ, MAP_SHARED, read_fd, io_zone_start_offset);
-    }
+
+    // if(page_cache_hit_mmap_addr_==nullptr){
+    //   uint64_t device_total_size= 1<<30;
+    //   device_total_size <<=log2_DEVICE_IO_CAPACITY;
+    //   page_cache_hit_mmap_addr_ = 
+    //   (char*)mmap(NULL, device_total_size, PROT_READ, MAP_SHARED, read_fd, io_zone_start_offset);
+    // }
 
     {  
     for(auto ext: extents){
@@ -3044,133 +3042,131 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if(align){
       max_end+=(4096-align);
     }
-    mlock2((const void*)min_start,(max_end-min_start),MLOCK_ONFAULT);
+
 
     ZenFSStopWatch z1("Large IO pread",zbd_);
 
-    // err=(int)pread(read_fd,ZC_read_buffer_,victim_zone->max_capacity_,victim_zone->start_);
-   
-    err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
+    // mlock2((const void*)min_start,(max_end-min_start),MLOCK_ONFAULT);
+    // err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
 
-    if(err){
-      printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
-    }
-    // err=(int)pread(read_fd,(ZC_read_buffer_+min_start),(max_end-min_start),min_start);
+    // if(err){
+    //   printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
+    // }
 
 
 
-    page_cache_check_hit_buffer_=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
-    unsigned char* valid_bitmap=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
-    for(auto ext: extents){
-      uint64_t length = ext->length;
-      uint64_t length_align = ext->length%page_size;
-      if(length_align){
-        length+=page_size-length_align;
-      }
-      memset(valid_bitmap+((ext->start-min_start)/page_size),1,length/page_size );
-    }
+    // page_cache_check_hit_buffer_=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
+    // unsigned char* valid_bitmap=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
+    // for(auto ext: extents){
+    //   uint64_t length = ext->length;
+    //   uint64_t length_align = ext->length%page_size;
+    //   if(length_align){
+    //     length+=page_size-length_align;
+    //   }
+    //   memset(valid_bitmap+((ext->start-min_start)/page_size),1,length/page_size );
+    // }
 
-    err=mincore(page_cache_hit_mmap_addr_+ (min_start -io_zone_start_offset),
-                  max_end-min_start, page_cache_check_hit_buffer_);
-    if(err){
-      printf("mincore err %d\n",err);
-    }
-    // bool is_there_hole = false;
-    uint64_t failed_min=UINT64_MAX;
-    uint64_t failed_max=UINT64_MAX;
-    // uint64_t failed_invalid_min=UINT64_MAX;
-    // uint64_t failed_invalid_max=UINT64_MAX;
+    // err=mincore(page_cache_hit_mmap_addr_+ (min_start -io_zone_start_offset),
+    //               max_end-min_start, page_cache_check_hit_buffer_);
+    // if(err){
+    //   printf("mincore err %d\n",err);
+    // }
+    
+    // uint64_t failed_min=UINT64_MAX;
+    // uint64_t failed_max=UINT64_MAX;
 
-    for(uint64_t i = 0; i<(max_end-min_start)/page_size;i++ ){
-      if(page_cache_check_hit_buffer_[i] & 0x1){
-        page_cache_hit++;
-      }else{
-        if(valid_bitmap[i] & 0x1){
-          failed_max=i;
-          if(failed_min==UINT64_MAX){
-            failed_min=i;
-          }
-        }
-        // else{ // invalid
-        //   if(failed_min==UINT64_MAX){
-        //     failed_min=i;
-        //   }
-        //   failed_invalid_max=i;
 
-        // }
+    // for(uint64_t i = 0; i<(max_end-min_start)/page_size;i++ ){
+    //   if(page_cache_check_hit_buffer_[i] & 0x1){
+    //     page_cache_hit++;
+    //   }else{
+    //     if(valid_bitmap[i] & 0x1){
+    //       failed_max=i;
+    //       if(failed_min==UINT64_MAX){
+    //         failed_min=i;
+    //       }
+    //     }
+    //     // else{ // invalid
+    //     //   if(failed_min==UINT64_MAX){
+    //     //     failed_min=i;
+    //     //   }
+    //     //   failed_invalid_max=i;
+
+    //     // }
         
-        page_cache_failed++;
-      }
-    }
-    uint64_t front_valid_hit = failed_min;
-    uint64_t to_be_direct_read = failed_max-failed_min+1;
-    uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
-    mlock2((const void*)tmp_buf,max_end-min_start,MLOCK_ONFAULT);
-    if(failed_min==UINT64_MAX){
-      // every valid extents are in page cache
-      ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
-      for(auto ext: extents){
-        err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
-        if(err!=(int)ext->length){
-          printf("zc pread error 1 %d\n",err);
-        }
-      }
+    //     page_cache_failed++;
+    //   }
+    // }
+    // uint64_t front_valid_hit = failed_min;
+    // uint64_t to_be_direct_read = failed_max-failed_min+1;
+    // uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
+    // mlock2((const void*)tmp_buf,max_end-min_start,MLOCK_ONFAULT);
+    // if(failed_min==UINT64_MAX){
+    //   // every valid extents are in page cache
+    //   ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
+    //   for(auto ext: extents){
+    //     err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
+    //     if(err!=(int)ext->length){
+    //       printf("zc pread error 1 %d\n",err);
+    //     }
+    //   }
 
-    }else{
-      // uint64_t front_valid_hit = failed_min;
-      // uint64_t to_be_direct_read = failed_max-failed_min+1;
-      // uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
-      if(front_valid_hit){
-        ZenFSStopWatch zread("FRONT READ",zbd_);
-        err=pread(read_fd,tmp_buf, front_valid_hit*page_size, min_start);
-        if(err!=(int)(front_valid_hit*page_size)){
-          printf("zc pread error 2 %d\n",err);
-        }
-      }
-      if(to_be_direct_read){
-        ZenFSStopWatch zread("DIRECT READ",zbd_);
-        err=pread(read_direct_fd, tmp_buf+ (front_valid_hit*page_size), 
-                  to_be_direct_read*page_size , 
-              min_start+ (front_valid_hit*page_size));
-        if(err!=(int)(to_be_direct_read*page_size)){
-          printf("zc pread error 3 %d\n",err);
-        }
-      }
-      if(back_valid_hit){
-        ZenFSStopWatch zread("BACK READ",zbd_);
-        err=pread(read_fd, tmp_buf+ ((front_valid_hit+to_be_direct_read) *page_size),
-                (back_valid_hit*page_size),
-                min_start+ ((front_valid_hit+to_be_direct_read) *page_size) );
-        if(err!=(int)(back_valid_hit*page_size)){
-          printf("zc pread error 4 %d\n",err);
-        }
-      }
+    // }else{
+    //   // uint64_t front_valid_hit = failed_min;
+    //   // uint64_t to_be_direct_read = failed_max-failed_min+1;
+    //   // uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
+    //   if(front_valid_hit){
+    //     ZenFSStopWatch zread("FRONT READ",zbd_);
+    //     err=pread(read_fd,tmp_buf, front_valid_hit*page_size, min_start);
+    //     if(err!=(int)(front_valid_hit*page_size)){
+    //       printf("zc pread error 2 %d\n",err);
+    //     }
+    //   }
+    //   if(to_be_direct_read){
+    //     ZenFSStopWatch zread("DIRECT READ",zbd_);
+    //     err=pread(read_direct_fd, tmp_buf+ (front_valid_hit*page_size), 
+    //               to_be_direct_read*page_size , 
+    //           min_start+ (front_valid_hit*page_size));
+    //     if(err!=(int)(to_be_direct_read*page_size)){
+    //       printf("zc pread error 3 %d\n",err);
+    //     }
+    //   }
+    //   if(back_valid_hit){
+    //     ZenFSStopWatch zread("BACK READ",zbd_);
+    //     err=pread(read_fd, tmp_buf+ ((front_valid_hit+to_be_direct_read) *page_size),
+    //             (back_valid_hit*page_size),
+    //             min_start+ ((front_valid_hit+to_be_direct_read) *page_size) );
+    //     if(err!=(int)(back_valid_hit*page_size)){
+    //       printf("zc pread error 4 %d\n",err);
+    //     }
+    //   }
 
-    }
+    // }
 
-    // err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
+    err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
     // printf("page cache hit : %d/%d = %lf %lu (us) (%lu / %lu / %lu), (%lu %lu)\n",
     //                       page_cache_hit,page_cache_failed,
     //                       (double)((double)page_cache_hit/(double)(page_cache_hit+page_cache_failed)) ,
     //                                         z1.RecordTickNS()/1000,
     //                                         front_valid_hit,to_be_direct_read,back_valid_hit,
     //                                         failed_min,failed_max);
-    munlock((const void*) min_start,(max_end-min_start));
+    // munlock((const void*) min_start,(max_end-min_start));
     
-    free(page_cache_check_hit_buffer_);
-    free(valid_bitmap);
+    // free(page_cache_check_hit_buffer_);
+    // free(valid_bitmap);
   }
 
-  // if(err!=(int)(max_end-min_start)){
-  //   printf("err %d max_end-min_start %lu(%lu-%lu)\n",err,max_end-min_start,max_end,min_start);
-  // }else{
+  if(err!=(int)(max_end-min_start)){
+    printf("err %d max_end-min_start %lu(%lu-%lu)\n",err,max_end-min_start,max_end,min_start);
+  }
+  // else{
   zbd_->AddZCRead(max_end-min_start);
 
 
   // }
-  mlock2((const void*)ZC_read_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
+  // mlock2((const void*)ZC_read_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
   memmove(ZC_read_buffer_+(min_start-victim_zone->start_),tmp_buf,max_end-min_start);
-  munlock((const void*)tmp_buf,max_end-min_start);
+  // munlock((const void*)tmp_buf,max_end-min_start);
   free(tmp_buf);
   
   // if(err!=(int)(victim_zone->max_capacity_)){
@@ -3197,7 +3193,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
   size_t pos = 0;
-mlock2((const void*)ZC_write_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
+// mlock2((const void*)ZC_write_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
 {  
   ZenFSStopWatch z2("MemoryMoveExtents",zbd_);
   for (const auto& it : file_extents) {
@@ -3223,12 +3219,12 @@ mlock2((const void*)ZC_write_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
     }
   }
 }
-  munlock((const void*)ZC_read_buffer_,victim_zone->max_capacity_);
+  // munlock((const void*)ZC_read_buffer_,victim_zone->max_capacity_);
   {
     ZenFSStopWatch z2("Large IO pwrite",zbd_);
     new_zone->Append(ZC_write_buffer_,pos);
   }
-  munlock((const void*)ZC_write_buffer_,victim_zone->max_capacity_);
+  // munlock((const void*)ZC_write_buffer_,victim_zone->max_capacity_);
   // if(new_zone->wp_-new_zone->start_ != pos){
   //   printf("SMRLargeIOMigrateExtents after append pos : %lu , relative wp %lu\n",pos,new_zone->wp_-new_zone->start_);
   // }

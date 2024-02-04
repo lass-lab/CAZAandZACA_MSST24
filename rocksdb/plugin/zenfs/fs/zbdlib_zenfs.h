@@ -75,6 +75,7 @@ class ZbdlibBackend : public ZonedBlockDeviceBackend {
   IOStatus Open(bool readonly, bool exclusive, unsigned int *max_active_zones,
                 unsigned int *max_open_zones,unsigned int* log2_erase_unit_size);
   std::unique_ptr<ZoneList> ListZones();
+  IOStatus MultiReset(uint64_t start,uint64_t reset_size);
   IOStatus Reset(uint64_t start, bool *offline, uint64_t *max_capacity);
   IOStatus PartialReset(uint64_t start, uint64_t erase_size,bool clflush);
   

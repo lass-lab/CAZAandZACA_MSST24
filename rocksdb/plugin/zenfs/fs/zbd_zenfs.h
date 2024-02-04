@@ -374,6 +374,7 @@ class ZonedBlockDeviceBackend {
                         unsigned int *log2_erase_unit_size) = 0;
 
   virtual std::unique_ptr<ZoneList> ListZones() = 0;
+  virtual IOStatus MultiReset(uint64_t start,uint64_t reset_size) = 0;
   virtual IOStatus Reset(uint64_t start, bool *offline,
                          uint64_t *max_capacity) = 0;
   virtual IOStatus PartialReset(uint64_t , uint64_t,bool) = 0;
