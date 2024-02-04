@@ -878,11 +878,12 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
 
     MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
     reclaim_until=zbd_->GetReclaimUntil();
-    if(free_percent_<MODIFIED_ZC_KICKING_POINT+10
-      && free_percent_>=MODIFIED_ZC_KICKING_POINT+5
-    ){
-      zbd_->ResetUnusedIOZones();
-    }
+    // if(free_percent_<MODIFIED_ZC_KICKING_POINT+10
+    //   && free_percent_>=MODIFIED_ZC_KICKING_POINT+5
+    // ){
+    //   zbd_->ResetUnusedIOZones();
+      
+    // }
     free_percent_ = zbd_->CalculateFreePercent();
     
     if(free_percent_>MODIFIED_ZC_KICKING_POINT){
@@ -1121,7 +1122,7 @@ ZenFSStopWatch z3("LARGE IO metadata sync",zbd_);
 }
 {
   ZenFSStopWatch z2("ZC Reset",zbd_);
-  zbd_->ResetUnusedIOZones();
+  zbd_->ResetMultipleUnusedIOZones();
   }
 }
 
@@ -3358,9 +3359,7 @@ uint64_t ZenFS::AsyncMigrateExtents(
   }
 }
 {
-  // ZenFSStopWatch z7("ResetUnusedIOZones");
-  // s=zbd_->ResetUnusedIOZones();
-  // s=zbd_->AsyncResetUnusedIOZones();
+  // r  u
 
 }  
   // clock_gettime(CLOCK_MONOTONIC, &end_timespec);

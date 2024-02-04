@@ -1023,6 +1023,7 @@ class ZonedBlockDevice {
     erase_size_zc_.fetch_add(io_zones[0]->max_capacity_);
     reset_count_zc_.fetch_add(1);
   }
+  IOStatus ResetMultipleUnusedIOZones(void)  __attribute__((hot));
   IOStatus ResetUnusedIOZones(void) __attribute__((hot));
   IOStatus RuntimeZoneReset(std::vector<bool>& is_reseted);
   IOStatus RuntimePartialZoneReset(std::vector<bool>& is_reseted);
