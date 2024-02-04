@@ -2982,7 +2982,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
   // int read_fd=zbd_->GetFD(READ_DIRECT_FD);
-  int read_fd;
+  int read_fd = zbd_->GetFD(READ_FD);
+  int read_direct_fd =zbd_->GetFD(READ_DIRECT_FD);
 
 
   (void)(should_be_copied);
@@ -3058,33 +3059,94 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
     page_cache_check_hit_buffer_=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
-
+    unsigned char* valid_bitmap=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
+    for(auto ext: extents){
+      uint64_t length = ext->length;
+      uint64_t length_align = ext->length%page_size;
+      if(length_align){
+        length+=page_size-length_align;
+      }
+      memset(valid_bitmap+((ext->start-min_start)/page_size),1,length/page_size );
+    }
 
     err=mincore(page_cache_hit_mmap_addr_+ (min_start -io_zone_start_offset),
                   max_end-min_start, page_cache_check_hit_buffer_);
     if(err){
       printf("mincore err %d\n",err);
     }
-    bool is_there_hole = false;
+    // bool is_there_hole = false;
+    uint64_t failed_min=UINT64_MAX;
+    uint64_t failed_max=UINT64_MAX;
+    // uint64_t failed_invalid_min=UINT64_MAX;
+    // uint64_t failed_invalid_max=UINT64_MAX;
+
     for(uint64_t i = 0; i<(max_end-min_start)/page_size;i++ ){
       if(page_cache_check_hit_buffer_[i] & 1){
-        if(page_cache_hit&&page_cache_failed){
-          is_there_hole=true;
-        }
         page_cache_hit++;
       }else{
+        if(valid_bitmap[i] & 0x1){
+          failed_max=i;
+          if(failed_min==UINT64_MAX){
+            failed_min=i;
+          }
+        }
+        // else{ // invalid
+        //   if(failed_min==UINT64_MAX){
+        //     failed_min=i;
+        //   }
+        //   failed_invalid_max=i;
+
+        // }
+        
         page_cache_failed++;
       }
     }
-    if(is_there_hole){
-      read_fd = zbd_->GetFD(READ_DIRECT_FD);
+
+    if(failed_min==UINT64_MAX){
+      // every valid extents are in page cache
+      for(auto ext: extents){
+        err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
+      }
+      if(err!=(int)ext->length){
+        printf("zc pread error 1 %d\n",err);
+      }
     }else{
-      read_fd = zbd_->GetFD(READ_FD);
+      uint64_t front_valid_hit = failed_min;
+      uint64_t to_be_direct_read = failed_max-failed_min+1;
+      uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
+      if(front_valid_hit){
+        err=pread(read_fd,tmp_buf, front_valid_hit*page_size, min_start);
+        if(err!=(int)front_valid_hit*page_size){
+          printf("zc pread error 2 %d\n",err);
+        }
+      }
+      if(to_be_direct_read){
+        err=pread(read_direct_fd, tmp_buf+ (front_valid_hit*page_size), 
+                  to_be_direct_read*page_size , 
+              min_start+ (front_valid_hit*page_size));
+        if(err!=(int)to_be_direct_read*page_size){
+          printf("zc pread error 3 %d\n",err);
+        }
+      }
+      if(back_valid_hit){
+        err=pread(read_fd, tmp_buf+ ((front_valid_hit+to_be_direct_read) *page_size),
+                (back_valid_hit*page_size),
+                min_start+ ((front_valid_hit+to_be_direct_read) *page_size) );
+        if(err!=(int)back_valid_hit*page_size){
+          printf("zc pread error 3 %d\n",err);
+        }
+      }
+
     }
 
-    err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
-    printf("page cache hit : %d/%d %lu(us)\n",page_cache_hit,page_cache_failed,z1.RecordTickNS()/1000);
+    // err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
+    printf("page cache hit : %d/%d = %lf %lu (us) (%lu / %lu %lu)\n",
+                          page_cache_hit,page_cache_failed,
+                          (double)((double)page_cache_hit/(double)(page_cache_hit+page_cache_failed)) ,
+                                            z1.RecordTickNS()/1000,
+                                            front_valid_hit,to_be_direct_read,back_valid_hit);
     free(page_cache_check_hit_buffer_);
+    free(valid_bitmap);
   }
 
   if(err!=(int)(max_end-min_start)){
@@ -3094,6 +3156,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
   memmove(ZC_read_buffer_+(min_start-victim_zone->start_),tmp_buf,max_end-min_start);
   free(tmp_buf);
+  
   // if(err!=(int)(victim_zone->max_capacity_)){
   //   printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
   // }
