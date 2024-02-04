@@ -1595,6 +1595,9 @@ IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
           for(auto do_reset : to_be_reseted){
             Zone* unused_zone= do_reset.first;
             bool was_full = do_reset.second;
+            unused_zone->capacity_=unused_zone->max_capacity_;
+            unused_zone->wp_=unused_zone->start_;
+            unused_zone->lifetime_=Env::WLTH_NOT_SET;
             unused_zone->Release();
             if(!was_full){
               PutActiveIOZoneToken();
@@ -1617,6 +1620,9 @@ IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
       for(auto do_reset : to_be_reseted){
       Zone* unused_zone= do_reset.first;
       bool was_full = do_reset.second;
+      unused_zone->capacity_=unused_zone->max_capacity_;
+      unused_zone->wp_=unused_zone->start_;
+      unused_zone->lifetime_=Env::WLTH_NOT_SET;
       unused_zone->Release();
       if(!was_full){
         PutActiveIOZoneToken();
