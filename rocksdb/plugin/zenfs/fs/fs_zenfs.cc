@@ -2981,7 +2981,10 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
 IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,uint64_t should_be_copied) {
   Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
-  int read_fd=zbd_->GetFD(READ_DIRECT_FD);
+  // int read_fd=zbd_->GetFD(READ_DIRECT_FD);
+  int read_fd;
+
+
   (void)(should_be_copied);
   
   uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
@@ -3062,14 +3065,22 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if(err){
       printf("mincore err %d\n",err);
     }
+    bool is_there_hole = false;
     for(uint64_t i = 0; i<(max_end-min_start)/page_size;i++ ){
       if(page_cache_check_hit_buffer_[i] & 1){
+        if(page_cache_hit&&page_cache_failed){
+          is_there_hole=true;
+        }
         page_cache_hit++;
       }else{
         page_cache_failed++;
       }
     }
-
+    if(is_there_hole){
+      read_fd = zbd_->GetFD(READ_DIRECT_FD);
+    }else{
+      read_fd = zbd_->GetFD(READ_FD);
+    }
 
     err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
     printf("page cache hit : %d/%d %lu(us)\n",page_cache_hit,page_cache_failed,z1.RecordTickNS()/1000);
