@@ -3148,11 +3148,12 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
 
     // err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
-    printf("page cache hit : %d/%d = %lf %lu (us) (%lu / %lu / %lu)\n",
+    printf("page cache hit : %d/%d = %lf %lu (us) (%lu / %lu / %lu), (%lu %lu)\n",
                           page_cache_hit,page_cache_failed,
                           (double)((double)page_cache_hit/(double)(page_cache_hit+page_cache_failed)) ,
                                             z1.RecordTickNS()/1000,
-                                            front_valid_hit,to_be_direct_read,back_valid_hit);
+                                            front_valid_hit,to_be_direct_read,back_valid_hit,
+                                            failed_min,failed_max);
     munlock((const void*) min_start,(max_end-min_start));
     free(page_cache_check_hit_buffer_);
     free(valid_bitmap);
