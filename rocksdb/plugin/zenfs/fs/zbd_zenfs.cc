@@ -1589,7 +1589,7 @@ IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
         }
 
         if(next_offset!=z->start_){
-          next_offset=UINT64_MAX;
+          
           zbd_be_->MultiReset(to_be_reseted[0].first->start_,
                     (to_be_reseted[0].first->max_capacity_ * to_be_reseted.size()));
           
@@ -1605,6 +1605,8 @@ IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
             }
           }
           to_be_reseted.clear();
+          to_be_reseted.push_back({z,full});
+          next_offset=z->start_+z->max_capacity_;
         }
 
 
