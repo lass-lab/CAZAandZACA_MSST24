@@ -530,8 +530,10 @@ size_t ZenFS::ZoneCleaning(bool forced){
       for(auto & zone : snapshot.zones_){
         min_start_max_start.push_back({zone.start+zone.max_capacity,zone.start});
       }
+
       for (auto& ext : snapshot.extents_) {
         uint64_t zidx= ext.zone_p->zidx_- ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+        printf("536 zidx %lu\n",zidx);
         if(ext.start < min_start_max_start[zidx].first){
           min_start_max_start[zidx].first=ext.start;
         }
@@ -559,6 +561,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       ZenFSStopWatch z1("ReadAmpSelection",zbd_);
 
       uint64_t zidx= zone.zone_p->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+            printf("564 zidx %lu\n",zidx);
       uint64_t min_start = min_start_max_start[zidx].first;
       uint64_t max_end = min_start_max_start[zidx].second;
       uint64_t to_be_read = max_end-min_start;
