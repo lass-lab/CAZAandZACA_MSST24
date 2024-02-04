@@ -3044,7 +3044,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if(align){
       max_end+=(4096-align);
     }
-    mlock2(min_start,(max_end-min_start),MLOCK_ONFAULT);
+    mlock2((const void*)min_start,(max_end-min_start),MLOCK_ONFAULT);
 
     ZenFSStopWatch z1("Large IO pread",zbd_);
 
@@ -3153,7 +3153,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
                           (double)((double)page_cache_hit/(double)(page_cache_hit+page_cache_failed)) ,
                                             z1.RecordTickNS()/1000,
                                             front_valid_hit,to_be_direct_read,back_valid_hit);
-    munlock(min_start,(max_end-min_start));
+    munlock((const void*) min_start,(max_end-min_start));
     free(page_cache_check_hit_buffer_);
     free(valid_bitmap);
   }
