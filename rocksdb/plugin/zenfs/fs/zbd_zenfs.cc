@@ -1616,7 +1616,7 @@ IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
   }
 
   if(to_be_reseted.size()){
-      zbd_be_->MultiReset(to_be_reseted[0].first->start_,(to_be_reseted[0].first->max_capacity * to_be_reseted.size()));
+      zbd_be_->MultiReset(to_be_reseted[0].first->start_,(to_be_reseted[0].first->max_capacity_ * to_be_reseted.size()));
     
       for(auto do_reset : to_be_reseted){
       Zone* unused_zone= do_reset.first;
