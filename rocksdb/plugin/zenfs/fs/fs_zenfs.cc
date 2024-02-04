@@ -1122,7 +1122,7 @@ ZenFSStopWatch z3("LARGE IO metadata sync",zbd_);
   LargeZCSyncFileMetadata(zfiles);
 }
 {
-  // ZenFSStopWatch z2("ZC Reset",zbd_);
+  ZenFSStopWatch z2("ZC Large Reset",zbd_);
   zbd_->ResetMultipleUnusedIOZones();
   }
 }
@@ -1165,7 +1165,7 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
     return s;
   }
 {
-  // ZenFSStopWatch z4("ZC reset",zbd_);
+  ZenFSStopWatch z4("ZC Small reset",zbd_);
   zbd_->ResetUnusedIOZones();
 }
   return IOStatus::OK();

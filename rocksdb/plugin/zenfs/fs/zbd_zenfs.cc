@@ -1537,7 +1537,7 @@ IOStatus ZonedBlockDevice::AsyncResetUnusedIOZones(void) {
 }
 
 IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
-  ZenFSStopWatch z4("ZC Large reset",this);
+  ZenFSStopWatch z4("Large reset",this);
   IOStatus reset_status;
   std::vector<std::pair<Zone*,bool>> to_be_reseted;
   uint64_t next_offset = UINT64_MAX;
@@ -1637,7 +1637,7 @@ IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
 
 
 IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
-  ZenFSStopWatch z4("ZC reset",this);
+  ZenFSStopWatch z4("Small reset",this);
   IOStatus reset_status;
 
 
