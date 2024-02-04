@@ -414,7 +414,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
     // ZenFSStopWatch z2("GetZenFSSnapshot");
     GetZenFSSnapshot(snapshot, options);
   }
-  size_t all_inval_zone_n = 0;
+  // size_t all_inval_zone_n = 0;
   // std::vector<VictimZoneCandiate> victim_candidate;
   std::vector<std::pair<uint64_t, uint64_t>> victim_candidate;
   // std::set<uint64_t> migrate_zones_start;
