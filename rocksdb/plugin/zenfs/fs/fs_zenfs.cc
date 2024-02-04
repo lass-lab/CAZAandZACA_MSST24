@@ -2981,7 +2981,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
 IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,uint64_t should_be_copied) {
   Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
-  int read_fd=zbd_->GetFD(READ_FD);
+  int read_fd=zbd_->GetFD(READ_DIRECT_FD);
   (void)(should_be_copied);
   
   uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
