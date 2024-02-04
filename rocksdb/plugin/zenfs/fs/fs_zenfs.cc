@@ -524,29 +524,29 @@ size_t ZenFS::ZoneCleaning(bool forced){
   }
 
 
-  std::vector<std::pair<uint64_t,uint64_t>> min_start_max_start;
-  if(zbd_->AsyncZCEnabled()>1){
-    ZenFSStopWatch z1("ReadAmpSelection",zbd_);
-      for(auto & zone : snapshot.zones_){
-        min_start_max_start.push_back({zone.start+zone.max_capacity,zone.start});
-      }
+  // std::vector<std::pair<uint64_t,uint64_t>> min_start_max_start;
+  // if(zbd_->AsyncZCEnabled()>1){
+  //   ZenFSStopWatch z1("ReadAmpSelection",zbd_);
+  //     for(auto & zone : snapshot.zones_){
+  //       min_start_max_start.push_back({zone.start+zone.max_capacity,zone.start});
+  //     }
 
-      for (auto& ext : snapshot.extents_) {
-        uint64_t zidx= ext.zone_p->zidx_- ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
-        // printf("536 zidx %lu\n",zidx);
-        if(ext.start < min_start_max_start[zidx].first){
-          min_start_max_start[zidx].first=ext.start;
-        }
-        if(ext.start+ext.length > 
-          min_start_max_start[zidx].second){
-          min_start_max_start[zidx].second=ext.start+ext.length;
-        }
-      }
-  }
+  //     for (auto& ext : snapshot.extents_) {
+  //       uint64_t zidx= ext.zone_p->zidx_- ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+  //       // printf("536 zidx %lu\n",zidx);
+  //       if(ext.start < min_start_max_start[zidx].first){
+  //         min_start_max_start[zidx].first=ext.start;
+  //       }
+  //       if(ext.start+ext.length > 
+  //         min_start_max_start[zidx].second){
+  //         min_start_max_start[zidx].second=ext.start+ext.length;
+  //       }
+  //     }
+  // }
 
 
   uint64_t min_gc_cost= UINT64_MAX;
-  uint64_t min_read_amp = UINT64_MAX;
+  // uint64_t min_read_amp = UINT64_MAX;
   uint64_t selected_victim_zone_start = 0;
   for (const auto& zone : snapshot.zones_) {
 
@@ -557,37 +557,37 @@ size_t ZenFS::ZoneCleaning(bool forced){
       continue;
     }
     uint64_t gc_cost;
-    if(zbd_->AsyncZCEnabled()>1){
-      ZenFSStopWatch z1("ReadAmpSelection",zbd_);
+    // if(zbd_->AsyncZCEnabled()>1){
+    //   ZenFSStopWatch z1("ReadAmpSelection",zbd_);
 
-      uint64_t zidx= zone.zone_p->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
-            // printf("564 zidx %lu\n",zidx);
-      uint64_t min_start = min_start_max_start[zidx].first;
-      uint64_t max_end = min_start_max_start[zidx].second;
-      uint64_t to_be_read = max_end-min_start;
-      uint64_t read_amp = to_be_read - zone.used_capacity;
-      if(max_end<min_start){
-        read_amp = 0;
-      }
-      gc_cost= zone.used_capacity>>20;
+    //   uint64_t zidx= zone.zone_p->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+    //         // printf("564 zidx %lu\n",zidx);
+    //   uint64_t min_start = min_start_max_start[zidx].first;
+    //   uint64_t max_end = min_start_max_start[zidx].second;
+    //   uint64_t to_be_read = max_end-min_start;
+    //   uint64_t read_amp = to_be_read - zone.used_capacity;
+    //   if(max_end<min_start){
+    //     read_amp = 0;
+    //   }
+    //   gc_cost= zone.used_capacity>>20;
 
-      if(gc_cost<min_gc_cost){
-        min_gc_cost=gc_cost;
-        selected_victim_zone_start=zone.start;
-        min_read_amp=read_amp;
-      }else if(gc_cost==min_gc_cost && read_amp <min_read_amp ){
-        min_gc_cost=gc_cost;
-        selected_victim_zone_start=zone.start;
-        min_read_amp=read_amp;
-      }
+    //   if(gc_cost<min_gc_cost){
+    //     min_gc_cost=gc_cost;
+    //     selected_victim_zone_start=zone.start;
+    //     min_read_amp=read_amp;
+    //   }else if(gc_cost==min_gc_cost && read_amp <min_read_amp ){
+    //     min_gc_cost=gc_cost;
+    //     selected_victim_zone_start=zone.start;
+    //     min_read_amp=read_amp;
+    //   }
 
-    }else{
+    // }else{
       gc_cost=100 * zone.used_capacity / zone.max_capacity;
       if(gc_cost<min_gc_cost){
         min_gc_cost=gc_cost;
         selected_victim_zone_start=zone.start;
       }
-    }
+    // }
     
 
 
@@ -3082,7 +3082,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     // uint64_t failed_invalid_max=UINT64_MAX;
 
     for(uint64_t i = 0; i<(max_end-min_start)/page_size;i++ ){
-      if(page_cache_check_hit_buffer_[i] & 1){
+      if(page_cache_check_hit_buffer_[i] & 0x1){
         page_cache_hit++;
       }else{
         if(valid_bitmap[i] & 0x1){
@@ -3149,12 +3149,12 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
 
     // err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
-    printf("page cache hit : %d/%d = %lf %lu (us) (%lu / %lu / %lu), (%lu %lu)\n",
-                          page_cache_hit,page_cache_failed,
-                          (double)((double)page_cache_hit/(double)(page_cache_hit+page_cache_failed)) ,
-                                            z1.RecordTickNS()/1000,
-                                            front_valid_hit,to_be_direct_read,back_valid_hit,
-                                            failed_min,failed_max);
+    // printf("page cache hit : %d/%d = %lf %lu (us) (%lu / %lu / %lu), (%lu %lu)\n",
+    //                       page_cache_hit,page_cache_failed,
+    //                       (double)((double)page_cache_hit/(double)(page_cache_hit+page_cache_failed)) ,
+    //                                         z1.RecordTickNS()/1000,
+    //                                         front_valid_hit,to_be_direct_read,back_valid_hit,
+    //                                         failed_min,failed_max);
     munlock((const void*) min_start,(max_end-min_start));
     
     free(page_cache_check_hit_buffer_);
