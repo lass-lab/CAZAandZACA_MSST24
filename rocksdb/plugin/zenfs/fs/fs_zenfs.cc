@@ -3104,7 +3104,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     if(failed_min==UINT64_MAX){
       // every valid extents are in page cache
-      ZenFSStopWatch z1("EVERY THING IN CACHE READ",zbd_);
+      ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
       for(auto ext: extents){
         err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
         if(err!=(int)ext->length){
@@ -3117,14 +3117,14 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       uint64_t to_be_direct_read = failed_max-failed_min+1;
       uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
       if(front_valid_hit){
-        ZenFSStopWatch z1("FRONT READ",zbd_);
+        ZenFSStopWatch zread("FRONT READ",zbd_);
         err=pread(read_fd,tmp_buf, front_valid_hit*page_size, min_start);
         if(err!=(int)(front_valid_hit*page_size)){
           printf("zc pread error 2 %d\n",err);
         }
       }
       if(to_be_direct_read){
-        ZenFSStopWatch z1("DIRECT READ",zbd_);
+        ZenFSStopWatch zread("DIRECT READ",zbd_);
         err=pread(read_direct_fd, tmp_buf+ (front_valid_hit*page_size), 
                   to_be_direct_read*page_size , 
               min_start+ (front_valid_hit*page_size));
@@ -3133,7 +3133,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         }
       }
       if(back_valid_hit){
-        ZenFSStopWatch z1("BACK READ",zbd_);
+        ZenFSStopWatch zread("BACK READ",zbd_);
         err=pread(read_fd, tmp_buf+ ((front_valid_hit+to_be_direct_read) *page_size),
                 (back_valid_hit*page_size),
                 min_start+ ((front_valid_hit+to_be_direct_read) *page_size) );
