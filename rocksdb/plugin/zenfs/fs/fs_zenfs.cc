@@ -3193,19 +3193,20 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
        
       // }
       ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
-
+      uint64_t copied_tmp  =0 ;
       for(auto ext: extents){
         // err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
         memmove(tmp_buf+(ext->start-min_start),
             page_cache_hit_mmap_addr_+(ext->start-io_zone_start_offset_),
             ext->length);
-        if(err!=(int)ext->length){
-          printf("zc pread error 1 %d\n",err);
-        }
+            copied_tmp +=ext->length;
+        // if(err!=(int)ext->length){
+        //   printf("zc pread error 1 %d\n",err);
+        // }
       }
       munlock((const void*)(page_cache_hit_mmap_addr_ + (victim_zone->start_- io_zone_start_offset_)) ,
           victim_zone->max_capacity_);
-       printf("in large I/O P/F %lu\t%luus \n",page_fault_n,zread.RecordTickNS()/1000);
+       printf("in large I/O P/F %lu\t%luus\tcopied%lu\n",page_fault_n,zread.RecordTickNS()/1000,copied_tmp);
     }else{
       ZenFSStopWatch zread("max end min start READ",zbd_);
       err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
@@ -3255,9 +3256,9 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     // free(valid_bitmap);
   }
 
-  if(err!=(int)(max_end-min_start)){
-    printf("err %d max_end-min_start %lu(%lu-%lu)\n",err,max_end-min_start,max_end,min_start);
-  }
+  // if(err!=(int)(max_end-min_start)){
+  //   printf("err %d max_end-min_start %lu(%lu-%lu)\n",err,max_end-min_start,max_end,min_start);
+  // }
   // else{
   zbd_->AddZCRead(max_end-min_start);
 
