@@ -631,7 +631,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       uint64_t zone_end= zone_start+ zone.max_capacity;
       bool page_fault=false;
       mlock2((const void*)page_cache_hit_mmap_addr_ + (zone_start-io_zone_start_offset_),
-                ,zone.max_capacity,MLOCK_ONFAULT);
+                zone.max_capacity,MLOCK_ONFAULT);
       mincore(page_cache_hit_mmap_addr_+(zone_start-io_zone_start_offset_),
               zone.max_capacity,
               page_cache_check_hit_buffer_);
@@ -659,8 +659,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
         min_gc_cost=gc_cost;
 
         if(selected_victim_zone_start){
-          munlock((const void*)page_cache_hit_mmap_addr_+(selected_victim_zone_start-io_zone_start_offset_),
-                  zone.max_capacity )
+          munlock((const void*) (page_cache_hit_mmap_addr_+(selected_victim_zone_start-io_zone_start_offset_)),
+                  zone.max_capacity );
         }
         selected_victim_zone_start=zone.start;
       }
@@ -3069,7 +3069,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
   (void)(should_be_copied);
   
-  uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
+  // uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
 
 
   int err;
@@ -3176,7 +3176,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       // every valid extents are in page cache
       uint64_t page_fault_n = 0;
       mincore(page_cache_hit_mmap_addr_+(victim_zone->start_-io_zone_start_offset_),
-            victim_zone_max_capacity_,page_cache_check_hit_buffer_);
+            victim_zone->max_capacity_,page_cache_check_hit_buffer_);
       for(auto ext : extents){
         uint64_t ext_start_page_offset= (ext.start - victim_zone->start_)/page_size_;
         uint64_t ext_length_pages = (ext.length)/page_size_;
@@ -3203,7 +3203,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
           printf("zc pread error 1 %d\n",err);
         }
       }
-      munlock((const void*)page_cache_hit_mmap_addr_ + (victim_zone->start_- io_zone_start_offset_) ,
+      munlock((const void*)(page_cache_hit_mmap_addr_ + (victim_zone->start_- io_zone_start_offset_)) ,
           victim_zone->max_capacity_);
     }else{
       ZenFSStopWatch zread("max end min start READ",zbd_);

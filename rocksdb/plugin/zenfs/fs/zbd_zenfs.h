@@ -44,6 +44,7 @@ namespace ROCKSDB_NAMESPACE {
 class ZonedBlockDevice;
 class ZonedBlockDeviceBackend;
 class ZoneSnapshot;
+class ZoneExtentSnapshot;
 class ZenFSSnapshotOptions;
 class Zone;
 class ZoneFile;
