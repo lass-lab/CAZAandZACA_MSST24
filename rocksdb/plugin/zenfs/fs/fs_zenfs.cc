@@ -3191,7 +3191,13 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
             victim_zone->max_capacity_,page_cache_check_hit_buffer_);
       for(auto ext : extents){
         uint64_t ext_start_page_offset= (ext->start - victim_zone->start_)/page_size_;
+
         uint64_t ext_length_pages = (ext->length)/page_size_;
+
+        uint64_t align =ext->length% page_size_;
+        if(align){
+          ext_length_pages++;
+        }
         for(uint64_t p = ext_start_page_offset; p < (ext_start_page_offset+ext_length_pages);p++){
           if( !(page_cache_check_hit_buffer_[p] & 0x1) ){
             // printf("why page fault ????\n");
@@ -3216,7 +3222,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
         }
-        printf("in large I/O P/F %lu\t%lu ms\tcopied%lu\n",page_fault_n,(zread.RecordTickNS()/1000/1000),copied_tmp);
+        printf("in large I/O P/F %lu\t%lu ms\tcopied %lu (MB)\n",page_fault_n,(zread.RecordTickNS()/1000/1000),copied_tmp>>20);
       }
       munlock((const void*)(page_cache_hit_mmap_addr_ + (victim_zone->start_- io_zone_start_offset_)) ,
           victim_zone->max_capacity_);
