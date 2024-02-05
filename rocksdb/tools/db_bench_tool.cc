@@ -3499,7 +3499,7 @@ class Benchmark {
       } else if (name == "deleterandom") {
         method = &Benchmark::DeleteRandom;
       } else if (name == "readwhilewriting") {
-        // num_threads++;  // Add extra thread for writing
+        num_threads++;  // Add extra thread for writing
         method = &Benchmark::ReadWhileWriting;
       } else if (name == "readwhilemerging") {
         num_threads++;  // Add extra thread for writing

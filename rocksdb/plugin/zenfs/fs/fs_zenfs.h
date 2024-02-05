@@ -205,6 +205,8 @@ class ZenFS : public FileSystemWrapper {
 
   char* page_cache_hit_mmap_addr_ = nullptr;
   unsigned char* page_cache_check_hit_buffer_ = nullptr;
+  uint64_t io_zone_start_offset_ = 0;
+  uint64_t page_size_;
 
   uint64_t GetAsyncStructure(io_uring** read_ring,io_context_t** write_ioctx){
     std::lock_guard<std::mutex> lg(async_struture_mutex_);
@@ -658,7 +660,8 @@ ret:
                               char*read_buf,char* write_buf,Zone* new_zone,size_t* pos);
 
   IOStatus MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot)) ;
-  IOStatus SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,uint64_t should_be_copied) __attribute__((hot)) ;
+  IOStatus SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,
+  uint64_t should_be_copied,bool everything_in_page_cache) __attribute__((hot)) ;
   uint64_t AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot));
   uint64_t AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
   

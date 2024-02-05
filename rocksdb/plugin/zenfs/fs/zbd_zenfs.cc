@@ -4093,6 +4093,13 @@ void ZonedBlockDevice::GetZoneSnapshot(std::vector<ZoneSnapshot> &snapshot) {
   }
 }
 
+void ZonedBlockDevice::GetZoneExtentSnapShotInZoneSnapshot(std::vector<ZoneSnapshot>* zone_snapshot,
+          std::vector<ZoneExtentSnapshot>& extents_snapshot){
+    for(auto& ext : extents_snapshot){
+      (*zone_snapshot)[ext->zone_p->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES].extents_in_zone.push_back(ext);
+    }
+}
+
   bool ZonedBlockDevice::SetSSTFileforZBDNoLock(uint64_t fno,ZoneFile* zoneFile){
     // auto sst=sst_file_map_.find(fno);
     // if(sst!=sst_file_map_.end()){

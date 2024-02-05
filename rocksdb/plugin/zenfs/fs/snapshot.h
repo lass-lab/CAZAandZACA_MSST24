@@ -15,6 +15,7 @@
 namespace ROCKSDB_NAMESPACE {
 
 // Indicate what stats info we want.
+struct ZoneExtentSnapshot;
 struct ZenFSSnapshotOptions {
   // Global zoned device stats info
   bool zbd_ = 0;
@@ -52,6 +53,7 @@ class ZoneSnapshot {
   uint64_t max_capacity;
   uint64_t zidx;
   Zone* zone_p;
+  std::vector<ZoneExtentSnapshot> extents_in_zone;
  public:
   ZoneSnapshot(Zone* zone)
       : start(zone->start_),
@@ -60,7 +62,9 @@ class ZoneSnapshot {
         used_capacity(zone->used_capacity_),
         max_capacity(zone->max_capacity_),
         zidx(zone->zidx_),
-        zone_p(zone) {}
+        zone_p(zone) {
+          extents_in_zone.clear();
+        }
 };
 
 class ZoneExtentSnapshot {

@@ -75,6 +75,9 @@
         "stack": "cpp",
         "__locale": "cpp",
         "__string": "cpp",
-        "__bit_reference": "cpp"
+        "__bit_reference": "cpp",
+        "__threading_support": "cpp",
+        "__nullptr": "cpp",
+        "filesystem": "cpp"
     }
 }
