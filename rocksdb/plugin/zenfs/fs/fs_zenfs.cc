@@ -645,7 +645,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         }
         align=ext_lenght_aligned% page_size_;
         if(align){
-          ext_lenght_aligned+= (page_size - align);
+          ext_lenght_aligned+= (page_size_ - align);
         }
         uint64_t ext_start_page_offset= (ext_start_aligned)/page_size_;
         uint64_t ext_length_pages = (ext_lenght_aligned)/page_size_;
