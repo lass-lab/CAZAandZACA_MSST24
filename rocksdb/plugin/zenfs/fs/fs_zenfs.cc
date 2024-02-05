@@ -616,7 +616,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t average_gc_cost;
 
   if(zbd_->AsyncZCEnabled()>1){
-    uint64_t average_gc_cost=0;
+    // uint64_t average_gc_cost=0;
     uint64_t victim_n = 0;
     for (const auto& zone : snapshot.zones_) {
       if(zone.capacity !=0 ){
@@ -626,9 +626,15 @@ size_t ZenFS::ZoneCleaning(bool forced){
         continue;
       }
       victim_n++;
-      average_gc_cost+=100 * zone.used_capacity / zone.max_capacity;
+      uint64_t tmp=100 * zone.used_capacity / zone.max_capacity;
+
+      // average_gc_cost+=tmp;
+      if(tmp<min_gc_cost){
+        min_gc_cost = tmp;
+      }
     }
-    average_gc_cost= average_gc_cost/victim_n;
+    // average_gc_cost= average_gc_cost/victim_n;
+    min_gc_cost= min_gc_cost * 120/ 100;
     zbd_->GetZoneExtentSnapShotInZoneSnapshot(&snapshot.zones_,snapshot.extents_);
     for (const auto& zone : snapshot.zones_) {
 
@@ -642,7 +648,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
       uint64_t gc_cost=100 * zone.used_capacity / zone.max_capacity;
       uint64_t zone_start = zone.start;
-      if(gc_cost>average_gc_cost){
+      if(gc_cost>min_gc_cost){
         continue;
       }
       // uint64_t zone_end= zone_start+ zone.max_capacity;
@@ -683,9 +689,10 @@ size_t ZenFS::ZoneCleaning(bool forced){
         continue;
       }
 
-      everything_in_page_cache=true;
+     
 
       if(gc_cost<min_gc_cost){
+        everything_in_page_cache=true;
         min_gc_cost=gc_cost;
 
         if(selected_victim_zone_start){
