@@ -3194,68 +3194,27 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       // if(page_fault_n){
        
       // }
-      ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
-      uint64_t copied_tmp  =0 ;
-      for(auto ext: extents){
-        // err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
-        memmove(tmp_buf+(ext->start-min_start),
-            page_cache_hit_mmap_addr_+(ext->start-io_zone_start_offset_),
-            ext->length);
-            copied_tmp +=ext->length;
-        // if(err!=(int)ext->length){
-        //   printf("zc pread error 1 %d\n",err);
-        // }
+      {
+        ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
+        uint64_t copied_tmp  =0 ;
+        for(auto ext: extents){
+          err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
+          // memmove(tmp_buf+(ext->start-min_start),
+          //     page_cache_hit_mmap_addr_+(ext->start-io_zone_start_offset_),
+          //     ext->length);
+          //     copied_tmp +=ext->length;
+
+
+        }
+        printf("in large I/O P/F %lu\t%lu us\tcopied%lu\n",page_fault_n,zread.RecordTickNS()/1000,copied_tmp);
       }
       munlock((const void*)(page_cache_hit_mmap_addr_ + (victim_zone->start_- io_zone_start_offset_)) ,
           victim_zone->max_capacity_);
-       printf("in large I/O P/F %lu\t%luus\tcopied%lu\n",page_fault_n,zread.RecordTickNS()/1000,copied_tmp);
+      
     }else{
       ZenFSStopWatch zread("max end min start READ",zbd_);
       err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
     }
-    // }else{
-    //   // uint64_t front_valid_hit = failed_min;
-    //   // uint64_t to_be_direct_read = failed_max-failed_min+1;
-    //   // uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
-    //   if(front_valid_hit){
-    //     ZenFSStopWatch zread("FRONT READ",zbd_);
-    //     err=pread(read_fd,tmp_buf, front_valid_hit*page_size, min_start);
-    //     if(err!=(int)(front_valid_hit*page_size)){
-    //       printf("zc pread error 2 %d\n",err);
-    //     }
-    //   }
-    //   if(to_be_direct_read){
-    //     ZenFSStopWatch zread("DIRECT READ",zbd_);
-    //     err=pread(read_direct_fd, tmp_buf+ (front_valid_hit*page_size), 
-    //               to_be_direct_read*page_size , 
-    //           min_start+ (front_valid_hit*page_size));
-    //     if(err!=(int)(to_be_direct_read*page_size)){
-    //       printf("zc pread error 3 %d\n",err);
-    //     }
-    //   }
-    //   if(back_valid_hit){
-    //     ZenFSStopWatch zread("BACK READ",zbd_);
-    //     err=pread(read_fd, tmp_buf+ ((front_valid_hit+to_be_direct_read) *page_size),
-    //             (back_valid_hit*page_size),
-    //             min_start+ ((front_valid_hit+to_be_direct_read) *page_size) );
-    //     if(err!=(int)(back_valid_hit*page_size)){
-    //       printf("zc pread error 4 %d\n",err);
-    //     }
-    //   }
-
-    // }
-
-    // err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
-    // printf("page cache hit : %d/%d = %lf %lu (us) (%lu / %lu / %lu), (%lu %lu)\n",
-    //                       page_cache_hit,page_cache_failed,
-    //                       (double)((double)page_cache_hit/(double)(page_cache_hit+page_cache_failed)) ,
-    //                                         z1.RecordTickNS()/1000,
-    //                                         front_valid_hit,to_be_direct_read,back_valid_hit,
-    //                                         failed_min,failed_max);
-    // munlock((const void*) min_start,(max_end-min_start));
-    
-    // free(page_cache_check_hit_buffer_);
-    // free(valid_bitmap);
   }
 
   // if(err!=(int)(max_end-min_start)){
