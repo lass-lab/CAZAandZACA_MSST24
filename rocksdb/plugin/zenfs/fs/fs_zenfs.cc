@@ -651,6 +651,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
         }
       }
       if(page_fault){
+        munlock(const void*)(page_cache_hit_mmap_addr_ + (zone_start-io_zone_start_offset_),
+              zone.max_capacity ) ;
         continue;
       }
 
