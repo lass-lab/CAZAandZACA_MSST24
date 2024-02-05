@@ -3135,55 +3135,6 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if(err){
       printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
     }
-
-
-
-    // page_cache_check_hit_buffer_=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
-    // unsigned char* valid_bitmap=(unsigned char*)malloc(((max_end-min_start)/page_size)+page_size);
-    // for(auto ext: extents){
-    //   uint64_t length = ext->length;
-    //   uint64_t length_align = ext->length%page_size;
-    //   if(length_align){
-    //     length+=page_size-length_align;
-    //   }
-    //   memset(valid_bitmap+((ext->start-min_start)/page_size),1,length/page_size );
-    // }
-
-    // err=mincore(page_cache_hit_mmap_addr_+ (min_start -io_zone_start_offset),
-    //               max_end-min_start, page_cache_check_hit_buffer_);
-    // if(err){
-    //   printf("mincore err %d\n",err);
-    // }
-    
-    // uint64_t failed_min=UINT64_MAX;
-    // uint64_t failed_max=UINT64_MAX;
-
-
-    // for(uint64_t i = 0; i<(max_end-min_start)/page_size;i++ ){
-    //   if(page_cache_check_hit_buffer_[i] & 0x1){
-    //     page_cache_hit++;
-    //   }else{
-    //     if(valid_bitmap[i] & 0x1){
-    //       failed_max=i;
-    //       if(failed_min==UINT64_MAX){
-    //         failed_min=i;
-    //       }
-    //     }
-    //     // else{ // invalid
-    //     //   if(failed_min==UINT64_MAX){
-    //     //     failed_min=i;
-    //     //   }
-    //     //   failed_invalid_max=i;
-
-    //     // }
-        
-    //     page_cache_failed++;
-    //   }
-    // }
-    // uint64_t front_valid_hit = failed_min;
-    // uint64_t to_be_direct_read = failed_max-failed_min+1;
-    // uint64_t back_valid_hit = (max_end-min_start)/page_size-failed_max-1;
-    // mlock2((const void*)tmp_buf,max_end-min_start,MLOCK_ONFAULT);
     if(everything_in_page_cache==true){
       // every valid extents are in page cache
       uint64_t page_fault_n = 0;
@@ -3251,25 +3202,12 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     memmove(ZC_read_buffer_+(min_start-victim_zone->start_),tmp_buf,max_end-min_start);
     printf("Memory move latency %lu ms\n",memory_move.RecordTickNS()/1000/1000);
   }
-  // munlock((const void*)tmp_buf,max_end-min_start);
+
   free(tmp_buf);
   
-  // if(err!=(int)(victim_zone->max_capacity_)){
-  //   printf("err %d victim_zone->max_capacity_ %lu\n",err,victim_zone->max_capacity_);
-  // }
-  // zbd_->WaitForOpenIOZoneToken(true);
-  // // GetActiveIOZoneTokenIfAvailable()
-  // while(GetActiveIOZoneTokenIfAvailable()==false);
-  // while(new_zone==nullptr){
-  //   AllocateEmptyZone(&new_zone);
-  // }
+
   zbd_->TakeSMRMigrateZone(&new_zone,victim_zone->lifetime_,should_be_copied);
-  // zbd_->TakeSMRMigrateZone(&new_zone);
-  // if(new_zone->used_capacity_ !=0 || new_zone->capacity_!=new_zone->max_capacity_
-  //   ||new_zone->wp_!=new_zone->start_){
-  //     printf("new zone is not empty zone ? used_capacity_ %lu >capacity %lu wp %lu start %lu\n",
-  //       new_zone->used_capacity_.load(),new_zone->capacity_,new_zone->wp_,new_zone->start_);
-  // }
+
 
   for (auto* ext : extents) {
     std::string fname = ext->filename;
@@ -3278,7 +3216,6 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
   size_t pos = 0;
-// mlock2((const void*)ZC_write_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
 {  
   ZenFSStopWatch z2("MemoryMoveExtents",zbd_);
   for (const auto& it : file_extents) {
