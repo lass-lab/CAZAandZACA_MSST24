@@ -3084,7 +3084,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   // uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
 
 
-  int err;
+  int err=0;
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
 
   std::map<ZoneFile*,std::vector<ZoneExtent*>> lock_acquired_zfiles;
@@ -3129,12 +3129,11 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     ZenFSStopWatch z1("Large IO pread",zbd_);
 
-    // mlock2((const void*)min_start,(max_end-min_start),MLOCK_ONFAULT);
-    // err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
 
-    if(err){
-      printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
-    }
+    // err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
+    // if(err){
+    //   printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
+    // }
     if(everything_in_page_cache==true){
       // every valid extents are in page cache
       uint64_t page_fault_n = 0;
