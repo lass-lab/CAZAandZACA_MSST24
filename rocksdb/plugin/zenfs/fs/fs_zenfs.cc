@@ -613,7 +613,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   uint64_t min_gc_cost= UINT64_MAX;
   uint64_t selected_victim_zone_start = 0;
   // uint64_t previous_mlock_addr = 0;
-  uint64_t average_gc_cost;
+  // uint64_t average_gc_cost;
 
   if(zbd_->AsyncZCEnabled()>1){
     uint64_t average_gc_cost=0;
