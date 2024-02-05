@@ -3184,7 +3184,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       ZenFSStopWatch zread("max end min start READ",zbd_);
       // err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
       err=(int)pread(read_fd,ZC_read_buffer_ +(min_start-victim_zone->start_) ,
-          max_end-min_start,max_end-min_start);
+          max_end-min_start,min_start);
+      zbd_->AddZCRead(max_end-min_start);
     }
   }
 
@@ -3192,7 +3193,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   //   printf("err %d max_end-min_start %lu(%lu-%lu)\n",err,max_end-min_start,max_end,min_start);
   // }
   // else{
-  zbd_->AddZCRead(max_end-min_start);
+  
 
 
   // }
