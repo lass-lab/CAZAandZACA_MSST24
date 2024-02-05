@@ -402,7 +402,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
     uint64_t device_total_size= 1<<30;
     device_total_size <<=log2_DEVICE_IO_CAPACITY;
     page_cache_hit_mmap_addr_ = 
-    (char*)mmap(NULL, device_total_size, PROT_READ, MAP_SHARED, read_fd, io_zone_start_offset_);
+    (char*)mmap(NULL, device_total_size, PROT_READ, MAP_SHARED, zbd_->GetFD(READ_FD), io_zone_start_offset_);
     page_size_=getpagesize();
     page_cache_check_hit_buffer_=(unsigned char*)malloc((zbd_->GetIOZoneByIndex(0)->max_capacity_/page_size_)+page_size_);
   }
@@ -612,7 +612,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
   uint64_t min_gc_cost= UINT64_MAX;
   uint64_t selected_victim_zone_start = 0;
-  uint64_t previous_mlock_addr = 0;
+  // uint64_t previous_mlock_addr = 0;
 
   if(zbd_->AsyncZCEnabled()>1){
     GetZoneExtentSnapShotInZoneSnapshot(&snapshot.zones_,snapshot.extents_);
@@ -630,7 +630,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       uint64_t zone_start = zone.start;
       uint64_t zone_end= zone_start+ zone.max_capacity;
       bool page_fault=false;
-      mlock2((const void*)page_cache_hit_mmap_addr_ + (zone_start-io_zone_start_offset_),
+      mlock2((const void*)(page_cache_hit_mmap_addr_ + (zone_start-io_zone_start_offset_)),
                 zone.max_capacity,MLOCK_ONFAULT);
       mincore(page_cache_hit_mmap_addr_+(zone_start-io_zone_start_offset_),
               zone.max_capacity,
@@ -3178,8 +3178,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       mincore(page_cache_hit_mmap_addr_+(victim_zone->start_-io_zone_start_offset_),
             victim_zone->max_capacity_,page_cache_check_hit_buffer_);
       for(auto ext : extents){
-        uint64_t ext_start_page_offset= (ext.start - victim_zone->start_)/page_size_;
-        uint64_t ext_length_pages = (ext.length)/page_size_;
+        uint64_t ext_start_page_offset= (ext->start - victim_zone->start_)/page_size_;
+        uint64_t ext_length_pages = (ext->length)/page_size_;
         for(uint64_t p = ext_start_page_offset; p < ext_length_pages;p++){
           if( !(page_cache_check_hit_buffer_[p] & 0x1) ){
             // printf("why page fault ????\n");
