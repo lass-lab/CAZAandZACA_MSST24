@@ -3103,7 +3103,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
   uint64_t min_start=victim_zone->start_+victim_zone->max_capacity_;
   uint64_t max_end=victim_zone->start_;
-   char* tmp_buf=nullptr;
+  //  char* tmp_buf=nullptr;
 
     {  
     for(auto ext: extents){
@@ -3130,7 +3130,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     ZenFSStopWatch z1("Large IO pread",zbd_);
 
     // mlock2((const void*)min_start,(max_end-min_start),MLOCK_ONFAULT);
-    err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
+    // err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
 
     if(err){
       printf("SMRLargeIOMigrateExtents fail to allocate tmp buf\n");
@@ -3182,7 +3182,6 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       
     }else{
       ZenFSStopWatch zread("max end min start READ",zbd_);
-      // err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
       err=(int)pread(read_fd,ZC_read_buffer_ +(min_start-victim_zone->start_) ,
           max_end-min_start,min_start);
       zbd_->AddZCRead(max_end-min_start);
@@ -3204,7 +3203,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   //   printf("Memory move latency %lu ms\n",memory_move.RecordTickNS()/1000/1000);
   // }
 
-  free(tmp_buf);
+  // free(tmp_buf);
   
 
   zbd_->TakeSMRMigrateZone(&new_zone,victim_zone->lifetime_,should_be_copied);
