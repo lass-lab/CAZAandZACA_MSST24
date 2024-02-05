@@ -3190,7 +3190,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
       }
       // if(page_fault_n){
-        printf("in large I/O P/F %lu\n",page_fault_n);
+       
       // }
       ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
 
@@ -3205,6 +3205,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       }
       munlock((const void*)(page_cache_hit_mmap_addr_ + (victim_zone->start_- io_zone_start_offset_)) ,
           victim_zone->max_capacity_);
+       printf("in large I/O P/F %lu\t%luus \n",page_fault_n,zread.RecordTickNS()/1000);
     }else{
       ZenFSStopWatch zread("max end min start READ",zbd_);
       err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
