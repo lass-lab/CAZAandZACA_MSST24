@@ -639,7 +639,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       for(auto& ext : zone.extents_in_zone){
         uint64_t ext_start_page_offset= (ext.start - zone_start)/page_size_;
         uint64_t ext_length_pages = (ext.length)/page_size_;
-        for(uint64_t p = ext_start_page_offset; p < ext_length_pages; p++){
+        for(uint64_t p = ext_start_page_offset; p < (ext_start_page_offset+ext_length_pages); p++){
           if( !(page_cache_check_hit_buffer_[p] & 0x1) ){
             page_fault=true;
             break;
@@ -3182,7 +3182,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       for(auto ext : extents){
         uint64_t ext_start_page_offset= (ext->start - victim_zone->start_)/page_size_;
         uint64_t ext_length_pages = (ext->length)/page_size_;
-        for(uint64_t p = ext_start_page_offset; p < ext_length_pages;p++){
+        for(uint64_t p = ext_start_page_offset; p < (ext_start_page_offset+ext_length_pages);p++){
           if( !(page_cache_check_hit_buffer_[p] & 0x1) ){
             // printf("why page fault ????\n");
             // break;
