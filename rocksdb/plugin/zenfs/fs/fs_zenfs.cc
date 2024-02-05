@@ -3166,7 +3166,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         uint64_t copied_tmp  =0 ;
         for(auto ext: extents){
           // err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
-          err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),ext->length,ext->start )
+          err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),ext->length,ext->start );
 
           // memmove(tmp_buf+(ext->start-min_start),
           //     page_cache_hit_mmap_addr_+(ext->start-io_zone_start_offset_),
