@@ -3202,7 +3202,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
           // memmove(tmp_buf+(ext->start-min_start),
           //     page_cache_hit_mmap_addr_+(ext->start-io_zone_start_offset_),
           //     ext->length);
-          //     copied_tmp +=ext->length;
+              copied_tmp +=ext->length;
 
 
         }
