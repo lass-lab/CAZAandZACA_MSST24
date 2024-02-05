@@ -615,7 +615,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t previous_mlock_addr = 0;
 
   if(zbd_->AsyncZCEnabled()>1){
-    GetZoneExtentSnapShotInZoneSnapshot(&snapshot.zones_,snapshot.extents_);
+    zbd_->GetZoneExtentSnapShotInZoneSnapshot(&snapshot.zones_,snapshot.extents_);
     for (const auto& zone : snapshot.zones_) {
 
       if(zone.capacity !=0 ){
@@ -628,7 +628,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
       uint64_t gc_cost=100 * zone.used_capacity / zone.max_capacity;
       uint64_t zone_start = zone.start;
-      uint64_t zone_end= zone_start+ zone.max_capacity;
+      // uint64_t zone_end= zone_start+ zone.max_capacity;
       bool page_fault=false;
       mlock2((const void*)(page_cache_hit_mmap_addr_ + (zone_start-io_zone_start_offset_)),
                 zone.max_capacity,MLOCK_ONFAULT);
