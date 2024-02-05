@@ -3194,7 +3194,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
         uint64_t ext_length_pages = (ext->length)/page_size_;
 
-        uint64_t align =ext->length% page_size_;
+        align =ext->length% page_size_;
         if(align){
           ext_length_pages++;
         }
