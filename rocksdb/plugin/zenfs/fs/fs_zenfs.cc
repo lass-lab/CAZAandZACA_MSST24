@@ -3215,6 +3215,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         uint64_t copied_tmp  =0 ;
         for(auto ext: extents){
           err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
+          // err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),ext->length,ext->start )
+
           // memmove(tmp_buf+(ext->start-min_start),
           //     page_cache_hit_mmap_addr_+(ext->start-io_zone_start_offset_),
           //     ext->length);
@@ -3230,6 +3232,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }else{
       ZenFSStopWatch zread("max end min start READ",zbd_);
       err=(int)pread(read_fd,tmp_buf,max_end-min_start,min_start);
+      // err=(int)pread(read_fd,ZC_read_buffer_ +(min_start-victim_zone->start_) ,
+      //     max_end-min_start,max_end-min_start);
     }
   }
 
@@ -3242,7 +3246,11 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
   // }
   // mlock2((const void*)ZC_read_buffer_,victim_zone->max_capacity_,MLOCK_ONFAULT);
-  memmove(ZC_read_buffer_+(min_start-victim_zone->start_),tmp_buf,max_end-min_start);
+  {
+    ZenFSStopWatch memory_move("memorymove",nullptr);
+    memmove(ZC_read_buffer_+(min_start-victim_zone->start_),tmp_buf,max_end-min_start);
+    printf("Memory move latency %lu ms\n",memory_move.RecordTickNS()/1000/1000);
+  }
   // munlock((const void*)tmp_buf,max_end-min_start);
   free(tmp_buf);
   
