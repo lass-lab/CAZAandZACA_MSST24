@@ -3206,7 +3206,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
         }
-        printf("in large I/O P/F %lu\t%lu us\tcopied%lu\n",page_fault_n,zread.RecordTickNS()/1000,copied_tmp);
+        printf("in large I/O P/F %lu\t%lu ms\tcopied%lu\n",page_fault_n,zread.(RecordTickNS()/1000/1000),copied_tmp);
       }
       munlock((const void*)(page_cache_hit_mmap_addr_ + (victim_zone->start_- io_zone_start_offset_)) ,
           victim_zone->max_capacity_);
