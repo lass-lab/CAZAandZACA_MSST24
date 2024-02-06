@@ -642,9 +642,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
       uint64_t zidx = ext->zone_p->zidx_ 
                           -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
       snapshot.zones_[zidx].extents_in_zone.push_back(ext);
-      if(ext->page_cache.get()){
-        printf("preload : i am loaded %p\n",ext->page_cache.get());
-      }
+      // if(ext->page_cache.get()){
+      //   printf("preload : i am loaded %p\n",ext->page_cache.get());
+      // }
     }
 
     
@@ -2691,7 +2691,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
           if( ext->page_cache_!=nullptr&& page_cache_size>ext->length_){
             page_cache_size-=ext->length_;
             ext_snapshot.page_cache=ext->page_cache_;
-            printf("zenfs snapshot :: page cache loaded %p\n",ext_snapshot.page_cache.get());
+            // printf("zenfs snapshot :: page cache loaded %p\n",ext_snapshot.page_cache.get());
             // if(ext_snapshot.page_cache.get()==nullptr){
             //   printf("ext->page_cache_ nullptr? \n");
             // }else{
