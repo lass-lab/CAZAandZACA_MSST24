@@ -2672,14 +2672,18 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
           ext_snapshot.zone_p=ext->zone_;
           // printf("GetZenFSSnapshot :: ext->start %lu\n",ext->start_);
           snapshot.extents_.push_back(ext_snapshot);
+          if(ext->page_cache_==nullptr){
+            continue;
+          }
           if(page_cache_size>ext->length_){
             page_cache_size-=ext->length_;
             ext_snapshot.page_cache=ext->page_cache_;
-            if(ext_snapshot.page_cache.get()==nullptr){
-              printf("ext->page_cache_ nullptr? \n");
-            }else{
-              printf("its on memory\n");
-            }
+
+            // if(ext_snapshot.page_cache.get()==nullptr){
+            //   printf("ext->page_cache_ nullptr? \n");
+            // }else{
+            //   printf("its on memory\n");
+            // }
           }
         }
       }
@@ -2687,6 +2691,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
       file.ReleaseWRLock();
     }
   }
+  printf("After page cache loaded  :%lu\n",page_cache_size);
 //  printf("GetZenFSSnapshot return @@\n");
   // if (options.trigger_report_) {
   //   zbd_->GetMetrics()->ReportSnapshot(snapshot);
