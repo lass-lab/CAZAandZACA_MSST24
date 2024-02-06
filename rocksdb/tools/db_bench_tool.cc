@@ -1694,6 +1694,8 @@ DEFINE_uint64(async_zc_enabled,0,"async_zc_enabled");
 
 DEFINE_uint64(default_extent_size,268435456,"default_extent_size");
 
+DEFINE_uint64(page_cache_size,0,"page_cache_size");
+
 namespace ROCKSDB_NAMESPACE {
 namespace {
 static Status CreateMemTableRepFactory(
@@ -4128,6 +4130,8 @@ class Benchmark {
     options.input_aware_scheme=FLAGS_input_aware_scheme;
     options.async_zc_enabled=FLAGS_async_zc_enabled;
     options.default_extent_size=FLAGS_default_extent_size;
+    options.page_cache_size=FLAGS_page_cache_size;
+    
     options.zc=FLAGS_zc;
     options.until=FLAGS_until;
     options.tuning_point=FLAGS_tuning_point;

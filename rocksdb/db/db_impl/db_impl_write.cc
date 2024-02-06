@@ -232,12 +232,6 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
   }
 
 
-  // if(immutable_db_options_.async_zc_enabled){
-  //   int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,WAL_IO_PRIORITY);
-  //   if(ret_ioprio){
-  //     printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-  //   }
-  // }
 
   if (two_write_queues_ && disable_memtable) {
     AssignOrder assign_order =

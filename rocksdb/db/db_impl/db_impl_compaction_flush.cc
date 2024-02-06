@@ -238,13 +238,7 @@ Status DBImpl::FlushMemTableToOutputFile(
       io_tracer_, db_id_, db_session_id_, cfd->GetFullHistoryTsLow(),
       &blob_callback_);
   FileMetaData file_meta;
-  if(immutable_db_options_.async_zc_enabled){
-    // int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,FLUSH_IO_PRIORITY);
-    // if(ret_ioprio){
-    //   printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-    // }
-    // printf("flush io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
-  }
+
   Status s;
   bool need_cancel = false;
   IOStatus log_io_s = IOStatus::OK();
@@ -3408,31 +3402,9 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       }
       c->immutable_options()->fs->GiveZenFStoLSMTreeHint(trivial_move_inputs,
                                           none,c->output_level(),true);
+
       
-      // if(c->immutable_options()->async_zc_enabled){
-      //   if(c->output_level()==1){
-      //     int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L0_to_L1_COMPACTION_IO_PRIORITY);
-      //     if(ret_ioprio){
-      //       printf("l0 to l1 ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-      //     }
-      //         printf("l0 to l1 io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
-      //   }else if(c->output_level()==2){
-      //     // L1_to_L2_COMPACTION_IO_PRIORITY
-      //     int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,L1_to_L2_COMPACTION_IO_PRIORITY);
-      //     if(ret_ioprio){
-      //       printf("l1 to l2 ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-      //     }
-      //     printf("l1 to l2 io priority  %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
-      //   }
-        
-      //   else{
-      //     int ret_ioprio=ioprio_set(IOPRIO_WHO_PROCESS,0,ELSE_COMPACTION_IO_PRIORITY);
-      //     if(ret_ioprio){
-      //       printf("l%d to l%d ioprio_set error %d , %ld\n",c->output_level()-1,c->output_level()==1,ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-      //     }
-      //     printf("l%d to l%d ioprio_set %d , %ld\n",c->output_level()-1,c->output_level(),ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
-      //   }
-      // }
+
     
     }
 

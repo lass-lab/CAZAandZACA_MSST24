@@ -415,7 +415,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // zbd_->EntireZoneReadLock();
   {
     // ZenFSStopWatch z2("GetZenFSSnapshot");
-    GetZenFSSnapshot(snapshot, options,1073741824);
+    GetZenFSSnapshot(snapshot, options,zbd_->PageCacheLimit());
   }
   // size_t all_inval_zone_n = 0;
   // std::vector<VictimZoneCandiate> victim_candidate;
@@ -427,215 +427,29 @@ size_t ZenFS::ZoneCleaning(bool forced){
   
 
 
-
-
-  uint64_t compaction_predicted_depth = zbd_->AsyncZCEnabled();
-  compaction_predicted_depth=0;
-  if(forced){
-    compaction_predicted_depth=0;
-  }
-  std::vector<uint64_t> soon_invalidation_zone_per_size((ZENFS_SPARE_ZONES+ZENFS_META_ZONES+zbd_->GetIOZoneN()),0);
-  
-  std::set<uint64_t> aggregated_soon_compaction_invalidated_fno;
-  aggregated_soon_compaction_invalidated_fno.clear();
-
-  if(compaction_predicted_depth>0){
-    aggregated_soon_compaction_invalidated_fno = 
-            db_ptr_ ? db_ptr_->GetAlreadyBeingCompactedSSTFileNo() : 
-            std::set<uint64_t>();
-  }
-
-
-  uint64_t current_lsm_tree[10];
-  int level_predicted_depth[10];
-  memset(level_predicted_depth,0,sizeof(level_predicted_depth));
-
-  for(int l=0;l<10;l++){
-    current_lsm_tree[l]=zbd_->lsm_tree_[l].load();
-  }
-
-
-  for(uint64_t p= 0 ; p < compaction_predicted_depth; p++){
-    int max_score_level = -1;
-    double max_level_score = 0.0;
-
-
-    for(int l = 0; l <10;l++){
-      // if(current_lsm_tree[l]/)
-      double this_level_score = double((double)current_lsm_tree[l]/(double)zbd_->GetLevelSizeLimit(l));
-      if(this_level_score>max_level_score&&this_level_score>=1.0){
-        max_score_level=l;
-      }
-      // if(this_level_score>max_level_score){
-      //   max_score_level=l;
-      // }
-    }
-
-
-    if(max_score_level==-1){
-      break;
-    }
-    uint64_t pivot_sst_fno=0;
-    std::set<uint64_t> soon_compaction_invalidated_fno=
-              db_ptr_ ?  db_ptr_->GetSoonCompactionInvalidatedSSTFileNo(max_score_level,
-                                    level_predicted_depth[max_score_level], &pivot_sst_fno) : std::set<uint64_t>();
-
-    if(db_ptr_==nullptr){
-      break;
-    }
-    level_predicted_depth[max_score_level]++;
-    // uint64_t ZoneFile* pivot_sst=GetSSTZoneFileInZBDNoLock();
-    if(aggregated_soon_compaction_invalidated_fno.find(pivot_sst_fno)
-          == aggregated_soon_compaction_invalidated_fno.end()){
-      continue;
-    }
-
-    for(auto fno : soon_compaction_invalidated_fno){
-      
-      if(aggregated_soon_compaction_invalidated_fno.find(fno)
-        == aggregated_soon_compaction_invalidated_fno.end( ) ){
-          continue;
-      }
-
-      if(soon_compaction_invalidated_fno.size()>1){
-        aggregated_soon_compaction_invalidated_fno.emplace(fno);
-      }
-
-      ZoneFile* zfile= zbd_->GetSSTZoneFileInZBDNoLock(fno);
-      if(zfile&&zfile->level_==max_score_level){
-        uint64_t file_size= zfile->GetFileSize();
-        current_lsm_tree[zfile->level_]-=file_size;
-        current_lsm_tree[zfile->level_+1]+=file_size;
-      }
-    }
-    current_lsm_tree[0]+=(64<<20);
-  }
-
-  for(auto fno : aggregated_soon_compaction_invalidated_fno){
-    ZoneFile* zfile= zbd_->GetSSTZoneFileInZBDNoLock(fno);
-
-
-    if(zfile){
-       std::vector<ZoneExtent*> extents=zfile->GetExtents();
-       for(auto ext : extents){
-          if(ext->zone_){
-            // uint64_t zidx = ext->zone_->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
-            soon_invalidation_zone_per_size[ext->zone_->zidx_]+=ext->length_;
-          }
-       }
-    }
-  }
-
-
-  // std::vector<std::pair<uint64_t,uint64_t>> min_start_max_start;
-  // if(zbd_->AsyncZCEnabled()>1){
-  //   ZenFSStopWatch z1("ReadAmpSelection",zbd_);
-  //     for(auto & zone : snapshot.zones_){
-  //       min_start_max_start.push_back({zone.start+zone.max_capacity,zone.start});
-  //     }
-
-  //     for (auto& ext : snapshot.extents_) {
-  //       uint64_t zidx= ext.zone_p->zidx_- ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
-  //       // printf("536 zidx %lu\n",zidx);
-  //       if(ext.start < min_start_max_start[zidx].first){
-  //         min_start_max_start[zidx].first=ext.start;
-  //       }
-  //       if(ext.start+ext.length > 
-  //         min_start_max_start[zidx].second){
-  //         min_start_max_start[zidx].second=ext.start+ext.length;
-  //       }
-  //     }
-  // }
-
-
-
-
-  // uint64_t min_read_amp = UINT64_MAX;
-
-
-  // for (const auto& zone : snapshot.zones_) {
-
-  //   if(zone.capacity !=0 ){
-  //     continue;
-  //   }
-  //   if(zone.used_capacity>(zone.max_capacity*95)/100){
-  //     continue;
-  //   }
-  //   uint64_t gc_cost;
-
-  //   if(zbd_->AsyncZCEnabled()>1){
-
-  //     gc_cost=100 * zone.used_capacity / zone.max_capacity;
-  //     uint64_t zone_start = zone.start;
-  //     uint64_t zone_end= zone_start+ zone.max_capacity;
-  //     bool page_fault=false;
-  //     mlock2((const void*)page_cache_hit_mmap_addr_ + (zone_start-io_zone_start_offset_),
-  //               ,zone.max_capacity,MLOCK_ONFAULT);
-  //     mincore(page_cache_hit_mmap_addr_+(zone_start-io_zone_start_offset_),
-  //             zone.max_capacity,
-  //             page_cache_check_hit_buffer_);
-  //     // page_cache_check_hit_buffer_
-  //     for(auto ext : zone.extents_in_zone){
-  //       uint64_t ext_start_page_offset= (ext.start - zone_start)/page_size_;
-  //       uint64_t ext_length_pages = (ext.length - zone_start)/page_size_;
-  //       for(uint64_t p = ext_start_page_offset; p < ext_length_pages; p++){
-  //         if( !(page_cache_check_hit_buffer_[p] & 0x1) ){
-  //           page_fault=true;
-  //           break;
-  //         }
-  //       }
-
-  //       if(page_fault){
-  //         break;
-  //       }
-  //     }
-  //     if(page_fault){
-  //       continue;
-  //     }
-
-  //     everything_in_page_cache=true;
-
-
-  //   }
-
-  //   else{
-  //     // mlock2(page_cache_hit_mmap_addr_,,MLOCK_ONFAULT);
-  //     gc_cost=100 * zone.used_capacity / zone.max_capacity;
-  //     if(gc_cost<min_gc_cost){
-  //       min_gc_cost=gc_cost;
-  //       selected_victim_zone_start=zone.start;
-  //     }
-  //   }
-    
-  // }
-
-
   uint64_t min_gc_cost= UINT64_MAX;
   uint64_t selected_victim_zone_start = 0;
   // uint64_t previous_mlock_addr = 0;
   // uint64_t average_gc_cost;
 
   if(zbd_->AsyncZCEnabled()>1){
-    // uint64_t average_gc_cost=0;
-    uint64_t victim_n = 0;
-    for (const auto& zone : snapshot.zones_) {
-      if(zone.capacity !=0 ){
-        continue;
-      }
-      if(zone.used_capacity>(zone.max_capacity*95)/100){
-        continue;
-      }
-      victim_n++;
-      uint64_t tmp=100 * zone.used_capacity / zone.max_capacity;
+    // uint64_t victim_n = 0;
+    // for (const auto& zone : snapshot.zones_) {
+    //   if(zone.capacity !=0 ){
+    //     continue;
+    //   }
+    //   if(zone.used_capacity>(zone.max_capacity*95)/100){
+    //     continue;
+    //   }
+    //   victim_n++;
+    //   uint64_t tmp=100 * zone.used_capacity / zone.max_capacity;
 
-      // average_gc_cost+=tmp;
-      if(tmp<min_gc_cost){
-        min_gc_cost = tmp;
-      }
-    }
-    // average_gc_cost= average_gc_cost/victim_n;
-    min_gc_cost= min_gc_cost * 120/ 100;
-    // zbd_->GetZoneExtentSnapShotInZoneSnapshot(&snapshot.zones_,snapshot.extents_);
+    //   // average_gc_cost+=tmp;
+    //   if(tmp<min_gc_cost){
+    //     min_gc_cost = tmp;
+    //   }
+    // }
+    // min_gc_cost= min_gc_cost * 120/ 100;
     
     for(size_t i = 0; i < snapshot.extents_.size(); i++){
       ZoneExtentSnapshot* ext = &snapshot.extents_[i];
@@ -674,7 +488,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
       for(ZoneExtentSnapshot* ext : zone.extents_in_zone){
         if(ext->page_cache != nullptr){
-          printf("I am in page cache\n");
+          // printf("I am in page cache\n");
           continue;
         }
         uint64_t ext_start_aligned =ext->start - zone_start;
