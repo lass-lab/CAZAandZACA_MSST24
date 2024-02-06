@@ -4097,6 +4097,8 @@ void ZonedBlockDevice::GetZoneExtentSnapShotInZoneSnapshot(std::vector<ZoneSnaps
           std::vector<ZoneExtentSnapshot>& extents_snapshot){
     for(auto& ext : extents_snapshot){
       (*zone_snapshot)[ext.zone_p->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES].extents_in_zone.push_back(ext);
+      
+      
     }
 }
 

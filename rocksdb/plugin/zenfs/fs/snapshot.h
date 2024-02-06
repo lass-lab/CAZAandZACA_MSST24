@@ -75,7 +75,7 @@ class ZoneExtentSnapshot {
   uint64_t header_size;
   std::string filename;
   Zone* zone_p;
-  std::shared_ptr<char> page_cache;
+  std::shared_ptr<char> page_cache = nullptr;
   // ZoneFile* zfile_p;
 
  public:

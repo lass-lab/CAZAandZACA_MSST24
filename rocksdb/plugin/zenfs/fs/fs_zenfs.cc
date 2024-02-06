@@ -415,7 +415,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // zbd_->EntireZoneReadLock();
   {
     // ZenFSStopWatch z2("GetZenFSSnapshot");
-    GetZenFSSnapshot(snapshot, options);
+    GetZenFSSnapshot(snapshot, options,1073741824);
   }
   // size_t all_inval_zone_n = 0;
   // std::vector<VictimZoneCandiate> victim_candidate;
@@ -660,6 +660,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
               page_cache_check_hit_buffer_);
       // page_cache_check_hit_buffer_
       for(auto& ext : zone.extents_in_zone){
+        if(ext.page_cache != nullptr){
+          continue;
+        }
         uint64_t ext_start_aligned =ext.start - zone_start;
         uint64_t ext_lenght_aligned = ext.length;
         uint64_t align = (ext_start_aligned) % page_size_;
@@ -2627,7 +2630,7 @@ Status ListZenFileSystems(
 }
 
 void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
-                             const ZenFSSnapshotOptions& options) {
+                             const ZenFSSnapshotOptions& options,uint64_t page_cache_size) {
   
   if (options.zbd_) {
     snapshot.zbd_ = ZBDSnapshot(*zbd_);
@@ -2668,6 +2671,10 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
           ext_snapshot.zone_p=ext->zone_;
           // printf("GetZenFSSnapshot :: ext->start %lu\n",ext->start_);
           snapshot.extents_.push_back(ext_snapshot);
+          if(page_cache_size>ext->length_){
+            page_cache_size-=ext->length_;
+            ext_snapshot.page_cache=ext->page_cache_;
+          }
         }
       }
 
@@ -3161,36 +3168,40 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     // }
     if(everything_in_page_cache==true){
       // every valid extents are in page cache
-      uint64_t page_fault_n = 0;
-      mincore(page_cache_hit_mmap_addr_+(victim_zone->start_-io_zone_start_offset_),
-            victim_zone->max_capacity_,page_cache_check_hit_buffer_);
-      for(auto ext : extents){
-        uint64_t ext_start_page_offset= (ext->start - victim_zone->start_)/page_size_;
+      // uint64_t page_fault_n = 0;
+      // mincore(page_cache_hit_mmap_addr_+(victim_zone->start_-io_zone_start_offset_),
+      //       victim_zone->max_capacity_,page_cache_check_hit_buffer_);
+      // for(auto ext : extents){
+      //   uint64_t ext_start_page_offset= (ext->start - victim_zone->start_)/page_size_;
 
-        uint64_t ext_length_pages = (ext->length)/page_size_;
+      //   uint64_t ext_length_pages = (ext->length)/page_size_;
 
-        align =ext->length% page_size_;
-        if(align){
-          ext_length_pages++;
-        }
-        for(uint64_t p = ext_start_page_offset; p < (ext_start_page_offset+ext_length_pages);p++){
-          if( !(page_cache_check_hit_buffer_[p] & 0x1) ){
-            // printf("why page fault ????\n");
-            // break;
-            page_fault_n ++ ;
-          }
-        }
+      //   align =ext->length% page_size_;
+      //   if(align){
+      //     ext_length_pages++;
+      //   }
+      //   for(uint64_t p = ext_start_page_offset; p < (ext_start_page_offset+ext_length_pages);p++){
+      //     if( !(page_cache_check_hit_buffer_[p] & 0x1) ){
+      //       // printf("why page fault ????\n");
+      //       // break;
+      //       page_fault_n ++ ;
+      //     }
+      //   }
 
-      }
-      // if(page_fault_n){
-       
       // }
+
       {
         ZenFSStopWatch zread("EVERY THING IN CACHE READ",zbd_);
         uint64_t copied_tmp  =0 ;
         for(auto ext: extents){
+          if(ext->page_cache!=nullptr){
+            memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get(),
+              ext->length + ext->header_size)
+          }else{
+            err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),ext->length,ext->start );
+          }
           // err=pread(read_fd,tmp_buf + ((ext->start)-min_start),ext->length, ext->start );
-          err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),ext->length,ext->start );
+
 
           // memmove(tmp_buf+(ext->start-min_start),
           //     page_cache_hit_mmap_addr_+(ext->start-io_zone_start_offset_),
@@ -3199,7 +3210,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
 
         }
-        printf("in large I/O P/F %lu\t%lu ms\tcopied %lu (MB)\n",page_fault_n,(zread.RecordTickNS()/1000/1000),copied_tmp>>20);
+        printf("in large I/O\t%lu ms\tcopied %lu (MB)\n",(zread.RecordTickNS()/1000/1000),copied_tmp>>20);
       }
       munlock((const void*)(page_cache_hit_mmap_addr_ + (victim_zone->start_- io_zone_start_offset_)) ,
           victim_zone->max_capacity_);
