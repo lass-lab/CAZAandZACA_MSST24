@@ -602,7 +602,7 @@ class ZonedBlockDevice {
   uint64_t async_zc_enabled_;
   
 
-  uint64_t page_cache_limit_;
+  uint64_t page_cache_limit_ = 0;
   std::atomic<long> cumulative_io_blocking_{0}; //ms
 
 
