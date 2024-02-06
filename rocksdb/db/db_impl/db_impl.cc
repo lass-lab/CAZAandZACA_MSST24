@@ -307,7 +307,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   other_options.push_back(immutable_db_options_.input_aware_scheme);
   other_options.push_back(immutable_db_options_.async_zc_enabled);
   other_options.push_back(immutable_db_options_.default_extent_size);
-  other_options.push_back(immutable_db_options_.page_cache_size)
+  other_options.push_back(immutable_db_options_.page_cache_size);
   fs_->SetResetScheme(immutable_db_options_.reset_scheme,immutable_db_options_.partial_reset_scheme,immutable_db_options_.tuning_point,
                         immutable_db_options_.zc_kicks,immutable_db_options_.until,immutable_db_options_.allocation_scheme,
                       other_options);
