@@ -76,7 +76,7 @@ ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone, std::string 
     pad_size_= block_sz-align;
   }
 }
-// ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone, )
+
 
 Status ZoneExtent::DecodeFrom(Slice* input) {
   if (input->size() != (sizeof(start_) + sizeof(length_)))
@@ -705,8 +705,14 @@ IOStatus ZoneFile::BufferedAppend(char* buffer, uint64_t data_size) {
     s = active_zone_->Append(buffer, wr_size + pad_sz);
     if (!s.ok()) return s;
     // printf("ZoneFile::BufferedAppend :: %lu %lu\n",extent_start_, extent_length);
-    extents_.push_back(
-        new ZoneExtent(extent_start_, extent_length, active_zone_,filename));
+    ZoneExtent* new_ext= new ZoneExtent(extent_start_, extent_length, active_zone_,filename);
+    new_ext->page_cache_=buffer;
+    extents_.push_back(new_ext);
+
+    int ret =
+          posix_memalign((void**)&buffer, sysconf(_SC_PAGESIZE), buffer_size_);
+
+      if (ret) buffer = nullptr;
 
     extent_start_ = active_zone_->wp_;
     active_zone_->used_capacity_ += extent_length;
@@ -768,11 +774,18 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
 
     s = active_zone_->Append(sparse_buffer, wr_size + pad_sz);
     if (!s.ok()) return s;
-    // printf("ZoneFile::SparseAppend %lu %lu\n",extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,extent_length);
-    extents_.push_back(
-        new ZoneExtent(extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,
-                       extent_length, active_zone_,filename,ZoneFile::SPARSE_HEADER_SIZE));
 
+    ZoneExtent* new_ext = new ZoneExtent(extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,
+                       extent_length, active_zone_,filename,ZoneFile::SPARSE_HEADER_SIZE)
+    // printf("ZoneFile::SparseAppend %lu %lu\n",extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,extent_length);
+    new_ext->page_cache_= sparse_buffer;
+
+    extents_.push_back(new_ext);
+    int ret =
+          posix_memalign((void**)&sparse_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
+
+    if (ret) buffer = nullptr;
+    
     extent_start_ = active_zone_->wp_;
     active_zone_->used_capacity_ += extent_length;
     file_size_ += extent_length;
@@ -1156,28 +1169,29 @@ ZonedWritableFile::ZonedWritableFile(ZonedBlockDevice* zbd, bool _buffered,
   sparse_buffer = nullptr;
   buffer = nullptr;
 
-  uint64_t default_buffer_size = zbd->GetDefaultExtentSize();
+  default_buffer_size_ = zbd->GetDefaultExtentSize();
 
   if (buffered) {
     if (zoneFile->IsSparse()) {
       size_t sparse_buffer_sz;
 
       sparse_buffer_sz =
-          default_buffer_size + block_sz; /* one extra block size for padding */
+          default_buffer_size_ + block_sz; /* one extra block size for padding */
       int ret = posix_memalign((void**)&sparse_buffer, sysconf(_SC_PAGESIZE),
                                sparse_buffer_sz);
 
       if (ret) sparse_buffer = nullptr;
 
       assert(sparse_buffer != nullptr);
-
+      
       buffer_sz = sparse_buffer_sz - ZoneFile::SPARSE_HEADER_SIZE - block_sz;
       buffer = sparse_buffer + ZoneFile::SPARSE_HEADER_SIZE;
+      zoneFile->buffer_size_=buffer_sz;
     } else {
-      buffer_sz = default_buffer_size;
+      buffer_sz = default_buffer_size_;
       int ret =
           posix_memalign((void**)&buffer, sysconf(_SC_PAGESIZE), buffer_sz);
-
+      zoneFile->buffer_size_=buffer_sz;
       if (ret) buffer = nullptr;
       assert(buffer != nullptr);
     }

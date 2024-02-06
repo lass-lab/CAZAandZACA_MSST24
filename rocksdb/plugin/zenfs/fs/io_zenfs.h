@@ -57,6 +57,9 @@ class ZoneExtent {
   bool position_pulled_ = false;
   std::string fname_;
   uint64_t header_size_;
+
+  std::shared_ptr<char> page_cache_= nullptr;
+
   explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname);
   // to be push front
   explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone);
@@ -65,7 +68,9 @@ class ZoneExtent {
   {
       return e1->start_ < e2->start_;
   }
-  
+  ~ZoneExtent(){
+    page_cache_.reset();
+  }
   Status DecodeFrom(Slice* input);
   void EncodeTo(std::string* output);
   void EncodeJson(std::ostream& json_stream);
@@ -87,7 +92,7 @@ class ZoneFile {
 
   ZonedBlockDevice* zbd_;
 
-
+  
 
   std::vector<std::string> linkfiles_;
   Zone* active_zone_;
@@ -129,6 +134,9 @@ class ZoneFile {
   std::vector<ZoneExtent*> extents_;
   static const uint64_t SPARSE_HEADER_SIZE = 8;
   bool selected_as_input_ = false;
+
+  uint64_t buffer_size_;
+
   ZoneFile(ZonedBlockDevice* zbd, uint64_t file_id_,
                     MetadataWriter* metadata_writer,FileSystemWrapper* zenfs);
 
@@ -311,6 +319,7 @@ class ZonedWritableFile : public FSWritableFile {
 
   std::shared_ptr<ZoneFile> zoneFile_;
   MetadataWriter* metadata_writer_;
+  uint64_t default_buffer_size_;
 
   std::mutex buffer_mtx_;
 };
