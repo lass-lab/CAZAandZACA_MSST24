@@ -3691,7 +3691,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
     //   long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
     //   printf("\t\t\t\t\t %lu\t(ms)\t%lu\t(MB)\t\t%d\t%lu\n", (elapsed_ns_timespec/1000)/1000,(after-prev)>>20,mount_time_.load(),cur_ops_ );
     // }
-    msleep(100);
+    usleep(100*1000);
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit()){
       std::lock_guard<std::mutex> file_lock(files_mtx_);
 
