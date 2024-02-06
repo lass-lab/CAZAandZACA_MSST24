@@ -1052,8 +1052,8 @@ class ZonedBlockDevice {
   void SetZoneDeferredStatus(IOStatus status);
 
   std::shared_ptr<ZenFSMetrics> GetMetrics() { return metrics_; }
-  void GetZoneExtentSnapShotInZoneSnapshot(std::vector<ZoneSnapshot>* zone_snapshot,
-          std::vector<ZoneExtentSnapshot>& extents_snapshot);
+  // void GetZoneExtentSnapShotInZoneSnapshot(std::vector<ZoneSnapshot>* zone_snapshot,
+  //         std::vector<ZoneExtentSnapshot>& extents_snapshot);
   void GetZoneSnapshot(std::vector<ZoneSnapshot> &snapshot);
 
     class ZoneReadLock{
