@@ -2677,6 +2677,8 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
             ext_snapshot.page_cache=ext->page_cache_;
             if(ext_snapshot.page_cache.get()==nullptr){
               printf("ext->page_cache_ nullptr? \n");
+            }else{
+              printf("its on memory\n");
             }
           }
         }
