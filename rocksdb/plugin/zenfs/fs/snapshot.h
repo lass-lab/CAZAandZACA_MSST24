@@ -107,6 +107,9 @@ class ZoneExtentSnapshot {
     //         (void)(debug);
     //       }
     //     }
+  ~ZoneExtentSnapshot(){
+    page_cache.reset();
+  }
 };
 
 class ZoneFileSnapshot {
