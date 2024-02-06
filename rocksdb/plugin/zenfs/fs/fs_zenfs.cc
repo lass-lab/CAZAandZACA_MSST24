@@ -635,7 +635,16 @@ size_t ZenFS::ZoneCleaning(bool forced){
     }
     // average_gc_cost= average_gc_cost/victim_n;
     min_gc_cost= min_gc_cost * 120/ 100;
-    zbd_->GetZoneExtentSnapShotInZoneSnapshot(&snapshot.zones_,snapshot.extents_);
+    // zbd_->GetZoneExtentSnapShotInZoneSnapshot(&snapshot.zones_,snapshot.extents_);
+    
+    for(size_t i = 0; i < snapshot.extents_.size(); i++){
+      ZoneExtentSnapshot* ext = &snapshot.extents_[i];
+      uint64_t zidx = ext->zone_p->zidx_ 
+                          -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+      snapshot.zones_[zidx].extents_in_zone.push_back(ext);
+    }
+
+    
     for (const auto& zone : snapshot.zones_) {
 
       if(zone.capacity !=0 ){
@@ -659,13 +668,14 @@ size_t ZenFS::ZoneCleaning(bool forced){
               zone.max_capacity,
               page_cache_check_hit_buffer_);
       // page_cache_check_hit_buffer_
-      for(auto& ext : zone.extents_in_zone){
-        if(ext.page_cache != nullptr){
+
+      for(ZoneExtentSnapshot* ext : zone.extents_in_zone){
+        if(ext->page_cache != nullptr){
           printf("I am in page cache\n");
           continue;
         }
-        uint64_t ext_start_aligned =ext.start - zone_start;
-        uint64_t ext_lenght_aligned = ext.length;
+        uint64_t ext_start_aligned =ext->start - zone_start;
+        uint64_t ext_lenght_aligned = ext->length;
         uint64_t align = (ext_start_aligned) % page_size_;
         if(align){
           ext_start_aligned-=align;
@@ -2691,7 +2701,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
       file.ReleaseWRLock();
     }
   }
-  printf("After page cache loaded  :%lu\n",page_cache_size);
+  // printf("After page cache loaded  :%lu\n",page_cache_size);
 //  printf("GetZenFSSnapshot return @@\n");
   // if (options.trigger_report_) {
   //   zbd_->GetMetrics()->ReportSnapshot(snapshot);

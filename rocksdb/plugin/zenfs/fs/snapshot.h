@@ -53,7 +53,7 @@ class ZoneSnapshot {
   uint64_t max_capacity;
   uint64_t zidx;
   Zone* zone_p;
-  std::vector<ZoneExtentSnapshot> extents_in_zone;
+  std::vector<ZoneExtentSnapshot*> extents_in_zone;
  public:
   ZoneSnapshot(Zone* zone)
       : start(zone->start_),
