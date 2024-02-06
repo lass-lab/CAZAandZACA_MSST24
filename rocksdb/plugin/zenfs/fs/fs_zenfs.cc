@@ -3681,18 +3681,38 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 void ZenFS::BackgroundAsyncStructureCleaner(void){
   
   while(run_gc_worker_){
-    uint64_t prev= zbd_->GetGCBytesWritten();
-    if(zbd_->GetZCRunning()){
+    // uint64_t prev= zbd_->GetGCBytesWritten();
+    // if(zbd_->GetZCRunning()){
     
-      struct timespec start_timespec, end_timespec;
-      clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-      while(zbd_->GetZCRunning() && run_gc_worker_);
-      clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-      uint64_t after = zbd_->GetGCBytesWritten();
-      long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-      printf("\t\t\t\t\t %lu\t(ms)\t%lu\t(MB)\t\t%d\t%lu\n", (elapsed_ns_timespec/1000)/1000,(after-prev)>>20,mount_time_.load(),cur_ops_ );
-    }
+    //   struct timespec start_timespec, end_timespec;
+    //   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
+    //   while(zbd_->GetZCRunning() && run_gc_worker_);
+    //   clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+    //   uint64_t after = zbd_->GetGCBytesWritten();
+    //   long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+    //   printf("\t\t\t\t\t %lu\t(ms)\t%lu\t(MB)\t\t%d\t%lu\n", (elapsed_ns_timespec/1000)/1000,(after-prev)>>20,mount_time_.load(),cur_ops_ );
+    // }
+    msleep(100);
+    while(zbd_->page_cache_size_>zbd_->PageCacheLimit()){
+      std::lock_guard<std::mutex> file_lock(files_mtx_);
 
+
+      for (const auto& file_it : files_) {
+        ZoneFile& file = *(file_it.second);
+        std::vector<ZoneExtent*> extents=file.GetExtents();
+        for (ZoneExtent* ext : extents ) {
+          zbd_->page_cache_size_-=ext->length_;
+          ext->page_cache_.reset();
+          if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+            break;
+          }
+        }
+        if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+          break;
+        }
+      }
+
+    }
   }
 }
 

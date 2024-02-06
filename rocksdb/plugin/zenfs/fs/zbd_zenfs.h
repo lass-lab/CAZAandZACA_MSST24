@@ -600,7 +600,9 @@ class ZonedBlockDevice {
   uint64_t input_aware_scheme_;
   uint64_t tuning_point_;
   uint64_t async_zc_enabled_;
-  uint64_t page_cache_size_;
+  
+
+  uint64_t page_cache_limit_`;
   std::atomic<long> cumulative_io_blocking_{0}; //ms
 
 
@@ -806,7 +808,7 @@ class ZonedBlockDevice {
   void AddBreakDown(std::string name, uint64_t us);
   void PrintCumulativeBreakDown();
   std::atomic<uint64_t> lsm_tree_[10];
-
+  std::atomic<uint64_t> page_cache_size_{0};
     uint64_t ZENFS_CONVENTIONAL_ZONE = 0;
 
   /*
@@ -834,7 +836,7 @@ class ZonedBlockDevice {
     return async_zc_enabled_;
   }
   uint64_t PageCacheLimit(){
-    return page_cache_size_;
+    return page_cache_limit_`;
   }
 
   uint64_t GetDefaultExtentSize(){
@@ -1297,7 +1299,7 @@ class ZonedBlockDevice {
     input_aware_scheme_ = other_options[0];
     async_zc_enabled_ = other_options[1];
     default_extent_size_ = other_options[2];
-    page_cache_size_ = other_options[3];
+    page_cache_limit_` = other_options[3];
 
     if(zc!=0){
       zc_until_set_=true;

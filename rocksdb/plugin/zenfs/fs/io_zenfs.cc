@@ -486,6 +486,8 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
     *result = Slice(scratch, 0);
     return s;
   }
+
+
   extent_end = extent->start_ + extent->length_;
   
   /* Limit read size to end of file */
@@ -710,6 +712,7 @@ IOStatus ZoneFile::BufferedAppend(char** _buffer, uint64_t data_size) {
     // printf("ZoneFile::BufferedAppend :: %lu %lu\n",extent_start_, extent_length);
     ZoneExtent* new_ext= new ZoneExtent(extent_start_, extent_length, active_zone_,filename);
     new_ext->page_cache_.reset(buffer);
+    zbd_->page_cache_size_+=extent_length;
     extents_.push_back(new_ext);
 
     int ret =
@@ -786,7 +789,7 @@ IOStatus ZoneFile::SparseAppend(char** _sparse_buffer, uint64_t data_size) {
                        extent_length, active_zone_,filename,ZoneFile::SPARSE_HEADER_SIZE);
     // printf("ZoneFile::SparseAppend %lu %lu\n",extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,extent_length);
     new_ext->page_cache_.reset(sparse_buffer);
-
+    zbd_->page_cache_size_+=extent_length;
     extents_.push_back(new_ext);
     int ret =
           posix_memalign((void**)_sparse_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
