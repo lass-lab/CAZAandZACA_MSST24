@@ -448,7 +448,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         min_gc_cost = tmp;
       }
     }
-    min_gc_cost= min_gc_cost +( 38<<20);
+    min_gc_cost= min_gc_cost +( 34<<20);
     
     for(size_t i = 0; i < snapshot.extents_.size(); i++){
       ZoneExtentSnapshot* ext = &snapshot.extents_[i];
