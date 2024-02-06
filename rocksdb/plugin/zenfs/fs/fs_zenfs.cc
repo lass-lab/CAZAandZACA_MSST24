@@ -661,6 +661,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // page_cache_check_hit_buffer_
       for(auto& ext : zone.extents_in_zone){
         if(ext.page_cache != nullptr){
+          printf("I am in page cache\n",);
           continue;
         }
         uint64_t ext_start_aligned =ext.start - zone_start;
@@ -2674,6 +2675,9 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
           if(page_cache_size>ext->length_){
             page_cache_size-=ext->length_;
             ext_snapshot.page_cache=ext->page_cache_;
+            if(ext_snapshot.page_cache.get()==nullptr){
+              printf("ext->page_cache_ nullptr? \n");
+            }
           }
         }
       }

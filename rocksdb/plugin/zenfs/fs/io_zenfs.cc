@@ -370,6 +370,7 @@ void ZoneFile::ClearExtents() {
       continue;
     }
     (*e)->is_invalid_=true;
+    delete (*e);
   }
   extents_.clear();
 }
