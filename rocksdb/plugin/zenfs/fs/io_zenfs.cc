@@ -776,7 +776,7 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
     if (!s.ok()) return s;
 
     ZoneExtent* new_ext = new ZoneExtent(extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,
-                       extent_length, active_zone_,filename,ZoneFile::SPARSE_HEADER_SIZE)
+                       extent_length, active_zone_,filename,ZoneFile::SPARSE_HEADER_SIZE);
     // printf("ZoneFile::SparseAppend %lu %lu\n",extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,extent_length);
     new_ext->page_cache_= sparse_buffer;
 
@@ -785,7 +785,7 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
           posix_memalign((void**)&sparse_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
 
     if (ret) buffer = nullptr;
-    
+
     extent_start_ = active_zone_->wp_;
     active_zone_->used_capacity_ += extent_length;
     file_size_ += extent_length;
