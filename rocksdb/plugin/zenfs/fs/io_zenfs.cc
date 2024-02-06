@@ -689,7 +689,7 @@ IOStatus ZoneFile::BufferedAppend(char** _buffer, uint64_t data_size) {
     filename="NONE(BufferedAppend)";
   }
   while (left) {
-    char* buffer = (*buffer);
+    char* buffer = (*_buffer);
     wr_size = left;
     if (wr_size > active_zone_->capacity_) wr_size = active_zone_->capacity_;
 
@@ -761,7 +761,7 @@ IOStatus ZoneFile::SparseAppend(char** _sparse_buffer, uint64_t data_size) {
   }
 
   while (left) {
-    char* spare_buffer = (*_sparse_buffer);
+    char* sparse_buffer = (*_sparse_buffer);
     wr_size = left + ZoneFile::SPARSE_HEADER_SIZE;
     if (wr_size > active_zone_->capacity_) wr_size = active_zone_->capacity_;
 
