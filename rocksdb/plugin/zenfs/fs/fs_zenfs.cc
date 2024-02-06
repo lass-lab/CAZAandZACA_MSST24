@@ -442,13 +442,13 @@ size_t ZenFS::ZoneCleaning(bool forced){
         continue;
       }
       victim_n++;
-      uint64_t tmp=100 * zone.used_capacity / zone.max_capacity;
+      uint64_t tmp=zone.used_capacity;
 
       if(tmp<min_gc_cost){
         min_gc_cost = tmp;
       }
     }
-    min_gc_cost= min_gc_cost * 110/ 100;
+    min_gc_cost= min_gc_cost + 38<<20;
     
     for(size_t i = 0; i < snapshot.extents_.size(); i++){
       ZoneExtentSnapshot* ext = &snapshot.extents_[i];
@@ -471,7 +471,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
       }
 
 
-      uint64_t gc_cost=100 * zone.used_capacity / zone.max_capacity;
+      // uint64_t gc_cost=100 * zone.used_capacity / zone.max_capacity;
+      uint64_t gc_cost = zone.used_capacity;
       uint64_t zone_start = zone.start;
       if(gc_cost>min_gc_cost){
         continue;
