@@ -784,7 +784,7 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
     int ret =
           posix_memalign((void**)&sparse_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
 
-    if (ret) buffer = nullptr;
+    if (ret) sparse_buffer = nullptr;
 
     extent_start_ = active_zone_->wp_;
     active_zone_->used_capacity_ += extent_length;
