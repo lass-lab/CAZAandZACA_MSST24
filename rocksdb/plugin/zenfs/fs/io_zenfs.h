@@ -154,8 +154,8 @@ class ZoneFile {
   IOStatus PersistMetadata();
 
   IOStatus Append(void* buffer, uint64_t data_size);
-  IOStatus BufferedAppend(char* data, uint64_t size);
-  IOStatus SparseAppend(char* data, uint64_t size);
+  IOStatus BufferedAppend(char** _data, uint64_t size);
+  IOStatus SparseAppend(char** _data, uint64_t size);
 
   IOStatus CAZAAppend(const char* data, uint32_t size,bool positioned,uint64_t offset);
   std::vector<SSTBuffer*>* GetSSTBuffers(void) { return &sst_buffers_; }

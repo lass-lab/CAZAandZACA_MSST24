@@ -670,11 +670,12 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
 }
 
 /* Byte-aligned writes without a sparse header */
-IOStatus ZoneFile::BufferedAppend(char* buffer, uint64_t data_size) {
+IOStatus ZoneFile::BufferedAppend(char** _buffer, uint64_t data_size) {
   uint64_t left = data_size;
   uint64_t wr_size;
   uint64_t block_sz = GetBlockSize();
   IOStatus s;
+  
   // printf("@@ Bufferedappend :%u\n",data_size);
   // while(zbd_->GetZCRunning());
   if (active_zone_ == NULL) {
@@ -688,6 +689,7 @@ IOStatus ZoneFile::BufferedAppend(char* buffer, uint64_t data_size) {
     filename="NONE(BufferedAppend)";
   }
   while (left) {
+    char* buffer = (*buffer);
     wr_size = left;
     if (wr_size > active_zone_->capacity_) wr_size = active_zone_->capacity_;
 
@@ -710,10 +712,12 @@ IOStatus ZoneFile::BufferedAppend(char* buffer, uint64_t data_size) {
     extents_.push_back(new_ext);
 
     int ret =
-          posix_memalign((void**)&buffer, sysconf(_SC_PAGESIZE), buffer_size_);
+          posix_memalign((void**)_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
 
-      if (ret) buffer = nullptr;
-
+    if (ret){ 
+      printf("ZoneFile::BufferedAppend memory allocate failed\n");
+      (*_buffer) = nullptr;
+    }
     extent_start_ = active_zone_->wp_;
     active_zone_->used_capacity_ += extent_length;
     file_size_ += extent_length;
@@ -725,7 +729,8 @@ IOStatus ZoneFile::BufferedAppend(char* buffer, uint64_t data_size) {
         return s;
       }
       if (left) {
-        memmove((void*)(buffer), (void*)(buffer + wr_size), left);
+        // memmove((void*)(buffer), (void*)(buffer + wr_size), left);
+        memmove((void*)(*_buffer),(void)(buffer+wr_size),left);
       }
       // while(zbd_->GetZCRunning());
       s = AllocateNewZone();
@@ -738,7 +743,7 @@ IOStatus ZoneFile::BufferedAppend(char* buffer, uint64_t data_size) {
 
 /* Byte-aligned, sparse writes with inline metadata
    the caller reserves 8 bytes of data for a size header */
-IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
+IOStatus ZoneFile::SparseAppend(char** _sparse_buffer, uint64_t data_size) {
   uint64_t left = data_size;
   uint64_t wr_size;
   uint64_t block_sz = GetBlockSize();
@@ -756,6 +761,7 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
   }
 
   while (left) {
+    char* spare_buffer = (*_sparse_buffer);
     wr_size = left + ZoneFile::SPARSE_HEADER_SIZE;
     if (wr_size > active_zone_->capacity_) wr_size = active_zone_->capacity_;
 
@@ -782,10 +788,12 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
 
     extents_.push_back(new_ext);
     int ret =
-          posix_memalign((void**)&sparse_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
+          posix_memalign((void**)_sparse_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
 
-    if (ret) sparse_buffer = nullptr;
-
+    if (ret) {
+        (*_sparse_buffer) = nullptr;
+        printf("ZoneFile::SparseAppend memory allocation failed\n");
+    }
     extent_start_ = active_zone_->wp_;
     active_zone_->used_capacity_ += extent_length;
     file_size_ += extent_length;
@@ -797,8 +805,10 @@ IOStatus ZoneFile::SparseAppend(char* sparse_buffer, uint64_t data_size) {
         return s;
       }
       if (left) {
-        memmove((void*)(sparse_buffer + ZoneFile::SPARSE_HEADER_SIZE),
-                (void*)(sparse_buffer + wr_size), left);
+        // memmove((void*)(sparse_buffer + ZoneFile::SPARSE_HEADER_SIZE),
+        //         (void*)(sparse_buffer + wr_size), left);
+        memmove((void*)( (*_sparse_buffer) + ZoneFile::SPARSE_HEADER_SIZE),
+                (void*)(sparse_buffer+wr_size),left );
       }
       // while(zbd_->GetZCRunning());
       s = AllocateNewZone();
@@ -1313,9 +1323,9 @@ IOStatus ZonedWritableFile::FlushBuffer() {
   if (buffer_pos == 0) return IOStatus::OK();
 
   if (zoneFile_->IsSparse()) {
-    s = zoneFile_->SparseAppend(sparse_buffer, buffer_pos);
+    s = zoneFile_->SparseAppend(&sparse_buffer, buffer_pos);
   } else {
-    s = zoneFile_->BufferedAppend(buffer, buffer_pos);
+    s = zoneFile_->BufferedAppend(&buffer, buffer_pos);
   }
 
   if (!s.ok()) {
