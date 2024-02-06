@@ -730,7 +730,7 @@ IOStatus ZoneFile::BufferedAppend(char** _buffer, uint64_t data_size) {
       }
       if (left) {
         // memmove((void*)(buffer), (void*)(buffer + wr_size), left);
-        memmove((void*)(*_buffer),(void)(buffer+wr_size),left);
+        memmove((void*)(*_buffer),(void*)(buffer+wr_size),left);
       }
       // while(zbd_->GetZCRunning());
       s = AllocateNewZone();
