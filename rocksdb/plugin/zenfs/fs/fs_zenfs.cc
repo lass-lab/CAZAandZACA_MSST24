@@ -2981,7 +2981,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   uint64_t read_size = (max_end-min_start)>>20;
   char stopwatch_buf[30];
   sprintf((char*)stopwatch_buf, "ZC size (%lu)(%lu)",should_be_copied>>20 ,read_size);
-  ZenFSStopwatch ZC_size_measure((const char*)stopwatch_buf,zbd_);
+  ZenFSStopWatch ZC_size_measure((const char*)stopwatch_buf,zbd_);
     {  
     for(auto ext: extents){
       if(ext->start<min_start){
