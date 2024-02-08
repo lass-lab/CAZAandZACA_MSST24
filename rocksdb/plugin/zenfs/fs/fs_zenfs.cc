@@ -2947,8 +2947,8 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
 IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,uint64_t should_be_copied,bool everything_in_page_cache) {
   Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
-  int read_fd = zbd_->GetFD(READ_FD);
-
+  // int read_fd = zbd_->GetFD(READ_FD);
+  int read_fd = zbd_->GetFD(READ_DIRECT_FD);
 
   (void)(should_be_copied);
   
@@ -3055,11 +3055,24 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
           victim_zone->max_capacity_);
       
     }else{
-      ZenFSStopWatch zread("max end min start READ",zbd_);
+      uint64_t read_size = (max_end-min_start)>>20;
+      const char stopwatch_buf[30];
+      sprintf(stopwatch_buf, "max end min start READ %lu", read_size);
+      // ZenFSStopWatch zread("max end min start READ",zbd_);
+      ZenFSStopWatch zread(stopwatch_buf,zbd_);
       err=(int)pread(read_fd,ZC_read_buffer_ +(min_start-victim_zone->start_) ,
           max_end-min_start,min_start);
       zbd_->AddZCRead(max_end-min_start);
+
+
+      
+      printf("%s %lu\n",stopwatch_buf,zread.RecordTickNS()/1000/1000);
+
+      // ZenFSStopWatch read_size_test("ddd",zbd_);
+
     }
+
+
   }
 
   // if(err!=(int)(max_end-min_start)){
