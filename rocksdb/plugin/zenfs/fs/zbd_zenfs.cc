@@ -1590,9 +1590,9 @@ IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
 
         if(next_offset!=z->start_){
           {
-            const char multireset_stopwatch[30];
+            char multireset_stopwatch[30];
             sprintf((char*)multireset_stopwatch,"multi reset %lu",to_be_reseted.size());
-            ZenFSStopWatch multireset(multireset_stopwatch,this);
+            ZenFSStopWatch multireset((const char*)multireset_stopwatch,this);
           zbd_be_->MultiReset(to_be_reseted[0].first->start_,
                     (to_be_reseted[0].first->max_capacity_ * to_be_reseted.size()));
           }
