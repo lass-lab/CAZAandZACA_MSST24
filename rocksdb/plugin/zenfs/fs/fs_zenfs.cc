@@ -432,7 +432,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t previous_mlock_addr = 0;
   // uint64_t average_gc_cost;
 
-  if(zbd_->PageCacheLimit()>1){
+  if(zbd_->PageCacheLimit()>1 && zbd_->AsyncZCEnabled()>1){
     uint64_t victim_n = 0;
     for (const auto& zone : snapshot.zones_) {
       if(zone.capacity !=0 ){
