@@ -935,6 +935,23 @@ class ZonedBlockDevice {
   }
   void SetZCRunning(bool v){ zc_running_.store(v); }
   bool GetZCRunning(void) {return zc_running_.load(); }
+
+  inline double ReadDiskCost(uint64_t size){ // mb
+    return (double)(4.26*size) + 7.54;
+  }
+  inline double ReadPageCacheCost(uint64_t size){ // mb
+    return (double)(0.92*size) + 0.09;
+  }
+  inline double WriteCost(uint64_t size){ // mb
+    return (double)(4.41*size) + 12.15;
+  }
+  inline double FreeSpaceCost(uint64_t size){
+    // to be get
+    return (double)(4.41*size) + 12.15;
+  }
+  
+
+
   uint64_t GetFullZoneN(){
     // uint64_t threshold = (100 - 3 * (GetZoneCleaningKickingPoint() - cur_free_percent_));
     uint64_t ret = 0;

@@ -479,13 +479,13 @@ size_t ZenFS::ZoneCleaning(bool forced){
       }
       // uint64_t zone_end= zone_start+ zone.max_capacity;
       bool page_fault=false;
+
       mlock2((const void*)(page_cache_hit_mmap_addr_ + (zone_start-io_zone_start_offset_)),
                 zone.max_capacity,MLOCK_ONFAULT);
       mincore(page_cache_hit_mmap_addr_+(zone_start-io_zone_start_offset_),
               zone.max_capacity,
               page_cache_check_hit_buffer_);
       // page_cache_check_hit_buffer_
-
       for(ZoneExtentSnapshot* ext : zone.extents_in_zone){
         if(ext->page_cache != nullptr){
           // printf("I am in page cache\n");
