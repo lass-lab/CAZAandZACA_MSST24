@@ -517,8 +517,14 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
       aligned = true;
     }
-
-    r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+    std::shared_ptr<char> page_cache = extent->page_cache_;
+    if(page_cache!=nullptr){
+      memcpy(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz );
+      r=pread_sz;
+    }else{
+      r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+    }
+    
 
     if (r <= 0) break;
 

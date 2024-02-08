@@ -2230,9 +2230,9 @@ Status ZenFS::Mount(bool readonly) {
         bg_stats_worker_.reset(new std::thread(&ZenFS::BackgroundStatTimeLapse, this));
     }
 
-    // if(async_cleaner_worker_==nullptr){
-    //   async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this));
-    // }
+    if(async_cleaner_worker_==nullptr){
+      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this));
+    }
 
   }
 
