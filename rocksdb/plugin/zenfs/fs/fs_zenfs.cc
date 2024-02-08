@@ -592,8 +592,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
     Info(logger_, "Garbage collecting %d extents \n",
          (int)migrate_exts.size());
-    printf("Garbage collecting %d extents \n",
-         (int)migrate_exts.size());
+    // printf("Garbage collecting %d extents \n",
+    //      (int)migrate_exts.size());
     clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     {    
         // ZenFSStopWatch z3("measure here");
