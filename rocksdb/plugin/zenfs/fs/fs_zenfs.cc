@@ -2978,9 +2978,9 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   uint64_t min_start=victim_zone->start_+victim_zone->max_capacity_;
   uint64_t max_end=victim_zone->start_;
   //  char* tmp_buf=nullptr;
-  uint64_t read_size = (max_end-min_start)>>20;
+  // uint64_t read_size = (max_end-min_start)>>20;
   char stopwatch_buf[50];
-  sprintf((char*)stopwatch_buf, "ZC size (%lu)(%lu)",should_be_copied>>20 ,read_size);
+  sprintf((char*)stopwatch_buf, "ZC size (%lu)",should_be_copied>>20 );
   ZenFSStopWatch ZC_size_measure((const char*)stopwatch_buf,zbd_);
     {  
     for(auto ext: extents){
@@ -3062,9 +3062,6 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
           victim_zone->max_capacity_);
       
     }else{
-      // uint64_t read_size = (max_end-min_start)>>20;
-      // const char stopwatch_buf[30];
-      // sprintf(stopwatch_buf, "max end min start READ %lu", read_size);
       ZenFSStopWatch zread("max end min start READ",zbd_);
       // ZenFSStopWatch zread(stopwatch_buf,zbd_);
       err=(int)pread(read_fd,ZC_read_buffer_ +(min_start-victim_zone->start_) ,
