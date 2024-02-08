@@ -2984,8 +2984,6 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   sprintf((char*)stopwatch_buf, "ZC COPY size (%lu)",should_be_copied>>20 );
 
   ZenFSStopWatch ZC_size_measure((const char*)stopwatch_buf,zbd_);
-
-    {  
     for(auto ext: extents){
       if(ext->start<min_start){
         min_start=ext->start;
@@ -3007,6 +3005,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     }
     sprintf((char*)stopwatch_buf2, "ZC READ size (%lu)",(max_end-min_start)>>20 );
     ZenFSStopWatch ZC_size_measure2((const char*)stopwatch_buf2,zbd_);
+
+    {  
 
     ZenFSStopWatch z1("Large IO pread",zbd_);
 
