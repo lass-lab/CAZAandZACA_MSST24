@@ -707,7 +707,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   //   printf("%ld : %ld / %ld , diff : %ld\n",fr,lazylinear,lazylog,lazylinear-lazylog);
   // }
   // start_time_ = time(NULL);
-  for(uint64_t i = 0 ; i<=256; i++){
+  for(i = 0 ; i<=256; i++){
 // #define READ_DISK_COST 0
 // #define READ_PAGE_COST 1
 // #define WRITE_COST 2
