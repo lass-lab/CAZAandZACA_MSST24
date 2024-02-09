@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 #include <sys/mman.h>
-
+#include <cfloat>
 
 #ifdef ZENFS_EXPORT_PROMETHEUS
 #include "metrics_prometheus.h"
@@ -440,29 +440,30 @@ size_t ZenFS::ZoneCleaning(bool forced){
       snapshot.zones_[zidx].extents_in_zone.push_back(ext);
     }
 
-    double min_gc_cost= DBL_MAX;
-    for (const auto& zone : snapshot.zones_) {
-      double gc_cost = 0.0;
-      if(zone.capacity !=0 ){
-        continue;
-      }
-      if(zone.used_capacity>(zone.max_capacity*95)/100){
-        continue;
-      }
-      for(ZoneExtentSnapshot* ext : zone.extents_in_zone){
-        uint64_t size_mb= (ext->length>>20);
-        if(ext->page_cache == nullptr){
-          gc_cost+=zbd_->ReadDiskCost(size_mb);
-        }else{
-          gc_cost+=zbd_->ReadPageCacheCost(size_mb);
+      double min_gc_cost= DBL_MAX;
+      for (const auto& zone : snapshot.zones_) {
+        double gc_cost = 0.0;
+        if(zone.capacity !=0 ){
+          continue;
         }
-        gc_cost+=zbd_->WriteCost(size_mb);
-        gc_cost+=zbd_->FreeSpaceCost(size_mb);
-      }
-      if(gc_cost<min_gc_cost){
-        gc_cost = min_gc_cost;
-        selected_victim_zone_start=zone.start;
-      }
+        if(zone.used_capacity>(zone.max_capacity*95)/100){
+          continue;
+        }
+        for(ZoneExtentSnapshot* ext : zone.extents_in_zone){
+          uint64_t size_mb= (ext->length>>20);
+          if(ext->page_cache == nullptr){
+            gc_cost+=zbd_->ReadDiskCost(size_mb);
+          }else{
+            gc_cost+=zbd_->ReadPageCacheCost(size_mb);
+          }
+          gc_cost+=zbd_->WriteCost(size_mb);
+          gc_cost+=zbd_->FreeSpaceCost(size_mb);
+        }
+        if(gc_cost<min_gc_cost){
+          gc_cost = min_gc_cost;
+          selected_victim_zone_start=zone.start;
+        }
+    }
   }else{
     uint64_t min_gc_cost= UINT64_MAX;
     for (const auto& zone : snapshot.zones_) {
@@ -479,7 +480,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       }
     }
   }
-  }
+  
   if(selected_victim_zone_start==0){
     printf("??? selected_victim_zone_start %lu\n",selected_victim_zone_start);
   }
