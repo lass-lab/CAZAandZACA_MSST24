@@ -978,7 +978,7 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
   for(auto file : lock_acquired_files){
     ZoneFile* zfile=file.first;
     std::vector<ZoneExtent*> new_extents = file.second;
-    for(size_t i = 0 ;i < new_extents.size(); i ++){
+    for(size_t i = 0 ;i < new_extents.size(); i++){
       ZoneExtent* old_ext=zfile->extents_[i];
       
 
@@ -2994,6 +2994,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     if (!zfile->TryAcquireWRLock()) {
       continue;
     }
+    zfile->on_zc_.store(1);
     // lock_acquired_zfiles.push_back(zfile);
 
 
@@ -3028,6 +3029,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   LargeIOSyncFileExtents(lock_acquired_zfiles);
   for(auto it : lock_acquired_zfiles){
     it.first->ReleaseWRLock();
+    it.first->on_zc_.store(1);
   }
 
   // zbd_->AddGCBytesWritten(pos);
