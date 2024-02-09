@@ -153,6 +153,13 @@ uint64_t ZenFSStopWatch::RecordTickNS(){
   return (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
   // return 
 }
+double ZenFSStopWatch::RecordTickMS(){
+  clock_gettime(CLOCK_MONOTONIC, &end_timespec);
+  long long ns =(end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
+  // return 
+  return ((double)( (double)(ns/1000) )/1000.0);
+}
+
 ZenFSStopWatch::~ZenFSStopWatch(){
     clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
@@ -700,7 +707,14 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   //   printf("%ld : %ld / %ld , diff : %ld\n",fr,lazylinear,lazylog,lazylinear-lazylog);
   // }
   // start_time_ = time(NULL);
-
+  for(uint64_t i = 0 ; i<=256; i++){
+// #define READ_DISK_COST 0
+// #define READ_PAGE_COST 1
+// #define WRITE_COST 2
+    cost_[READ_DISK_COST][i]=ReadDiskCost(i);
+    cost_[READ_PAGE_COST][i]=ReadPageCacheCost(i);
+    cost_[WRITE_COST][i]=WriteCost(i);
+  }
   return IOStatus::OK();
 }
 

@@ -68,7 +68,10 @@ class ZoneFile;
 
 #define ZC_COMPACTION_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_RT,4)
 
-
+#define READ_DISK_COST 0
+#define READ_PAGE_COST 1
+#define WRITE_COST 2
+#define FREE_SPACE_COST 3
 // #define ZENFS_IO_ZONES (40) // 20GB
 
 // #define ZONE_SIZE 512
@@ -218,6 +221,7 @@ struct ZenFSStopWatch{
   }
 
   uint64_t RecordTickNS();
+  double RecordTickMS();
   ~ZenFSStopWatch();
   // {
   //   clock_gettime(CLOCK_MONOTONIC, &end_timespec);
@@ -936,14 +940,41 @@ class ZonedBlockDevice {
   void SetZCRunning(bool v){ zc_running_.store(v); }
   bool GetZCRunning(void) {return zc_running_.load(); }
 
+  // double read_disk_cost_[257];
+  // double read_page_cache_cost_[257];
+  // double write_cost_[257];
+
+  double cost_[3][257];
+
+  inline CorrectCost(int type,uint64_t size,double measured_cost){
+    double learning_rate = 0.1;
+    double diff= measured_cost-cost_[type][size];
+    cost_[type][size] +=  diff * learning_rate;
+  }
+// #define READ_DISK_COST 0
+// #define READ_PAGE_COST 1
+// #define WRITE_COST 2
+  inline double GetCost(int type,uint64_t size){
+    if(type == FREE_SPACE_COST){
+      return 50.0 + 
+          cost_[READ_DISK_COST][size] + 
+          cost_[WRITE_COST][size];
+    }
+    return cost_[type][size];
+  }
+
   inline double ReadDiskCost(uint64_t size){ // mb
     return (double)(4.26*size) + 7.54;
+    // return read_disk_cost_[i];
   }
   inline double ReadPageCacheCost(uint64_t size){ // mb
+
     return (double)(0.92*size) + 0.09;
+    // return read_page_cache_cost_[i];
   }
   inline double WriteCost(uint64_t size){ // mb
     return (double)(4.41*size) + 12.15;
+    // return write_cost_[i];
   }
   inline double FreeSpaceCost(uint64_t size){
     // to be get
