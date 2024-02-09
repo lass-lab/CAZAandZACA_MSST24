@@ -75,8 +75,8 @@ IOStatus ZbdlibBackend::Open(bool readonly, bool exclusive,
   (void)(log2_erase_unit_size);
   /* The non-direct file descriptor acts as an exclusive-use semaphore */
   if (exclusive) {
-    // read_f_ = zbd_open(filename_.c_str(), O_RDONLY | O_EXCL, &info);
-    read_f_ = zbd_open(filename_.c_str(), O_RDONLY | O_EXCL | O_DIRECT, &info);
+    read_f_ = zbd_open(filename_.c_str(), O_RDONLY | O_EXCL, &info);
+    // read_f_ = zbd_open(filename_.c_str(), O_RDONLY | O_EXCL | O_DIRECT, &info);
   } else {
     read_f_ = zbd_open(filename_.c_str(), O_RDONLY, &info);
   }
