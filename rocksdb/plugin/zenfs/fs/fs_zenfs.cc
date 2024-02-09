@@ -982,12 +982,15 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
       ZoneExtent* old_ext=zfile->extents_[i];
       
 
-      // ZoneExtent* new_ext=;
+      // ZoneExtent* new_ext=new_extents[i];
       if(old_ext->start_!=new_extents[i]->start_){
 
         zfile->extents_[i]=new_extents[i];
 
         old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
+        delete old_ext;
+      }else{
+        delete new_extents[i];
       }
      
     }
@@ -1027,6 +1030,7 @@ IOStatus ZenFS::SyncFileExtents(ZoneFile* zoneFile,
       //   }
       //   old_ext->zone_->Release();
       // }
+      delete old_ext;
     }
     else{
       delete new_extents[i];
@@ -2805,7 +2809,9 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
           ext->fname_,ext->header_size_);
     new_ext->zone_=ext->zone_;
+    new_ext->page_cache_=ext->page_cache_;
     new_extent_list.push_back(new_ext);    
+
   }
   
   
@@ -2914,7 +2920,10 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     for(auto ext : extents){
       if(ext->page_cache==nullptr){
-        pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),ext->length,ext->start);
+        err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),ext->length,ext->start);
+        if(err){
+          printf("SMRLargeIOMigrateExtents err ? %d\n",err);
+        }
       }else{
         memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get(),
               ext->length + ext->header_size);
@@ -3939,6 +3948,7 @@ IOStatus ZenFS::MigrateFileExtents(
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
           ext->fname_,ext->header_size_);
     new_ext->zone_=ext->zone_;
+    new_ext->page_cache_ = ext->page_cache_;
     new_extent_list.push_back(new_ext);    
   }
 {
@@ -4012,11 +4022,11 @@ IOStatus ZenFS::MigrateFileExtents(
       target_start = target_zone->wp_ + ZoneFile::SPARSE_HEADER_SIZE;
       zfile->MigrateData(ext->start_ - ZoneFile::SPARSE_HEADER_SIZE,
                          ext->length_ + ZoneFile::SPARSE_HEADER_SIZE,
-                         target_zone,ext->page_cache);
+                         target_zone,ext->page_cache_);
       ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
       copied +=ZoneFile::SPARSE_HEADER_SIZE;
     } else {
-      zfile->MigrateData(ext->start_, ext->length_, target_zone,ext->page_cache);
+      zfile->MigrateData(ext->start_, ext->length_, target_zone,ext->page_cache_);
     }
 
     if(!run_gc_worker_){
