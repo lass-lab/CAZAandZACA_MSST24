@@ -2940,10 +2940,9 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
           printf("SMRLargeIOMigrateExtents err %d ext->start %lu victim_zone->start_ %lu ext->length %lu header %lu\n",
           err,ext->start,victim_zone->start_,ext->length,ext->header_size);
         }
-}
         measured_ms=sw.RecordTickMS();
         zbd_->CorrectCost(READ_DISK_COST,(read_size>>20),measured_ms);
-      }else{
+        }else{
         ZenFSStopWatch sw("",nullptr);
         memmove(ZC_read_buffer_+(ext->start-ext->header_size -victim_zone->start_), ext->page_cache.get(),
               ext->length + ext->header_size);

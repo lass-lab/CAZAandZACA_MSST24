@@ -708,9 +708,6 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   // }
   // start_time_ = time(NULL);
   for(i = 0 ; i<=256; i++){
-// #define READ_DISK_COST 0
-// #define READ_PAGE_COST 1
-// #define WRITE_COST 2
     cost_[READ_DISK_COST][i]=ReadDiskCost(i);
     cost_[READ_PAGE_COST][i]=ReadPageCacheCost(i);
     cost_[WRITE_COST][i]=WriteCost(i);
