@@ -2884,7 +2884,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   Zone* new_zone =nullptr;
   // int read_fd = zbd_->GetFD(READ_FD);
   int read_fd = zbd_->GetFD(READ_DIRECT_FD);
-
+  (void)(everything_in_page_cache);
   (void)(should_be_copied);
   
   // uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
