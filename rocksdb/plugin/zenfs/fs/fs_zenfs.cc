@@ -3617,7 +3617,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
     //     break;
     //   }
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit()){
-      if(page_cache_mtx_.try_lock()){
+      if(page_cache_mtx_.lock()){
         continue;
       }
       std::lock_guard<std::mutex> file_lock(files_mtx_);
@@ -3626,7 +3626,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
         std::vector<ZoneExtent*> extents=file.GetExtents();
         for (ZoneExtent* ext : extents ) {
           zbd_->page_cache_size_-=ext->length_;
-          ext->page_cache_.reset(nullptr);
+          ext->page_cache_.reset();
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
             break;
           }
