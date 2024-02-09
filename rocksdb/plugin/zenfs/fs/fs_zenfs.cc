@@ -2920,8 +2920,14 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
     for(auto ext : extents){
       if(ext->page_cache==nullptr){
+        uint64_t read_size = ext->length+ext->header_size;
+        size_t align =   (read_size) % 4096;
+        if(align){
+          read_size += 4096-align;
+        }
+
         err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),
-            (ext->length+ext->header_size),
+            (read_size),
             (ext->start-ext->header_size));
         if(err<0){
           printf("SMRLargeIOMigrateExtents err %d ext->start %lu victim_zone->start_ %lu ext->length %lu header %lu\n",
