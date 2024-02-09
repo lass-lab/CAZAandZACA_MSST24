@@ -3617,9 +3617,10 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
     //     break;
     //   }
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit()){
-      if(page_cache_mtx_.lock()){
-        continue;
-      }
+      // if(page_cache_mtx_.lock()){
+      //   continue;
+      // }
+      page_cache_mtx_.lock();
       std::lock_guard<std::mutex> file_lock(files_mtx_);
       for (const auto& file_it : files_) {
         ZoneFile& file = *(file_it.second);
