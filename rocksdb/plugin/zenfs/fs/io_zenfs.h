@@ -188,7 +188,8 @@ class ZoneFile {
   void MetadataSynced() { nr_synced_extents_ = extents_.size(); };
   void MetadataUnsynced() { nr_synced_extents_ = 0; };
 
-  IOStatus MigrateData(uint64_t offset, uint64_t length, Zone* target_zone);
+  IOStatus MigrateData(uint64_t offset, uint64_t length, Zone* target_zone,
+                      std::shared_ptr<char> page_cache = nullptr);
 
   Status DecodeFrom(Slice* input);
   Status MergeUpdate(std::shared_ptr<ZoneFile> update, bool replace);

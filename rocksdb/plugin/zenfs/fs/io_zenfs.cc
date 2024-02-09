@@ -1535,7 +1535,7 @@ IOStatus ZonedRandomAccessFile::Read(uint64_t offset, size_t n,
 
 
 IOStatus ZoneFile::MigrateData(uint64_t offset, uint64_t length,
-                               Zone* target_zone) {
+                               Zone* target_zone, std::shared_ptr<char> page_cache) {
   IOStatus s;
   uint64_t step = length;
   uint64_t block_sz = zbd_->GetBlockSize();
@@ -1572,10 +1572,15 @@ IOStatus ZoneFile::MigrateData(uint64_t offset, uint64_t length,
   while (length > 0) {
     read_sz = length > read_sz ? read_sz : length;
     pad_sz = read_sz % block_sz == 0 ? 0 : (block_sz - (read_sz % block_sz));
-    int r;
+    int r = 0;
     {
         ZenFSStopWatch z1("READ",zbd_);
-        r= zbd_->Read(buf, offset, read_sz + pad_sz, true);
+        if(page_cache==nullptr){
+          r= zbd_->Read(buf, offset, read_sz + pad_sz, true);
+        }else{
+          memmove(buf,page_cache.get(),read_sz + pad_sz);
+          r=(read_sz+pad_sz);
+        }
     }
 
     if (r < 0) {

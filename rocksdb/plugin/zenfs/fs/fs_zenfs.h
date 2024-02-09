@@ -140,6 +140,7 @@ class ZenFS : public FileSystemWrapper {
   ZonedBlockDevice* zbd_;
   std::map<std::string, std::shared_ptr<ZoneFile>> files_;
   std::mutex files_mtx_;
+  std::mutex page_cache_mtx_;
   std::shared_ptr<Logger> logger_;
   std::atomic<uint64_t> next_file_id_;
 
