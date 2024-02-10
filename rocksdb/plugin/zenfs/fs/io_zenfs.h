@@ -69,6 +69,11 @@ class ZoneExtent {
       return e1->start_ < e2->start_;
   }
   ~ZoneExtent(){
+    if(zone_ && zone->GetZBD() && page_cache_ != nullptr && page_cache_.use_count()==1){
+
+      zone->GetZBD()->page_cache_size_ -=length_;
+    }
+
     page_cache_.reset();
   }
   Status DecodeFrom(Slice* input);
@@ -189,7 +194,7 @@ class ZoneFile {
   void MetadataUnsynced() { nr_synced_extents_ = 0; };
 
   IOStatus MigrateData(uint64_t offset, uint64_t length, Zone* target_zone,
-                      std::shared_ptr<char> page_cache = nullptr);
+                      std::shared_ptr<char>& page_cache );
 
   Status DecodeFrom(Slice* input);
   Status MergeUpdate(std::shared_ptr<ZoneFile> update, bool replace);

@@ -517,9 +517,10 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
       aligned = true;
     }
-    std::shared_ptr<char> page_cache = extent->page_cache_;
+    std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
     if(page_cache!=nullptr){
       memcpy(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz );
+      extent->page_cache_=std::move(page_cache);
       r=pread_sz;
     }else{
       r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
@@ -1535,7 +1536,7 @@ IOStatus ZonedRandomAccessFile::Read(uint64_t offset, size_t n,
 
 
 IOStatus ZoneFile::MigrateData(uint64_t offset, uint64_t length,
-                               Zone* target_zone, std::shared_ptr<char> page_cache) {
+                               Zone* target_zone, std::shared_ptr<char>& page_cache) {
   IOStatus s;
   uint64_t step = length;
   uint64_t block_sz = zbd_->GetBlockSize();

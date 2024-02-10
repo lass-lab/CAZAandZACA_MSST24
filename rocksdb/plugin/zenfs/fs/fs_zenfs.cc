@@ -996,6 +996,7 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
         old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
         delete old_ext;
       }else{
+        
         delete new_extents[i];
       }
      
@@ -2815,7 +2816,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
           ext->fname_,ext->header_size_);
     new_ext->zone_=ext->zone_;
-    new_ext->page_cache_=ext->page_cache_;
+    new_ext->page_cache_=std::move(ext->page_cache_);
     new_extent_list.push_back(new_ext);    
 
   }
@@ -3975,7 +3976,7 @@ IOStatus ZenFS::MigrateFileExtents(
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
           ext->fname_,ext->header_size_);
     new_ext->zone_=ext->zone_;
-    new_ext->page_cache_ = ext->page_cache_;
+    new_ext->page_cache_ = std::move(ext->page_cache_);
     new_extent_list.push_back(new_ext);    
   }
 {
