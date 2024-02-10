@@ -996,7 +996,7 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
         old_ext->zone_->used_capacity_.fetch_sub(old_ext->length_);
         delete old_ext;
       }else{
-        
+
         delete new_extents[i];
       }
      
@@ -3627,6 +3627,9 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
         ZoneFile& file = *(file_it.second);
         std::vector<ZoneExtent*> extents=file.GetExtents();
         for (ZoneExtent* ext : extents ) {
+          if(ext->page_cache_.use_count()>1){
+            continue;
+          }
           zbd_->page_cache_size_-=ext->length_;
           ext->page_cache_.reset();
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
