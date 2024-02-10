@@ -2927,15 +2927,17 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
     ZenFSStopWatch z1("Large IO pread",zbd_);
 
     for(auto ext : extents){
-      if(ext->page_cache==nullptr){
-        ZenFSStopWatch sw("",nullptr);
         uint64_t read_size = ext->length+ext->header_size;
         size_t align =   (read_size) % 4096;
         if(align){
           read_size += 4096-align;
         }
 
-        err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_),
+      if(ext->page_cache==nullptr){
+        ZenFSStopWatch sw("",nullptr);
+
+
+        err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_-ext->header_size),
             (read_size),
             (ext->start-ext->header_size));
         if(err<0){
@@ -2947,10 +2949,11 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         }else{
         ZenFSStopWatch sw("",nullptr);
         memmove(ZC_read_buffer_+(ext->start-ext->header_size -victim_zone->start_), ext->page_cache.get(),
-              ext->length + ext->header_size);
+              read_size);
         measured_ms=sw.RecordTickMS();
-        zbd_->CorrectCost(READ_PAGE_COST,( (ext->length + ext->header_size)>>20),measured_ms);
+        zbd_->CorrectCost(READ_PAGE_COST,( (read_size)>>20),measured_ms);
       }
+    
     }
 
 
