@@ -69,7 +69,7 @@ class ZoneExtent {
       return e1->start_ < e2->start_;
   }
   ~ZoneExtent(){
-    if(zone_ && zone->GetZBD() && page_cache_ != nullptr && page_cache_.use_count()==1){
+    if(zone_ && zone_->GetZBD() && page_cache_ != nullptr && page_cache_.use_count()==1){
 
       zone->GetZBD()->page_cache_size_ -=length_;
     }
