@@ -71,7 +71,7 @@ class ZoneExtent {
   ~ZoneExtent(){
     if(zone_ && zone_->GetZBD() && page_cache_ != nullptr && page_cache_.use_count()==1){
 
-      zone->GetZBD()->page_cache_size_ -=length_;
+      zone_->GetZBD()->page_cache_size_ -=length_;
     }
 
     page_cache_.reset();
