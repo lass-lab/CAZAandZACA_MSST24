@@ -1392,7 +1392,7 @@ void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
                 same_zone_score_for_timelapse_,invalidate_score_for_timelapse_,
                 0.0,invalid_percent_per_zone,
                 cur_ops,gc_bytes_written_.load(),
-                valid_data_size
+                valid_data_size,
                 invalid_data_size);
 }
 
