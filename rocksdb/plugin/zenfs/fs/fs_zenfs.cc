@@ -561,7 +561,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // (void)(microseconds);
       
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-      zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec)
+      zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec);
       zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
                           1,should_be_copied, forced);
     }
