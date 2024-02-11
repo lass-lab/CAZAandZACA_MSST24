@@ -607,7 +607,7 @@ class ZonedBlockDevice {
   
 
   uint64_t page_cache_limit_ = 0;
-  std::atomic<long> cumulative_io_blocking_{0}; //ms
+  uint64_t cumulative_io_blocking_=0; //ms
 
 
   uint64_t default_extent_size_ = 256<<20;
@@ -672,7 +672,7 @@ class ZonedBlockDevice {
     uint64_t cur_gc_written_;
     uint64_t valid_data_size_;
     uint64_t invalid_data_size_;
-    
+    uint64_t cumulative_io_blocking_;
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
             uint64_t wwp, int T, uint64_t rt,uint64_t zone_sz, std::vector<int> num_files_levels, 
             std::vector<double> compaction_scores, std::vector<uint64_t> levels_size,
@@ -681,12 +681,12 @@ class ZonedBlockDevice {
             std::vector<double>* inval_score_for_timelapse ,
             double avg_invalid_ratio,
             std::vector<uint64_t> invalid_percent_per_zone,
-            uint64_t cur_ops,uint64_t cur_gc_written, uint64_t valid_data_size, uint64_t invalid_data_size) 
+            uint64_t cur_ops,uint64_t cur_gc_written, uint64_t valid_data_size, uint64_t invalid_data_size,uint64_t cumulative_io_blocking) 
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
           , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
           levels_size_(levels_size),avg_invalid_ratio_(avg_invalid_ratio),cur_ops_(cur_ops),
-          cur_gc_written_(cur_gc_written), valid_data_size_(valid_data_size), invalid_data_size_(invalid_data_size) {
+          cur_gc_written_(cur_gc_written), valid_data_size_(valid_data_size), invalid_data_size_(invalid_data_size),cumulative_io_blocking_(cumulative_io_blocking) {
       if((rc+rc_zc)==0){
         R_wp_= 100;
       }else{
@@ -771,6 +771,7 @@ class ZonedBlockDevice {
       printf("%lu\t",cur_gc_written_);
       printf("%lu\t",valid_data_size_);
       printf("%lu\t",invalid_data_size_);
+      printf("%lu\t",cumulative_io_blocking_);
       // for(int n : num_files_levels_){
       //   printf("%d\t",n);
       // }
@@ -1078,7 +1079,8 @@ class ZonedBlockDevice {
   }
   void AddTimeLapse(int T,uint64_t cur_ops);
   void AddCumulativeIOBlocking(long ns){
-    cumulative_io_blocking_.fetch_add(((ns/1000)/1000));
+    // cumulative_io_blocking_.fetch_add(((ns/1000)/1000));
+    cumulative_io_blocking_+=(ns/1000)/1000;
   }
   
   IOStatus AsyncResetUnusedIOZones(void)__attribute__((hot));

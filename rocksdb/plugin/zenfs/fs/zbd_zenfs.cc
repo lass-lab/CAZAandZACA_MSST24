@@ -1393,7 +1393,7 @@ void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
                 0.0,invalid_percent_per_zone,
                 cur_ops,gc_bytes_written_.load(),
                 valid_data_size,
-                invalid_data_size);
+                invalid_data_size,cumulative_io_blocking_);
 }
 
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
