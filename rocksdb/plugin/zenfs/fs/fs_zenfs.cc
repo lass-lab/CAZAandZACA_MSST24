@@ -3060,7 +3060,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   LargeIOSyncFileExtents(lock_acquired_zfiles);
   for(auto it : lock_acquired_zfiles){
     it.first->ReleaseWRLock();
-    it.first->on_zc_.store(1);
+    it.first->on_zc_.store(0);
   }
 
   // zbd_->AddGCBytesWritten(pos);
