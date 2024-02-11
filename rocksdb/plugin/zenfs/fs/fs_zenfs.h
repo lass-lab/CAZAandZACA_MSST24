@@ -486,6 +486,7 @@ class ZenFS : public FileSystemWrapper {
       clock_gettime(CLOCK_MONOTONIC, &end_timespec);
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       // goto loop;
+      (void)(elapsed_ns_timespec);
       // zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec);
 
     }
