@@ -1061,7 +1061,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   //   printf("read latency %lu / %lu = %lu us\n",
   //     read_latency_sum_.load(),read_n_.load(),read_latency_sum_.load()/read_n_.load());
   // }
-  printf("Cumulative I/O Blocking %lu\n",cumulative_io_blocking_.load());
+  printf("Cumulative I/O Blocking %lu\n",cumulative_io_blocking_);
   PrintCumulativeBreakDown();
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
