@@ -1369,6 +1369,14 @@ void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
     printf("Addtimelapse cur_free_percent_ ? %lu\n",cur_free_percent_);
   }
 
+
+  uint64_t invalid_data_size = 0;
+  uint64_t valid_data_size = 0;
+  for(auto z : io_zones){
+   valid_data_size+=z->used_capacity_; 
+   invalid_data_size+=(z->wp_-z->start_ - z->used_capacity_);
+  }
+
   far_stats_.emplace_back(cur_free_percent_, 
           reset_count_.load(), reset_count_zc_.load(), partial_reset_count_.load(),
           erase_size_.load(),erase_size_zc_.load(),erase_size_proactive_zc_.load(),partial_erase_size_.load(),
@@ -1383,7 +1391,9 @@ void ZonedBlockDevice::AddTimeLapse(int T,uint64_t cur_ops) {
                 std::vector<uint64_t>(0),compaction_stats_,
                 same_zone_score_for_timelapse_,invalidate_score_for_timelapse_,
                 0.0,invalid_percent_per_zone,
-                cur_ops);
+                cur_ops,gc_bytes_written_.load(),
+                valid_data_size
+                invalid_data_size);
 }
 
 inline uint64_t ZonedBlockDevice::LazyLog(uint64_t sz,uint64_t fr,uint64_t T){
