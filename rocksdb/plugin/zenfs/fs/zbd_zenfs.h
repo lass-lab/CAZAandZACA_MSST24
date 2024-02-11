@@ -670,7 +670,7 @@ class ZonedBlockDevice {
     std::vector<uint64_t> invalid_percent_per_zone_;
     uint64_t cur_ops_;
     uint64_t cur_gc_written_;
-    uint64_t valid_data_size_,
+    uint64_t valid_data_size_;
     uint64_t invalid_data_size_;
     
     FARStat(uint64_t fr, size_t rc, size_t rc_zc,size_t partial_rc,size_t er_sz,size_t er_sz_zc,size_t er_sz_pr_zc,size_t p_er_sz,
