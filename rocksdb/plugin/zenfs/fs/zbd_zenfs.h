@@ -607,7 +607,8 @@ class ZonedBlockDevice {
   uint64_t input_aware_scheme_;
   uint64_t tuning_point_;
   uint64_t async_zc_enabled_;
-  
+  uint64_t pca_selection_;
+
 
   uint64_t page_cache_limit_ = 0;
   uint64_t cumulative_io_blocking_=0; //ms
@@ -850,6 +851,9 @@ class ZonedBlockDevice {
   void ZCorPartialUnLock();
   uint64_t AsyncZCEnabled(){
     return async_zc_enabled_;
+  }
+  uint64_t PCAEnabled(){
+    return pca_selection_;
   }
   uint64_t PageCacheLimit(){
     return page_cache_limit_;
@@ -1365,7 +1369,7 @@ class ZonedBlockDevice {
     async_zc_enabled_ = other_options[1];
     default_extent_size_ = other_options[2];
     page_cache_limit_ = other_options[3];
-
+    pca_selection_ = other_options[4];
     if(zc!=0){
       zc_until_set_=true;
       zc_=zc;

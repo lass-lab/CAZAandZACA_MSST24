@@ -1696,6 +1696,7 @@ DEFINE_uint64(default_extent_size,268435456,"default_extent_size");
 
 DEFINE_uint64(page_cache_size,0,"page_cache_size");
 
+DEFINE_uint64(pca_selection,0,"pca_selection");
 namespace ROCKSDB_NAMESPACE {
 namespace {
 static Status CreateMemTableRepFactory(
@@ -4131,7 +4132,7 @@ class Benchmark {
     options.async_zc_enabled=FLAGS_async_zc_enabled;
     options.default_extent_size=FLAGS_default_extent_size;
     options.page_cache_size=FLAGS_page_cache_size;
-    
+    options.pca_selection=FLAGS_pca_selection;
     options.zc=FLAGS_zc;
     options.until=FLAGS_until;
     options.tuning_point=FLAGS_tuning_point;

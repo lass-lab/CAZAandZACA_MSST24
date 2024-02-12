@@ -586,6 +586,10 @@ static std::unordered_map<std::string, OptionTypeInfo>
          {offsetof(struct ImmutableDBOptions, page_cache_size),
           OptionType::kUInt64T, OptionVerificationType::kNormal,
           OptionTypeFlags::kNone}},  
+            {"pca_selection",
+         {offsetof(struct ImmutableDBOptions, pca_selection),
+          OptionType::kUInt64T, OptionVerificationType::kNormal,
+          OptionTypeFlags::kNone}},  
 
         {"compaction_scheme",
          {offsetof(struct ImmutableDBOptions, compaction_scheme),
@@ -837,6 +841,7 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
       async_zc_enabled(options.async_zc_enabled),
       default_extent_size(options.default_extent_size),
       page_cache_size(options.page_cache_size),
+      pca_selection(options.pca_selection),
       max_compaction_kick(options.max_compaction_kick),
       zc_kicks(options.zc),
       until(options.until),
