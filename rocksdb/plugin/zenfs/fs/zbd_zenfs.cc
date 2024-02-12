@@ -866,7 +866,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     uint64_t invalid_data_size = zc_timelapse_[i].invalid_data_size;
     uint64_t valid_data_size = zc_timelapse_[i].valid_data_size;
     uint64_t invalid_ratio = zc_timelapse_[i].invalid_ratio;
-    printf("[%lu]\t%d ~ %d\t %llu ms\t, %ld (MB)\t%lu\t%lu\t%lu\n",i+1,s,e,us/1000,(zc_timelapse_[i].copied>>20),
+    printf("[%lu]\t%d ~ %d\t %llu ms,\t %ld (MB)\t%lu\t%lu\t%lu\n",i+1,s,e,us/1000,(zc_timelapse_[i].copied>>20),
         invalid_data_size,valid_data_size,invalid_ratio );
     total_copied+=zc_timelapse_[i].copied;
     rc_zc ++;
