@@ -2968,7 +2968,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
             // memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get(),
             //   ext->length + ext->header_size);    
       
-            memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get(),
+            memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get()+ext->header_size,
               ext->length);    
         measured_ms=sw.RecordTickMS();
         printf("zc cache hit %lf\n",measured_ms);
