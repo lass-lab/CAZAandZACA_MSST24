@@ -869,7 +869,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     printf("[%lu]\t%d ~ %d\t %llu ms\t, %ld (MB)\t%lu\t%lu\t%lu\n",i+1,s,e,us/1000,(zc_timelapse_[i].copied>>20),
         invalid_data_size,valid_data_size,invalid_ratio );
     total_copied+=zc_timelapse_[i].copied;
-    rc_zc += zc_z;
+    rc_zc ++;
   }
   
   printf("Total ZC Copied (MB) :: %lu(%lu), Recaimed by ZC :: %lu \n",

@@ -506,7 +506,7 @@ class ZonedBlockDevice {
     size_t copied;
     bool forced;
     uint64_t invalid_data_size;
-    uint64_t valid_data_size 
+    uint64_t valid_data_size;
     uint64_t invalid_ratio;
     // std::vector<int> levels_files_timelapse;
   };
