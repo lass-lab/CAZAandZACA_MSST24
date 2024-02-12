@@ -994,7 +994,7 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
   for(auto file : lock_acquired_files){
     ZoneFile* zfile=file.first;
     std::vector<ZoneExtent*> new_extents = file.second;
-    WriteLock wrlock(zfile);
+    ZoneFile::WriteLock wrlock(zfile);
     for(size_t i = 0 ;i < new_extents.size(); i++){
       ZoneExtent* old_ext=zfile->extents_[i];
       
