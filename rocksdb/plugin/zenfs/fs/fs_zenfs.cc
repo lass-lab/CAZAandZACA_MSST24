@@ -462,7 +462,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
           }else{
             gc_cost+=zbd_->GetCost(READ_PAGE_COST,size_mb);
           }
-          // gc_cost+=zbd_->WriteCost(size_mb);
+          gc_cost+=zbd_->WriteCost(size_mb);
           // gc_cost+=zbd_->GetCost(WRITE_COST,size_mb);
           // gc_cost+=zbd_->GetCost(FREE_SPACE_COST,size_mb);
           // gc_cost+=zbd_->FreeSpaceCost(size_mb);
