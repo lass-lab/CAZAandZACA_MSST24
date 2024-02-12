@@ -364,14 +364,16 @@ void ZoneFile::ClearExtents() {
       continue;
     }
     zone->used_capacity_.fetch_sub((*e)->length_); 
-  }
-  for (auto e = std::begin(extents_); e != std::end(extents_); ++e) {
-    if((*e)==nullptr){
-      continue;
-    }
-    (*e)->is_invalid_=true;
     delete (*e);
   }
+
+  // for (auto e = std::begin(extents_); e != std::end(extents_); ++e) {
+  //   if((*e)==nullptr){
+  //     continue;
+  //   }
+  //   (*e)->is_invalid_=true;
+   
+  // }
   extents_.clear();
 }
 

@@ -72,7 +72,7 @@ class ZoneExtent {
     if(zone_ && zone_->GetZBD() && page_cache_ != nullptr && page_cache_.use_count()==1){
 
       zone_->GetZBD()->page_cache_size_ -=length_;
-      printf("After page cache %lu\n",zone_->GetZBD()->page_cache_size_.load());
+      // printf("After page cache %lu\n",zone_->GetZBD()->page_cache_size_.load());
     }
 
     page_cache_.reset();

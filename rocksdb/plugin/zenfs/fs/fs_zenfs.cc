@@ -463,8 +463,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
             gc_cost+=zbd_->GetCost(READ_PAGE_COST,size_mb);
           }
           // gc_cost+=zbd_->WriteCost(size_mb);
-          gc_cost+=zbd_->GetCost(WRITE_COST,size_mb);
-          gc_cost+=zbd_->GetCost(FREE_SPACE_COST,size_mb);
+          // gc_cost+=zbd_->GetCost(WRITE_COST,size_mb);
+          // gc_cost+=zbd_->GetCost(FREE_SPACE_COST,size_mb);
           // gc_cost+=zbd_->FreeSpaceCost(size_mb);
 
         }
@@ -2965,8 +2965,11 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         // memmove(ZC_read_buffer_+(ext->start-ext->header_size -victim_zone->start_), ext->page_cache.get(),
         //       read_size);
 
+            // memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get(),
+            //   ext->length + ext->header_size);    
+      
             memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get(),
-              ext->length + ext->header_size);    
+              ext->length);    
         measured_ms=sw.RecordTickMS();
         printf("zc cache hit %lf\n",measured_ms);
         zbd_->CorrectCost(READ_PAGE_COST,( (ext->length + ext->header_size)>>20),measured_ms);
