@@ -735,7 +735,9 @@ void ZenFS::AsyncZoneCleaning(void){
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
       (void)(microseconds);
-      (void)(elapsed_ns_timespec,end,start);
+      (void)(elapsed_ns_timespec);
+      (void)(end);
+      (void)(start);
       // zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
       //                     migrate_zones_start.size(),should_be_copied, false);
     }
