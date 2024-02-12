@@ -994,6 +994,7 @@ void ZenFS::LargeIOSyncFileExtents(std::map<ZoneFile*,std::vector<ZoneExtent*>>&
   for(auto file : lock_acquired_files){
     ZoneFile* zfile=file.first;
     std::vector<ZoneExtent*> new_extents = file.second;
+    WriteLock wrlock(zfile);
     for(size_t i = 0 ;i < new_extents.size(); i++){
       ZoneExtent* old_ext=zfile->extents_[i];
       
@@ -2971,7 +2972,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
             memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get()+ext->header_size,
               ext->length);    
         measured_ms=sw.RecordTickMS();
-        printf("zc cache hit %lf\n",measured_ms);
+        printf("\t\tzc cache hit %lf\n",measured_ms);
         zbd_->CorrectCost(READ_PAGE_COST,( (ext->length + ext->header_size)>>20),measured_ms);
       }
 

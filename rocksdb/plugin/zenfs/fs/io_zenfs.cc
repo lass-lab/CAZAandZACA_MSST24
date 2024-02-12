@@ -521,7 +521,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
     }
     std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
     if(page_cache!=nullptr){
-      memcpy(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz );
+      memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz );
       extent->page_cache_=std::move(page_cache);
       r=pread_sz;
     }else{
