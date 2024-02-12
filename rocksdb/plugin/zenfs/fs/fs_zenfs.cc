@@ -2855,7 +2855,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
       Info(logger_, "Migrate extent not found, ext_start: %lu", ext->start_);
       continue;
     }
-      uint64_t prev_relative_start = ext->start_ - ext->zone_->start_;
+    uint64_t prev_relative_start = ext->start_ - ext->zone_->start_;
 
     uint64_t target_start = new_zone->wp_ + (*pos);
 
@@ -2948,9 +2948,12 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         ZenFSStopWatch sw("",nullptr);
 
 
-        err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ -(ext->header_size)),
-            (read_size),
-            (ext->start-ext->header_size));
+        // err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ -(ext->header_size)),
+        //     (read_size),
+        //     (ext->start-ext->header_size));
+        err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ ),
+            (ext->length),
+            (ext->start));
         if(err<0){
           printf("SMRLargeIOMigrateExtents err %d ext->start %lu victim_zone->start_ %lu ext->length %lu header %lu\n",
           err,ext->start,victim_zone->start_,ext->length,ext->header_size);
@@ -2959,8 +2962,11 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         zbd_->CorrectCost(READ_DISK_COST,(read_size>>20),measured_ms);
       }else{
         ZenFSStopWatch sw("",nullptr);
-        memmove(ZC_read_buffer_+(ext->start-ext->header_size -victim_zone->start_), ext->page_cache.get(),
-              read_size);
+        // memmove(ZC_read_buffer_+(ext->start-ext->header_size -victim_zone->start_), ext->page_cache.get(),
+        //       read_size);
+
+            memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get(),
+              ext->length + ext->header_size);    
         measured_ms=sw.RecordTickMS();
         printf("zc cache hit %lf\n",measured_ms);
         zbd_->CorrectCost(READ_PAGE_COST,( (ext->length + ext->header_size)>>20),measured_ms);
