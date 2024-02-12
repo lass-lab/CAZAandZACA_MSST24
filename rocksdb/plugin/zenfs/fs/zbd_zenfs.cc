@@ -856,14 +856,18 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   int io_blocking_sum=0;
   long long io_blocking_ms_sum= 0;
   for(size_t i=0;i<zc_timelapse_.size();i++){
-    bool forced=zc_timelapse_[i].forced;
-    size_t zc_z=zc_timelapse_[i].zc_z;
+    // bool forced=zc_timelapse_[i].forced;
+    // size_t zc_z=zc_timelapse_[i].zc_z;
     int s= zc_timelapse_[i].s;
     int e= zc_timelapse_[i].e;
     long long us=zc_timelapse_[i].us;
     io_blocking_sum+=e-s+1;
     io_blocking_ms_sum+=us/1000;
-    printf("[%lu] :: %d ~ %d [%llu ms], %ld (MB), Reclaimed Zone : %lu [%s]\n",i+1,s,e,us/1000,(zc_timelapse_[i].copied>>20),zc_z,forced ? "FORCED":" " );
+    uint64_t invalid_data_size = zc_timelapse_[i].invalid_data_size;
+    uint64_t valid_data_size = zc_timelapse_[i].valid_data_size;
+    uint64_t invalid_ratio = zc_timelapse_[i].invalid_ratio;
+    printf("[%lu]\t%d ~ %d\t %llu ms\t, %ld (MB)\t%lu\t%lu\t%lu\n",i+1,s,e,us/1000,(zc_timelapse_[i].copied>>20),
+        invalid_data_size,valid_data_size,invalid_ratio );
     total_copied+=zc_timelapse_[i].copied;
     rc_zc += zc_z;
   }

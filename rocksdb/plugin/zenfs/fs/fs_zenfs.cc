@@ -425,7 +425,12 @@ size_t ZenFS::ZoneCleaning(bool forced){
   std::vector<ZonedBlockDevice::ZoneReadLock> zone_read_locks;
   ZonedBlockDevice::ZoneReadLock zone_read_lock;
   
-
+  uint64_t invalid_data_size = 0;
+  uint64_t valid_data_size = 0;
+  for(auto& z : snapshot.zones_){
+   valid_data_size+=z.used_capacity; 
+   invalid_data_size+=(z.wp-z.start - z.used_capacity);
+  }
 
   
   uint64_t selected_victim_zone_start = 0;
@@ -559,11 +564,13 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // auto elapsed = std::chrono::high_resolution_clock::now() - start_chrono;
       // long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
       // (void)(microseconds);
-      
+      uint64_t invalid_data_size = 0;
+      uint64_t valid_data_size = 0;
       long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
       zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec);
       zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
-                          1,should_be_copied, forced);
+                          1,should_be_copied, forced,
+                          invalid_data_size,valid_data_size);
     }
     zc_triggerd_count_.fetch_add(1);
   }else{
