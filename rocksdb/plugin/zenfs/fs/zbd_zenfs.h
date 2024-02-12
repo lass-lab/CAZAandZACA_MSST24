@@ -1370,6 +1370,10 @@ class ZonedBlockDevice {
     default_extent_size_ = other_options[2];
     page_cache_limit_ = other_options[3];
     pca_selection_ = other_options[4];
+
+    for(auto opt : other_options){
+      printf("other options %lu\n",opt);
+    }
     if(zc!=0){
       zc_until_set_=true;
       zc_=zc;
