@@ -995,7 +995,12 @@ class ZonedBlockDevice {
   inline double FreeSpaceCost(uint64_t size){
     // to be get
     // read, write, reset
-    return ReadDiskCost(size) + WriteCost(size) +50.0;
+    // return ReadDiskCost(size) + WriteCost(size) +50.0;
+    if(size == 0 ){
+      size= 1;
+    }
+
+    return (double)(size*size)*0.0000388  + ((double)size)*11.5931 -0.6707;
   }
   
 
