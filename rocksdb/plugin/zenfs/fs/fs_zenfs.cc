@@ -3091,7 +3091,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
 
   // zbd_->AddGCBytesWritten(pos);
-  printf("%d %s %lu\n",stopwatch_buf,mount_time_.load(),ZC_size_measure.RecordTickNS()/1000/1000);
+  printf("%d %s %lu\n",mount_time_.load(),stopwatch_buf,ZC_size_measure.RecordTickNS()/1000/1000);
   // printf("%s %lu\n",stopwatch_buf2,ZC_size_measure2.RecordTickNS()/1000/1000);
   return IOStatus::OK();
 }
