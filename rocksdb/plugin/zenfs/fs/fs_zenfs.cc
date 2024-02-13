@@ -446,7 +446,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
     }
 
       double min_gc_cost= DBL_MAX;
+      
       for (const auto& zone : snapshot.zones_) {
+        uint64_t size_mb_sum = 0;
         double gc_cost = 0.0;
         if(zone.capacity !=0 ){
           continue;
@@ -456,6 +458,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         }
         for(ZoneExtentSnapshot* ext : zone.extents_in_zone){
           uint64_t size_mb= (ext->length>>20);
+          size_mb_sum+=size_mb;
           if(ext->page_cache == nullptr){
             // gc_cost+=zbd_->ReadDiskCost(size_mb);
             gc_cost+=zbd_->GetCost(READ_DISK_COST,size_mb);
@@ -465,12 +468,13 @@ size_t ZenFS::ZoneCleaning(bool forced){
           gc_cost+=zbd_->WriteCost(size_mb);
 
 
-          gc_cost *=(double)size_mb;
+          // gc_cost *=(double)size_mb;
           // gc_cost+=zbd_->GetCost(WRITE_COST,size_mb);
           // gc_cost+=zbd_->GetCost(FREE_SPACE_COST,size_mb);
           // gc_cost+=zbd_->FreeSpaceCost(size_mb);
 
         }
+        gc_cost*=(double)size_mb_sum;
 
         if(gc_cost<min_gc_cost){
           // gc_cost = min_gc_cost;
@@ -3087,7 +3091,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
 
   // zbd_->AddGCBytesWritten(pos);
-  printf("%s %lu\n",stopwatch_buf,ZC_size_measure.RecordTickNS()/1000/1000);
+  printf("%d %s %lu\n",stopwatch_buf,mount_time_.load(),ZC_size_measure.RecordTickNS()/1000/1000);
   // printf("%s %lu\n",stopwatch_buf2,ZC_size_measure2.RecordTickNS()/1000/1000);
   return IOStatus::OK();
 }
