@@ -474,7 +474,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
           
 
         }
-        // gc_cost*=(double)size_mb_sum;
+        // gc_cost*=(double)sqrt(size_mb_sum);
 
         gc_cost+=zbd_->FreeSpaceCost(size_mb_sum);
 
@@ -2943,7 +2943,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
   ZenFSStopWatch ZC_size_measure((const char*)stopwatch_buf,zbd_);
 
-
+{
     ZenFSStopWatch z1("Large IO pread",zbd_);
 
     for(auto ext : extents){
@@ -2986,7 +2986,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       }
 
     }
-
+}
 
     // err=posix_memalign((void**)&tmp_buf, sysconf(_SC_PAGESIZE), max_end-min_start);
     // if(err){
