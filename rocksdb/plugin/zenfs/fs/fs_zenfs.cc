@@ -474,9 +474,10 @@ size_t ZenFS::ZoneCleaning(bool forced){
           
 
         }
+        gc_cost*=(double)(size_mb_sum);
         // gc_cost*=(double)sqrt(size_mb_sum);
 
-        gc_cost+=zbd_->FreeSpaceCost(size_mb_sum);
+        // gc_cost+=zbd_->FreeSpaceCost(size_mb_sum);
 
         if(gc_cost<min_gc_cost){
           // gc_cost = min_gc_cost;
