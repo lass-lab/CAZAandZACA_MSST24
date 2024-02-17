@@ -3669,6 +3669,9 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
         ZoneFile& file = *(file_it.second);
         std::vector<ZoneExtent*> extents=file.GetExtents();
         for (ZoneExtent* ext : extents ) {
+          if(!ext){
+            continue;
+          }
           if(ext->page_cache_.use_count()>1){
             continue;
           }
