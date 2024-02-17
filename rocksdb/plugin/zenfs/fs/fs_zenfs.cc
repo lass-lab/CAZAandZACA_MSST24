@@ -481,7 +481,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
           continue;
         }
         printf("time cost : %lf /  reclaimed mb %lu = gc_cost %lf\n",
-          gc_cost,reclaimed_net_free_space,gc_cost / (double)(reclaimed_net_free_space););
+          gc_cost,reclaimed_net_free_space,gc_cost / (double)(reclaimed_net_free_space));
         gc_cost = gc_cost / (double)(reclaimed_net_free_space);
         // gc_cost*=(double)sqrt(size_mb_sum);
 
