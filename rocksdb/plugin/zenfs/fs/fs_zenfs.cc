@@ -474,7 +474,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
           
 
         }
-        uint64_t reclaimed_net_free_space = zone.max_capacity - size_mb_sum;
+        uint64_t reclaimed_net_free_space = (zone.max_capacity>>20) - size_mb_sum;
         // gc_cost*=(double)(size_mb_sum);
         if(reclaimed_net_free_space==0){
           // reclaimed_net_free_space=0.1;
