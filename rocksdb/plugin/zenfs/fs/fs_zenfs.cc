@@ -3672,14 +3672,15 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(!ext){
             continue;
           }
-          if(ext->page_cache_==nullptr){
+          std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
+          if(tmp_cache==nullptr){
             continue;
           }
-          if(ext->page_cache_.use_count()>1){
+          if(tmp_cache.use_count()>1){
             continue;
           }
           zbd_->page_cache_size_-=ext->length_;
-          ext->page_cache_.reset();
+          tmp_cache.reset();
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
             break;
           }
