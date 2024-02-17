@@ -3672,6 +3672,9 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(!ext){
             continue;
           }
+          if(ext->page_cache_==nullptr){
+            continue;
+          }
           if(ext->page_cache_.use_count()>1){
             continue;
           }
