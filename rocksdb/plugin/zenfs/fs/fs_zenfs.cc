@@ -163,7 +163,7 @@ IOStatus ZenMetaLog::AddRecord(const Slice& slice) {
   EncodeFixed32(buffer + sizeof(uint32_t), record_sz);
   memcpy(buffer + sizeof(uint32_t) * 2, data, record_sz);
 
-  s = zone_->Append(buffer, phys_sz);
+  s = zone_->Append(buffer, phys_sz,true);
 
   free(buffer);
   return s;
