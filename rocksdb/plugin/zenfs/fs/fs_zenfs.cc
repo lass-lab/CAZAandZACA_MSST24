@@ -3098,7 +3098,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
 
   {
     ZenFSStopWatch sw("Large IO pwrite",zbd_);
-    new_zone->Append(ZC_write_buffer_,pos);
+    new_zone->Append(ZC_write_buffer_,pos,true);
     measured_ms=sw.RecordTickMS();
     zbd_->CorrectCost(WRITE_COST,( (should_be_copied)>>20),measured_ms);
     
