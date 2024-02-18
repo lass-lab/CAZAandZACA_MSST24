@@ -2919,8 +2919,8 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
 IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,uint64_t should_be_copied,bool everything_in_page_cache) {
   Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
-  int read_fd = zbd_->GetFD(READ_FD);
-  // int read_fd = zbd_->GetFD(READ_DIRECT_FD);
+  // int read_fd = zbd_->GetFD(READ_FD);
+  int read_fd = zbd_->GetFD(READ_DIRECT_FD);
   (void)(everything_in_page_cache);
   (void)(should_be_copied);
   double measured_ms;
@@ -2940,6 +2940,10 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   }
   if(ZC_read_buffer_==nullptr){
     err=posix_memalign((void**)&ZC_read_buffer_, sysconf(_SC_PAGESIZE), victim_zone->max_capacity_);
+    if(err){
+      printf("SMRLargeIOMigrateExtents fail to allocate ZC_read_buffer_\n");
+    }
+    err=posix_memalign((void**)&ZC_read_buffer2_, sysconf(_SC_PAGESIZE), victim_zone->max_capacity_);
     if(err){
       printf("SMRLargeIOMigrateExtents fail to allocate ZC_read_buffer_\n");
     }
@@ -2970,9 +2974,25 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         // err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ -(ext->header_size)),
         //     (read_size),
         //     (ext->start-ext->header_size));
-        err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ ),
-            (ext->length),
-            (ext->start));
+        uint64_t aligned_start= ext->start;
+        uint64_t aligned_length = ext->length;
+        uint64_t align= aligned_start  % 4096;
+        if(align){
+          aligned_start-=align;
+        }
+        align=aligned_length%4096;
+        if(align){
+          aligned_length+=4096-align;
+        }
+
+        err=pread(read_fd,ZC_read_buffer2_,aligned_length,aligned_start);
+        memmove(ZC_read_buffer_+(ext->start-victim_zone->start_ ),ZC_read_buffer2_, ext->length);
+        
+        // err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ ),
+        //     (ext->length),
+        //     (ext->start));
+
+        
         if(err<0){
           printf("SMRLargeIOMigrateExtents err %d ext->start %lu victim_zone->start_ %lu ext->length %lu header %lu\n",
           err,ext->start,victim_zone->start_,ext->length,ext->header_size);

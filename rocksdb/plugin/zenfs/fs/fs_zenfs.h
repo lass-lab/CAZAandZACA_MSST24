@@ -202,6 +202,7 @@ class ZenFS : public FileSystemWrapper {
   std::queue<io_context_t*> io_ctx_queue_;
 
   char* ZC_read_buffer_ = nullptr;
+  char* ZC_read_buffer2_ =nullptr;
   char* ZC_write_buffer_ = nullptr;
 
   char* page_cache_hit_mmap_addr_ = nullptr;
