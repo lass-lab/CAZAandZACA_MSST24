@@ -2976,7 +2976,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         //     (ext->start-ext->header_size));
         uint64_t aligned_start= ext->start;
         uint64_t aligned_length = ext->length;
-        uint64_t align= aligned_start  % 4096;
+        align= aligned_start  % 4096;
         if(align){
           aligned_start-=align;
         }
