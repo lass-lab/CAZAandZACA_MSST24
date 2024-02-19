@@ -519,10 +519,10 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
       aligned = true;
     }
-    
+    std::shared_ptr<char> page_cache;
 {
     std::lock_guard<std::mutex> lg(extent->page_cache_lock_);
-    std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
+    page_cache = std::move(extent->page_cache_);
     if(page_cache==nullptr){
       char* align_buf = nullptr;
       r=posix_memalign((void**)(&align_buf),sysconf(_SC_PAGESIZE) ,extent->length_+extent->header_size_ );
