@@ -831,17 +831,19 @@ class ZonedBlockDevice {
 
   // validsize,zidx
   std::vector<std::pair<uint64_t,uint64_t>> HighPosibilityTobeVictim(void){
-    std::vector<uint64_t> ret;
-    ret.clear();
+    std::vector<std::pair<uint64_t,uint64_t>> sorted,ret;
+    sorted.clear(); ret.clear();
     for(auto z: io_zones){
       if(z->capacity_!=0){
         continue;
       }
-      ret.push_back({z->used_capacity_,z->zidx_});
+      sorted.push_back({z->used_capacity_,z->zidx_});
     }
-    std::sort(ret.begin(),ret.end());
-
-    
+    std::sort(sorted.begin(),sorted.end());
+    for(size_t i = 0 ; i<5 && i <sorted.size();i++){
+      ret.push_back(sorted[i]);
+    }
+  
     return ret;
   }
 
