@@ -519,14 +519,42 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
       aligned = true;
     }
+    
     std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
-    if(page_cache!=nullptr){
-      memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz );
-      extent->page_cache_=std::move(page_cache);
-      r=pread_sz;
-    }else{
-      r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+
+    if(page_cache==nullptr){
+      char* align_buf = nullptr;
+      r=posix_memalign((void**)(&align_buf),sysconf(_SC_PAGESIZE) ,extent->length_ );
+      if(r){
+        printf("ZoneFile::PositionedRead memory allocate failed\n");
+        align_buf = nullptr;
+      }
+      zbd_->Read(align_buf, extent->start_, extent->legnth_, (direct && aligned));
+
+      page_cache.reset(align_buf);
+      zbd_->page_cache_size_+=extent->legnth_;
     }
+
+
+    
+
+    // if(page_cache!=nullptr){
+    memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz );
+    extent->page_cache_=std::move(page_cache);
+    r=pread_sz;
+    // }
+
+    // else{
+    //   char* align_buf = nullptr;
+    //   r=posix_memalign((void**)(align_buf),sysconf(_SC_PAGESIZE) ,extent->length_ );
+    //   if(r){
+    //     printf("ZoneFile::BufferedAppend memory allocate failed\n");
+    //     (*_buffer) = nullptr;
+    //   }
+    //   r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+
+
+    // }
     
 
     if (r <= 0) break;
