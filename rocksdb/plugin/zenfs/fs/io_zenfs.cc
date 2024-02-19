@@ -524,12 +524,11 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
     if(page_cache==nullptr){
       char* align_buf = nullptr;
-      r=posix_memalign((void**)(&align_buf),sysconf(_SC_PAGESIZE) ,extent->length_ );
+      r=posix_memalign((void**)(&align_buf),sysconf(_SC_PAGESIZE) ,extent->length_+extent->header_size_ );
       if(r){
         printf("ZoneFile::PositionedRead memory allocate failed\n");
-        align_buf = nullptr;
       }
-      zbd_->Read(align_buf, extent->start_, extent->length_, (direct && aligned));
+      zbd_->Read(align_buf, extent->start_-extent->header_size_, extent->length_ + extent->header_size_, (direct && aligned));
 
       page_cache.reset(align_buf);
       zbd_->page_cache_size_+=extent->length_;
