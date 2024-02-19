@@ -529,10 +529,10 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
         printf("ZoneFile::PositionedRead memory allocate failed\n");
         align_buf = nullptr;
       }
-      zbd_->Read(align_buf, extent->start_, extent->legnth_, (direct && aligned));
+      zbd_->Read(align_buf, extent->start_, extent->length_, (direct && aligned));
 
       page_cache.reset(align_buf);
-      zbd_->page_cache_size_+=extent->legnth_;
+      zbd_->page_cache_size_+=extent->length_;
     }
 
 
