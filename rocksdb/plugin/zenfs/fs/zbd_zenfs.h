@@ -840,11 +840,12 @@ class ZonedBlockDevice {
       if(z->used_capacity_==0){
         continue;
       }
-      sorted.push_back({z->used_capacity_,z->zidx_});
+      sorted.push_back({(z->used_capacity_>>20),z->zidx_});
     }
     std::sort(sorted.begin(),sorted.end());
 
     for(size_t i = 0 ; i<(5) && i <sorted.size();i++){
+      printf("%lu %lu\n",sorted[i].first,sorted[i].second);
       ret.push_back(sorted[i]);
     }
   
