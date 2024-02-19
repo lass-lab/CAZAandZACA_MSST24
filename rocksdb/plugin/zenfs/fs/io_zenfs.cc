@@ -886,6 +886,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     return IOStatus::OK();
     // return;
   }
+  printf("%lu MB\n",zoneFile_->GetFileSize()>>20);
   zoneFile_->fno_=fno_;
   zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
 
