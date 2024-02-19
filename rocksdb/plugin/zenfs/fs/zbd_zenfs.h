@@ -837,6 +837,9 @@ class ZonedBlockDevice {
       if(z->capacity_!=0){
         continue;
       }
+      if(z->used_capacity_==0){
+        continue;
+      }
       sorted.push_back({z->used_capacity_,z->zidx_});
     }
     std::sort(sorted.begin(),sorted.end());
