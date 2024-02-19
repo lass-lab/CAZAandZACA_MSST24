@@ -59,6 +59,7 @@ class ZoneExtent {
   uint64_t header_size_;
 
   std::shared_ptr<char> page_cache_= nullptr;
+  std::mutex page_cache_lock_ ; 
 
   explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname);
   // to be push front
