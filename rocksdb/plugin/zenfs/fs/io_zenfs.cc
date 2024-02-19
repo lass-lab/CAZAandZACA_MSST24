@@ -344,7 +344,7 @@ void ZoneFile::SetFileModificationTime(time_t mt) { m_time_ = mt; }
 void ZoneFile::SetIOType(IOType io_type) { io_type_ = io_type; }
 
 ZoneFile::~ZoneFile() { 
-  printf("file size %lu\n",file_size_>>20);
+  // printf("file size %lu\n",file_size_>>20);
   ClearExtents();
   // ReleaseWRLock();
  }
