@@ -3719,7 +3719,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
                         != zone_to_be_pinned.end()
           )
           {
-
+            continue;
           }
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
