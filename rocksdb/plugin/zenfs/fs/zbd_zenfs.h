@@ -798,6 +798,7 @@ class ZonedBlockDevice {
 
 
 
+
   std::vector<FARStat> far_stats_;
   std::mutex same_zone_score_mutex_;
   std::vector<double> same_zone_score_[10];
@@ -827,6 +828,23 @@ class ZonedBlockDevice {
   std::atomic<uint64_t> lsm_tree_[10];
   std::atomic<uint64_t> page_cache_size_{0};
     uint64_t ZENFS_CONVENTIONAL_ZONE = 0;
+
+  // validsize,zidx
+  std::vector<std::pair<uint64_t,uint64_t>> HighPosibilityTobeVictim(void){
+    std::vector<uint64_t> ret;
+    ret.clear();
+    for(auto z: io_zones){
+      if(z->capacity_!=0){
+        continue;
+      }
+      ret.push_back({z->used_capacity_,z->zidx_});
+    }
+    std::sort(ret.begin(),ret.end());
+
+    
+    return ret;
+  }
+
 
   /*
   0 : 256
