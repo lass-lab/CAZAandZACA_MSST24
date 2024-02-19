@@ -511,7 +511,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   }
   
   if(selected_victim_zone_start==0){
-    printf("??? selected_victim_zone_start %lu\n",selected_victim_zone_start);
+    // printf("??? selected_victim_zone_start %lu\n",selected_victim_zone_start);
   }
   // sort(victim_candidate.rbegin(), victim_candidate.rend());
 
@@ -3685,9 +3685,15 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
       // if(page_cache_mtx_.lock()){
       //   continue;
       // }
+      if(!run_gc_worker_){
+        break;
+      }
       page_cache_mtx_.lock();
       std::lock_guard<std::mutex> file_lock(files_mtx_);
       for (const auto& file_it : files_) {
+        if(!run_gc_worker_){
+          break;
+        }
         ZoneFile& file = *(file_it.second);
         std::vector<ZoneExtent*> extents=file.GetExtents();
         for (ZoneExtent* ext : extents ) {
@@ -3706,6 +3712,9 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
             break;
           }
+        }
+        if(!run_gc_worker_){
+          break;
         }
         if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
           break;
