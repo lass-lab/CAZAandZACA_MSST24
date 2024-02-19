@@ -453,9 +453,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
         if(zone.capacity !=0 ){
           continue;
         }
-        if(zone.used_capacity>(zone.max_capacity*95)/100){
-          continue;
-        }
+        // if(zone.used_capacity>(zone.max_capacity*95)/100){
+        //   continue;
+        // }
         for(ZoneExtentSnapshot* ext : zone.extents_in_zone){
           uint64_t size_mb= (ext->length>>20);
           size_mb_sum+=size_mb;
@@ -499,9 +499,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
       if(zone.capacity !=0 ){
         continue;
       }
-      if(zone.used_capacity>(zone.max_capacity*95)/100){
-        continue;
-      }
+      // if(zone.used_capacity>(zone.max_capacity*95)/100){
+      //   continue;
+      // }
       uint64_t gc_cost=100 * zone.used_capacity / zone.max_capacity;
       if(gc_cost<min_gc_cost){
         min_gc_cost=gc_cost;
