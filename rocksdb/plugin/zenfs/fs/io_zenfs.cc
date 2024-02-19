@@ -344,6 +344,7 @@ void ZoneFile::SetFileModificationTime(time_t mt) { m_time_ = mt; }
 void ZoneFile::SetIOType(IOType io_type) { io_type_ = io_type; }
 
 ZoneFile::~ZoneFile() { 
+  printf("file size %lu\n",file_size_>>20);
   ClearExtents();
   // ReleaseWRLock();
  }
@@ -886,7 +887,7 @@ IOStatus ZonedWritableFile::CAZAFlushSST(){
     return IOStatus::OK();
     // return;
   }
-  printf("%lu MB\n",zoneFile_->GetFileSize()>>20);
+
   zoneFile_->fno_=fno_;
   zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
 
