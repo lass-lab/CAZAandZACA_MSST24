@@ -3711,7 +3711,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           // zone_to_be_pinned
           if(std::find_if(zone_to_be_pinned.begin(),zone_to_be_pinned,end(),
                         [&](const std::pair<uint64_t,uint64_t> valid_zidx){
-                          if(valid_zidx==ext->zone_->zidx){
+                          if(valid_zidx.second==ext->zone_->zidx_){
                             return true;
                           }
                           return false;
