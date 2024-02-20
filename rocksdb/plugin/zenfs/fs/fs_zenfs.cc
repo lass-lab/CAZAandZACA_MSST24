@@ -450,9 +450,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
       for (const auto& zone : snapshot.zones_) {
         uint64_t size_mb_sum = 0;
         double gc_cost = 0.0;
-        if(zone.capacity !=0 ){
-          continue;
-        }
+        // if(zone.capacity !=0 ){
+        //   continue;
+        // }
         // if(zone.used_capacity>(zone.max_capacity*95)/100){
         //   continue;
         // }
@@ -475,10 +475,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
         }
         gc_cost+=zbd_->GetCost(WRITE_COST,size_mb_sum);
 
-        uint64_t reclaimed_net_free_space = (zone.max_capacity>>20) - size_mb_sum;
+        uint64_t reclaimed_net_free_space = ((zone.wp-zone.start) >>20) - size_mb_sum;
         // gc_cost*=(double)(size_mb_sum);
         if(reclaimed_net_free_space==0){
-          // reclaimed_net_free_space=0.1;
           continue;
         }
         // printf("time cost : %lf /  reclaimed mb %lu = gc_cost %lf\n",
@@ -490,24 +489,36 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
         if(gc_cost<min_gc_cost){
           // gc_cost = min_gc_cost;
+          if(selected_victim_zone_start!=0){
+            zbd_->GetIOZone(selected_victim_zone_start)->Release();
+          }
           min_gc_cost=gc_cost;
           selected_victim_zone_start=zone.start;
+          continue;
         }
+
+        zbd_->GetIOZone(zone.start)->Release();
+
     }
   }else{
     uint64_t min_gc_cost= UINT64_MAX;
     for (const auto& zone : snapshot.zones_) {
-      if(zone.capacity !=0 ){
-        continue;
-      }
+      // if(zone.capacity !=0 ){
+      //   continue;
+      // }
       // if(zone.used_capacity>(zone.max_capacity*95)/100){
       //   continue;
       // }
       uint64_t gc_cost=100 * zone.used_capacity / zone.max_capacity;
       if(gc_cost<min_gc_cost){
+        if(selected_victim_zone_start!=0){
+          zbd_->GetIOZone(selected_victim_zone_start)->Release();
+        }
         min_gc_cost=gc_cost;
         selected_victim_zone_start=zone.start;
+        continue;
       }
+       zbd_->GetIOZone(zone.start)->Release();
     }
   }
   
@@ -569,6 +580,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // ZenFSStopWatch z2("ZC Large Reset",zbd_);
       zbd_->ResetMultipleUnusedIOZones();
     }
+    
     if(!run_gc_worker_){
       zbd_->SetZCRunning(false);
       // zbd_->ZCorPartialUnLock();
@@ -609,6 +621,11 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
     // }
     // return 0;
+  }
+  if(selected_victim_zone_start!=0){
+    zbd_->GetIOZone(selected_victim_zone_start)->Release();
+    
+    // printf("??? selected_victim_zone_start %lu\n",selected_victim_zone_start);
   }
   // zbd_->SetZCRunning(false);
   // for(size_t i = 0; i<zone_read_locks.size();i++){
