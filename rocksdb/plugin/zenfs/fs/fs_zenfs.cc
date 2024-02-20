@@ -465,8 +465,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
           }else{
             gc_cost+=zbd_->GetCost(READ_PAGE_COST,size_mb);
           }
-          gc_cost+=zbd_->GetCost(WRITE_COST,size_mb);
-
+          
 
           // gc_cost *=(double)size_mb;
           // gc_cost+=zbd_->GetCost(WRITE_COST,size_mb);
@@ -474,6 +473,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
           
 
         }
+        gc_cost+=zbd_->GetCost(WRITE_COST,size_mb_sum);
+
         uint64_t reclaimed_net_free_space = (zone.max_capacity>>20) - size_mb_sum;
         // gc_cost*=(double)(size_mb_sum);
         if(reclaimed_net_free_space==0){
