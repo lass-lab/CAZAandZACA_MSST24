@@ -488,6 +488,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         uint64_t reclaimed_net_free_space = ((zone.wp-zone.start) >>20) - size_mb_sum;
         // gc_cost*=(double)(size_mb_sum);
         if(reclaimed_net_free_space==0){
+          zbd_->GetIOZone(zone.start)->Release();
           continue;
         }
         // printf("time cost : %lf /  reclaimed mb %lu = gc_cost %lf\n",
