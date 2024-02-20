@@ -4119,13 +4119,14 @@ void ZonedBlockDevice::SetZoneDeferredStatus(IOStatus status) {
 }
 
 void ZonedBlockDevice::GetZoneSnapshot(std::vector<ZoneSnapshot> &snapshot) {
-  for (auto *zone : io_zones) {
+  for (size_t z = 0; z< io_zones.size(); z++) {
+    Zone* zone = io_zones[z];
     if(zone->wp_==zone->start_){
       continue;
     }
-    if(!zone->Acquire()){
-      continue;
-    }
+    // if(!zone->Acquire()){
+    //   continue;
+    // }
     snapshot.emplace_back(zone);
   }
 }

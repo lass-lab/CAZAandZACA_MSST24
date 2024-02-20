@@ -390,6 +390,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
   size_t should_be_copied=0;
   (void)(forced);
+  
   // uint64_t zone_size;
   // uint64_t zone_per_erase_unit_ratio=(zbd_->GetEraseUnitSize()*100)/zone_size;
   // uint64_t erase_unit_size=zbd_->GetEraseUnitSize();
@@ -460,9 +461,10 @@ size_t ZenFS::ZoneCleaning(bool forced){
         // if(zone.lock_held==false){
         //   continue;
         // }
-        // if(zone.capacity !=0 ){
-        //   continue;
-        // }
+        if(zone.capacity !=0 ){
+          
+          continue;
+        }
         // if(zone.used_capacity>(zone.max_capacity*95)/100){
         //   continue;
         // }
@@ -488,7 +490,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         uint64_t reclaimed_net_free_space = ((zone.wp-zone.start) >>20) - size_mb_sum;
         // gc_cost*=(double)(size_mb_sum);
         if(reclaimed_net_free_space==0){
-          zbd_->GetIOZone(zone.start)->Release();
+          // zbd_->GetIOZone(zone.start)->Release();
           continue;
         }
         // printf("time cost : %lf /  reclaimed mb %lu = gc_cost %lf\n",
@@ -500,23 +502,23 @@ size_t ZenFS::ZoneCleaning(bool forced){
 
         if(gc_cost<min_gc_cost){
           // gc_cost = min_gc_cost;
-          if(selected_victim_zone_start!=0){
-            zbd_->GetIOZone(selected_victim_zone_start)->Release();
-          }
+          // if(selected_victim_zone_start!=0){
+          //   // zbd_->GetIOZone(selected_victim_zone_start)->Release();
+          // }
           min_gc_cost=gc_cost;
           selected_victim_zone_start=zone.start;
           continue;
         }
 
-        zbd_->GetIOZone(zone.start)->Release();
+        // zbd_->GetIOZone(zone.start)->Release();
 
     }
   }else{
     uint64_t min_gc_cost= UINT64_MAX;
     for (const auto& zone : snapshot.zones_) {
-      // if(zone.capacity !=0 ){
-      //   continue;
-      // }
+      if(zone.capacity !=0 ){
+        continue;
+      }
       // if(zone.used_capacity>(zone.max_capacity*95)/100){
       //   continue;
       // }
@@ -528,14 +530,14 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // }
       uint64_t gc_cost=100 * zone.used_capacity / (zone.wp-zone.start);
       if(gc_cost<min_gc_cost){
-        if(selected_victim_zone_start!=0){
-          zbd_->GetIOZone(selected_victim_zone_start)->Release();
-        }
+        // if(selected_victim_zone_start!=0){
+        //   zbd_->GetIOZone(selected_victim_zone_start)->Release();
+        // }
         min_gc_cost=gc_cost;
         selected_victim_zone_start=zone.start;
         continue;
       }
-       zbd_->GetIOZone(zone.start)->Release();
+      //  zbd_->GetIOZone(zone.start)->Release();
     }
   }
   
@@ -592,11 +594,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         }
         clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     }
-    
-    {
-      // ZenFSStopWatch z2("ZC Large Reset",zbd_);
-      zbd_->ResetMultipleUnusedIOZones();
-    }
+
     
     if(!run_gc_worker_){
       zbd_->SetZCRunning(false);
@@ -622,28 +620,15 @@ size_t ZenFS::ZoneCleaning(bool forced){
     }
     zc_triggerd_count_.fetch_add(1);
   }else{
-    // printf("ERROR : Garbage collecting %d extents in %d \n",
-        //  (int)migrate_exts.size(),(int)migrate_zones_start.size());
     zbd_->SetZCRunning(false);
-
-    // for(auto zstart : migrate_zones_start){
-    //   printf("used capacity %lu\n",zbd_->GetIOZone((zstart))->used_capacity_.load()   );
-    //   if(zbd_->GetIOZone((zstart))->used_capacity_.load() ){
-    //     zbd_->GetIOZone((zstart))->used_capacity_.store(0);
-    //     // if(zbd_->GetIOZone((zstart))->Acquire()){
-    //     //   zbd_->GetIOZone((zstart))->Reset();
-    //     //   zbd_->GetIOZone((zstart))->Release();
-    //     // }
-    //   }
-
+  }
+    // if(selected_victim_zone_start!=0){
+    //   zbd_->GetIOZone(selected_victim_zone_start)->Release();
     // }
-    // return 0;
-  }
-  if(selected_victim_zone_start!=0){
-    zbd_->GetIOZone(selected_victim_zone_start)->Release();
-    
-    // printf("??? selected_victim_zone_start %lu\n",selected_victim_zone_start);
-  }
+    {
+      // ZenFSStopWatch z2("ZC Large Reset",zbd_);
+      zbd_->ResetMultipleUnusedIOZones();
+    }
   // zbd_->SetZCRunning(false);
   // for(size_t i = 0; i<zone_read_locks.size();i++){
   //   // zone_read_lock.ReadLockZone(migrate_zones_[i]);
