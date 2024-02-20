@@ -4123,10 +4123,16 @@ void ZonedBlockDevice::GetZoneSnapshot(std::vector<ZoneSnapshot> &snapshot) {
     if(zone->wp_==zone->start_){
       continue;
     }
-    if(!zone->Acquire()){
-      continue;
-    }
+
     snapshot.emplace_back(zone);
+    // if(zone->Acquire()){
+    //   // continue;
+    //   snapshot[snapshot.size()-1].lock_held=true;
+
+
+    // }
+    snapshot[snapshot.size()-1].lock_held=zone->Acquire();
+
   }
 }
 

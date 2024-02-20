@@ -54,6 +54,7 @@ class ZoneSnapshot {
   uint64_t zidx;
   Zone* zone_p;
   std::vector<ZoneExtentSnapshot*> extents_in_zone;
+  bool lock_held = false;
  public:
   ZoneSnapshot(Zone* zone)
       : start(zone->start_),

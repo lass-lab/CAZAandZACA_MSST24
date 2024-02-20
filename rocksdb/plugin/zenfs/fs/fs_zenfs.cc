@@ -450,6 +450,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
       for (const auto& zone : snapshot.zones_) {
         uint64_t size_mb_sum = 0;
         double gc_cost = 0.0;
+        if(zone.lock_held==false){
+          continue;
+        }
         // if(zone.capacity !=0 ){
         //   continue;
         // }
@@ -509,6 +512,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // if(zone.used_capacity>(zone.max_capacity*95)/100){
       //   continue;
       // }
+      if(zone.lock_held==false){
+        continue;
+      }
       uint64_t gc_cost=100 * zone.used_capacity / (zone.wp-zone.start);
       if(gc_cost<min_gc_cost){
         if(selected_victim_zone_start!=0){
