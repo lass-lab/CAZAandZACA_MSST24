@@ -441,16 +441,16 @@ size_t ZenFS::ZoneCleaning(bool forced){
   if(zbd_->PageCacheLimit()>1 && zbd_->PCAEnabled()){
     for(size_t i = 0; i < snapshot.extents_.size(); i++){
       ZoneExtentSnapshot* ext = &snapshot.extents_[i];
-      uint64_t zidx = ext->zone_p->zidx_;
-                          // -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+      uint64_t zidx = ext->zone_p->zidx_
+                          -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
       
-      for(size_t j = 0 ; j < snapshot.zones_.size(); j++){
-        if(snapshot.zones_[j].zidx==zidx){
-          snapshot.zones_[j].extents_in_zone.push_back(ext);
-          break;
-        }
-      }
-      // snapshot.zones_[zidx].extents_in_zone.push_back(ext);
+      // for(size_t j = 0 ; j < snapshot.zones_.size(); j++){
+      //   if(snapshot.zones_[j].zidx==zidx){
+      //     snapshot.zones_[j].extents_in_zone.push_back(ext);
+      //     break;
+      //   }
+      // }
+      snapshot.zones_[zidx].extents_in_zone.push_back(ext);
     }
 
       double min_gc_cost= DBL_MAX;
