@@ -4120,6 +4120,9 @@ void ZonedBlockDevice::SetZoneDeferredStatus(IOStatus status) {
 
 void ZonedBlockDevice::GetZoneSnapshot(std::vector<ZoneSnapshot> &snapshot) {
   for (auto *zone : io_zones) {
+    if(zone_->wp==zone->start_){
+      continue;
+    }
     if(!zone->Acquire()){
       continue;
     }
