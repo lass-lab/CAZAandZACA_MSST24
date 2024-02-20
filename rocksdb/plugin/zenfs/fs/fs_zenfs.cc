@@ -440,9 +440,16 @@ size_t ZenFS::ZoneCleaning(bool forced){
   if(zbd_->PageCacheLimit()>1 && zbd_->PCAEnabled()){
     for(size_t i = 0; i < snapshot.extents_.size(); i++){
       ZoneExtentSnapshot* ext = &snapshot.extents_[i];
-      uint64_t zidx = ext->zone_p->zidx_ 
-                          -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
-      snapshot.zones_[zidx].extents_in_zone.push_back(ext);
+      uint64_t zidx = ext->zone_p->zidx_;
+                          // -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
+      
+      for(size_t j = 0 ; j < snapshot.zones_.size(); j++){
+        if(snapshot.zones_[j].zidx==zidx){
+          snapshot.zones_[j].extents_in_zone.push_back(ext);
+          break;
+        }
+      }
+      // snapshot.zones_[zidx].extents_in_zone.push_back(ext);
     }
 
       double min_gc_cost= DBL_MAX;
@@ -450,9 +457,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
       for (const auto& zone : snapshot.zones_) {
         uint64_t size_mb_sum = 0;
         double gc_cost = 0.0;
-        if(zone.lock_held==false){
-          continue;
-        }
+        // if(zone.lock_held==false){
+        //   continue;
+        // }
         // if(zone.capacity !=0 ){
         //   continue;
         // }
@@ -512,9 +519,12 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // if(zone.used_capacity>(zone.max_capacity*95)/100){
       //   continue;
       // }
-      if(zone.lock_held==false){
-        continue;
-      }
+      // if(zone.lock_held==false){
+      //   continue;
+      // }
+      // if(zone.wp-zone.start==0){
+      //   continue;
+      // }
       uint64_t gc_cost=100 * zone.used_capacity / (zone.wp-zone.start);
       if(gc_cost<min_gc_cost){
         if(selected_victim_zone_start!=0){
