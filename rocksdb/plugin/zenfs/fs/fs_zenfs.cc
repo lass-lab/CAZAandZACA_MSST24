@@ -487,7 +487,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
         }
         gc_cost+=zbd_->GetCost(WRITE_COST,size_mb_sum);
 
-        uint64_t reclaimed_net_free_space = ((zone.wp-zone.start) >>20) - size_mb_sum;
+        uint64_t reclaimed_net_free_space = ((zone.max_capacity) >>20) - size_mb_sum;
         // gc_cost*=(double)(size_mb_sum);
         if(reclaimed_net_free_space==0){
           // zbd_->GetIOZone(zone.start)->Release();
@@ -528,7 +528,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // if(zone.wp-zone.start==0){
       //   continue;
       // }
-      uint64_t gc_cost=100 * zone.used_capacity / (zone.wp-zone.start);
+      uint64_t gc_cost=100 * zone.used_capacity / (zone.max_capacity);
       if(gc_cost<min_gc_cost){
         // if(selected_victim_zone_start!=0){
         //   zbd_->GetIOZone(selected_victim_zone_start)->Release();
