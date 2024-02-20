@@ -509,7 +509,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       // if(zone.used_capacity>(zone.max_capacity*95)/100){
       //   continue;
       // }
-      uint64_t gc_cost=100 * zone.used_capacity / zone.max_capacity;
+      uint64_t gc_cost=100 * zone.used_capacity / (zone.wp-zone.start);
       if(gc_cost<min_gc_cost){
         if(selected_victim_zone_start!=0){
           zbd_->GetIOZone(selected_victim_zone_start)->Release();
