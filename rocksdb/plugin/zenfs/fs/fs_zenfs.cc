@@ -541,9 +541,9 @@ size_t ZenFS::ZoneCleaning(bool forced){
     }
   }
   
-  // if(selected_victim_zone_start==0){
-  //   // printf("??? selected_victim_zone_start %lu\n",selected_victim_zone_start);
-  // }
+  if(selected_victim_zone_start==0){
+    // printf("??? selected_victim_zone_start %lu\n",selected_victim_zone_start);
+  }
   // sort(victim_candidate.rbegin(), victim_candidate.rend());
 
   // sort(victim_candidate.begin(), victim_candidate.end());
@@ -566,21 +566,12 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // }
   
   std::vector<ZoneExtentSnapshot*> migrate_exts;
-  if(zbd_->PCAEnabled() && selected_victim_zone_start){
-    // snapshot.zones_[zidx].extents_in_zone.push_back(ext);
-    uint64_t zidx = zbd_->GetIOZone(selected_victim_zone_start)->zidx_
-                        -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
-    migrate_exts=snapshot.zones_[zidx].extents_in_zone;
-
-  }else{
-    for (auto& ext : snapshot.extents_) {
-      if(selected_victim_zone_start==ext.zone_start){
-        migrate_exts.push_back(&ext);
-        should_be_copied+=ext.length + ext.header_size;
-      }
+  for (auto& ext : snapshot.extents_) {
+    if(selected_victim_zone_start==ext.zone_start){
+      migrate_exts.push_back(&ext);
+      should_be_copied+=ext.length + ext.header_size;
     }
   }
-
   
 
 
