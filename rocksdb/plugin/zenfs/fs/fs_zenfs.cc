@@ -572,7 +572,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
                         -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
     migrate_exts=snapshot.zones_[zidx].extents_in_zone;
     for(auto ext : migrate_exts){
-      should_be_copied+=ext->legnth+ ext->header_size;
+      should_be_copied+=ext->length+ ext->header_size;
     }
   }else{
     for (auto& ext : snapshot.extents_) {
