@@ -988,6 +988,7 @@ class ZonedBlockDevice {
   double cost_[3][257];
 
   inline void CorrectCost(int type,uint64_t size,double measured_cost){
+    return;
     double learning_rate = 0.1;
     double diff= measured_cost-cost_[type][size];
     cost_[type][size] +=  diff * learning_rate;
