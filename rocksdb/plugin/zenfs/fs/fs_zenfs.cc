@@ -3730,7 +3730,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(!ext){
             continue;
           }
-          if(reserve_full_zone==true && ext->zone_->capacity_ != 0 ){
+          if(reserve_full_zone==true && ext->zone_->capacity_ == 0 ){
             continue;
           }
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
