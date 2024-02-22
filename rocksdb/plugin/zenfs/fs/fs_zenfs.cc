@@ -3746,10 +3746,10 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(tmp_cache.use_count()>1){
             continue;
           }
-          
+
           if(std::find_if(zone_to_be_pinned.begin() ,
                           zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
-                            return valid_zidx.second==ext->zone_->zidx_
+                            return valid_zidx.second==ext->zone_->zidx_;
                           }) != zone_to_be_pinned.end() ){
             continue;
           }
