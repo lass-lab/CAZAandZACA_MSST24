@@ -438,7 +438,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t previous_mlock_addr = 0;
   // uint64_t average_gc_cost;
 
-  if(zbd_->PageCacheLimit()>1 && zbd_->PCAEnabled()){
+  // if(zbd_->PageCacheLimit()>1 && zbd_->PCAEnabled()){
+  if(zbd_->PageCacheLimit()>1 && false){
     for(size_t i = 0; i < snapshot.extents_.size(); i++){
       ZoneExtentSnapshot* ext = &snapshot.extents_[i];
       uint64_t zidx = ext->zone_p->zidx_
