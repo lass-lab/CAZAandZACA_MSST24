@@ -2143,11 +2143,11 @@ IOStatus ZonedBlockDevice::RuntimeReset(void){
     case PARTIAL_RESET_AT_BACKGROUND:
       /* fall through */
     case RUNTIME_ZONE_RESET_ONLY:
-      if(AsyncZCEnabled()){
-        ResetMultipleUnusedIOZones();
-      }else{
+      // if(AsyncZCEnabled()){
+      //   ResetMultipleUnusedIOZones();
+      // }else{
         ResetUnusedIOZones();
-      }
+      // }
       // s = RuntimeZoneReset(is_reseted);
       
       break;

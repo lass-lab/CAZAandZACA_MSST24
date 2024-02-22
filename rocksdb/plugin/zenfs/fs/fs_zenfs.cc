@@ -637,7 +637,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
     // }
     {
       // ZenFSStopWatch z2("ZC Large Reset",zbd_);
-      zbd_->ResetMultipleUnusedIOZones();
+      // zbd_->ResetMultipleUnusedIOZones();
+      zbd_->ResetUnusedIOZones();
     }
   // zbd_->SetZCRunning(false);
   // for(size_t i = 0; i<zone_read_locks.size();i++){
@@ -3696,37 +3697,28 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 void ZenFS::BackgroundAsyncStructureCleaner(void){
   
   while(run_gc_worker_){
-    // uint64_t prev= zbd_->GetGCBytesWritten();
-    // if(zbd_->GetZCRunning()){
-    
-    //   struct timespec start_timespec, end_timespec;
-    //   clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-    //   while(zbd_->GetZCRunning() && run_gc_worker_);
-    //   clock_gettime(CLOCK_MONOTONIC, &end_timespec);
-    //   uint64_t after = zbd_->GetGCBytesWritten();
-    //   long elapsed_ns_timespec = (end_timespec.tv_sec - start_timespec.tv_sec) * 1000000000 + (end_timespec.tv_nsec - start_timespec.tv_nsec);
-    //   printf("\t\t\t\t\t %lu\t(ms)\t%lu\t(MB)\t\t%d\t%lu\n", (elapsed_ns_timespec/1000)/1000,(after-prev)>>20,mount_time_.load(),cur_ops_ );
-    // }
+
     usleep(100*1000);
     // if(!page_cache_mtx_.try_lock()){
     //     break;
     //   }
+    bool reserve_full_zone = zbd_->PCAEnabled();
+
+
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit()){
-      // if(page_cache_mtx_.lock()){
-      //   continue;
-      // }
+
       if(!run_gc_worker_){
         break;
       }
       page_cache_mtx_.lock();
       std::lock_guard<std::mutex> file_lock(files_mtx_);
 
-      std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
-      zone_to_be_pinned.clear();
-      // if(zbd_->PCAEnabled() && free_percent_<=21)
-      // {
-      //   zone_to_be_pinned=zbd_->HighPosibilityTobeVictim();
-      // }
+      // std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
+      // zone_to_be_pinned.clear();
+
+
+
+
 
       for (const auto& file_it : files_) {
         if(!run_gc_worker_){
@@ -3738,19 +3730,9 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(!ext){
             continue;
           }
-          // zone_to_be_pinned
-          // if(std::find_if(zone_to_be_pinned.begin(),zone_to_be_pinned.end(),
-          //               [&](const std::pair<uint64_t,uint64_t> valid_zidx){
-          //                 if(valid_zidx.second==ext->zone_->zidx_){
-          //                   return true;
-          //                 }
-          //                 return false;
-          //               }) 
-          //               != zone_to_be_pinned.end()
-          // )
-          // {
-          //   continue;
-          // }
+          if(reserve_full_zone==true && ext->zone_->capacity_ != 0 ){
+            continue;
+          }
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
             continue;
@@ -3758,11 +3740,15 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(tmp_cache.use_count()>1){
             continue;
           }
+
+          
           zbd_->page_cache_size_-=ext->length_;
           tmp_cache.reset();
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
             break;
           }
+          
+
         }
         if(!run_gc_worker_){
           break;
@@ -3771,6 +3757,9 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           break;
         }
       }
+      reserve_full_zone=false;
+
+
       page_cache_mtx_.unlock();
     }
   }
