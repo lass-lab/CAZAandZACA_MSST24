@@ -567,7 +567,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // }
   
   std::vector<ZoneExtentSnapshot*> migrate_exts;
-  if(zbd_->PCAEnabled() && selected_victim_zone_start){
+  if(zbd_->PCAEnabled() && selected_victim_zone_start && false){
     // snapshot.zones_[zidx].extents_in_zone.push_back(ext);
     uint64_t zidx = zbd_->GetIOZone(selected_victim_zone_start)->zidx_
                         -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
