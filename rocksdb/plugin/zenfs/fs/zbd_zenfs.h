@@ -844,7 +844,7 @@ class ZonedBlockDevice {
     }
     std::sort(sorted.begin(),sorted.end());
 
-    for(size_t i = 0 ; i<(5) && i <sorted.size()/10;i++){
+    for(size_t i = 0 ; i<(2) && i <sorted.size()/10;i++){
       // printf("%lu %lu\n",sorted[i].first,sorted[i].second);
       ret.push_back(sorted[i]);
     }
