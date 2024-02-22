@@ -3706,7 +3706,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
     std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
 
     bool reserve_full_zone = zbd_->PCAEnabled();
-    if(reserve_full_zone && free_percent_<=21){
+    if(reserve_full_zone && free_percent_<=22){
       zone_to_be_pinned.clear();
       zone_to_be_pinned=zbd_->HighPosibilityTobeVictim();
     }
