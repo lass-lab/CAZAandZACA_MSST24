@@ -3703,8 +3703,13 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
     // if(!page_cache_mtx_.try_lock()){
     //     break;
     //   }
-    bool reserve_full_zone = zbd_->PCAEnabled();
+    std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
 
+    bool reserve_full_zone = zbd_->PCAEnabled();
+    if(reserve_full_zone && free_percent_<23){
+      zone_to_be_pinned.clear();
+      zone_to_be_pinned=zbd_->HighPosibilityTobeVictim();
+    }
 
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit()){
 
@@ -3714,8 +3719,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
       page_cache_mtx_.lock();
       std::lock_guard<std::mutex> file_lock(files_mtx_);
 
-      // std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
-      // zone_to_be_pinned.clear();
+
 
 
 
@@ -3734,6 +3738,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(reserve_full_zone==true && ext->zone_->capacity_ == 0 ){
             continue;
           }
+
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
             continue;
@@ -3741,7 +3746,13 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(tmp_cache.use_count()>1){
             continue;
           }
-
+          
+          if(std::find_if(zone_to_be_pinned.begin() ,
+                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
+                            return valid_zidx.second==ext->zone_->zidx_
+                          }) != zone_to_be_pinned.end() ){
+            continue;
+          }
           
           zbd_->page_cache_size_-=ext->length_;
           tmp_cache.reset();
