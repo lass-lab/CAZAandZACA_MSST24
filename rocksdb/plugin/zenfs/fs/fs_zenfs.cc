@@ -390,7 +390,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
   size_t should_be_copied=0;
   (void)(forced);
-  
+  uint64_t page_cache_hit_size;
   // uint64_t zone_size;
   // uint64_t zone_per_erase_unit_ratio=(zbd_->GetEraseUnitSize()*100)/zone_size;
   // uint64_t erase_unit_size=zbd_->GetEraseUnitSize();
@@ -597,7 +597,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
             // AsyncMigrateExtents(migrate_exts);
           std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
           // AsyncUringMigrateExtents(migrate_exts);
-          SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
+          page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
         }else{
           MigrateExtents(migrate_exts);
         }
@@ -625,7 +625,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
       zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec);
       zbd_->AddZCTimeLapse(start, end,(elapsed_ns_timespec/1000),
                           1,should_be_copied, forced,
-                          invalid_data_size,valid_data_size);
+                          invalid_data_size,valid_data_size,page_cache_hit_size);
     }
     zc_triggerd_count_.fetch_add(1);
   }else{
@@ -2944,7 +2944,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
   return new_extent_list;
 }
 
-IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,uint64_t should_be_copied,bool everything_in_page_cache) {
+uint64_t ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,uint64_t should_be_copied,bool everything_in_page_cache) {
   Zone* victim_zone= zbd_->GetIOZone(extents[0]->start);
   Zone* new_zone =nullptr;
   // int read_fd = zbd_->GetFD(READ_FD);
@@ -2952,6 +2952,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   (void)(everything_in_page_cache);
   (void)(should_be_copied);
   double measured_ms;
+  uint64_t page_cache_hit_size = 0 ;
+  // uint64_t disk_io_size = 0;
   // uint64_t io_zone_start_offset = zbd_->GetIOZoneByIndex(0)->start_;
 
 
@@ -2997,7 +2999,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       
       if(ext->page_cache==nullptr){
         ZenFSStopWatch sw("",nullptr);
-
+        // disk_io_size+= ext->length>>20;
 
         // err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ -(ext->header_size)),
         //     (read_size),
@@ -3028,6 +3030,7 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         measured_ms=sw.RecordTickMS();
         zbd_->CorrectCost(READ_DISK_COST,(read_size>>20),measured_ms);
       }else{
+        page_cache_hit_size+=(ext->length)>>20;
         ZenFSStopWatch sw("",nullptr);
         // memmove(ZC_read_buffer_+(ext->start-ext->header_size -victim_zone->start_), ext->page_cache.get(),
         //       read_size);
@@ -3152,7 +3155,8 @@ IOStatus ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   // zbd_->AddGCBytesWritten(pos);
   printf("%d %s %lu\n",mount_time_.load(),stopwatch_buf,ZC_size_measure.RecordTickNS()/1000/1000);
   // printf("%s %lu\n",stopwatch_buf2,ZC_size_measure2.RecordTickNS()/1000/1000);
-  return IOStatus::OK();
+  // return IOStatus::OK();
+  return page_cache_hit_size;
 }
 
 IOStatus ZenFS::MigrateExtents(

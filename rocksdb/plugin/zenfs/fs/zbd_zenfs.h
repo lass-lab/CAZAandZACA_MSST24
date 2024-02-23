@@ -508,6 +508,7 @@ class ZonedBlockDevice {
     uint64_t invalid_data_size;
     uint64_t valid_data_size;
     uint64_t invalid_ratio;
+    uint64_t page_cache_hit_size;
     // std::vector<int> levels_files_timelapse;
   };
   std::vector<ZCStat> zc_timelapse_;
@@ -1107,7 +1108,7 @@ class ZonedBlockDevice {
   }
 
   void AddZCTimeLapse(int s,int e,long long us,size_t zc_z,size_t copied,
-            bool forced,uint64_t invalid_data_size,uint64_t valid_data_size){
+            bool forced,uint64_t invalid_data_size,uint64_t valid_data_size,uint64_t page_cache_hit_size){
     
     if(forced==true){
       force_zc_should_triggered_.store(false);
@@ -1117,7 +1118,7 @@ class ZonedBlockDevice {
 
     zc_timelapse_.push_back({zc_z,s,e,us,copied,forced,
         invalid_data_size,valid_data_size, 
-        (invalid_data_size*100)/(valid_data_size+invalid_data_size)  });
+        (invalid_data_size*100)/(valid_data_size+invalid_data_size) ,page_cache_hit_size });
   }
   void AddTimeLapse(int T,uint64_t cur_ops);
   void AddCumulativeIOBlocking(long ns){

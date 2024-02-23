@@ -80,6 +80,8 @@
         "__nullptr": "cpp",
         "filesystem": "cpp",
         "ios": "cpp",
-        "__config": "cpp"
+        "__config": "cpp",
+        "shared_mutex": "cpp",
+        "cfenv": "cpp"
     }
 }

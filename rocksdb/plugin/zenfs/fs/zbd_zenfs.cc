@@ -858,6 +858,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   size_t rc_zc = 0;
   int io_blocking_sum=0;
   long long io_blocking_ms_sum= 0;
+  uint64_t page_cache_hit_size_sum = 0;
   for(size_t i=0;i<zc_timelapse_.size();i++){
     // bool forced=zc_timelapse_[i].forced;
     // size_t zc_z=zc_timelapse_[i].zc_z;
@@ -869,8 +870,10 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     uint64_t invalid_data_size = zc_timelapse_[i].invalid_data_size;
     uint64_t valid_data_size = zc_timelapse_[i].valid_data_size;
     uint64_t invalid_ratio = zc_timelapse_[i].invalid_ratio;
-    printf("[%lu]\t%d ~ %d\t %llu ms,\t %ld (MB)\t%lu\t%lu\t%lu\n",i+1,s,e,us/1000,(zc_timelapse_[i].copied>>20),
-        invalid_data_size,valid_data_size,invalid_ratio );
+    uint64_t page_cache_hit_size = zc_timelapse_[i].page_cache_hit_size;
+    page_cache_hit_size_sum+=page_cache_hit_size;
+    printf("[%lu]\t%d ~ %d\t %llu ms,\t %ld (MB)\t%lu\t%lu\t%lu\t%lu\n",i+1,s,e,us/1000,(zc_timelapse_[i].copied>>20),
+        invalid_data_size,valid_data_size,invalid_ratio,page_cache_hit_size );
     total_copied+=zc_timelapse_[i].copied;
     rc_zc ++;
   }
@@ -955,6 +958,12 @@ ZonedBlockDevice::~ZonedBlockDevice() {
     printf("copied/erased ratio : %lu/%lu=%lu\n",gc_bytes_written_.load(),(total_erased),(gc_bytes_written_.load()*100)/total_erased);
   }else{
     printf("copied/erased ratio : (NULL)\n");
+  }
+  if(gc_bytes_written_.load()){
+      printf("ZC cache hit ratio  %lu/%lu = %lu\n"
+      ,page_cache_hit_size_sum
+      ,(gc_bytes_written_.load()>>20)+page_cache_hit_size_sum
+      ,(page_cache_hit_size_sum*100)/((gc_bytes_written_.load()>>20)+page_cache_hit_size_sum ));
   }
   if(GetUserBytesWritten()){
     printf("copy/written ratio : %lu/%lu=%lu\n",gc_bytes_written_.load(),GetUserBytesWritten(),(gc_bytes_written_.load()*100)/GetUserBytesWritten());
