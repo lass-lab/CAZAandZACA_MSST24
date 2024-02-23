@@ -1011,7 +1011,8 @@ class ZonedBlockDevice {
   }
   inline double ReadPageCacheCost(uint64_t size){ // mb
 
-    return (double)(0.92*size) + 0.09;
+    // return (double)(0.92*size) + 0.09;
+    return (double)(size)/3;
     // return read_page_cache_cost_[i];
   }
   inline double WriteCost(uint64_t size){ // mb
