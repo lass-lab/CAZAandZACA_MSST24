@@ -971,6 +971,10 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("ZC read amp %lu\n",zc_read_amp_);
   printf("TOTAL I/O BLOKCING TIME %d\n",io_blocking_sum);
   printf("TOTAL I/O BLOCKING TIME(ms) %llu\n",io_blocking_ms_sum);
+  if(io_blocking_ms_sum){
+    printf("COPY(MB/s) %lu\n",(gc_bytes_written_.load()>>20) /(io_blocking_ms_sum/1000));
+  }
+
   printf("TOTAL ERASED AT RZR DEVICE VIEW : %lu(MB)\n",(wasted_wp_.load()+erase_size_.load())>>20 );
   printf("READ LOCK OVERHEAD %llu\n",read_lock_overhead_sum);
   // printf("runtime reset latency : %llu(ms)\n",runtime_reset_latency_.load()/1000);

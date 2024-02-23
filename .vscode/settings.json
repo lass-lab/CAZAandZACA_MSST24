@@ -82,6 +82,8 @@
         "ios": "cpp",
         "__config": "cpp",
         "shared_mutex": "cpp",
-        "cfenv": "cpp"
+        "cfenv": "cpp",
+        "__functional_base": "cpp",
+        "locale": "cpp"
     }
 }
