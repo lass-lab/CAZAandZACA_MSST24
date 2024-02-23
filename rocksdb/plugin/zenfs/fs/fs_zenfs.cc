@@ -416,7 +416,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // zbd_->EntireZoneReadLock();
   {
     // ZenFSStopWatch z2("GetZenFSSnapshot");
-    GetZenFSSnapshot(snapshot, options,zbd_->PageCacheLimit());
+    GetZenFSSnapshot(snapshot, options);
   }
   // size_t all_inval_zone_n = 0;
   // std::vector<VictimZoneCandiate> victim_candidate;
@@ -2460,7 +2460,7 @@ Status ListZenFileSystems(
 }
 
 void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
-                             const ZenFSSnapshotOptions& options,uint64_t page_cache_size) {
+                             const ZenFSSnapshotOptions& options) {
   
   if (options.zbd_) {
     snapshot.zbd_ = ZBDSnapshot(*zbd_);
@@ -2471,6 +2471,10 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
   // printf("GetZenFSSnapshot @@\n");
   if (options.zone_file_) {
     std::lock_guard<std::mutex> file_lock(files_mtx_);
+
+
+
+
     for (const auto& file_it : files_) {
       ZoneFile& file = *(file_it.second);
 
@@ -2485,10 +2489,12 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
       snapshot.zone_files_.emplace_back(file);
       // extent -> file mapping
       std::vector<ZoneExtent*> extents=file.GetExtents();
+
+
+
       for (ZoneExtent* ext : extents ) {
         if(ext->zone_==nullptr){
-            zbd_->GetIOZone(ext->start_);
-            // continue;
+            ext->zone_=zbd_->GetIOZone(ext->start_);
         }
         if(ext->is_invalid_==false){
 
@@ -2504,8 +2510,11 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
           // if(ext->page_cache_==nullptr){
             
           // }
-          if( ext->page_cache_!=nullptr&& page_cache_size>ext->length_){
-            page_cache_size-=ext->length_;
+          if( ext->page_cache_!=nullptr){
+
+            
+
+            // page_cache_size-=ext->length_;
             ext_snapshot.page_cache=ext->page_cache_;
             // printf("zenfs snapshot :: page cache loaded %p\n",ext_snapshot.page_cache.get());
             // if(ext_snapshot.page_cache.get()==nullptr){

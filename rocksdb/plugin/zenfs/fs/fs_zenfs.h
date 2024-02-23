@@ -656,7 +656,7 @@ ret:
   void BackgroundAsyncStructureCleaner();
 
   void GetZenFSSnapshot(ZenFSSnapshot& snapshot,
-                        const ZenFSSnapshotOptions& options,uint64_t page_cache_size=0);
+                        const ZenFSSnapshotOptions& options);
   
 
   std::vector<ZoneExtent*> MemoryMoveExtents(ZoneFile* zfile,const std::vector<ZoneExtentSnapshot*>& migrate_exts,
