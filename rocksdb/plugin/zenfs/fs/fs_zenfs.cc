@@ -390,7 +390,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t MODIFIED_ZC_KICKING_POINT=zbd_->GetZoneCleaningKickingPoint();
   size_t should_be_copied=0;
   (void)(forced);
-  uint64_t page_cache_hit_size;
+  uint64_t page_cache_hit_size=0;
   // uint64_t zone_size;
   // uint64_t zone_per_erase_unit_ratio=(zbd_->GetEraseUnitSize()*100)/zone_size;
   // uint64_t erase_unit_size=zbd_->GetEraseUnitSize();
