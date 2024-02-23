@@ -972,7 +972,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("TOTAL I/O BLOKCING TIME %d\n",io_blocking_sum);
   printf("TOTAL I/O BLOCKING TIME(ms) %llu\n",io_blocking_ms_sum);
   if(io_blocking_ms_sum){
-    printf("COPY(MB/s) %lu\n",(gc_bytes_written_.load()>>20) /(io_blocking_ms_sum/1000));
+    printf("COPY(MB/s) %llu\n",(gc_bytes_written_.load()>>20)/(io_blocking_ms_sum/1000));
   }
 
   printf("TOTAL ERASED AT RZR DEVICE VIEW : %lu(MB)\n",(wasted_wp_.load()+erase_size_.load())>>20 );
