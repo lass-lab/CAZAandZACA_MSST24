@@ -438,8 +438,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // uint64_t previous_mlock_addr = 0;
   // uint64_t average_gc_cost;
 
-  if(zbd_->PageCacheLimit()>1 && zbd_->PCAEnabled()){
-  // if(zbd_->PageCacheLimit()>1 && false){
+  // if(zbd_->PageCacheLimit()>1 && zbd_->PCAEnabled()){
+  if(zbd_->PageCacheLimit()>1 && false){
     for(size_t i = 0; i < snapshot.extents_.size(); i++){
       ZoneExtentSnapshot* ext = &snapshot.extents_[i];
       uint64_t zidx = ext->zone_p->zidx_
@@ -564,7 +564,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
   // }
   
   std::vector<ZoneExtentSnapshot*> migrate_exts;
-  if(zbd_->PCAEnabled() && selected_victim_zone_start){
+  // if(zbd_->PCAEnabled() && selected_victim_zone_start){
+  if(false){
     // snapshot.zones_[zidx].extents_in_zone.push_back(ext);
     uint64_t zidx = zbd_->GetIOZone(selected_victim_zone_start)->zidx_
                         -ZENFS_SPARE_ZONES-ZENFS_META_ZONES;
