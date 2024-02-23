@@ -971,7 +971,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("ZC read amp %lu\n",zc_read_amp_);
   printf("TOTAL I/O BLOKCING TIME %d\n",io_blocking_sum);
   printf("TOTAL I/O BLOCKING TIME(ms) %llu\n",io_blocking_ms_sum);
-  if(io_blocking_ms_sum){
+  if(io_blocking_ms_sum/1000){
     printf("COPY(MB/s) %llu\n",(gc_bytes_written_.load()>>20)/(io_blocking_ms_sum/1000));
   }
 
