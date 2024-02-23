@@ -2504,22 +2504,11 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
           ext_snapshot.zone_p=ext->zone_;
           // printf("GetZenFSSnapshot :: ext->start %lu\n",ext->start_);
 
-          // if(ext->page_cache_==nullptr){
-            
+
+          // if( ext->page_cache_!=nullptr){
+
           // }
-          if( ext->page_cache_!=nullptr){
-
-            
-
-            // page_cache_size-=ext->length_;
-            ext_snapshot.page_cache=ext->page_cache_;
-            // printf("zenfs snapshot :: page cache loaded %p\n",ext_snapshot.page_cache.get());
-            // if(ext_snapshot.page_cache.get()==nullptr){
-            //   printf("ext->page_cache_ nullptr? \n");
-            // }else{
-            //   printf("its on memory\n");
-            // }
-          }
+          ext_snapshot.page_cache=ext->page_cache_;
           snapshot.extents_.push_back(ext_snapshot);
         }
       }
@@ -3744,6 +3733,15 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(reserve_full_zone==true && ext->zone_->capacity_ == 0 ){
             continue;
           }
+          
+          
+          if(std::find_if(zone_to_be_pinned.begin() ,
+                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
+                            return valid_zidx.second==ext->zone_->zidx_;
+                          }) != zone_to_be_pinned.end() ){
+            continue;
+          }
+
 
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
@@ -3753,12 +3751,7 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
             continue;
           }
 
-          if(std::find_if(zone_to_be_pinned.begin() ,
-                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
-                            return valid_zidx.second==ext->zone_->zidx_;
-                          }) != zone_to_be_pinned.end() ){
-            continue;
-          }
+
           
           zbd_->page_cache_size_-=ext->length_;
           tmp_cache.reset();
