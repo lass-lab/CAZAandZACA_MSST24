@@ -861,7 +861,7 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
         // }
         page_cache_mtx_.lock();
         zbd_->SetZCRunning(true);
-        for(int zc=0;zc<5&&zbd_->GetFullZoneN()&&free_percent_<= (reclaim_until);zc++){
+        for(int zc=0;zbd_->GetFullZoneN()&&free_percent_<= (reclaim_until);zc++){
            
           ZoneCleaning(force);
           free_percent_ = zbd_->CalculateFreePercent();
