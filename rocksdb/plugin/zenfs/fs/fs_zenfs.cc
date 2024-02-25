@@ -3702,7 +3702,7 @@ void ZenFS::BackgroundPageCacheEviction(void){
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit() && run_gc_worker_){
     std::lock_guard<std::mutex> lg(page_cache_mtx_);
     std::lock_guard<std::mutex> file_lock(files_mtx_);
-      if(free_percent<23 && zbd_->PCAEnabled()){
+      if(free_percent_<23 && zbd_->PCAEnabled()){
         ZCPageCacheEviction();
       }else{
         LRUPageCacheEviction();
@@ -3745,20 +3745,22 @@ void ZenFS::ZCPageCacheEviction(void){
         if(!run_gc_worker_){
           break;
         }
-        for(ZoneExtent* ext : extent_to_zone.second){
+        for(ZoneExtent* ext : ez.second){
+
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
+          if(tmp_cache==nullptr){
+            continue;
+          }
+          if(tmp_cache.use_count()>1){
+            continue;
+          }
+          zbd_->page_cache_size_-=ext->length_;
+          tmp_cache.reset();
+          if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+            break;
+          }
         }
-        if(tmp_cache==nullptr){
-          continue;
-        }
-        if(tmp_cache.use_count()>1){
-          continue;
-        }
-        zbd_->page_cache_size_-=ext->length_;
-        tmp_cache.reset();
-        if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
-          break;
-        }
+
       }
 
 
