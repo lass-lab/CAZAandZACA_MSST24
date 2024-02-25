@@ -3713,7 +3713,8 @@ void ZenFS::BackgroundPageCacheEviction(void){
 
 void ZenFS::ZCPageCacheEviction(void){
       std::vector<std::pair <uint64_t, std::vector<ZoneExtent*> > > extent_to_zone;
-      
+      std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned=zbd_->HighPosibilityTobeVictim();
+
       std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
       for(auto z : io_zones ){
         extent_to_zone.push_back( {z->wp_-z->start_- z->used_capacity_ , std::vector<ZoneExtent*>() });
@@ -3746,7 +3747,13 @@ void ZenFS::ZCPageCacheEviction(void){
           break;
         }
         for(ZoneExtent* ext : ez.second){
-
+          if(std::find_if(zone_to_be_pinned.begin() ,
+                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
+                            return valid_zidx.second==ext->zone_->zidx_;
+                          }) != zone_to_be_pinned.end() ){
+            continue;
+          }
+          
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
             continue;
