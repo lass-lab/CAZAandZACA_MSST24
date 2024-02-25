@@ -3742,18 +3742,18 @@ void ZenFS::ZCPageCacheEviction(void){
       // phase 2 : sort zone by ZC posilbiity
       std::sort(extent_to_zone.begin(),extent_to_zone.end());
 
-      for(auto ez : extent_to_zone){
+      for(size_t i = 0;i< extent_to_zone.size(); i++){
+         if(std::find_if(zone_to_be_pinned.begin() ,
+                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
+                            return valid_zidx.second==(i+ZENFS_SPARE_ZONES+ZENFS_META_ZONES);
+                          }) != zone_to_be_pinned.end() ){
+            continue;
+        }
+
         if(!run_gc_worker_){
           break;
         }
         for(ZoneExtent* ext : ez.second){
-          if(std::find_if(zone_to_be_pinned.begin() ,
-                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
-                            return valid_zidx.second==ext->zone_->zidx_;
-                          }) != zone_to_be_pinned.end() ){
-            continue;
-          }
-          
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
             continue;
