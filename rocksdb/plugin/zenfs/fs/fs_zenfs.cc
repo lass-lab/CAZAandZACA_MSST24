@@ -2935,7 +2935,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     }
     if(ext->page_cache_==nullptr){
       char* page_cache_ptr = nullptr;
-      if(posix_memalign(void**(&page_cache_ptr),sysconf(_SC_PAGESIZE), tmp)){
+      if(posix_memalign((void**)(&page_cache_ptr),sysconf(_SC_PAGESIZE), tmp)){
         printf("ZenFS::MemoryMoveExtents memory allocation failed\n");
       }
       memmove(page_cache_ptr,read_buf+(prev_relative_start-ext->header_size_),tmp);
