@@ -653,7 +653,10 @@ ret:
 
   void BackgroundStatTimeLapse();
 
-  void BackgroundAsyncStructureCleaner();
+  void BackgroundPageCacheEviction();
+
+  void ZCPageCacheEviction();
+  void LRUPageCacheEviction();
 
   void GetZenFSSnapshot(ZenFSSnapshot& snapshot,
                         const ZenFSSnapshotOptions& options);

@@ -84,6 +84,7 @@
         "shared_mutex": "cpp",
         "cfenv": "cpp",
         "__functional_base": "cpp",
-        "locale": "cpp"
+        "locale": "cpp",
+        "__mutex_base": "cpp"
     }
 }

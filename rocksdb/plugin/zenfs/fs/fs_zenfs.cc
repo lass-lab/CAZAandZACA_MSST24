@@ -2231,7 +2231,7 @@ Status ZenFS::Mount(bool readonly) {
     }
 
     if(async_cleaner_worker_==nullptr){
-      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundAsyncStructureCleaner,this));
+      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundPageCacheEviction,this));
     }
 
   }
@@ -3695,36 +3695,32 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
   return IOStatus::OK();
 }
 
-void ZenFS::BackgroundAsyncStructureCleaner(void){
-  
+void ZenFS::BackgroundPageCacheEviction(void){
   while(run_gc_worker_){
-
     usleep(100*1000);
-    // if(!page_cache_mtx_.try_lock()){
-    //     break;
-    //   }
-    std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
 
-    bool reserve_full_zone = zbd_->PCAEnabled();
-    if(reserve_full_zone && free_percent_<23){
-      zone_to_be_pinned.clear();
-      zone_to_be_pinned=zbd_->HighPosibilityTobeVictim();
-    }
-
-    while(zbd_->page_cache_size_>zbd_->PageCacheLimit()){
-
-      if(!run_gc_worker_){
-        break;
+    while(zbd_->page_cache_size_>zbd_->PageCacheLimit() && run_gc_worker_){
+    std::lock_guard<std::mutex> lg(page_cache_mtx_);
+    std::lock_guard<std::mutex> file_lock(files_mtx_);
+      if(free_percent<23 && zbd_->PCAEnabled()){
+        ZCPageCacheEviction();
+      }else{
+        LRUPageCacheEviction();
       }
-      page_cache_mtx_.lock();
-      std::lock_guard<std::mutex> file_lock(files_mtx_);
+    }
+  }
+}
+
+void ZenFS::ZCPageCacheEviction(void){
+      std::vector<std::pair <uint64_t, std::vector<ZoneExtent*> > > extent_to_zone;
+      
+      std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
+      for(auto z : io_zones ){
+        extent_to_zone.push_back( {z->wp_-z->start_- z->used_capacity_ , std::vector<ZoneExtent*>() });
+      }
 
 
-
-
-
-
-
+      // phase 1 : separate it to zone - extent
       for (const auto& file_it : files_) {
         if(!run_gc_worker_){
           break;
@@ -3735,19 +3731,50 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(!ext){
             continue;
           }
-          if(reserve_full_zone==true && ext->zone_->capacity_ == 0 ){
-            continue;
-          }
-          
-          
-          if(std::find_if(zone_to_be_pinned.begin() ,
-                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
-                            return valid_zidx.second==ext->zone_->zidx_;
-                          }) != zone_to_be_pinned.end() ){
-            continue;
-          }
+          extent_to_zone[ext->zone_->zidx_-ZENFS_SPARE_ZONES-ZENFS_META_ZONES].second.push_back(ext);
+        }
+      }
+
+      
 
 
+      // phase 2 : sort zone by ZC posilbiity
+      std::sort(extent_to_zone.begin(),extent_to_zone.end());
+
+      for(auto ez : extent_to_zone){
+        if(!run_gc_worker_){
+          break;
+        }
+        for(ZoneExtent* ext : extent_to_zone.second){
+          std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
+        }
+        if(tmp_cache==nullptr){
+          continue;
+        }
+        if(tmp_cache.use_count()>1){
+          continue;
+        }
+        zbd_->page_cache_size_-=ext->length_;
+        tmp_cache.reset();
+        if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+          break;
+        }
+      }
+
+
+  
+}
+
+void ZenFS::LRUPageCacheEviction(void){
+  
+
+      for (const auto& file_it : files_) {
+        ZoneFile& file = *(file_it.second);
+        std::vector<ZoneExtent*> extents=file.GetExtents();
+        for (ZoneExtent* ext : extents ) {
+          if(!ext){
+            continue;
+          }
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
             continue;
@@ -3763,22 +3790,13 @@ void ZenFS::BackgroundAsyncStructureCleaner(void){
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
             break;
           }
-          
-
-        }
-        if(!run_gc_worker_){
-          break;
+        
         }
         if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
           break;
         }
       }
-      reserve_full_zone=false;
 
-
-      page_cache_mtx_.unlock();
-    }
-  }
 }
 
 ///////////// this async

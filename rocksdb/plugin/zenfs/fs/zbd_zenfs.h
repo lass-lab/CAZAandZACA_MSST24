@@ -1065,6 +1065,10 @@ class ZonedBlockDevice {
   uint64_t GetIOZoneN(){
     return io_zones.size();
   }
+  std::vector<Zone*>* GetIOZones(){
+    return &io_zones;
+  }
+
   IOStatus AllocateIOZone(bool is_sst,Slice& smallest, Slice& largest ,int level,
                             Env::WriteLifeTimeHint file_lifetime, IOType io_type,
                             std::vector<uint64_t>& input_fno,uint64_t predicted_size,
