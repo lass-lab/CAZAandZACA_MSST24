@@ -3754,7 +3754,6 @@ void ZenFS::ZCPageCacheEviction(void){
                           zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
                             return valid_zidx.second==ext->zone_->zidx_;
                           }) != zone_to_be_pinned.end() ){
-            // continue;
             break;
           }
 
@@ -3771,7 +3770,9 @@ void ZenFS::ZCPageCacheEviction(void){
             break;
           }
         }
-
+        if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+          break;
+        }
       }
 
 
