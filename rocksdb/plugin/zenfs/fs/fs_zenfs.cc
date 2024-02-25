@@ -2933,22 +2933,22 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     }else{
       tmp= ext->header_size_ + ext->length_;
     }
-
+    if(ext->page_cache_==nullptr){
+      char* page_cache_ptr = nullptr;
+      if(posix_memalign(void**(&page_cache_ptr),sysconf(_SC_PAGESIZE), ext->legnth_)){
+        printf("ZenFS::MemoryMoveExtents memory allocation failed\n");
+      }
+      memmove(page_cache_ptr,read_buf+(prev_relative_start-ext->header_size_),tmp);
+      ext->page_cache_.reset(page_cache_ptr);
+      zbd_->page_cache_size_+=ext->length_;
+    }
 
     memmove(write_buf+(*pos), read_buf+(prev_relative_start-ext->header_size_)  ,tmp);
 
     (*pos)+=tmp;
 
   }
-  if(ext->page_cache_==nullptr){
-    char* page_cache_ptr = nullptr;
-    if(posix_memalign(void**(&page_cache_ptr),sysconf(_SC_PAGESIZE), ext->legnth_)){
-      printf("ZenFS::MemoryMoveExtents memory allocation failed\n");
-    }
-    memmove(page_cache_ptr,read_buf+(prev_relative_start-ext->header_size_),tmp);
-    ext->page_cache_.reset(page_cache_ptr);
-    zbd_->page_cache_size_+=ext->length_;
-  }
+
 
   zbd_->AddGCBytesWritten(copied);
   return new_extent_list;
