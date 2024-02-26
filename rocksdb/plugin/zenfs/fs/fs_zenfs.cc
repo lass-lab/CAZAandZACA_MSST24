@@ -599,7 +599,7 @@ size_t ZenFS::ZoneCleaning(bool forced){
           // AsyncUringMigrateExtents(migrate_exts);
           page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
         }else{
-          MigrateExtents(migrate_exts);
+          page_cache_hit_size=MigrateExtents(migrate_exts);
         }
         clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     }
@@ -2933,15 +2933,15 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     }else{
       tmp= ext->header_size_ + ext->length_;
     }
-    if(ext->page_cache_==nullptr){
-      char* page_cache_ptr = nullptr;
-      if(posix_memalign((void**)(&page_cache_ptr),sysconf(_SC_PAGESIZE), tmp)){
-        printf("ZenFS::MemoryMoveExtents memory allocation failed\n");
-      }
-      memmove(page_cache_ptr,read_buf+(prev_relative_start-ext->header_size_),tmp);
-      ext->page_cache_.reset(page_cache_ptr);
-      zbd_->page_cache_size_+=ext->length_;
-    }
+    // if(ext->page_cache_==nullptr){
+    //   char* page_cache_ptr = nullptr;
+    //   if(posix_memalign((void**)(&page_cache_ptr),sysconf(_SC_PAGESIZE), tmp)){
+    //     printf("ZenFS::MemoryMoveExtents memory allocation failed\n");
+    //   }
+    //   memmove(page_cache_ptr,read_buf+(prev_relative_start-ext->header_size_),tmp);
+    //   ext->page_cache_.reset(page_cache_ptr);
+    //   zbd_->page_cache_size_+=ext->length_;
+    // }
 
     memmove(write_buf+(*pos), read_buf+(prev_relative_start-ext->header_size_)  ,tmp);
 
@@ -3169,9 +3169,10 @@ uint64_t ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
   return page_cache_hit_size;
 }
 
-IOStatus ZenFS::MigrateExtents(
+uint64_t ZenFS::MigrateExtents(
     const std::vector<ZoneExtentSnapshot*>& extents) {
-  IOStatus s;
+  // IOStatus s;
+  uint64_t ret = 0;
   // ZenFSStopWatch("MigrateExtents");
   // (void) run_once;
   // Group extents by their filename
@@ -3183,17 +3184,19 @@ IOStatus ZenFS::MigrateExtents(
   }
   //  printf("after MigrateExtents\n");e
   for (const auto& it : file_extents) {
-    s = MigrateFileExtents(it.first, it.second);
+    ret+= MigrateFileExtents(it.first, it.second);
     if (!s.ok()) break;
     if(!run_gc_worker_){
-      return IOStatus::OK();
+      // return IOStatus::OK();
+      return ret;
     }
   }
   {
     // ZenFSStopWatch z1("ResetUnsedZones");
     // s=zbd_->ResetUnusedIOZones();
   }
-  return s;
+  // return s;
+  return ret;
 }
 
 
@@ -4128,24 +4131,24 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   return IOStatus::OK();
 }
 
-IOStatus ZenFS::MigrateFileExtents(
+uint64_t ZenFS::MigrateFileExtents(
     const std::string& fname,
     const std::vector<ZoneExtentSnapshot*>& migrate_exts) {
   IOStatus s = IOStatus::OK();
   uint64_t copied = 0;
   Info(logger_, "MigrateFileExtents, fname: %s, extent count: %lu",
        fname.data(), migrate_exts.size());
-
+  uint64_t ret = 0;
   // The file may be deleted by other threads, better double check.
   auto zfile = GetFile(fname);
   if (zfile == nullptr) {
-    return IOStatus::OK();
+    return ret;
   }
 
   // Don't migrate open for write files and prevent write reopens while we
   // migrate
   if (!zfile->TryAcquireWRLock()) {
-    return IOStatus::OK();
+    return ret;
   }
   zfile->on_zc_.store(1);
 
@@ -4206,7 +4209,7 @@ IOStatus ZenFS::MigrateFileExtents(
                               zfile->predicted_size_,
                               ext->length_,&run_gc_worker_,zfile->IsSST());
     if(!run_gc_worker_){
-      return IOStatus::OK();
+      return ret;
     }
     if(target_zone!=nullptr&&target_zone->lifetime_==Env::WriteLifeTimeHint::WLTH_NOT_SET){
       target_zone->lifetime_=Env::WriteLifeTimeHint::WLTH_LONG;
@@ -4225,6 +4228,9 @@ IOStatus ZenFS::MigrateFileExtents(
     // zone_read_lock.ReadLockZone(prev_zone);
     uint64_t target_start = target_zone->wp_;
     copied += ext->length_;
+    if(ext->page_cache_!=nullptr){
+      ret+=ext->length_;
+    }
     if (zfile->IsSparse()) {
       // For buffered write, ZenFS use inlined metadata for extents and each
       // extent has a SPARSE_HEADER_SIZE.
@@ -4239,7 +4245,7 @@ IOStatus ZenFS::MigrateFileExtents(
     }
 
     if(!run_gc_worker_){
-      return IOStatus::OK();
+      return ret;
     }
 
     // prev_zone = ext->zone_;
@@ -4284,7 +4290,7 @@ IOStatus ZenFS::MigrateFileExtents(
     // printf("after finding in MigrateFileExtents 22\n");
 
     }
-  return s;
+  return ret;
 }
 
 extern "C" FactoryFunc<FileSystem> zenfs_filesystem_reg;

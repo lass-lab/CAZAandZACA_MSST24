@@ -665,14 +665,14 @@ ret:
   std::vector<ZoneExtent*> MemoryMoveExtents(ZoneFile* zfile,const std::vector<ZoneExtentSnapshot*>& migrate_exts,
                               char*read_buf,char* write_buf,Zone* new_zone,size_t* pos);
 
-  IOStatus MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot)) ;
+  uint64_t MigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot)) ;
   uint64_t SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents,
   uint64_t should_be_copied,bool everything_in_page_cache) __attribute__((hot)) ;
   uint64_t AsyncMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents) __attribute__((hot));
   uint64_t AsyncReadMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
   
   uint64_t AsyncUringMigrateExtents(const std::vector<ZoneExtentSnapshot*>& extents);
-  IOStatus MigrateFileExtents(
+  uint64_t MigrateFileExtents(
       const std::string& fname,
       const std::vector<ZoneExtentSnapshot*>& migrate_exts);
   struct AsyncWorker{
