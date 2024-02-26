@@ -525,8 +525,10 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz );
       extent->page_cache_=std::move(page_cache);
       r=pread_sz;
+      zbd_->rocksdb_page_cache_hit_size_+=r;
     }else{
       r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+      zbd_->rocksdb_page_cache_fault_size_+=r;
     }
     
 
@@ -1590,9 +1592,9 @@ IOStatus ZoneFile::MigrateData(uint64_t offset, uint64_t length,
         if(page_cache==nullptr){
           
           r= zbd_->Read(buf, offset, read_sz + pad_sz, true);
-          zbd_->rocksdb_page_cache_fault_size_+=read_sz + pad_sz;
+
         }else{
-          zbd_->rocksdb_page_cache_hit_size_+=read_sz + pad_sz;
+          // zbd_->rocksdb_page_cache_hit_size_+=read_sz + pad_sz;
           memmove(buf,page_cache.get(),read_sz + pad_sz);
           r=(read_sz+pad_sz);
         }
