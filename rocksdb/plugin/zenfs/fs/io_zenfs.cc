@@ -1588,8 +1588,11 @@ IOStatus ZoneFile::MigrateData(uint64_t offset, uint64_t length,
     {
         ZenFSStopWatch z1("READ",zbd_);
         if(page_cache==nullptr){
+          
           r= zbd_->Read(buf, offset, read_sz + pad_sz, true);
+          zbd_->rocksdb_page_cache_fault_size_+=read_sz + pad_sz;
         }else{
+          zbd_->rocksdb_page_cache_hit_size_+=read_sz + pad_sz;
           memmove(buf,page_cache.get(),read_sz + pad_sz);
           r=(read_sz+pad_sz);
         }

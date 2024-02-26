@@ -965,6 +965,14 @@ ZonedBlockDevice::~ZonedBlockDevice() {
       ,(gc_bytes_written_.load()>>20)+page_cache_hit_size_sum
       ,(page_cache_hit_size_sum*100)/((gc_bytes_written_.load()>>20)+page_cache_hit_size_sum ));
   }
+  //   std::atomic<uint64_t> rocksdb_page_cache_fault_size_{0};
+  // std::atomic<uint64_t> rocksdb_page_cache_hit_size_{0};
+  if(){
+      printf("RocksDB cache hit ratio  %lu/%lu = %lu\n"
+      ,rocksdb_page_cache_hit_size_.load()
+      ,(rocksdb_page_cache_fault_size_.load()+rocksdb_page_cache_hit_size_.load() )+
+      ,(rocksdb_page_cache_hit_size_.load()*100)/((rocksdb_page_cache_hit_size_.load())+rocksdb_page_cache_fault_size_.load() ));
+  }
   if(GetUserBytesWritten()){
     printf("copy/written ratio : %lu/%lu=%lu\n",gc_bytes_written_.load(),GetUserBytesWritten(),(gc_bytes_written_.load()*100)/GetUserBytesWritten());
   }

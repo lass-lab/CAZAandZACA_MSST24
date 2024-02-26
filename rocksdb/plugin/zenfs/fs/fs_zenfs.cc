@@ -4229,7 +4229,7 @@ uint64_t ZenFS::MigrateFileExtents(
     uint64_t target_start = target_zone->wp_;
     copied += ext->length_;
     if(ext->page_cache_!=nullptr){
-      ret+=ext->length_;
+      ret+=(ext->length_>>20);
     }
     if (zfile->IsSparse()) {
       // For buffered write, ZenFS use inlined metadata for extents and each

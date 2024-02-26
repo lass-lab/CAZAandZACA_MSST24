@@ -818,6 +818,8 @@ class ZonedBlockDevice {
   // std::atomic<uint64_t> intral0_compaction_triggered_{0};
   
  public:
+  std::atomic<uint64_t> rocksdb_page_cache_fault_size_{0};
+  std::atomic<uint64_t> rocksdb_page_cache_hit_size_{0};
   uint64_t ZONE_CLEANING_KICKING_POINT=40;
   std::atomic<bool> migrating_{false};
   std::condition_variable migrate_resource_;
