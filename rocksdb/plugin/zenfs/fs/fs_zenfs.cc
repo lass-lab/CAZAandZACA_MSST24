@@ -3185,7 +3185,7 @@ uint64_t ZenFS::MigrateExtents(
   //  printf("after MigrateExtents\n");e
   for (const auto& it : file_extents) {
     ret+= MigrateFileExtents(it.first, it.second);
-    if (!s.ok()) break;
+    // if (!s.ok()) break;
     if(!run_gc_worker_){
       // return IOStatus::OK();
       return ret;
