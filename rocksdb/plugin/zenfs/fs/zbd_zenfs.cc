@@ -967,7 +967,7 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   }
   //   std::atomic<uint64_t> rocksdb_page_cache_fault_size_{0};
   // std::atomic<uint64_t> rocksdb_page_cache_hit_size_{0};
-  if(){
+  if(rocksdb_page_cache_hit_size_.load()){
       printf("RocksDB cache hit ratio  %lu/%lu = %lu\n"
       ,rocksdb_page_cache_hit_size_.load()
       ,(rocksdb_page_cache_fault_size_.load()+rocksdb_page_cache_hit_size_.load() )+
