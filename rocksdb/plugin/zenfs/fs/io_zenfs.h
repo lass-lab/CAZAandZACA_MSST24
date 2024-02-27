@@ -62,10 +62,10 @@ class ZoneExtent {
   std::shared_ptr<char> page_cache_= nullptr;
   std::mutex page_cache_lock_ ; 
 
-  explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname);
+  explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname,uint64_t now_micros);
   // to be push front
   explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone);
-  explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone, std::string fname, uint64_t header_size);
+  explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone, std::string fname, uint64_t header_size,uint64_t now_micros);
   static bool cmp(ZoneExtent* e1/*big*/, ZoneExtent* e2/*small*/)
   {
       return e1->start_ < e2->start_;
