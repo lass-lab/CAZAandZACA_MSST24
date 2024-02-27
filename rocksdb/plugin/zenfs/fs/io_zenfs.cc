@@ -613,7 +613,7 @@ void ZoneFile::PushExtent() {
   }
   // printf("@@@ PushExtent %lu %lu\n",extent_start_,length);
   // sst extents, zone extents
-  extents_.push_back(new ZoneExtent(extent_start_, length, active_zone_,filename));
+  extents_.push_back(new ZoneExtent(extent_start_, length, active_zone_,filename,zenfs_->NowMicros()));
 
   active_zone_->used_capacity_ += length;
   extent_start_ = active_zone_->wp_;
