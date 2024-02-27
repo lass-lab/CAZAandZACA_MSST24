@@ -446,6 +446,7 @@ ZoneExtent* ZoneFile::GetExtent(uint64_t file_offset, uint64_t* dev_offset) {
   return NULL;
 }
 
+
 IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
                                   char* scratch, bool direct) {
   ZenFSMetricsLatencyGuard guard(zbd_->GetMetrics(), ZENFS_READ_LATENCY,
@@ -524,46 +525,39 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       aligned = true;
     }
     extent->last_accessed_ = zenfs_->NowMicros();
-    
-
     std::shared_ptr<char> page_cache = (extent->page_cache_);
-    // std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
-    {
-      if(page_cache==nullptr){
-        char* new_page_cache_ptr = nullptr;
-        if(posix_memalign((void**)(&new_page_cache_ptr),sysconf(_SC_PAGE_SIZE),extent->length_)){
-          printf("@@@@@@@@@@ new_page_cache_ptr error\n");
-        }
-        zbd_->Read(new_page_cache_ptr, extent->start_, extent->length_,false);
-
-        page_cache.reset(new_page_cache_ptr);
-        
-      }
-    }
     if(page_cache!=nullptr){
-      memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
+      // if(r_off<extent->start_){
+        
+      // }
+      // char* debug_buffer;
+      // if(posix_memalign((void**)(&debug_buffer),sysconf(_SC_PAGE_SIZE),256<<20)){
+      //   printf("@@@@@@@@@@ debug buffer error\n");
+      // }
+
+
+      
+      // printf("memcopy to debug buffer %p<- page_cache.get() + (r_off -extent->start_)  %p:\n",
+      // debug_buffer
+      // ,page_cache.get() + (r_off -extent->start_) );
+      // memcpy(debug_buffer,page_cache.get() + (r_off -extent->start_),pread_sz);
+
+      // printf("memcopy to ptr %p <- debug buffer %p\n",ptr,debug_buffer);
+      //  memcpy(ptr,debug_buffer,pread_sz);
+
+      // free(debug_buffer);
+
+      // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p offset %lu n %lu\n",
+      // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get(),offset,n);
+      memcpy(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
       // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p OKOKOK\n",
       // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
-      // bool overlaped_read = false;
-      {
-        std::lock_guard<std::mutex> lg(extent->page_cache_lock_);
-        if(extent->page_cache_ == nullptr){
-          extent->page_cache_=std::move(page_cache);
-        }
-      }
-      if(page_cache==nullptr){
-        zbd_->page_cache_size_+=extent->length_;
-      }
 
-
+      extent->page_cache_=std::move(page_cache);
       r=pread_sz;
       zbd_->rocksdb_page_cache_hit_size_+=r;
-    }
-    else{
-      
-      
+    }else{
       r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
-
       zbd_->rocksdb_page_cache_fault_size_+=r;
     }
     
@@ -626,6 +620,187 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
   *result = Slice((char*)scratch, read);
   return s;
 }
+
+// IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
+//                                   char* scratch, bool direct) {
+//   ZenFSMetricsLatencyGuard guard(zbd_->GetMetrics(), ZENFS_READ_LATENCY,
+//                                  Env::Default());
+//   zbd_->GetMetrics()->ReportQPS(ZENFS_READ_QPS, 1);
+
+//   ReadLock lck(this);
+
+//   char* ptr;
+//   uint64_t r_off;
+//   size_t r_sz;
+//   ssize_t r = 0;
+//   size_t read = 0;
+//   ZoneExtent* extent;
+//   uint64_t extent_end;
+//   size_t pread_sz;
+//   bool aligned;
+//   IOStatus s;
+
+//   if (offset >= file_size_) {
+//     *result = Slice(scratch, 0);
+//     return IOStatus::OK();
+//   }
+
+//   r_off = 0;
+  
+//   // TO CHECK WHICH zone
+//   GetExtent(offset, &r_off);
+//   // READLOCK HERE
+//   ZonedBlockDevice::ZoneReadLock zone_read_lock;
+
+
+
+//   // first, find the zone extents is located
+//   Zone* z = zbd_->GetIOZone(r_off);
+//   // then, lock the zone
+//   if(z){
+//     zone_read_lock.ReadLockZone(z);
+//   }
+//   // retreive r_offset again
+//   extent = GetExtent(offset, &r_off);
+
+//   if (!extent) {
+//     *result = Slice(scratch, 0);
+//     return s;
+//   }
+
+
+//   extent_end = extent->start_ + extent->length_;
+  
+//   /* Limit read size to end of file */
+//   if ((offset + n) > file_size_)
+//     r_sz = file_size_ - offset;
+//   else
+//     r_sz = n;
+
+//   ptr = scratch;
+
+//   while (read != r_sz) {
+//     pread_sz = r_sz - read;
+
+//     if ((pread_sz + r_off) > extent_end){ 
+//       pread_sz = extent_end - r_off;
+//     }
+
+//     /* We may get some unaligned direct reads due to non-aligned extent lengths,
+//      * so increase read request size to be aligned to next blocksize boundary.
+//      */
+//     aligned = (pread_sz % zbd_->GetBlockSize() == 0);
+
+//     size_t bytes_to_align = 0;
+//     if (direct && !aligned) {
+//       bytes_to_align = zbd_->GetBlockSize() - (pread_sz % zbd_->GetBlockSize());
+//       pread_sz += bytes_to_align;
+
+//       aligned = true;
+//     }
+//     extent->last_accessed_ = zenfs_->NowMicros();
+    
+
+//     std::shared_ptr<char> page_cache = (extent->page_cache_);
+//     // std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
+//     {
+//       if(page_cache==nullptr){
+//         char* new_page_cache_ptr = nullptr;
+//         if(posix_memalign((void**)(&new_page_cache_ptr),sysconf(_SC_PAGE_SIZE),extent->length_)){
+//           printf("@@@@@@@@@@ new_page_cache_ptr error\n");
+//         }
+//         zbd_->Read(new_page_cache_ptr, extent->start_, extent->length_,false);
+
+//         page_cache.reset(new_page_cache_ptr);
+        
+//       }
+//     }
+//     if(page_cache!=nullptr){
+//       memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
+//       // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p OKOKOK\n",
+//       // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
+//       // bool overlaped_read = false;
+//       {
+//         std::lock_guard<std::mutex> lg(extent->page_cache_lock_);
+//         if(extent->page_cache_ == nullptr){
+//           extent->page_cache_=std::move(page_cache);
+//         }
+//       }
+//       if(page_cache==nullptr){
+//         zbd_->page_cache_size_+=extent->length_;
+//       }
+
+
+//       r=pread_sz;
+//       zbd_->rocksdb_page_cache_hit_size_+=r;
+//     }
+//     else{
+      
+      
+//       r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+
+//       zbd_->rocksdb_page_cache_fault_size_+=r;
+//     }
+    
+
+//     if (r <= 0) break;
+
+//     /* Verify and update the the bytes read count (if read size was incremented,
+//      * for alignment purposes).
+//      */
+//     if ((size_t)r <= pread_sz - bytes_to_align){
+//       // uint64_t bf_pread= pread_sz;
+//       pread_sz = (size_t)r;
+//       // if(pread_sz>(1<<30)){
+//       //   printf("ERROR to large pread  2: %lu %lu\n",bf_pread,bytes_to_align);
+//       // }
+//     }else{
+//       // uint64_t bf_pread= pread_sz;
+//       pread_sz -= bytes_to_align;
+//       // if(pread_sz>(1<<30)){
+//       //   printf("ERROR to large pread  3: %lu %lu\n",bf_pread,bytes_to_align);
+//       // }
+//     }
+//     ptr += pread_sz;
+//     read += pread_sz;
+//     r_off += pread_sz;
+
+
+
+//     if (read != r_sz && r_off == extent_end) {
+//       // extent->position_pulled_ = false;
+//       zone_read_lock.ReadUnLockZone();
+
+//       // first, find which zone has extents
+//       extent = GetExtent(offset + read, &r_off);
+      
+//       if (!extent) {
+//         /* read beyond end of (synced) file data */
+//         break;
+//       }
+//       // then, read lock the zone
+//       z = zbd_->GetIOZone(extent->start_);
+//       if(z){
+//         zone_read_lock.ReadLockZone(z);
+//       }
+//       // retreive r_offset again
+//       extent = GetExtent(offset + read, &r_off);
+//       // after read lock, we can retrieve start
+//       r_off = extent->start_;
+//       extent_end = extent->start_ + extent->length_;
+//     }
+//   }
+
+//   if (r < 0) {
+//     printf("pread error at r_off : %lu / n :%lu / direct :%d / error code %ld @@@@\n",r_off,pread_sz,(direct && aligned),r);
+//     // sleep(3);
+//     s = IOStatus::IOError("pread error\n");
+//     read = 0;
+//   }
+//   zone_read_lock.ReadUnLockZone();
+//   *result = Slice((char*)scratch, read);
+//   return s;
+// }
 
 void ZoneFile::PushExtent() {
   uint64_t length;
