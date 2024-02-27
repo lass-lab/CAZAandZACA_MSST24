@@ -83,6 +83,10 @@ class ZoneExtent {
   void EncodeTo(std::string* output);
   void EncodeJson(std::ostream& json_stream);
   uint64_t PrintExtentInfo(bool print);
+
+  static bool SortByLeastRecentlyUsed(ZoneExtent* ea,ZoneExtent* eb){
+    return ea->last_accessed_ < eb->last_accessed_;
+  }
 };
 
 class ZoneFile;

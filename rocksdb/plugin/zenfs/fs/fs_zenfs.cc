@@ -3754,7 +3754,9 @@ void ZenFS::ZCPageCacheEviction(void){
 
       // phase 2 : sort zone by ZC posilbiity
       std::sort(extent_to_zone.begin(),extent_to_zone.end());
-
+      for(auto ez : extent_to_zone){
+        std::sort(ez.second.begin(),ez.second.end(),ZoneExtent::SortByLeastRecentlyUsed);
+      }
       for(auto ez : extent_to_zone){
         if(!run_gc_worker_){
           break;
@@ -3793,7 +3795,7 @@ void ZenFS::ZCPageCacheEviction(void){
 }
 
 void ZenFS::LRUPageCacheEviction(void){
-  
+      std::vector<ZoneExtent*> all_extents;
 
       for (const auto& file_it : files_) {
         ZoneFile& file = *(file_it.second);
@@ -3802,6 +3804,37 @@ void ZenFS::LRUPageCacheEviction(void){
           if(!ext){
             continue;
           }
+
+          all_extents.push_back(ext);
+
+          // std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
+          // if(tmp_cache==nullptr){
+          //   continue;
+          // }
+          // if(tmp_cache.use_count()>1){
+          //   continue;
+          // }
+
+
+
+          
+          // zbd_->page_cache_size_-=ext->length_;
+          // tmp_cache.reset();
+          // if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+          //   break;
+          // }
+        
+        }
+
+
+
+        // if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+        //   break;
+        // }
+      }
+
+      sort(all_extents.begin(),all_extents.end(),ZoneExtent::SortByLeastRecentlyUsed);
+      for(ZoneExtent* ext : all_extents){
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
             continue;
@@ -3809,21 +3842,12 @@ void ZenFS::LRUPageCacheEviction(void){
           if(tmp_cache.use_count()>1){
             continue;
           }
-
-
-          
           zbd_->page_cache_size_-=ext->length_;
           tmp_cache.reset();
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
             break;
           }
-        
-        }
-        if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
-          break;
-        }
       }
-
 }
 
 ///////////// this async

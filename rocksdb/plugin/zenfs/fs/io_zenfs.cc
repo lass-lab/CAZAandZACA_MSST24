@@ -32,7 +32,7 @@ namespace ROCKSDB_NAMESPACE {
 // class ZenFS;
 ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname,uint64_t now_micros)
     : start_(start), length_(length), zone_(zone), is_invalid_(false), fname_(fname), header_size_(0),last_accessed_(now_micros) {
-      printf("ZoneExtent :: %lu \n",now_micros);
+      // printf("ZoneExtent :: %lu \n",now_micros);
       if(zone==nullptr){
         return;
       }
@@ -65,7 +65,7 @@ ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone)
   }
 ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone, std::string fname, uint64_t header_size,uint64_t now_micros) 
 : start_(start), length_(length), zone_(zone), is_invalid_(false), fname_(fname), header_size_(header_size),last_accessed_(now_micros) {
-    printf("ZoneExtent :: %lu \n",now_micros);
+    // printf("ZoneExtent :: %lu \n",now_micros);
   if(zone==nullptr){
       return;
   }
@@ -523,6 +523,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
       aligned = true;
     }
+    extent->last_accessed_ = zenfs_->NowMicros();
     std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
     if(page_cache!=nullptr){
       memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz );
