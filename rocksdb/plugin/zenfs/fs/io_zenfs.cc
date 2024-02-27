@@ -544,13 +544,17 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
       // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p OKOKOK\n",
       // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
+      // bool overlaped_read = false;
       {
         std::lock_guard<std::mutex> lg(extent->page_cache_lock_);
         if(extent->page_cache_ == nullptr){
-          zbd_->page_cache_size_+=extent->length_;
+          extent->page_cache_=std::move(page_cache);
         }
-        extent->page_cache_=std::move(page_cache);
       }
+      if(page_cache==nullptr){
+        zbd_->page_cache_size_+=extent->length_;
+      }
+
 
       r=pread_sz;
       zbd_->rocksdb_page_cache_hit_size_+=r;
