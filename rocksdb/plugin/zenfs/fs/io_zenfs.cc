@@ -538,8 +538,8 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       ,page_cache.get() + (r_off -extent->start_) );
       memcpy(debug_buffer,page_cache.get() + (r_off -extent->start_),pread_sz);
 
-      printf("memcopy to ptr %p <- debug buffer %p\n",ptr,debug_buffer);
-       memcpy(ptr,debug_buffer,pread_sz);
+      // printf("memcopy to ptr %p <- debug buffer %p\n",ptr,debug_buffer);
+      //  memcpy(ptr,debug_buffer,pread_sz);
 
       free(debug_buffer);
 
