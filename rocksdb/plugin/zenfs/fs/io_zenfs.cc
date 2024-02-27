@@ -528,26 +528,28 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
     
     // std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
-    std::shared_ptr<char> page_cache = (extent->page_cache_);
-    if(page_cache==nullptr){
-      char* new_page_cache_ptr = nullptr;
-      if(posix_memalign((void**)(&new_page_cache_ptr),sysconf(_SC_PAGE_SIZE),extent->length_)){
-        printf("@@@@@@@@@@ new_page_cache_ptr error\n");
+    {
+      std::lock_guard<std::mutex> lg(extent->page_cache_lock_);
+      std::shared_ptr<char> page_cache = (extent->page_cache_);
+      if(page_cache==nullptr){
+        char* new_page_cache_ptr = nullptr;
+        if(posix_memalign((void**)(&new_page_cache_ptr),sysconf(_SC_PAGE_SIZE),extent->length_)){
+          printf("@@@@@@@@@@ new_page_cache_ptr error\n");
+        }
+        zbd_->Read(new_page_cache_ptr, extent->start_, extent->length_,false);
+        zbd_->page_cache_size_+=extent->length_;
+        page_cache.reset(new_page_cache_ptr);
+        
       }
-      zbd_->Read(new_page_cache_ptr, extent->start_, extent->length_,false);
-
-      page_cache.reset(new_page_cache_ptr);
-      
     }
-
     if(page_cache!=nullptr){
       memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
       // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p OKOKOK\n",
       // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
 
-      if(extent->page_cache_ == nullptr){
-        zbd_->page_cache_size_+=extent->length_;
-      }
+      // if(extent->page_cache_ == nullptr){
+        
+      // }
       extent->page_cache_=std::move(page_cache);
       r=pread_sz;
       zbd_->rocksdb_page_cache_hit_size_+=r;
