@@ -423,6 +423,7 @@ class FileSystem : public Customizable {
   virtual size_t ZoneCleaning(bool) { return 0; }
   virtual bool IsZCRunning(void) { return false; }
   virtual int GetMountTime(void) { return -1; }
+  virtual uint64_t NowMicros(void) { return 0;}
   virtual void ZCLock(void) { }
   virtual void ZCUnLock(void) {}
   // Create an object that represents a directory. Will fail if directory
@@ -1418,6 +1419,9 @@ class FileSystemWrapper : public FileSystem {
   }
   int GetMountTime(void) { 
     return target_->GetMountTime(); 
+  }
+  uint64_t NowMicros(void){
+    return target_->NowMicros();
   }
   bool IsZCRunning(void) {
     return target_->IsZCRunning();
