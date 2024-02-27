@@ -534,7 +534,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
         printf("@@@@@@@@@@ debug buffer error\n");
       }
       printf("memcopy to debug buffer %p<- page_cache.get() + (r_off -extent->start_)  %p:\n",
-      debug_buffer,
+      debug_buffer
       ,page_cache.get() + (r_off -extent->start_) );
       memcpy(debug_buffer,page_cache.get() + (r_off -extent->start_),pread_sz);
 
