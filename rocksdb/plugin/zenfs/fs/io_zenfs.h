@@ -76,7 +76,7 @@ class ZoneExtent {
       zone_->GetZBD()->page_cache_size_ -=length_;
       // printf("After page cache %lu\n",zone_->GetZBD()->page_cache_size_.load());
     }
-    print("delete %p\n",page_cache_.get());
+    printf("delete %p\n",page_cache_.get());
     page_cache_.reset();
   }
   Status DecodeFrom(Slice* input);
