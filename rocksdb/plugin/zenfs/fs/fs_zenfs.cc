@@ -2872,7 +2872,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
   for (size_t i = 0; i < extents.size();i++) {
     ZoneExtent* ext=extents[i];
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
-          ext->fname_,ext->header_size_);
+          ext->fname_,ext->header_size_,NowMicros());
     new_ext->zone_=ext->zone_;
     new_ext->page_cache_=std::move(ext->page_cache_);
     new_extent_list.push_back(new_ext);    
@@ -4158,7 +4158,7 @@ uint64_t ZenFS::MigrateFileExtents(
   for (size_t i = 0; i < extents.size();i++) {
     ZoneExtent* ext=extents[i];
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
-          ext->fname_,ext->header_size_);
+          ext->fname_,ext->header_size_,NowMicros());
     new_ext->zone_=ext->zone_;
     new_ext->page_cache_ = std::move(ext->page_cache_);
     new_extent_list.push_back(new_ext);    
