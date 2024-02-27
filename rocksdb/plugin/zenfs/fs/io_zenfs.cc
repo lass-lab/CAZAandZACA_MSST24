@@ -529,9 +529,10 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       // if(r_off<extent->start_){
         
       // }
-      printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p\n",
-      r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
+      // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p\n",
+      // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
       memcpy(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
+      // printf("")
       extent->page_cache_=std::move(page_cache);
       r=pread_sz;
       zbd_->rocksdb_page_cache_hit_size_+=r;
