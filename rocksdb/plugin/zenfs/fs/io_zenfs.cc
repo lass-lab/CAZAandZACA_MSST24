@@ -526,10 +526,10 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
     extent->last_accessed_ = zenfs_->NowMicros();
     
 
-    
+    std::shared_ptr<char> page_cache = (extent->page_cache_);
     // std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
     {
-      std::shared_ptr<char> page_cache = (extent->page_cache_);
+      
       if(page_cache==nullptr){
         char* new_page_cache_ptr = nullptr;
         if(posix_memalign((void**)(&new_page_cache_ptr),sysconf(_SC_PAGE_SIZE),extent->length_)){
