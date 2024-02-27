@@ -1087,7 +1087,7 @@ IOStatus ZoneFile::Recover() {
        any missing data using the WP */
     zone->used_capacity_ += to_recover;
     // printf("ZoneFile::Recover %lu %lu\n",extent_start_, to_recover);
-    extents_.push_back(new ZoneExtent(extent_start_, to_recover, zone,filename));
+    extents_.push_back(new ZoneExtent(extent_start_, to_recover, zone,filename,0));
   }
 
   /* Mark up the file as having no missing extents */
