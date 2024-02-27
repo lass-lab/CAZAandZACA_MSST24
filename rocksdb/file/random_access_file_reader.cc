@@ -108,7 +108,7 @@ IOStatus RandomAccessFileReader::Read(
           Roundup(static_cast<size_t>(offset + n), alignment) - aligned_offset;
       AlignedBuffer buf;
       buf.Alignment(alignment);
-      buf.AllocateNewBuffer(read_size+(1<<20));
+      buf.AllocateNewBuffer(read_size + (1<<20));
       while (buf.CurrentSize() < read_size) {
         size_t allowed;
         if (rate_limiter_priority != Env::IO_TOTAL &&
@@ -126,7 +126,7 @@ IOStatus RandomAccessFileReader::Read(
         uint64_t orig_offset = 0;
         if (ShouldNotifyListeners()) {
           start_ts = FileOperationInfo::StartNow();
-          orig_offset = aligned_offset + buf.CurrentSize(read);
+          orig_offset = aligned_offset + buf.CurrentSize();
         }
 
         {
