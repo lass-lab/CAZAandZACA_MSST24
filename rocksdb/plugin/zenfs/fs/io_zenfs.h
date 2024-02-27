@@ -58,6 +58,7 @@ class ZoneExtent {
   std::string fname_;
   uint64_t header_size_;
 
+  uint64_t last_accessed_;
   std::shared_ptr<char> page_cache_= nullptr;
   std::mutex page_cache_lock_ ; 
 

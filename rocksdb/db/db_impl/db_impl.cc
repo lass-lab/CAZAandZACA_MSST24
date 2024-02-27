@@ -3055,6 +3055,10 @@ void DBImpl::ZenFSInstallSuperVersionAndScheduleWork(void){
   InstallSuperVersionAndScheduleWork(cfd,&job_context.superversion_contexts[0],*cfd->GetLatestMutableCFOptions());
 }
 
+uint64_t DBImpl::NowMicros(void){
+  return immutable_db_options_.clock ? immutable_db_options_.clock->NowMicros() : 0;
+}
+
 void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list, bool exclude_being_compacted){
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   const std::vector<int>& files_by_compactio_pri=vstorage->FilesByCompactionPri(level);
@@ -4621,6 +4625,10 @@ void DB::ZenFSInstallSuperVersionAndScheduleWork(void){
 }
 void DB::SameLevelFileList(int , std::vector<uint64_t>&,bool ){
   std::cout<<"DB::SameLevelFileList not Supported\n";
+}
+
+uint64_t DB::NowMicros(void){
+  return 0;
 }
 double DB::ReCalculateCompactionScore(int){
   return 0.0;

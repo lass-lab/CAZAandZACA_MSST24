@@ -390,7 +390,10 @@ class DB {
   virtual void AdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
   virtual void DownwardAdjacentFileList(Slice& s, Slice& l, int level, std::vector<uint64_t>& fno_list);
   virtual void ZenFSInstallSuperVersionAndScheduleWork(void);
+  virtual uint64_t NowMicros(void);
   virtual void SameLevelFileList(int level, std::vector<uint64_t>& fno_list,bool exclude_being_compacted = true);
+  
+  
   virtual double ReCalculateCompactionScore(int level);
   virtual std::vector<int> NumLevelsFiles(void);
   virtual std::vector<double> LevelsCompactionScore(void);

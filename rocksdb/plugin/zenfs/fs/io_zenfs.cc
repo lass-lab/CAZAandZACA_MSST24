@@ -30,11 +30,13 @@
 
 namespace ROCKSDB_NAMESPACE {
 // class ZenFS;
-ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname)
-    : start_(start), length_(length), zone_(zone), is_invalid_(false), fname_(fname), header_size_(0) {
+ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname,uint64_t now_micros)
+    : start_(start), length_(length), zone_(zone), is_invalid_(false), fname_(fname), header_size_(0),last_accessed_(now_micros) {
+      printf("ZoneExtent :: %lu \n",now_micros);
       if(zone==nullptr){
         return;
       }
+
       // printf("function 1 %lu %lu\n",start_,length_);
       // if(zone!=nullptr){
       zone->PushExtent(this);
@@ -61,8 +63,9 @@ ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone)
       zone->PushExtentAtFront(this);
       
   }
-ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone, std::string fname, uint64_t header_size) 
-: start_(start), length_(length), zone_(zone), is_invalid_(false), fname_(fname), header_size_(header_size) {
+ZoneExtent::ZoneExtent(uint64_t start, uint64_t length, Zone* zone, std::string fname, uint64_t header_size,uint64_t now_micros) 
+: start_(start), length_(length), zone_(zone), is_invalid_(false), fname_(fname), header_size_(header_size),last_accessed_(now_micros) {
+    printf("ZoneExtent :: %lu \n",now_micros);
   if(zone==nullptr){
       return;
   }
@@ -722,8 +725,10 @@ IOStatus ZoneFile::BufferedAppend(char** _buffer, uint64_t data_size) {
     s = active_zone_->Append(buffer, wr_size + pad_sz);
     if (!s.ok()) return s;
     // printf("ZoneFile::BufferedAppend :: %lu %lu\n",extent_start_, extent_length);
-    ZoneExtent* new_ext= new ZoneExtent(extent_start_, extent_length, active_zone_,filename);
-
+    ZoneExtent* new_ext= new ZoneExtent(extent_start_, extent_length, active_zone_,filename, 
+        zenfs_->db_ptr_ ? zenfs_->db_ptr_->NowMicros() : 0);
+    // zenfs_
+    // zenfs_
     extents_.push_back(new_ext);
 
     int ret =
@@ -801,7 +806,9 @@ IOStatus ZoneFile::SparseAppend(char** _sparse_buffer, uint64_t data_size) {
     if (!s.ok()) return s;
 
     ZoneExtent* new_ext = new ZoneExtent(extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,
-                       extent_length, active_zone_,filename,ZoneFile::SPARSE_HEADER_SIZE);
+                       extent_length, active_zone_,filename,ZoneFile::SPARSE_HEADER_SIZE,
+                               zenfs_->db_ptr_ ? zenfs_->db_ptr_->NowMicros() : 0  );
+    // zenfs_->db_ptr_;
 
     extents_.push_back(new_ext);
     int ret =
@@ -1022,7 +1029,7 @@ IOStatus ZoneFile::RecoverSparseExtents(uint64_t start, uint64_t end,
       break;
     }
     recovered_segments++;
-
+    
     zone->used_capacity_ += extent_length;
     // printf("ZoneFile::RecoverSparseExtents %lu %lu\n",next_extent_start + SPARSE_HEADER_SIZE,extent_length);
     extents_.push_back(new ZoneExtent(next_extent_start + SPARSE_HEADER_SIZE,
