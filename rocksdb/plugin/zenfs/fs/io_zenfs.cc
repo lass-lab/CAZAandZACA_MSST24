@@ -226,7 +226,7 @@ Status ZoneFile::DecodeFrom(Slice* input) {
       case kExtent:
         filename="NONE(Decodefrom)";
         // not push to zone extents here
-        extent = new ZoneExtent(0, 0, nullptr,filename);
+        extent = new ZoneExtent(0, 0, nullptr,filename,0);
         GetLengthPrefixedSlice(input, &slice);
         s = extent->DecodeFrom(&slice);
         if (!s.ok()) {
