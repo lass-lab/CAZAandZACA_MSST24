@@ -3840,6 +3840,7 @@ void ZenFS::LRUPageCacheEviction(void){
             continue;
           }
           if(tmp_cache.use_count()>1){
+            // ext->page_cache_
             continue;
           }
           zbd_->page_cache_size_-=ext->length_;
