@@ -726,7 +726,7 @@ IOStatus ZoneFile::BufferedAppend(char** _buffer, uint64_t data_size) {
     if (!s.ok()) return s;
     // printf("ZoneFile::BufferedAppend :: %lu %lu\n",extent_start_, extent_length);
     ZoneExtent* new_ext= new ZoneExtent(extent_start_, extent_length, active_zone_,filename, 
-        zenfs_->db_ptr_ ? zenfs_->db_ptr_->NowMicros() : 0);
+        ((ZenFS*)zenfs_)->db_ptr_ ? zenfs_->db_ptr_->NowMicros() : 0);
     // zenfs_
     // zenfs_
     extents_.push_back(new_ext);
@@ -807,7 +807,7 @@ IOStatus ZoneFile::SparseAppend(char** _sparse_buffer, uint64_t data_size) {
 
     ZoneExtent* new_ext = new ZoneExtent(extent_start_ + ZoneFile::SPARSE_HEADER_SIZE,
                        extent_length, active_zone_,filename,ZoneFile::SPARSE_HEADER_SIZE,
-                               zenfs_->db_ptr_ ? zenfs_->db_ptr_->NowMicros() : 0  );
+                               ((ZenFS*)zenfs_)->db_ptr_ ? zenfs_->db_ptr_->NowMicros() : 0  );
     // zenfs_->db_ptr_;
 
     extents_.push_back(new_ext);
