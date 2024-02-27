@@ -309,7 +309,7 @@ Status ZoneFile::MergeUpdate(std::shared_ptr<ZoneFile> update, bool replace) {
     }
     zone->used_capacity_ += extent->length_;
     printf("ZoneFile::MergeUpdate :: %lu %lu\n",extent->start_, extent->length_);
-    new_ext=new ZoneExtent(extent->start_, extent->length_, nullptr,filename);
+    new_ext=new ZoneExtent(extent->start_, extent->length_, nullptr,filename,0);
     new_ext->zone_=zone;
     extents_.push_back(new_ext);
   }
