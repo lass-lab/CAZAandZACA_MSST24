@@ -530,44 +530,24 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
     // std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
     std::shared_ptr<char> page_cache = (extent->page_cache_);
     if(page_cache==nullptr){
-      char* new_page_cache_ptr;
+      char* new_page_cache_ptr = nullptr;
       if(posix_memalign((void**)(&new_page_cache_ptr),sysconf(_SC_PAGE_SIZE),extent->length_)){
         printf("@@@@@@@@@@ new_page_cache_ptr error\n");
       }
-      // zbd_->Read()
       zbd_->Read(new_page_cache_ptr, extent->start_, extent->length_,false);
 
       page_cache.reset(new_page_cache_ptr);
-      zbd_->page_cache_size_+=extent->length_;
+      
     }
 
     if(page_cache!=nullptr){
-      // if(r_off<extent->start_){
-        
-      // }
-      // char* debug_buffer;
-      // if(posix_memalign((void**)(&debug_buffer),sysconf(_SC_PAGE_SIZE),256<<20)){
-      //   printf("@@@@@@@@@@ debug buffer error\n");
-      // }
-
-
-
-      // printf("memcopy to debug buffer %p<- page_cache.get() + (r_off -extent->start_)  %p:\n",
-      // debug_buffer
-      // ,page_cache.get() + (r_off -extent->start_) );
-      // memmove(debug_buffer,page_cache.get() + (r_off -extent->start_),pread_sz);
-
-      // printf("memcopy to ptr %p <- debug buffer %p\n",ptr,debug_buffer);
-      //  memmove(ptr,debug_buffer,pread_sz);
-
-      // free(debug_buffer);
-
-      // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p offset %lu n %lu\n",
-      // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get(),offset,n);
       memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
       // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p OKOKOK\n",
       // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
 
+      if(extent->page_cache == nullptr){
+        zbd_->page_cache_size_+=extent->length_;
+      }
       extent->page_cache_=std::move(page_cache);
       r=pread_sz;
       zbd_->rocksdb_page_cache_hit_size_+=r;
