@@ -545,13 +545,14 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p OKOKOK\n",
       // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
 
-      if(extent->page_cache == nullptr){
+      if(extent->page_cache_ == nullptr){
         zbd_->page_cache_size_+=extent->length_;
       }
       extent->page_cache_=std::move(page_cache);
       r=pread_sz;
       zbd_->rocksdb_page_cache_hit_size_+=r;
-    }else{
+    }
+    else{
       
       
       r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
