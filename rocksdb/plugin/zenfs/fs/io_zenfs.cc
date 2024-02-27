@@ -524,7 +524,8 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       aligned = true;
     }
     extent->last_accessed_ = zenfs_->NowMicros();
-    std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
+    // std::shared_ptr<char> page_cache = std::move(extent->page_cache_);
+    std::shared_ptr<char> page_cache = (extent->page_cache_);
     if(page_cache!=nullptr){
       // if(r_off<extent->start_){
         
@@ -535,22 +536,22 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       }
 
 
-      
-      printf("memcopy to debug buffer %p<- page_cache.get() + (r_off -extent->start_)  %p:\n",
-      debug_buffer
-      ,page_cache.get() + (r_off -extent->start_) );
-      memcpy(debug_buffer,page_cache.get() + (r_off -extent->start_),pread_sz);
+
+      // printf("memcopy to debug buffer %p<- page_cache.get() + (r_off -extent->start_)  %p:\n",
+      // debug_buffer
+      // ,page_cache.get() + (r_off -extent->start_) );
+      // memmove(debug_buffer,page_cache.get() + (r_off -extent->start_),pread_sz);
 
       // printf("memcopy to ptr %p <- debug buffer %p\n",ptr,debug_buffer);
-      //  memcpy(ptr,debug_buffer,pread_sz);
+      //  memmove(ptr,debug_buffer,pread_sz);
 
       free(debug_buffer);
 
-      printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p offset %lu n %lu\n",
-      r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get(),offset,n);
-      memcpy(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
-      printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p OKOKOK\n",
-      r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
+      // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p offset %lu n %lu\n",
+      // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get(),offset,n);
+      memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
+      // printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p OKOKOK\n",
+      // r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get());
 
       extent->page_cache_=std::move(page_cache);
       r=pread_sz;
