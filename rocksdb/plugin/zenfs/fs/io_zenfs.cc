@@ -529,6 +529,20 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       // if(r_off<extent->start_){
         
       // }
+      char* debug_buffer;
+      if(posix_memalign((void**)(&debug_buffer),sysconf(_SC_PAGE_SIZE),256<<20)){
+        printf("@@@@@@@@@@ debug buffer error\n");
+      }
+      printf("memcopy to debug buffer %p<- page_cache.get() + (r_off -extent->start_)  %p:\n",
+      debug_buffer,
+      ,page_cache.get() + (r_off -extent->start_) );
+      memcpy(debug_buffer,page_cache.get() + (r_off -extent->start_),pread_sz);
+
+      printf("memcopy to ptr %p <- debug buffer %p",ptr,debug_buffer);
+       memcpy(ptr,debug_buffer,pread_sz);
+
+      free(debug_buffer);
+
       printf("Positionread ?? r_off %lu extent->start_ %lu extent->length_ %lu pread_sz %lu ptr %p pcptr %p offset %lu n %lu\n",
       r_off,extent->start_,extent->length_,pread_sz,ptr,page_cache.get(),offset,n);
       memcpy(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
