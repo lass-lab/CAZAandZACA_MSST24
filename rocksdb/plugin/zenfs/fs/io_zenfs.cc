@@ -528,6 +528,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
     
     std::shared_ptr<char> page_cache = (extent->page_cache_);
+    (void)(page_cache);
     {
       std::lock_guard<std::mutex> lg(extent->page_cache_lock_);
       // std::shared_ptr<char> page_cache = (extent->page_cache_);
