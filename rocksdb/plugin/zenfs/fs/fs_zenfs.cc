@@ -2231,7 +2231,7 @@ Status ZenFS::Mount(bool readonly) {
     }
 
     if(async_cleaner_worker_==nullptr){
-      // async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundPageCacheEviction,this));
+      async_cleaner_worker_.reset(new std::thread(&ZenFS::BackgroundPageCacheEviction,this));
     }
 
   }
