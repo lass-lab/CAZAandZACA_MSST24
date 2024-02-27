@@ -542,7 +542,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
       }
     }
     if(extent->page_cache_!=nullptr){
-      memmove(ptr,page_cache.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
+      memmove(ptr,extent->page_cache_.get() + (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
 
       r=pread_sz;
       zbd_->rocksdb_page_cache_hit_size_+=r;
