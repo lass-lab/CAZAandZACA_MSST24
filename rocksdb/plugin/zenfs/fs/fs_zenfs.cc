@@ -3821,7 +3821,9 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
       }
       uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
       
-      std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned=zbd_->HighPosibilityTobeVictim(
+      std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
+      zone_to_be_pinned.clear();
+      zone_to_be_pinned=zbd_->HighPosibilityTobeVictim(
         invalid_ratio == 0 ? 10 : 100/invalid_ratio
       );
 
