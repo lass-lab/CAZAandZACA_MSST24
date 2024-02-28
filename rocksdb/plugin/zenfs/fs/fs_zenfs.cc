@@ -3715,11 +3715,12 @@ void ZenFS::BackgroundPageCacheEviction(void){
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit() && run_gc_worker_){
     std::lock_guard<std::mutex> lg(page_cache_mtx_);
     std::lock_guard<std::mutex> file_lock(files_mtx_);
-      if(free_percent_<23 && zbd_->PCAEnabled()){
-        ZCPageCacheEviction();
-      }else{
-        LRUPageCacheEviction();
-      }
+      // if(free_percent_<23 && zbd_->PCAEnabled()){
+      //   ZCPageCacheEviction();
+      // }else{
+
+      // }
+      LRUPageCacheEviction(free_percent_<23 && zbd_->PCAEnabled());
     }
   }
 }
@@ -3794,8 +3795,10 @@ void ZenFS::ZCPageCacheEviction(void){
   
 }
 
-void ZenFS::LRUPageCacheEviction(void){
+void ZenFS::LRUPageCacheEviction(bool zc_aware){
       std::vector<ZoneExtent*> all_extents;
+
+      std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned=zbd_->HighPosibilityTobeVictim();
 
       for (const auto& file_it : files_) {
         ZoneFile& file = *(file_it.second);
@@ -3834,7 +3837,17 @@ void ZenFS::LRUPageCacheEviction(void){
       }
 
       sort(all_extents.begin(),all_extents.end(),ZoneExtent::SortByLeastRecentlyUsed);
+
+
       for(ZoneExtent* ext : all_extents){
+          if(zc_aware && std::find_if(zone_to_be_pinned.begin() ,
+                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
+                            return valid_zidx.second==ext->zone_->zidx_;
+                          }) != zone_to_be_pinned.end() ){
+            continue;
+          }
+
+
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
             continue;

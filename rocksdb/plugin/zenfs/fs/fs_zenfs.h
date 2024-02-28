@@ -658,7 +658,7 @@ ret:
   void BackgroundPageCacheEviction();
 
   void ZCPageCacheEviction();
-  void LRUPageCacheEviction();
+  void LRUPageCacheEviction(bool zc_aware);
 
   void GetZenFSSnapshot(ZenFSSnapshot& snapshot,
                         const ZenFSSnapshotOptions& options);
