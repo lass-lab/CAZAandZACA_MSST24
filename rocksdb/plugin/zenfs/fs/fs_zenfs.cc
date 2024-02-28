@@ -3808,6 +3808,7 @@ void ZenFS::ZCPageCacheEviction(void){
 
 void ZenFS::LRUPageCacheEviction(bool zc_aware){
       std::vector<ZoneExtent*> all_extents;
+      (bool)(zc_aware);
       all_extents.clear();
       // std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned=zbd_->HighPosibilityTobeVictim();
 
