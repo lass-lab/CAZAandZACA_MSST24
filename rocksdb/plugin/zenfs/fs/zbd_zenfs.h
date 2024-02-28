@@ -833,7 +833,7 @@ class ZonedBlockDevice {
     uint64_t ZENFS_CONVENTIONAL_ZONE = 0;
 
   // validsize,zidx
-  std::vector<std::pair<uint64_t,uint64_t>> HighPosibilityTobeVictim(void){
+  std::vector<std::pair<uint64_t,uint64_t>> HighPosibilityTobeVictim(uint64_t n){
     std::vector<std::pair<uint64_t,uint64_t>> sorted,ret;
     sorted.clear(); ret.clear();
     for(auto z: io_zones){
@@ -847,7 +847,7 @@ class ZonedBlockDevice {
     }
     std::sort(sorted.begin(),sorted.end());
 
-    for(size_t i = 0 ; i<(6) && i <sorted.size();i++){
+    for(size_t i = 0 ; i<(4) && i <sorted.size();i++){
       // printf("%lu %lu\n",sorted[i].first,sorted[i].second);
       ret.push_back(sorted[i]);
     }
