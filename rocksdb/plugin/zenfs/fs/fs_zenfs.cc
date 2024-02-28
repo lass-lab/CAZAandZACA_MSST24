@@ -3715,7 +3715,7 @@ void ZenFS::BackgroundPageCacheEviction(void){
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit() && run_gc_worker_){
     std::lock_guard<std::mutex> lg(page_cache_mtx_);
     std::lock_guard<std::mutex> file_lock(files_mtx_);
-      if(free_percent_<23 && zbd_->PCAEnabled()){
+      if(free_percent_<22 && zbd_->PCAEnabled()){
         ZCPageCacheEviction();
       }else{
         LRUPageCacheEviction(false);
@@ -3738,7 +3738,7 @@ void ZenFS::ZCPageCacheEviction(void){
       uint64_t invalid_raito = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
       
       std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned=zbd_->HighPosibilityTobeVictim( 
-        invalid ratio == 0 ? 10 : 100/invalid_raito);
+        invalid ratio == 0 ? 10 : 100/invalid_raito );
 
       std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
       for(auto z : io_zones ){
