@@ -837,13 +837,14 @@ class ZonedBlockDevice {
     std::vector<std::pair<uint64_t,uint64_t>> sorted,ret;
     sorted.clear(); ret.clear();
     for(auto z: io_zones){
-      if(z->capacity_!=0){
-        continue;
-      }
+      // if(z->capacity_!=0){
+      //   continue;
+      // }
       if(z->used_capacity_==0){
         continue;
       }
-      sorted.push_back({((z->used_capacity_*100)/z->max_capacity_ ),z->zidx_});
+      // sorted.push_back({((z->used_capacity_*100)/z->max_capacity_ ),z->zidx_});
+      sorted.push_back({( z->wp_-z->start_-z->used_capacity_  ),z->zidx_});
     }
     std::sort(sorted.begin(),sorted.end());
 
