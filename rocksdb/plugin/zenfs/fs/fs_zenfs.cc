@@ -3732,8 +3732,8 @@ void ZenFS::ZCPageCacheEviction(void){
       uint64_t valid_data_size = 0;
       std::vector<Zone*> io_zones = (*zbd_->GetIOZones());
       for(Zone* z : io_zones){
-        valid_data_size+=z.used_capacity_; 
-        invalid_data_size+=(z.wp_-z.start_ - z.used_capacity_);
+        valid_data_size+=z->used_capacity_; 
+        invalid_data_size+=(z->wp_-z->start_ - z->used_capacity_);
       }
       uint64_t invalid_raito = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
       
