@@ -3715,12 +3715,12 @@ void ZenFS::BackgroundPageCacheEviction(void){
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit() && run_gc_worker_){
     std::lock_guard<std::mutex> lg(page_cache_mtx_);
     std::lock_guard<std::mutex> file_lock(files_mtx_);
-      // if(free_percent_<22 && zbd_->PCAEnabled()){
-      //   ZCPageCacheEviction();
-      // }else{
-      //   LRUPageCacheEviction(false);
-      // }
-      LRUPageCacheEviction(free_percent_<23 && zbd_->PCAEnabled());
+      if(free_percent_<22 && zbd_->PCAEnabled()){
+        ZCPageCacheEviction();
+      }else{
+        LRUPageCacheEviction(false);
+      }
+      // LRUPageCacheEviction(free_percent_<23 && zbd_->PCAEnabled());
     }
   }
 }
