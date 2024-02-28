@@ -3735,10 +3735,10 @@ void ZenFS::ZCPageCacheEviction(void){
         valid_data_size+=z->used_capacity_; 
         invalid_data_size+=(z->wp_-z->start_ - z->used_capacity_);
       }
-      uint64_t invalid_raito = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
+      uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
       
       std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned=zbd_->HighPosibilityTobeVictim( 
-        invalid ratio == 0 ? 10 : 100/invalid_raito );
+        invalid_ratio == 0 ? 10 : 100/invalid_ratio );
 
       std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
       for(auto z : io_zones ){
