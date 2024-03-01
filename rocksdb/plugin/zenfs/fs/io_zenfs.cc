@@ -367,7 +367,11 @@ void ZoneFile::ClearExtents() {
       printf("clearextents Error here@@@ %s %lu %lu\n",GetFilename().c_str(),zone->used_capacity_.load(),(*e)->length_);
       continue;
     }
-    zbd_->page_cache_size_ -= (*e)->length_;
+
+    std::shared_ptr<char> tmp_cache = (*e)->page_cache_;
+    if(tmp_cache!=nullptr){
+      zbd_->page_cache_size_ -= (*e)->length_;
+    }
     zone->used_capacity_.fetch_sub((*e)->length_); 
     delete (*e);
   }
