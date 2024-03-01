@@ -3715,16 +3715,16 @@ void ZenFS::BackgroundPageCacheEviction(void){
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit() && run_gc_worker_){
       std::lock_guard<std::mutex> lg(page_cache_mtx_);
       std::lock_guard<std::mutex> file_lock(files_mtx_);
-      uint64_t invalid_data_size = 0;
-      uint64_t valid_data_size = 0;
-      std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
-      for(Zone* z : io_zones){
-        valid_data_size+=z->used_capacity_; 
-        invalid_data_size+=(z->wp_-z->start_ - z->used_capacity_);
-      }
-      uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
+      // uint64_t invalid_data_size = 0;
+      // uint64_t valid_data_size = 0;
+      // std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
+      // for(Zone* z : io_zones){
+      //   valid_data_size+=z->used_capacity_; 
+      //   invalid_data_size+=(z->wp_-z->start_ - z->used_capacity_);
+      // }
+      // uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
 
-      if( free_percent_<21 && invalid_ratio<25 &&zbd_->PCAEnabled()){
+      if( free_percent_<21 &&zbd_->PCAEnabled()){
         ZCPageCacheEviction();
       }else{
         LRUPageCacheEviction(false);
