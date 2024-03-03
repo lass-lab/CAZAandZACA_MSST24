@@ -134,10 +134,12 @@ class ZoneFile {
 
   std::vector<SSTBuffer*> sst_buffers_;
 
-  std::mutex writer_mtx_;
-  std::atomic<int> readers_{0};
+  // std::mutex writer_mtx_;
+
   FileSystemWrapper* zenfs_;
  public:
+  std::mutex writer_mtx_;
+    std::atomic<int> readers_{0};
   // std::<atomic> uint64_t on_zc_{0};
   std::atomic<uint64_t> on_zc_{0};
   bool is_sst_ = false;

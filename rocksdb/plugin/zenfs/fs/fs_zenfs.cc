@@ -3839,7 +3839,11 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
 
       for (const auto& file_it : files_) {
         ZoneFile* file = (file_it.second.get());
-        ZoneFile::ReadLock readlck(file);
+        // ZoneFile::ReadLock readlck(file);
+        if(!file->writer_mtx_.try_lock()){
+          continue;
+        }
+        file->readers_++;
         std::vector<ZoneExtent*> extents=file->GetExtents();
         for (ZoneExtent* ext : extents ) {
           if(!ext){
@@ -3867,7 +3871,7 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
         
         }
 
-
+        file->writer_mtx_.unlock();
 
         // if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
         //   break;
