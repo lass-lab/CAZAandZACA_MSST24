@@ -789,6 +789,7 @@ DBImpl::~DBImpl() {
   if(immutable_db_options_.is_db_bench==false){ // this is YCSB
   GetProperty("rocksdb.stats",&stats);
   // GetProperty()
+  fs_->SetDBPtr(nullptr);
   printf("==============================~DBImpl=========================\n");
   printf("%s\n",stats.c_str());
   printf("==============================~DBImpl=========================\n");
@@ -3056,7 +3057,10 @@ void DBImpl::ZenFSInstallSuperVersionAndScheduleWork(void){
 }
 
 uint64_t DBImpl::NowMicros(void){
-  return immutable_db_options_.clock ? immutable_db_options_.clock->NowMicros() : 0;
+  if(!immutable_db_options_.clock){
+    return 0;
+  }
+  return immutable_db_options_.clock->NowMicros();
 }
 
 void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list, bool exclude_being_compacted){
