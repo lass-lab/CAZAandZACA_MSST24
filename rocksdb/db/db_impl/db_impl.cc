@@ -789,7 +789,7 @@ DBImpl::~DBImpl() {
   if(immutable_db_options_.is_db_bench==false){ // this is YCSB
   GetProperty("rocksdb.stats",&stats);
   // GetProperty()
-  // fs_->SetDBPtr(nullptr);
+
   printf("==============================~DBImpl=========================\n");
   printf("%s\n",stats.c_str());
   printf("==============================~DBImpl=========================\n");
@@ -799,6 +799,7 @@ DBImpl::~DBImpl() {
     // }else{
     //   printf("immutable_db_options_.stats nullptr\n");
     // }
+  fs_->SetDBPtr(nullptr);
   }
   init_logger_creation_s_.PermitUncheckedError();
 
