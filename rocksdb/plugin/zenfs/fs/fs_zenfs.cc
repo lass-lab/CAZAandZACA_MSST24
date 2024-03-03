@@ -3847,11 +3847,14 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
         file->writer_mtx_.unlock();
         std::vector<ZoneExtent*> extents=file->GetExtents();
         for (ZoneExtent* ext : extents ) {
+          if(ext){
+            all_extents.push_back(ext);
+          }
           if(!ext){
-            continue;
+            printf("why?? %p\n",ext);
           }
 
-          all_extents.push_back(ext);
+          // all_extents.push_back(ext);
 
           // std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           // if(tmp_cache==nullptr){
