@@ -3764,7 +3764,7 @@ void ZenFS::ZCPageCacheEviction(void){
           break;
         }
         std::shared_ptr<ZoneFile> file = (file_it.second);
-        std::vector<ZoneExtent*> extents=file.GetExtents();
+        std::vector<ZoneExtent*> extents=file->GetExtents();
         for (ZoneExtent* ext : extents ) {
           if(!ext){
             continue;
