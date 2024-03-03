@@ -638,7 +638,7 @@ ret:
   size_t ZoneCleaning(bool forced) override __attribute__((hot));
   int GetMountTime(void) override { return mount_time_.load(); }
   uint64_t NowMicros(void) override {
-    if(!gc_worker_){
+    if(!run_gc_worker_){
       return 0;
     }
     return db_ptr_ ? db_ptr_->NowMicros() : 0; 

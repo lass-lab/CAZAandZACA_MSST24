@@ -2871,6 +2871,9 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
 
   for (size_t i = 0; i < extents.size();i++) {
     ZoneExtent* ext=extents[i];
+    // if(!run_gc_worker_){
+    //   breka;
+    // }
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
           ext->fname_,ext->header_size_,NowMicros());
     new_ext->zone_=ext->zone_;
