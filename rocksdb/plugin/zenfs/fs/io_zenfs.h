@@ -85,12 +85,12 @@ class ZoneExtent {
   uint64_t PrintExtentInfo(bool print);
 
   static bool SortByLeastRecentlyUsed(ZoneExtent* ea,ZoneExtent* eb){
-    if(!ea){
-      return true;
-    }
-    if(!eb){
-      return false;
-    }
+    // if(!ea){
+    //   return true;
+    // }
+    // if(!eb){
+    //   return false;
+    // }
     return ea->last_accessed_ < eb->last_accessed_;
   }
 };
