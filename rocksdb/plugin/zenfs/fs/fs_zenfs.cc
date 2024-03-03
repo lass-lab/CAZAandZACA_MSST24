@@ -3864,7 +3864,7 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
             printf("why?? %p\n",ext);
           }
         }
-        file.ReleaseWRLock();
+        file->ReleaseWRLock();
         // file->readers_--;
 
 
