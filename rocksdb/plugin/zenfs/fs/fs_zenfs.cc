@@ -3844,6 +3844,7 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
           continue;
         }
         file->readers_++;
+        file->writer_mtx_.unlock();
         std::vector<ZoneExtent*> extents=file->GetExtents();
         for (ZoneExtent* ext : extents ) {
           if(!ext){
@@ -3870,8 +3871,8 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
           // }
         
         }
+        file->readers_--;
 
-        file->writer_mtx_.unlock();
 
         // if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
         //   break;
