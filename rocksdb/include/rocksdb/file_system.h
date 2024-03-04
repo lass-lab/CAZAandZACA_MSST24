@@ -117,7 +117,7 @@ struct IOOptions {
   // Force directory fsync, some file systems like btrfs may skip directory
   // fsync, set this to force the fsync
   bool force_dir_fsync;
-  bool for_compactions = false;
+  bool for_compaction = false;
   IOOptions() : IOOptions(false) {}
 
   explicit IOOptions(bool force_dir_fsync_)
