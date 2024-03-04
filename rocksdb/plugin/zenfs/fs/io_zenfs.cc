@@ -529,7 +529,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
 
       aligned = true;
     }
-    if(ioptions.for_compactions){
+    if(ioptions.for_compaction){
       extent->last_accessed_ = zenfs_->NowMicros();
     }
     std::shared_ptr<char> page_cache = (extent->page_cache_);
