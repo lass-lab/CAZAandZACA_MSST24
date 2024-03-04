@@ -253,6 +253,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
   } else if (!TryGetCompressedBlockFromPersistentCache()) {
     IOOptions opts;
     io_status_ = file_->PrepareIOOptions(read_options_, opts);
+    opts.for_compaction=for_compaction_;
     // Actual file read
     if (io_status_.ok()) {
       if (file_->use_direct_io()) {

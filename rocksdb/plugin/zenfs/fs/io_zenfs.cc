@@ -452,7 +452,7 @@ ZoneExtent* ZoneFile::GetExtent(uint64_t file_offset, uint64_t* dev_offset) {
 }
 
 
-IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
+IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& ioptions, Slice* result,
                                   char* scratch, bool direct) {
   ZenFSMetricsLatencyGuard guard(zbd_->GetMetrics(), ZENFS_READ_LATENCY,
                                  Env::Default());
@@ -529,7 +529,9 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n, Slice* result,
 
       aligned = true;
     }
-    extent->last_accessed_ = zenfs_->NowMicros();
+    if(ioptions.for_compactions){
+      extent->last_accessed_ = zenfs_->NowMicros();
+    }
     std::shared_ptr<char> page_cache = (extent->page_cache_);
     if(page_cache!=nullptr){
       // if(r_off<extent->start_){
@@ -1730,12 +1732,12 @@ void ZonedWritableFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) {
   zoneFile_->SetWriteLifeTimeHint(hint,level_);
 }
 
-IOStatus ZonedSequentialFile::Read(size_t n, const IOOptions& /*options*/,
+IOStatus ZonedSequentialFile::Read(size_t n, const IOOptions& ioptions,
                                    Slice* result, char* scratch,
                                    IODebugContext* /*dbg*/) {
   IOStatus s;
 
-  s = zoneFile_->PositionedRead(rp, n, result, scratch, direct_);
+  s = zoneFile_->PositionedRead(rp, n,ioptions ,result, scratch, direct_);
   if (s.ok()) rp += result->size();
 
   return s;
@@ -1749,17 +1751,17 @@ IOStatus ZonedSequentialFile::Skip(uint64_t n) {
 }
 
 IOStatus ZonedSequentialFile::PositionedRead(uint64_t offset, size_t n,
-                                             const IOOptions& /*options*/,
+                                             const IOOptions& ioptions,
                                              Slice* result, char* scratch,
                                              IODebugContext* /*dbg*/) {
-  return zoneFile_->PositionedRead(offset, n, result, scratch, direct_);
+  return zoneFile_->PositionedRead(offset, n,ioptions ,result, scratch, direct_);
 }
 
 IOStatus ZonedRandomAccessFile::Read(uint64_t offset, size_t n,
-                                     const IOOptions& /*options*/,
+                                     const IOOptions& ioptions,
                                      Slice* result, char* scratch,
                                      IODebugContext* /*dbg*/) const {
-  return zoneFile_->PositionedRead(offset, n, result, scratch, direct_);
+  return zoneFile_->PositionedRead(offset, n,ioptions ,result, scratch, direct_);
 }
 
 

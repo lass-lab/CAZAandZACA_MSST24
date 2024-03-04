@@ -263,7 +263,7 @@ class EncryptedRandomAccessFile : public FSRandomAccessFile {
   // If Direct I/O enabled, offset, n, and scratch should be aligned properly.
   IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
-                IODebugContext* dbg) const override;
+                IODebugContext* dbg,bool for_compaction) const override;
 
   // Readahead the file starting from offset by n bytes for caching.
   IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
