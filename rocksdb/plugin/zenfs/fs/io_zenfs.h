@@ -195,7 +195,7 @@ class ZoneFile {
   Env::WriteLifeTimeHint GetWriteLifeTimeHint() { return lifetime_; }
 
   IOStatus PositionedRead(uint64_t offset, size_t n,const IOOptions& ioptions ,Slice* result,
-                          char* scratch, bool direct, );
+                          char* scratch, bool direct );
   ZoneExtent* GetExtent(uint64_t file_offset, uint64_t* dev_offset);
   void PushExtent();
   IOStatus AllocateNewZone(uint64_t min_capacity = 0);
