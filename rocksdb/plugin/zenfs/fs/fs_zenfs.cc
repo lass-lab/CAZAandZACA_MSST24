@@ -3752,8 +3752,8 @@ void ZenFS::ZCPageCacheEviction(void){
       }
       uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
       
-      std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned=zbd_->HighPosibilityTobeVictim( 
-        invalid_ratio == 0 ? 10 : 100/invalid_ratio );
+      // std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned=zbd_->HighPosibilityTobeVictim( 
+      //   invalid_ratio == 0 ? 10 : 100/invalid_ratio );
 
 
       for(auto z : io_zones ){
@@ -3793,12 +3793,12 @@ void ZenFS::ZCPageCacheEviction(void){
 
         
         for(ZoneExtent* ext : ez.second){
-          if(std::find_if(zone_to_be_pinned.begin() ,
-                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
-                            return valid_zidx.second==ext->zone_->zidx_;
-                          }) != zone_to_be_pinned.end() ){
-            break;
-          }
+          // if(std::find_if(zone_to_be_pinned.begin() ,
+          //                 zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
+          //                   return valid_zidx.second==ext->zone_->zidx_;
+          //                 }) != zone_to_be_pinned.end() ){
+          //   break;
+          // }
 
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
