@@ -1040,9 +1040,9 @@ class ZonedBlockDevice {
     // uint64_t threshold = (100 - 3 * (GetZoneCleaningKickingPoint() - cur_free_percent_));
     uint64_t ret = 0;
     for(auto z : io_zones){
-      if(z->used_capacity_>>20>=255){
-        continue;
-      }
+      // if(z->used_capacity_*100/(z->max_capacity_)>=95){
+      //   continue;
+      // }
       if(!z->IsFull()){
         continue; 
       }
