@@ -3909,7 +3909,7 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
             // ext->page_cache_
             continue;
           }
-          zbd_->page_cache_size_-=ext->length_;
+          zbd_->page_cache_size_-=ext.second->length_;
           tmp_cache.reset();
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
             break;
