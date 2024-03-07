@@ -529,11 +529,12 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
 
       aligned = true;
     }
-    if(ioptions.for_compaction){
+    // if(ioptions.for_compaction){
       extent->last_accessed_ = zenfs_->NowMicros();
-    }
+    // }
     std::shared_ptr<char> page_cache = (extent->page_cache_);
-    if(page_cache!=nullptr && ioptions.for_compaction){
+    if(page_cache!=nullptr){
+    // if(page_cache!=nullptr && ioptions.for_compaction){
       // if(r_off<extent->start_){
         
       // }
@@ -565,7 +566,9 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       zbd_->rocksdb_page_cache_hit_size_+=r;
     }else{
       r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
-      zbd_->rocksdb_page_cache_fault_size_+=r;
+      if(ioptions.for_compaction){
+        zbd_->rocksdb_page_cache_fault_size_+=r;
+      }
     }
     
 
