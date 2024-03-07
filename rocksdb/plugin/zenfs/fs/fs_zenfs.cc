@@ -3733,7 +3733,7 @@ void ZenFS::BackgroundPageCacheEviction(void){
       }
       uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
 
-      if( free_percent_<23 && invalid_ratio<25 &&zbd_->PCAEnabled()){
+      if( (free_percent_<zbd_->until_ || free_percent_<23)   && invalid_ratio<25 &&zbd_->PCAEnabled()){
         ZCPageCacheEviction();
       }else{
         LRUPageCacheEviction(false);
