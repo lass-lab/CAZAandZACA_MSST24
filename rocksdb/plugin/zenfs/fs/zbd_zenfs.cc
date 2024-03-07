@@ -3742,9 +3742,10 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
       bool full = zone->IsFull();
       zone->Close();
       zone->Release();
-      PutOpenIOZoneToken();
+       PutActiveIOZoneToken();
       if(full){
-        PutActiveIOZoneToken();
+        PutOpenIOZoneToken();
+        // PutActiveIOZoneToken();
       }
     }
   }
@@ -3832,13 +3833,12 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
         }
 
         if(GetActiveIOZoneTokenIfAvailable()){
-        s=AllocateEmptyZone(out_zone); 
+          s=AllocateEmptyZone(out_zone); 
         if (s.ok() && (*out_zone) != nullptr) {
           Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
           (*out_zone)->lifetime_=file_lifetime;
           break;
         }else{
-          // PutActiveIOZoneToken();
           PutActiveIOZoneToken();
         }
       } 
