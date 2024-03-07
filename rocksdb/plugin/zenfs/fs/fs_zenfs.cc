@@ -3889,8 +3889,8 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
       // sort(all_extents.begin(),all_extents.end(),ZoneExtent::SortByLeastRecentlyUsed);
       sort(all_extents.begin(),all_extents.end());
 
-      for(ZoneExtent* ext : all_extents){
-          if(!ext){
+      for(std::pair<uint64_t,ZoneExtent*> ext : all_extents){
+          if(!ext.second){
             continue;
           }
           // if(zc_aware && std::find_if(zone_to_be_pinned.begin() ,
@@ -3901,7 +3901,7 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
           // }
 
 
-          std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
+          std::shared_ptr<char> tmp_cache = std::move(ext.second->page_cache_);
           if(tmp_cache==nullptr){
             continue;
           }
