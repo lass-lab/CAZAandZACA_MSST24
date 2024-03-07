@@ -3060,7 +3060,7 @@ uint64_t ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
             memmove(ZC_read_buffer_+(ext->start-victim_zone->start_), ext->page_cache.get()+ext->header_size,
               ext->length);    
         measured_ms=sw.RecordTickMS();
-        printf("\t\tzc cache hit %lf (%lu MB)\n",measured_ms,ext->length>>20);
+        // printf("\t\tzc cache hit %lf (%lu MB)\n",measured_ms,ext->length>>20);
         zbd_->CorrectCost(READ_PAGE_COST,( (ext->length + ext->header_size)>>20),measured_ms);
       }
 
