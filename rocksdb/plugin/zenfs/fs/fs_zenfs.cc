@@ -3826,11 +3826,11 @@ void ZenFS::ZCPageCacheEviction(void){
 }
 
 void ZenFS::LRUPageCacheEviction(bool zc_aware){
-      std::vector<ZoneExtent*> all_extents;
-       std::vector<ZoneExtent*> all_extents_tmp;
+      std::vector< std::pair< uint64_t,ZoneExtent* >> all_extents;
+      //  std::vector<ZoneExtent*> all_extents_tmp;
       (void)(zc_aware);
       all_extents.clear();
-      all_extents_tmp.clear();
+      // all_extents_tmp.clear();
 
 
       // uint64_t invalid_data_size = 0;
@@ -3864,7 +3864,9 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
         extents=file->GetExtents();
         for (ZoneExtent* ext : extents ) {
           if(ext){
-            all_extents_tmp.push_back(ext);
+            // all_extents_tmp.push_back(ext);
+            all_extents.push_back({ext->last_accessed_,ext});
+            
           }
           if(!ext){
             printf("why?? %p\n",ext);
@@ -3879,13 +3881,13 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
         // }
       }
       
-      for(auto ext: all_extents_tmp){
-        if(ext){
-          all_extents.push_back(ext);
-        }
-      }
-      sort(all_extents.begin(),all_extents.end(),ZoneExtent::SortByLeastRecentlyUsed);
-
+      // for(auto ext: all_extents_tmp){
+      //   if(ext){
+      //     all_extents.push_back(ext);
+      //   }
+      // }
+      // sort(all_extents.begin(),all_extents.end(),ZoneExtent::SortByLeastRecentlyUsed);
+      sort(all_extents.begin(),all_extents.end());
 
       for(ZoneExtent* ext : all_extents){
           if(!ext){

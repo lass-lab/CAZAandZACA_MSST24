@@ -84,7 +84,7 @@ class ZoneExtent {
   void EncodeJson(std::ostream& json_stream);
   uint64_t PrintExtentInfo(bool print);
 
-  static bool SortByLeastRecentlyUsed(ZoneExtent* ea,ZoneExtent* eb){
+  static bool SortByLeastRecentlyUsed(ZoneExtent* ea, ZoneExtent* eb){
     // if(!ea){
     //   return true;
     // }
