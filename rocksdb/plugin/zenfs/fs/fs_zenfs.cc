@@ -3878,6 +3878,7 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware){
         //   break;
         // }
       }
+      
       for(auto ext: all_extents_tmp){
         if(ext){
           all_extents.push_back(ext);

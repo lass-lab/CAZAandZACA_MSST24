@@ -91,6 +91,10 @@ class ZoneExtent {
     // if(!eb){
     //   return false;
     // }
+    if(ea->last_accessed_==eb->last_accessed_){
+      return ea->fname_ > eb->fname_;
+    }
+
     return ea->last_accessed_ < eb->last_accessed_;
   }
 };
