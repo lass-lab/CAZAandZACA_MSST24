@@ -595,15 +595,18 @@ size_t ZenFS::ZoneCleaning(bool forced){
     // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     {    
         clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-        if(zbd_->AsyncZCEnabled()){
-            // AsyncZoneCleaning();
-            // AsyncMigrateExtents(migrate_exts);
-          std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
-          // AsyncUringMigrateExtents(migrate_exts);
-          page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
-        }else{
-          page_cache_hit_size=MigrateExtents(migrate_exts);
-        }
+        // if(zbd_->AsyncZCEnabled()){
+        //     // AsyncZoneCleaning();
+        //     // AsyncMigrateExtents(migrate_exts);
+        //   std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
+        //   // AsyncUringMigrateExtents(migrate_exts);
+        //   page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
+        // }else{
+        //   page_cache_hit_size=MigrateExtents(migrate_exts);
+        // }
+
+        page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
+
         clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     }
 
@@ -3013,7 +3016,7 @@ uint64_t ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
       }
 
       
-      if(ext->page_cache==nullptr){
+      if(ext->page_cache==nullptr || !zbd_->AsyncZCEnabled()){
         ZenFSStopWatch sw("",nullptr);
         // disk_io_size+= ext->length>>20;
 
