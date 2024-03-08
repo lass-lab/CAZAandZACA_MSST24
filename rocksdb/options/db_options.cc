@@ -856,6 +856,12 @@ ImmutableDBOptions::ImmutableDBOptions(const DBOptions& options)
   clock = env->GetSystemClock().get();
   logger = info_log.get();
   stats = statistics.get();
+  if(row_cache==nullptr&&row_cache_size){
+    printf("New Row cache size %lu\n",row_cache_size);
+    row_cache=NewLRUCache(row_cache_size);
+  }else{
+    printf("row cache %p , %lu",row_cache.get(),row_cache_size);
+  }
 }
 
 void ImmutableDBOptions::Dump(Logger* log) const {

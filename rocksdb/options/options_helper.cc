@@ -57,7 +57,7 @@ Status ValidateOptions(const DBOptions& db_opts,
   return s;
 }
 
-DBOptions BuildDBOptions(ImmutableDBOptions& immutable_db_options,
+DBOptions BuildDBOptions(const ImmutableDBOptions& immutable_db_options,
                          const MutableDBOptions& mutable_db_options) {
   DBOptions options;
 
@@ -153,9 +153,9 @@ DBOptions BuildDBOptions(ImmutableDBOptions& immutable_db_options,
       immutable_db_options.skip_checking_sst_file_sizes_on_db_open;
   options.wal_recovery_mode = immutable_db_options.wal_recovery_mode;
   options.allow_2pc = immutable_db_options.allow_2pc;
-  if(immutable_db_options.row_cache_size){
-    immutable_db_options.row_cache=NewLRUCache(immutable_db_options.row_cache_size);
-  }
+  // if(immutable_db_options.row_cache_size){
+  //   immutable_db_options.row_cache=NewLRUCache(immutable_db_options.row_cache_size);
+  // }
 
   options.row_cache = immutable_db_options.row_cache;
 #ifndef ROCKSDB_LITE
