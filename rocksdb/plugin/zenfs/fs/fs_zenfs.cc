@@ -595,17 +595,15 @@ size_t ZenFS::ZoneCleaning(bool forced){
     // clock_gettime(CLOCK_MONOTONIC, &start_timespec);
     {    
         clock_gettime(CLOCK_MONOTONIC, &start_timespec);
-        // if(zbd_->AsyncZCEnabled()){
-        //     // AsyncZoneCleaning();
-        //     // AsyncMigrateExtents(migrate_exts);
-        //   std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
-        //   // AsyncUringMigrateExtents(migrate_exts);
-        //   page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
-        // }else{
-        //   page_cache_hit_size=MigrateExtents(migrate_exts);
-        // }
+        std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
+        if(zbd_->GetZoneSize() < (1<<29) ){ // SMR
 
-        page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
+          page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
+        }else{
+          page_cache_hit_size=MigrateExtents(migrate_exts);
+        }
+
+        // page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
 
         clock_gettime(CLOCK_MONOTONIC, &end_timespec);
     }
@@ -4319,7 +4317,7 @@ uint64_t ZenFS::MigrateFileExtents(
     // zone_read_lock.ReadLockZone(prev_zone);
     uint64_t target_start = target_zone->wp_;
     copied += ext->length_;
-    if(ext->page_cache_!=nullptr){
+    if(ext->page_cache_!=nullptr && zbd_->AsyncZCEnabled()){
       ret+=(ext->length_>>20);
     }
     if (zfile->IsSparse()) {
@@ -4328,11 +4326,13 @@ uint64_t ZenFS::MigrateFileExtents(
       target_start = target_zone->wp_ + ZoneFile::SPARSE_HEADER_SIZE;
       zfile->MigrateData(ext->start_ - ZoneFile::SPARSE_HEADER_SIZE,
                          ext->length_ + ZoneFile::SPARSE_HEADER_SIZE,
-                         target_zone,ext->page_cache_);
+                         target_zone, zbd_->AsyncZCEnabled() ?  ext->page_cache_ : std::shared_ptr<char>(nullptr));
       ext->header_size_=ZoneFile::SPARSE_HEADER_SIZE;
       copied +=ZoneFile::SPARSE_HEADER_SIZE;
     } else {
-      zfile->MigrateData(ext->start_, ext->length_, target_zone,ext->page_cache_);
+      zfile->MigrateData(ext->start_, ext->length_, target_zone,
+      zbd_->AsyncZCEnabled() ?  ext->page_cache_ : std::shared_ptr<char>(nullptr)
+      );
     }
 
     if(!run_gc_worker_){
