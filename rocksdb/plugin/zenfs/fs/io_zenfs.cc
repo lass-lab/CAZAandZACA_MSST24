@@ -478,7 +478,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
 
   r_off = 0;
   
-  while(zbd_->GetZCRunning());
+  // while(zbd_->GetZCRunning());
 
   // TO CHECK WHICH zone
   GetExtent(offset, &r_off);
