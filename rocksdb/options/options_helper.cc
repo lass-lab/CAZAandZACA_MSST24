@@ -57,7 +57,7 @@ Status ValidateOptions(const DBOptions& db_opts,
   return s;
 }
 
-DBOptions BuildDBOptions(const ImmutableDBOptions& immutable_db_options,
+DBOptions BuildDBOptions(ImmutableDBOptions& immutable_db_options,
                          const MutableDBOptions& mutable_db_options) {
   DBOptions options;
 

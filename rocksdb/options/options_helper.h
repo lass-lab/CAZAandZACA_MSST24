@@ -42,7 +42,7 @@ inline bool IsSupportedChecksumType(ChecksumType type) {
 Status ValidateOptions(const DBOptions& db_opts,
                        const ColumnFamilyOptions& cf_opts);
 
-DBOptions BuildDBOptions(const ImmutableDBOptions& immutable_db_options,
+DBOptions BuildDBOptions(ImmutableDBOptions& immutable_db_options,
                          const MutableDBOptions& mutable_db_options);
 
 ColumnFamilyOptions BuildColumnFamilyOptions(
