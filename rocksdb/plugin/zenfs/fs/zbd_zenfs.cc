@@ -3717,7 +3717,11 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
     if((*out_zone)!=nullptr){
       break;
     }
-
+    
+    GetAnyLargestRemainingZone(out_zone,false,should_be_copied);
+    if((*out_zone)!=nullptr){
+      break;
+    }
 
     if(GetActiveIOZoneTokenIfAvailable()){
       AllocateEmptyZone(out_zone);
@@ -3731,10 +3735,7 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
     
       
 
-    GetAnyLargestRemainingZone(out_zone,false,should_be_copied);
-    if((*out_zone)!=nullptr){
-      break;
-    }
+
     try_n++;
     if(try_n>256){
       FinishCheapestIOZone();
@@ -3866,6 +3867,12 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
+    s = GetAnyLargestRemainingZone(out_zone,false,min_capacity);
+    if(s.ok()&&(*out_zone)!=nullptr){
+      Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+      break;
+    }
+
     if(GetActiveIOZoneTokenIfAvailable()){
       s=AllocateEmptyZone(out_zone); 
       if (s.ok() && (*out_zone) != nullptr) {
@@ -3878,11 +3885,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       }
     }
 
-    s = GetAnyLargestRemainingZone(out_zone,false,min_capacity);
-    if(s.ok()&&(*out_zone)!=nullptr){
-      Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-      break;
-    }
+
     // FinishCheapestIOZone();
 
 

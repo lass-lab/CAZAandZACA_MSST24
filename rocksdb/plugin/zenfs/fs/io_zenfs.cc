@@ -1569,7 +1569,7 @@ IOStatus ZonedWritableFile::FlushBuffer() {
   IOStatus s;
 
   if (buffer_pos == 0) return IOStatus::OK();
-
+  
   if (zoneFile_->IsSparse()) {
     s = zoneFile_->SparseAppend(&sparse_buffer, buffer_pos);
   } else {
