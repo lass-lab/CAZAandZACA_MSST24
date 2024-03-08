@@ -3704,7 +3704,7 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
 //     (void)(should_be_copied);
 //     (*out_zone)->lifetime_=file_lifetime;
 
-
+  uint64_t try_n= 0 ;
   should_be_copied+=4096*256;
   unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
   WaitForOpenIOZoneToken(false);
@@ -3734,6 +3734,10 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
     GetAnyLargestRemainingZone(out_zone,false,should_be_copied);
     if((*out_zone)!=nullptr){
       break;
+    }
+    try_n++;
+    if(try_n>256){
+      FinishCheapestIOZone();
     }
   }
 }
