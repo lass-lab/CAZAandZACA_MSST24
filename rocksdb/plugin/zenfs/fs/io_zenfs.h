@@ -264,7 +264,7 @@ class ZoneFile {
   class WriteLock {
    public:
     WriteLock(ZoneFile* zfile) : zfile_(zfile) {
-      while(zfile->GetZbd()->GetZCRunning());
+      // while(zfile->GetZbd()->GetZCRunning());
       zfile_->writer_mtx_.lock();
       while (zfile_->readers_ > 0) {
       }
