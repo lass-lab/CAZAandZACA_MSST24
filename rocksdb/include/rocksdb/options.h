@@ -678,6 +678,7 @@ struct DBOptions {
   uint64_t default_extent_size;
   uint64_t page_cache_size;
   uint64_t pca_selection;
+  uint64_t row_cache_size;
   uint32_t partial_reset_scheme;
 
   uint64_t tuning_point;

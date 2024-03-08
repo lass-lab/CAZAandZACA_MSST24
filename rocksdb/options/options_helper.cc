@@ -153,6 +153,10 @@ DBOptions BuildDBOptions(const ImmutableDBOptions& immutable_db_options,
       immutable_db_options.skip_checking_sst_file_sizes_on_db_open;
   options.wal_recovery_mode = immutable_db_options.wal_recovery_mode;
   options.allow_2pc = immutable_db_options.allow_2pc;
+  if(immutable_db_options.row_cache_size){
+    immutable_db_options.row_cache=NewLRUCache(row_cache_size);
+  }
+
   options.row_cache = immutable_db_options.row_cache;
 #ifndef ROCKSDB_LITE
   options.wal_filter = immutable_db_options.wal_filter;
@@ -196,6 +200,7 @@ DBOptions BuildDBOptions(const ImmutableDBOptions& immutable_db_options,
   options.default_extent_size=immutable_db_options.default_extent_size;
   options.page_cache_size=immutable_db_options.page_cache_size;
   options.pca_selection=immutable_db_options.pca_selection;
+  options.row_cache_size=immutable_db_options.row_cache_size;
   options.compaction_scheme=immutable_db_options.compaction_scheme;
   options.until=immutable_db_options.until;
   options.zc=immutable_db_options.zc_kicks;

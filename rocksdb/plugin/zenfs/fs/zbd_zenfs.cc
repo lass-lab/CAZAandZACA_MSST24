@@ -3742,10 +3742,10 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
       bool full = zone->IsFull();
       zone->Close();
       zone->Release();
-       PutActiveIOZoneToken();
+       
+       PutOpenIOZoneToken();
       if(full){
-        PutOpenIOZoneToken();
-        // PutActiveIOZoneToken();
+        PutActiveIOZoneToken();
       }
     }
   }
