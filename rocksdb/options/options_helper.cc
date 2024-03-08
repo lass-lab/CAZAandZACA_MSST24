@@ -154,7 +154,7 @@ DBOptions BuildDBOptions(const ImmutableDBOptions& immutable_db_options,
   options.wal_recovery_mode = immutable_db_options.wal_recovery_mode;
   options.allow_2pc = immutable_db_options.allow_2pc;
   if(immutable_db_options.row_cache_size){
-    immutable_db_options.row_cache=NewLRUCache(row_cache_size);
+    immutable_db_options.row_cache=NewLRUCache(immutable_db_options.row_cache_size);
   }
 
   options.row_cache = immutable_db_options.row_cache;
