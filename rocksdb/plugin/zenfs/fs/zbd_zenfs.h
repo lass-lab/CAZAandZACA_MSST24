@@ -1289,14 +1289,7 @@ class ZonedBlockDevice {
     uint64_t d_free_space=device_size ; // MB
     uint64_t writed = 0;
     for(const auto z : io_zones){
-      // if(z->IsBusy()){
-      //   d_free_space-=zone_sz;
-      // }else{
-        // if(z->wp_>z->max_capacity_){
-        //   writed+=z->max_capacity_-z->start_;
-        // }else{
-        //   writed+=z->wp_-z->start_; // BYTE
-        // }
+
       uint64_t tmp = z->wp_-z->start_;
       if(tmp > z->max_capacity_){
         tmp = z->max_capacity_;
