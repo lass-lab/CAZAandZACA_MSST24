@@ -3734,7 +3734,7 @@ void ZenFS::BackgroundPageCacheEviction(void){
       uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
 
       bool do_zc_page_cache_eviction = (free_percent_<zbd_->until_ || free_percent_<23)  
-                                 && invalid_ratio<25 &&zbd_->PCAEnabled()
+                                 && invalid_ratio<25 &&zbd_->PCAEnabled();
 
       // if( do_zc_page_cache_eviction
       // ){
@@ -3852,7 +3852,7 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware,uint64_t invalid_ratio){
       invalid_ratio = invalid_ratio==0 ? 1 : invalid_ratio;
       if(zc_aware){
         zone_to_be_pinned=zbd_->HighPosibilityTobeVictim(
-         ( (100 - invalid_ratio)*zbd_->PageCacheLimit()) /100 / zbd_->GetZoneSize();
+         ( (100 - invalid_ratio)*zbd_->PageCacheLimit()) /100 / zbd_->GetZoneSize()
         );
       }
 
