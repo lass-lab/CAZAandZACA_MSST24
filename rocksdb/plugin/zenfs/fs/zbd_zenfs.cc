@@ -3718,10 +3718,7 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
       break;
     }
     
-    GetAnyLargestRemainingZone(out_zone,false,should_be_copied);
-    if((*out_zone)!=nullptr){
-      break;
-    }
+
 
     if(GetActiveIOZoneTokenIfAvailable()){
       AllocateEmptyZone(out_zone);
@@ -3733,8 +3730,10 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
       }
     }
     
-      
-
+    GetAnyLargestRemainingZone(out_zone,false,should_be_copied);
+    if((*out_zone)!=nullptr){
+      break;
+    }
 
     try_n++;
     if(try_n>256){
