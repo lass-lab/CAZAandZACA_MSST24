@@ -840,9 +840,9 @@ class ZonedBlockDevice {
       // if(z->capacity_!=0){
       //   continue;
       // }
-      if(z->used_capacity_==0){
-        continue;
-      }
+      // if(z->used_capacity_==0){
+      //   continue;
+      // }
       // sorted.push_back({((z->used_capacity_*100)/z->max_capacity_ ),z->zidx_});
       sorted.push_back({( z->wp_-z->start_-z->used_capacity_  ),z->zidx_});
     }
