@@ -3904,7 +3904,7 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware,uint64_t invalid_ratio){
           }
           if(zc_aware && std::find_if(zone_to_be_pinned.begin() ,
                           zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
-                            return valid_zidx.second==ext->zone_->zidx_;
+                            return valid_zidx.second==ext.second->zone_->zidx_;
                           }) != zone_to_be_pinned.end() ){
             continue;
           }
