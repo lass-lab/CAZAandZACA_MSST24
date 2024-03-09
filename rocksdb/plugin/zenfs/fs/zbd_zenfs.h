@@ -888,6 +888,14 @@ class ZonedBlockDevice {
     return page_cache_limit_;
   }
 
+  uint64_t ZCPageCacheLimit(){
+    return ((100-CalculateFreePercent())*page_cache_limit_) /100;
+  }
+
+  uint64_t UserPageCacheLimit(){
+    return (CalculateFreePercent()*page_cache_limit_)/100;
+  }
+
   uint64_t GetDefaultExtentSize(){
     return default_extent_size_;
   }
