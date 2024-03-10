@@ -587,7 +587,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
         sprintf((char*)stopwatch_buf, "ClosedZone");
         break;
       default:
-        sprintf((char*)stopwatch_buf, "Unknown state ? %d",state_);
+        sprintf((char*)stopwatch_buf, "Unknown state ? %d",z->state_);
         break;
       }
 
