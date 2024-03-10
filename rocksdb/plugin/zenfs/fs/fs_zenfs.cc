@@ -3725,8 +3725,8 @@ void ZenFS::BackgroundPageCacheEviction(void){
     usleep(1000*1000);
     uint64_t page_cache_size = zbd_->page_cache_size_;
     while(page_cache_size>zbd_->PageCacheLimit() && run_gc_worker_){
-      std::lock_guard<std::mutex> lg(page_cache_mtx_);
-      std::lock_guard<std::mutex> file_lock(files_mtx_);
+      // std::lock_guard<std::mutex> lg(page_cache_mtx_);
+      // std::lock_guard<std::mutex> file_lock(files_mtx_);
       // uint64_t invalid_data_size = 0;
       // uint64_t valid_data_size = 0;
       // std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
