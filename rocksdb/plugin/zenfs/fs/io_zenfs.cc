@@ -1304,7 +1304,7 @@ IOStatus ZoneFile::RecoverSparseExtents(uint64_t start, uint64_t end,
     zone->used_capacity_ += extent_length;
     // printf("ZoneFile::RecoverSparseExtents %lu %lu\n",next_extent_start + SPARSE_HEADER_SIZE,extent_length);
     extents_.push_back(new ZoneExtent(next_extent_start + SPARSE_HEADER_SIZE,
-                                      extent_length, zone,filename,SPARSE_HEADER_SIZE) );
+                                      extent_length, zone,filename,SPARSE_HEADER_SIZE,0,this) );
 
     uint64_t extent_blocks = (extent_length + SPARSE_HEADER_SIZE) / block_sz;
     if ((extent_length + SPARSE_HEADER_SIZE) % block_sz) {
