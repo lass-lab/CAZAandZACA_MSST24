@@ -2483,7 +2483,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
       ZoneFile& file = *(file_it.second);
 
       /* Skip files open for writing, as extents are being updated */
-      // if (!file.TryAcquireWRLock()) continue;
+      if (!file.TryAcquireWRLock()) continue;
       // if(file.is_sst_==false&&file.is_wal_==false){
       //   // files_.erase(file_it);
       //   delete file_it.second.get();
@@ -2520,7 +2520,7 @@ void ZenFS::GetZenFSSnapshot(ZenFSSnapshot& snapshot,
         }
       }
 
-      // file.ReleaseWRLock();
+      file.ReleaseWRLock();
     }
   }
   // printf("After page cache loaded  :%lu\n",page_cache_size);
