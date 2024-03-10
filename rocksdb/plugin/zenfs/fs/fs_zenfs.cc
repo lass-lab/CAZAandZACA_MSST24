@@ -3787,7 +3787,7 @@ void ZenFS::OpenZonePageCacheEviction(void){
 
       sort(all_extents.begin(),all_extents.end());
       for(int evict_open_first = 1 ; evict_open_first>=0; evict_open_first--){
-        if(page_cache_size<zbd_->PageCacheLimit()){
+        if(page_cache_size<zbd_->PageCacheLimit() /2 ){
           break;
         }
         for(std::pair<uint64_t,ZoneExtent*> ext : all_extents){
@@ -3809,7 +3809,7 @@ void ZenFS::OpenZonePageCacheEviction(void){
             zbd_->page_cache_size_-=ext.second->length_;
             page_cache_size-=ext.second->length_;
             tmp_cache.reset();
-            if(page_cache_size<zbd_->PageCacheLimit()){
+            if(page_cache_size<zbd_->PageCacheLimit()/2 ){
               break;
             }
         }
@@ -3980,7 +3980,7 @@ void ZenFS::LRUPageCacheEviction(){
           page_cache_size-=ext.second->length_;
           zbd_->page_cache_size_-=ext.second->length_;
           tmp_cache.reset();
-          if(page_cache_size<zbd_->PageCacheLimit()){
+          if(page_cache_size<zbd_->PageCacheLimit()/2){
             break;
           }
       }
