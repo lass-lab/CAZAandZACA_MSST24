@@ -3722,9 +3722,9 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
 
 void ZenFS::BackgroundPageCacheEviction(void){
   while(run_gc_worker_){
-    usleep(100*1000);
-
-    while(zbd_->page_cache_size_>zbd_->PageCacheLimit() && run_gc_worker_){
+    usleep(1000*1000);
+    uint64_t page_cache_size = zbd_->page_cache_size_;
+    while(page_cache_size>zbd_->PageCacheLimit() && run_gc_worker_){
       std::lock_guard<std::mutex> lg(page_cache_mtx_);
       std::lock_guard<std::mutex> file_lock(files_mtx_);
       // uint64_t invalid_data_size = 0;
@@ -3759,7 +3759,7 @@ void ZenFS::BackgroundPageCacheEviction(void){
 void ZenFS::OpenZonePageCacheEviction(void){
 
         std::vector< std::pair< uint64_t,ZoneExtent* >> all_extents;
-
+      uint64_t page_cache_size = zbd_->page_cache_size_;
       all_extents.clear();
 
 
@@ -3787,8 +3787,8 @@ void ZenFS::OpenZonePageCacheEviction(void){
 
       sort(all_extents.begin(),all_extents.end());
       for(int evict_open_first = 1 ; evict_open_first>=0; evict_open_first--){
-          if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
-            break;
+        if(page_cache_size<zbd_->PageCacheLimit()){
+          break;
         }
         for(std::pair<uint64_t,ZoneExtent*> ext : all_extents){
             if(!ext.second){
@@ -3807,8 +3807,9 @@ void ZenFS::OpenZonePageCacheEviction(void){
               continue;
             }
             zbd_->page_cache_size_-=ext.second->length_;
+            page_cache_size-=ext.second->length_;
             tmp_cache.reset();
-            if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+            if(page_cache_size<zbd_->PageCacheLimit()){
               break;
             }
         }
@@ -3899,7 +3900,7 @@ void ZenFS::ZCPageCacheEviction(void){
 
 void ZenFS::LRUPageCacheEviction(){
       std::vector< std::pair< uint64_t,ZoneExtent* >> all_extents;
-
+      uint64_t page_cache_size = zbd_->page_cache_size_;
       all_extents.clear();
       // all_extents_tmp.clear();
 
@@ -3976,9 +3977,10 @@ void ZenFS::LRUPageCacheEviction(){
             // ext->page_cache_
             continue;
           }
+          page_cache_size-=ext.second->length_;
           zbd_->page_cache_size_-=ext.second->length_;
           tmp_cache.reset();
-          if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+          if(page_cache_size<zbd_->PageCacheLimit()){
             break;
           }
       }
