@@ -577,13 +577,13 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       // }
       switch (z->state_)
       {
-      case FINISH:
+      case Zone::State::FINISH:
         sprintf((char*)stopwatch_buf, "Full&FinishedZone");
         break;
-      case OPEN:
+      case Zone::State::OPEN:
         sprintf((char*)stopwatch_buf, "OpenZone");
         break;
-      case CLOSE:
+      case Zone::State::CLOSE:
         sprintf((char*)stopwatch_buf, "ClosedZone");
         break;
       default:
