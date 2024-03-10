@@ -3037,6 +3037,7 @@ uint64_t ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         }
 
         err=pread(read_fd,ZC_read_buffer2_,aligned_length,aligned_start);
+        
         memmove(ZC_read_buffer_+(ext->start-victim_zone->start_ ),ZC_read_buffer2_, ext->length);
         
         // err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ ),
