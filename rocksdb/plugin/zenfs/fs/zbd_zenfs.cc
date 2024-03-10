@@ -224,7 +224,7 @@ IOStatus Zone::Reset() {
   else
     max_capacity_ = capacity_ = max_capacity;
 
-
+  state_=EMPTY;
 
   wp_ = start_;
   lifetime_ = Env::WLTH_NOT_SET;
@@ -410,7 +410,7 @@ IOStatus Zone::Finish() {
 
   IOStatus ios = zbd_be_->Finish(start_);
   if (ios != IOStatus::OK()) return ios;
-
+  state_=FINISH;
   capacity_ = 0;
   wp_ = start_ + zbd_->GetZoneSize();
 
@@ -422,8 +422,15 @@ IOStatus Zone::Close() {
 
   if (!(IsEmpty() || IsFull())) {
     IOStatus ios = zbd_be_->Close(start_);
+    if(IsFull()){
+      state_=FINISH;
+    }else{
+      state_=CLOSE;
+    }
+   
     if (ios != IOStatus::OK()) return ios;
   }
+
 
   return IOStatus::OK();
 }
@@ -3746,7 +3753,7 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
       bool full = zone->IsFull();
       zone->Close();
       zone->Release();
-       
+      
        PutOpenIOZoneToken();
       if(full){
         PutActiveIOZoneToken();

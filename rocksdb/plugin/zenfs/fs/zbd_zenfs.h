@@ -293,7 +293,10 @@ class Zone {
 
   uint64_t reset_count_ = 0;
   // uint64_t invalid_wp_;
-
+  enum State{
+    EMPTY,OPEN,CLOSE,FINISH,RO,OFFLINE
+  };
+  State state_;
 
   std::atomic<int> zone_readers_{0};
   std::atomic<long> read_lock_overhead_{0};
