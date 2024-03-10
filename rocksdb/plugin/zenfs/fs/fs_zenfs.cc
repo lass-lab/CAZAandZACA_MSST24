@@ -3891,7 +3891,7 @@ void ZenFS::ZCPageCacheEviction(void){
           //   break;
           // }
 
-          if(ext.second->page_cache_==nullptr){
+          if(ext->page_cache_==nullptr){
             continue;
           }
 
