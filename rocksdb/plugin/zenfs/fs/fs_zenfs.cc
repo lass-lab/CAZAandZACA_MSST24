@@ -2882,7 +2882,8 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     // }
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
           ext->fname_,ext->header_size_,
-          zbd_->AsyncZCEnabled() ? ext->last_accessed_ : NowMicros()
+          zbd_->AsyncZCEnabled() ? ext->last_accessed_ : NowMicros(),
+          zfile
           );
     new_ext->zone_=ext->zone_;
     new_ext->page_cache_=std::move(ext->page_cache_);
@@ -3340,7 +3341,7 @@ IOStatus ZenFS::MigrateFileExtentsWorker(
   for (size_t i = 0; i < extents.size();i++) {
     ZoneExtent* ext=extents[i];
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
-          ext->fname_,ext->header_size_);
+          ext->fname_,ext->header_size_,zfile.get());
     new_ext->zone_=ext->zone_;
     new_extent_list.push_back(new_ext);
   }
@@ -3482,7 +3483,7 @@ IOStatus ZenFS::AsyncUringMigrateFileExtentsWorker(
   for (size_t i = 0; i < extents.size();i++) {
     ZoneExtent* ext=extents[i];
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
-          ext->fname_,ext->header_size_);
+          ext->fname_,ext->header_size_,zfile.get());
     new_ext->zone_=ext->zone_;
     new_extent_list.push_back(new_ext);
   }
@@ -3622,7 +3623,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWriteWorker(
   for (size_t i = 0; i < extents.size();i++) {
     ZoneExtent* ext=extents[i];
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
-          ext->fname_,ext->header_size_);
+          ext->fname_,ext->header_size_,zfile.get());
     new_ext->zone_=ext->zone_;
     new_extent_list.push_back(new_ext);
   }
@@ -3727,6 +3728,7 @@ void ZenFS::BackgroundPageCacheEviction(void){
     while(page_cache_size>zbd_->PageCacheLimit() && run_gc_worker_){
       // std::lock_guard<std::mutex> lg(page_cache_mtx_);
       // std::lock_guard<std::mutex> file_lock(files_mtx_);
+
       // uint64_t invalid_data_size = 0;
       // uint64_t valid_data_size = 0;
       // std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
@@ -3971,6 +3973,12 @@ void ZenFS::LRUPageCacheEviction(){
           if(!ext.second){
             continue;
           }
+          if(!ext.second->zfile_){
+            continue;
+          }
+          if(!ext.second->zfile_->writer_mtx_.try_lock()){
+            continue;
+          }
           // if(zc_aware && std::find_if(zone_to_be_pinned.begin() ,
           //                 zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
           //                   return valid_zidx.second==ext.second->zone_->zidx_;
@@ -3981,15 +3989,19 @@ void ZenFS::LRUPageCacheEviction(){
 
           std::shared_ptr<char> tmp_cache = std::move(ext.second->page_cache_);
           if(tmp_cache==nullptr){
+            ext.second->zfile_->writer_mtx_.unlock();
             continue;
           }
           if(tmp_cache.use_count()>1){
             // ext->page_cache_
+            ext.second->zfile_->writer_mtx_.unlock();
             continue;
           }
           page_cache_size-=ext.second->length_;
           zbd_->page_cache_size_-=ext.second->length_;
           tmp_cache.reset();
+          ext.second->zfile_->writer_mtx_.unlock();
+
           if(page_cache_size<zbd_->PageCacheLimit()/2){
             break;
           }
@@ -4091,7 +4103,7 @@ IOStatus ZenFS::AsyncMigrateFileExtentsWorker(
   for (size_t i = 0; i < extents.size();i++) {
     ZoneExtent* ext=extents[i];
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
-          ext->fname_,ext->header_size_);
+          ext->fname_,ext->header_size_,zfile.get());
     new_ext->zone_=ext->zone_;
     new_extent_list.push_back(new_ext);    
   }
@@ -4328,7 +4340,7 @@ uint64_t ZenFS::MigrateFileExtents(
   for (size_t i = 0; i < extents.size();i++) {
     ZoneExtent* ext=extents[i];
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
-          ext->fname_,ext->header_size_,NowMicros());
+          ext->fname_,ext->header_size_,NowMicros(),zfile.get());
     new_ext->zone_=ext->zone_;
     new_ext->page_cache_ = std::move(ext->page_cache_);
     new_extent_list.push_back(new_ext);    

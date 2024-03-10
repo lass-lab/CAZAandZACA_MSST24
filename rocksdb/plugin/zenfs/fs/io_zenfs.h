@@ -40,6 +40,7 @@ struct SSTBuffer{
   bool positioned_;
   uint64_t offset_;
 };
+class ZoneFile;
 
 class ZoneExtent {
  public:
@@ -61,11 +62,12 @@ class ZoneExtent {
   uint64_t last_accessed_;
   std::shared_ptr<char> page_cache_= nullptr;
   std::mutex page_cache_lock_ ; 
-
-  explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname,uint64_t now_micros);
+  ZoneFile* zfile_;
+  explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone,std::string fname,uint64_t now_micros,ZoneFile* zfile);
   // to be push front
   explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone);
-  explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone, std::string fname, uint64_t header_size,uint64_t now_micros);
+  explicit ZoneExtent(uint64_t start, uint64_t length, Zone* zone, std::string fname, uint64_t header_size,uint64_t now_micros,
+  ZoneFile* zfile);
   static bool cmp(ZoneExtent* e1/*big*/, ZoneExtent* e2/*small*/)
   {
       return e1->start_ < e2->start_;
@@ -99,7 +101,7 @@ class ZoneExtent {
   }
 };
 
-class ZoneFile;
+
 
 /* Interface for persisting metadata for files */
 class MetadataWriter {
