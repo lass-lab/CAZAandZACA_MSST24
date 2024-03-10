@@ -3927,7 +3927,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   } else {
     migrating_=false;
   }
-
+  (*out_zone)->state_=Zone::State::OPEN;
   return s;
 }
 
