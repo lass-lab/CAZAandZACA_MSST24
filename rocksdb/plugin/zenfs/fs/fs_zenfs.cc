@@ -3756,7 +3756,7 @@ void ZenFS::BackgroundPageCacheEviction(void){
   }
 }
 
-void OpenZonePageCacheEviction(void){
+void ZenFS::OpenZonePageCacheEviction(void){
 
         std::vector< std::pair< uint64_t,ZoneExtent* >> all_extents;
 
@@ -3792,7 +3792,7 @@ void OpenZonePageCacheEviction(void){
             if(!ext.second){
               continue;
             }
-            if(evict_open_first==1 && ext.second->zone_->state_ ==FINISH){ // if FINISH OR FULL
+            if(evict_open_first==1 && ext.second->zone_->state_ ==Zone::State::FINISH){ // if FINISH OR FULL
               continue;
             }
 
