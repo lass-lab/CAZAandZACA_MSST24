@@ -3787,7 +3787,9 @@ void ZenFS::OpenZonePageCacheEviction(void){
 
       sort(all_extents.begin(),all_extents.end());
       for(int evict_open_first = 1 ; evict_open_first>=0; evict_open_first--){
-
+          if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+            break;
+        }
         for(std::pair<uint64_t,ZoneExtent*> ext : all_extents){
             if(!ext.second){
               continue;
