@@ -591,7 +591,15 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       }
 
       ZenFSStopWatch z1((const char*)stopwatch_buf,zbd_);
-      zbd_->Read(debug_buffer,extent->start_,extent->length_,true);
+
+      uint64_t align = extent->length_ % 4096;
+      uint64_t aligned_extent_length = extent->length_;
+      if(align){
+        aligned_extent_length+= 4096-align;
+      }
+      
+      
+      zbd_->Read(debug_buffer,extent->start_,aligned_extent_length,true);
 
       memmove(ptr, debug_buffer+ (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
 
