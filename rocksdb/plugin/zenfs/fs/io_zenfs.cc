@@ -567,6 +567,12 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       r=pread_sz;
       zbd_->rocksdb_page_cache_hit_size_+=r;
     }else{
+      char* debug_buffer=nullptr;
+      if(posix_memalign((void**)(&debug_buffer),sysconf(_SC_PAGE_SIZE),extent->length_)){
+        printf("@@@@@@@@@@ debug buffer error\n");
+      }
+
+      
       char stopwatch_buf[50];
       switch (z->state_)
       {
@@ -584,9 +590,17 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
         break;
       }
 
-        ZenFSStopWatch z1((const char*)stopwatch_buf,zbd_);
-      r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+      ZenFSStopWatch z1((const char*)stopwatch_buf,zbd_);
+      zbd_->Read(debug_buffer,extent->start_,extent->length_,true);
+
+      memmove(ptr, debug_buffer+ (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
+
+      // r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
       // if(ioptions.for_compaction){
+      ext->page_cache_.reset(debug_buffer);
+      zbd_->page_cache_size+=ext->length_;
+      r=pread_sz;
+
         zbd_->rocksdb_page_cache_fault_size_+=r;
       // }
     }
