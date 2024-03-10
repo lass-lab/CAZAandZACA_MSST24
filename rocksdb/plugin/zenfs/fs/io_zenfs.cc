@@ -570,11 +570,27 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       char stopwatch_buf[50];
 
 
-      if(z->IsFull()){
-        sprintf((char*)stopwatch_buf, "Full&FinishZone");
-      }else{
+      // if(z->IsFull()){
+      //   sprintf((char*)stopwatch_buf, "Full&FinishZone");
+      // }else{
+      //   sprintf((char*)stopwatch_buf, "OpenZone");
+      // }
+      switch (z->state_)
+      {
+      case FINISH:
+        sprintf((char*)stopwatch_buf, "Full&FinishedZone");
+        break;
+      case OPEN:
         sprintf((char*)stopwatch_buf, "OpenZone");
+        break;
+      case CLOSE:
+        sprintf((char*)stopwatch_buf, "ClosedZone");
+        break;
+      default:
+        sprintf((char*)stopwatch_buf, "Unknown state ? %d",state_);
+        break;
       }
+
         ZenFSStopWatch z1((const char*)stopwatch_buf,zbd_);
       r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
       // if(ioptions.for_compaction){
@@ -1423,6 +1439,7 @@ void ZoneFile::SetActiveZone(Zone* zone) {
   assert(active_zone_ == nullptr);
 
   active_zone_ = zone;
+  zone->state_=OPEN;
 }
 
 ZonedWritableFile::ZonedWritableFile(ZonedBlockDevice* zbd, bool _buffered,

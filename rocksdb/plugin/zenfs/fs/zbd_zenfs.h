@@ -296,7 +296,7 @@ class Zone {
   enum State{
     EMPTY,OPEN,CLOSE,FINISH,RO,OFFLINE
   };
-  State state_;
+  State state_=EMPTY;
 
   std::atomic<int> zone_readers_{0};
   std::atomic<long> read_lock_overhead_{0};
