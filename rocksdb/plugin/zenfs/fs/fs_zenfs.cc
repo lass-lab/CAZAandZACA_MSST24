@@ -3805,18 +3805,25 @@ void ZenFS::OpenZonePageCacheEviction(void){
             if(evict_open_first==1 && ext.second->zone_->state_ ==Zone::State::FINISH){ // if FINISH OR FULL
               continue;
             }
-
+            if(!ext.second->zfile_){
+              continue;
+            }
+            if(!ext.second->zfile_->writer_mtx_.try_lock()){
+              continue;
+            }
 
             std::shared_ptr<char> tmp_cache = std::move(ext.second->page_cache_);
             if(tmp_cache==nullptr){
+              ext.second->zfile_->writer_mtx_.unlock();
               continue;
             }
-            if(tmp_cache.use_count()>1){
-              continue;
-            }
+            // if(tmp_cache.use_count()>1){
+            //   continue;
+            // }
             zbd_->page_cache_size_-=ext.second->length_;
             page_cache_size-=ext.second->length_;
             tmp_cache.reset();
+            ext.second->zfile_->writer_mtx_.unlock();
             if(page_cache_size<zbd_->PageCacheLimit()/2 ){
               break;
             }
@@ -3884,13 +3891,17 @@ void ZenFS::ZCPageCacheEviction(void){
           //   break;
           // }
 
+          if(ext.second->page_cache_==nullptr){
+            continue;
+          }
+
           std::shared_ptr<char> tmp_cache = std::move(ext->page_cache_);
           if(tmp_cache==nullptr){
             continue;
           }
-          if(tmp_cache.use_count()>1){
-            continue;
-          }
+          // if(tmp_cache.use_count()>1){
+          //   continue;
+          // }
           zbd_->page_cache_size_-=ext->length_;
           tmp_cache.reset();
           if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
@@ -3973,9 +3984,13 @@ void ZenFS::LRUPageCacheEviction(){
           if(!ext.second){
             continue;
           }
+          if(ext.second->page_cache_==nullptr){
+            continue;
+          }
           if(!ext.second->zfile_){
             continue;
           }
+
           if(!ext.second->zfile_->writer_mtx_.try_lock()){
             continue;
           }
@@ -3992,11 +4007,11 @@ void ZenFS::LRUPageCacheEviction(){
             ext.second->zfile_->writer_mtx_.unlock();
             continue;
           }
-          if(tmp_cache.use_count()>1){
-            // ext->page_cache_
-            ext.second->zfile_->writer_mtx_.unlock();
-            continue;
-          }
+          // if(tmp_cache.use_count()>1){
+          //   // ext->page_cache_
+          //   ext.second->zfile_->writer_mtx_.unlock();
+          //   continue;
+          // }
           page_cache_size-=ext.second->length_;
           zbd_->page_cache_size_-=ext.second->length_;
           tmp_cache.reset();
