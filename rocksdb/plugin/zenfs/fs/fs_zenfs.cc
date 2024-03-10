@@ -3037,7 +3037,7 @@ uint64_t ZenFS::SMRLargeIOMigrateExtents(const std::vector<ZoneExtentSnapshot*>&
         }
 
         err=pread(read_fd,ZC_read_buffer2_,aligned_length,aligned_start);
-        
+
         memmove(ZC_read_buffer_+(ext->start-victim_zone->start_ ),ZC_read_buffer2_, ext->length);
         
         // err=pread(read_fd,ZC_read_buffer_+(ext->start-victim_zone->start_ ),
@@ -3727,27 +3727,90 @@ void ZenFS::BackgroundPageCacheEviction(void){
     while(zbd_->page_cache_size_>zbd_->PageCacheLimit() && run_gc_worker_){
       std::lock_guard<std::mutex> lg(page_cache_mtx_);
       std::lock_guard<std::mutex> file_lock(files_mtx_);
-      uint64_t invalid_data_size = 0;
-      uint64_t valid_data_size = 0;
-      std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
-      for(Zone* z : io_zones){
-        valid_data_size+=z->used_capacity_; 
-        invalid_data_size+=(z->wp_-z->start_ - z->used_capacity_);
-      }
-      uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
+      // uint64_t invalid_data_size = 0;
+      // uint64_t valid_data_size = 0;
+      // std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
+      // for(Zone* z : io_zones){
+      //   valid_data_size+=z->used_capacity_; 
+      //   invalid_data_size+=(z->wp_-z->start_ - z->used_capacity_);
+      // }
+      // uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
 
-      bool do_zc_page_cache_eviction = (free_percent_<zbd_->until_ || free_percent_<23)  
-                                 && invalid_ratio<25 &&zbd_->PCAEnabled();
+      // bool do_zc_page_cache_eviction = (free_percent_<zbd_->until_ || free_percent_<23)  
+      //                            && invalid_ratio<25 &&zbd_->PCAEnabled();
 
       // if( do_zc_page_cache_eviction
       // ){
       //   ZCPageCacheEviction();
       // }else{
-        LRUPageCacheEviction(do_zc_page_cache_eviction,invalid_ratio);
+      if(zbd_->PCAEnabled()){
+        OpenZonePageCacheEviction();
+      }else{
+        LRUPageCacheEviction();
+      }
+      
+      
       // }
       // LRUPageCacheEviction(free_percent_<23 && zbd_->PCAEnabled());
     }
   }
+}
+
+void OpenZonePageCacheEviction(void){
+
+        std::vector< std::pair< uint64_t,ZoneExtent* >> all_extents;
+
+      all_extents.clear();
+
+
+  // evict open zone, closed zone first
+
+      for (const auto& file_it : files_) {
+        std::shared_ptr<ZoneFile> file = (file_it.second);
+        if(!file->TryAcquireWRLock()){
+          continue;
+        }
+        std::vector<ZoneExtent*> extents;
+        extents.clear();
+        extents=file->GetExtents();
+        for (ZoneExtent* ext : extents ) {
+          if(ext){
+            all_extents.push_back({ext->last_accessed_,ext});
+            
+          }
+          if(!ext){
+            printf("why?? %p\n",ext);
+          }
+        }
+        file->ReleaseWRLock();
+      }
+
+      sort(all_extents.begin(),all_extents.end());
+      for(int evict_open_first = 1 ; evict_open_first>=0; evict_open_first--){
+
+        for(std::pair<uint64_t,ZoneExtent*> ext : all_extents){
+            if(!ext.second){
+              continue;
+            }
+            if(evict_open_first==1 && ext.second->zone_->state_ ==FINISH){ // if FINISH OR FULL
+              continue;
+            }
+
+
+            std::shared_ptr<char> tmp_cache = std::move(ext.second->page_cache_);
+            if(tmp_cache==nullptr){
+              continue;
+            }
+            if(tmp_cache.use_count()>1){
+              continue;
+            }
+            zbd_->page_cache_size_-=ext.second->length_;
+            tmp_cache.reset();
+            if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
+              break;
+            }
+        }
+    }
 }
 
 void ZenFS::ZCPageCacheEviction(void){
@@ -3832,32 +3895,22 @@ void ZenFS::ZCPageCacheEviction(void){
   
 }
 
-void ZenFS::LRUPageCacheEviction(bool zc_aware,uint64_t invalid_ratio){
+void ZenFS::LRUPageCacheEviction(){
       std::vector< std::pair< uint64_t,ZoneExtent* >> all_extents;
-      //  std::vector<ZoneExtent*> all_extents_tmp;
-      (void)(zc_aware);
-      (void)(invalid_ratio);
+
       all_extents.clear();
       // all_extents_tmp.clear();
 
 
-      // uint64_t invalid_data_size = 0;
-      // uint64_t valid_data_size = 0;
-      // std::vector<Zone*> io_zones =  *zbd_->GetIOZones();
-      // for(Zone* z : io_zones){
-      //   valid_data_size+=z->used_capacity_; 
-      //   invalid_data_size+=(z->wp_-z->start_ - z->used_capacity_);
+
+      // std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
+      // zone_to_be_pinned.clear();
+      // invalid_ratio = invalid_ratio==0 ? 1 : invalid_ratio;
+      // if(zc_aware){
+      //   zone_to_be_pinned=zbd_->HighPosibilityTobeVictim(
+      //    ( (100 - invalid_ratio)*zbd_->PageCacheLimit()) /100 / zbd_->GetZoneSize()
+      //   );
       // }
-      // uint64_t invalid_ratio = (invalid_data_size*100)/(valid_data_size+invalid_data_size);
-      
-      std::vector<std::pair<uint64_t,uint64_t>> zone_to_be_pinned;
-      zone_to_be_pinned.clear();
-      invalid_ratio = invalid_ratio==0 ? 1 : invalid_ratio;
-      if(zc_aware){
-        zone_to_be_pinned=zbd_->HighPosibilityTobeVictim(
-         ( (100 - invalid_ratio)*zbd_->PageCacheLimit()) /100 / zbd_->GetZoneSize()
-        );
-      }
 
 
       for (const auto& file_it : files_) {
@@ -3905,12 +3958,12 @@ void ZenFS::LRUPageCacheEviction(bool zc_aware,uint64_t invalid_ratio){
           if(!ext.second){
             continue;
           }
-          if(zc_aware && std::find_if(zone_to_be_pinned.begin() ,
-                          zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
-                            return valid_zidx.second==ext.second->zone_->zidx_;
-                          }) != zone_to_be_pinned.end() ){
-            continue;
-          }
+          // if(zc_aware && std::find_if(zone_to_be_pinned.begin() ,
+          //                 zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
+          //                   return valid_zidx.second==ext.second->zone_->zidx_;
+          //                 }) != zone_to_be_pinned.end() ){
+          //   continue;
+          // }
 
 
           std::shared_ptr<char> tmp_cache = std::move(ext.second->page_cache_);

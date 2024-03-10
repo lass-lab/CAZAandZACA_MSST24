@@ -535,7 +535,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       extent->last_accessed_ = zenfs_->NowMicros();
     // }
     std::shared_ptr<char> page_cache = (extent->page_cache_);
-    if(page_cache!=nullptr && false){
+    if(page_cache!=nullptr){
     // if(page_cache!=nullptr && ioptions.for_compaction){
       // if(r_off<extent->start_){
         
@@ -568,13 +568,6 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       zbd_->rocksdb_page_cache_hit_size_+=r;
     }else{
       char stopwatch_buf[50];
-
-
-      // if(z->IsFull()){
-      //   sprintf((char*)stopwatch_buf, "Full&FinishZone");
-      // }else{
-      //   sprintf((char*)stopwatch_buf, "OpenZone");
-      // }
       switch (z->state_)
       {
       case Zone::State::FINISH: // full
