@@ -1439,7 +1439,7 @@ void ZoneFile::SetActiveZone(Zone* zone) {
   assert(active_zone_ == nullptr);
 
   active_zone_ = zone;
-  zone->state_=OPEN;
+  zone->state_=Zone::State::OPEN;
 }
 
 ZonedWritableFile::ZonedWritableFile(ZonedBlockDevice* zbd, bool _buffered,
