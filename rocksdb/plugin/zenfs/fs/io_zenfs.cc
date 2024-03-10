@@ -577,7 +577,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       // }
       switch (z->state_)
       {
-      case Zone::State::FINISH:
+      case Zone::State::FINISH: // full
         sprintf((char*)stopwatch_buf, "Full&FinishedZone");
         break;
       case Zone::State::OPEN:

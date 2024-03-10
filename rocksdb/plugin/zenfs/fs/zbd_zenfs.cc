@@ -420,17 +420,18 @@ IOStatus Zone::Finish() {
 IOStatus Zone::Close() {
   // assert(IsBusy());
 
-  if (!(IsEmpty() || IsFull())) {
+  if (! (IsEmpty() || IsFull()) ) {
     IOStatus ios = zbd_be_->Close(start_);
-    if(IsFull()){
-      state_=FINISH;
-    }else{
-      state_=CLOSE;
-    }
+
    
     if (ios != IOStatus::OK()) return ios;
   }
 
+  if(IsFull()){
+    state_=FINISH;
+  }else{
+    state_=CLOSE;
+  }
 
   return IOStatus::OK();
 }
