@@ -588,6 +588,11 @@ class ZonedBlockDevice {
   // std::atomic<double> reset_total_time_{0.0};
   /* Protects zone_resuorces_  condition variable, used
      for notifying changes in open_io_zones_ */
+  std::mutex zone_resources_mtx_wal_;
+  std::condition_variable zone_resources_wal_;
+  std::atomic<bool> resources_wal_{false};
+  
+
   std::mutex zone_resources_mtx_;
   std::condition_variable zone_resources_;
 

@@ -2168,27 +2168,32 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
 
 
 
-  std::unique_lock<std::mutex> lk(zone_resources_mtx_);
+  
 
 
-  if(AsyncZCEnabled() && !prioritized ){
+  if(AsyncZCEnabled() ){
     // // push priority queue to my level
-    zone_resources_priority_queue_.push((int)open_class);
-
-    zone_resources_.wait(lk, [this, allocator_open_limit,open_class] {
-
-
-    if (open_io_zones_.load() < allocator_open_limit && 
-          open_class == zone_resources_priority_queue_.top() ) {
-      open_io_zones_++;
-      zone_resources_priority_queue_.pop();
-      return true;
-    } else {
-      zone_resources_.notify_one();
-      return false;
+    if(prioritized){
+      return;
     }
-  });
+    // if(!prioritized){
+      std::unique_lock<std::mutex> lk(zone_resources_mtx_);
+      zone_resources_priority_queue_.push((int)open_class);
+
+      zone_resources_.wait(lk, [this, allocator_open_limit,open_class] {
+        if (open_io_zones_.load() < allocator_open_limit && 
+              open_class == zone_resources_priority_queue_.top() ) {
+          open_io_zones_++;
+          zone_resources_priority_queue_.pop();
+          return true;
+        } else {
+          zone_resources_.notify_one();
+          return false;
+        }
+      });
+    // }
   }else{
+    std::unique_lock<std::mutex> lk(zone_resources_mtx_);
     zone_resources_.wait(lk, [this, allocator_open_limit] {
       if (open_io_zones_.load() < allocator_open_limit) {
         open_io_zones_++;
