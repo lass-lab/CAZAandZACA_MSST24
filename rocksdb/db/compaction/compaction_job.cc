@@ -124,6 +124,7 @@ const char* GetCompactionReasonString(CompactionReason compaction_reason) {
 // Maintains state for each sub-compaction
 struct CompactionJob::SubcompactionState {
   const Compaction* compaction;
+  uint64_t sstfiles_created_per_subcompaction = 0;
   std::unique_ptr<CompactionIterator> c_iter;
 
   // The boundaries of the key-range this compaction is interested in. No two
@@ -761,16 +762,22 @@ Status CompactionJob::Run() {
   ProcessKeyValueCompaction(&compact_->sub_compact_states[0]);
 
   // Wait for all other threads (if there are any) to finish execution
+  // std::vector<uint64_t> sst_per_subcompactions;
+  // sst_per_subcompactions.clear();
   for (auto& thread : thread_pool) {
     thread.join();
   }
 
   compaction_stats_.micros = db_options_.clock->NowMicros() - start_micros;
   compaction_stats_.cpu_micros = 0;
+   printf("[%d]---\n",compact_.sub_compact_state[i].output_level());
   for (size_t i = 0; i < compact_->sub_compact_states.size(); i++) {
     compaction_stats_.cpu_micros +=
         compact_->sub_compact_states[i].compaction_job_stats.cpu_micros;
+    // sst_per_subcompactions.push_back(compact_->sub_compact_states[i].sstfiles_created_per_subcompaction);
+   printf("%lu ",compact_->sub_compact_states[i].sstfiles_created_per_subcompaction);
   }
+  printf("\n------\n",compact_.sub_compact_state[i].output_level());
 
   RecordTimeToHistogram(stats_, COMPACTION_TIME, compaction_stats_.micros);
   RecordTimeToHistogram(stats_, COMPACTION_CPU_TIME,
@@ -1867,7 +1874,8 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     }
   }
 #endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-  printf("[%d] Average SST created per copmaction %lu\n",sub_compact->compaction->output_level(),compaction_file_opened);
+  sub_compact->sstfiles_created_per_subcompaction=compaction_file_opened;
+  // printf("[%d] Average SST created per copmaction %lu\n",sub_compact->compaction->output_level(),compaction_file_opened);
   sub_compact->c_iter.reset();
   blob_counter.reset();
   clip.reset();
