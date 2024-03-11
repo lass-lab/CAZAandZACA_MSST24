@@ -2182,8 +2182,10 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       zone_resources_priority_queue_.push((int)open_class);
 
       zone_resources_.wait(lk, [this, allocator_open_limit,open_class] {
-        if (open_io_zones_.load() < allocator_open_limit && 
-              open_class == zone_resources_priority_queue_.top() ) {
+        if (
+          open_class == zone_resources_priority_queue_.top()&&
+          open_io_zones_.load() < allocator_open_limit
+               ) {
           open_io_zones_++;
           zone_resources_priority_queue_.pop();
           return true;
