@@ -1473,7 +1473,7 @@ class ZonedBlockDevice {
 
   IOStatus GetZoneDeferredStatus();
   bool GetActiveIOZoneTokenIfAvailable();
-  void WaitForOpenIOZoneToken(bool prioritized);
+  void WaitForOpenIOZoneToken(bool prioritized, WaitForOpenZoneClass open_class);
   bool GetMigrationIOZoneToken(void);
   IOStatus ApplyFinishThreshold();
   IOStatus FinishCheapestIOZone(bool put_token = true);
