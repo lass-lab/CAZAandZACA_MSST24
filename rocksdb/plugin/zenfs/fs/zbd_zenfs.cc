@@ -3933,10 +3933,10 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     // usleep(1000 * 1000);
     // sleep(1);
     blocking_time++;
-    if(blocking_time>5){
+    if(blocking_time>256){
       // FinishCheapestIOZone(false);
-      MoveResources(true);
-
+      // MoveResources(true);
+      FinishCheapestIOZone();
       // s=AllocateEmptyZone(out_zone); 
       // if (s.ok() && (*out_zone) != nullptr) {
       //   Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
