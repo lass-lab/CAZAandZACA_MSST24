@@ -2154,12 +2154,12 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       }
      ZenFSStopWatch z1((const char*)stopwatch_buf,this);
   /* Avoid non-priortized allocators from starving prioritized ones */
-  if (prioritized) {
-    allocator_open_limit = max_nr_open_io_zones_;
-  } else {
-    allocator_open_limit = max_nr_open_io_zones_ - 1;
-  }
-
+  // if (prioritized) {
+  //   allocator_open_limit = max_nr_open_io_zones_;
+  // } else {
+  //   allocator_open_limit = max_nr_open_io_zones_ - 1;
+  // }
+// allocator_open_limit = max_nr_open_io_zones_;
   /* Wait for an open IO Zone token - after this function returns
    * the caller is allowed to write to a closed zone. The callee
    * is responsible for calling a PutOpenIOZoneToken to return the resource
@@ -2176,6 +2176,8 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
     if(prioritized){
       open_io_zones_++;
       return;
+    }else{
+      allocator_open_limit = max_nr_open_io_zones_ - 1;
     }
     // if(!prioritized){
       std::unique_lock<std::mutex> lk(zone_resources_mtx_);
@@ -2196,6 +2198,8 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       });
     // }
   }else{
+    allocator_open_limit = max_nr_open_io_zones_;
+    
     std::unique_lock<std::mutex> lk(zone_resources_mtx_);
     zone_resources_.wait(lk, [this, allocator_open_limit] {
       if (open_io_zones_.load() < allocator_open_limit) {
