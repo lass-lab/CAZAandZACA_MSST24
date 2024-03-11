@@ -2174,6 +2174,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
   if(AsyncZCEnabled() ){
     // // push priority queue to my level
     if(prioritized){
+      open_io_zones_++;
       return;
     }
     // if(!prioritized){
