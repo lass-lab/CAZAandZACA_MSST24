@@ -2178,21 +2178,21 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
   /////////////////////
 
 
-  std::unique_lock<std::mutex> lk(zone_resources_mtx_);
-  // push priority queue to my level
-  zone_resources_priority_queue_.push((int)opopen_classen_class);
+  // std::unique_lock<std::mutex> lk(zone_resources_mtx_);
+  // // push priority queue to my level
+  // zone_resources_priority_queue_.push((int)opopen_classen_class);
 
-  zone_resources_.wait(lk, [this, allocator_open_limit] {
-    if (open_io_zones_.load() < allocator_open_limit) {
-      open_io_zones_++;
-      return true;
-    } else {
+  // zone_resources_.wait(lk, [this, allocator_open_limit] {
+  //   if (open_io_zones_.load() < allocator_open_limit) {
+  //     open_io_zones_++;
+  //     return true;
+  //   } else {
       
 
 
-      return false;
-    }
-  });
+  //     return false;
+  //   }
+  // });
 
 
 }
