@@ -3726,8 +3726,8 @@ void ZenFS::BackgroundPageCacheEviction(void){
     usleep(1000*1000);
     uint64_t page_cache_size = zbd_->page_cache_size_;
     while(page_cache_size>zbd_->PageCacheLimit() && run_gc_worker_){
-      // std::lock_guard<std::mutex> lg(page_cache_mtx_);
-      // std::lock_guard<std::mutex> file_lock(files_mtx_);
+      std::lock_guard<std::mutex> lg(page_cache_mtx_);
+      std::lock_guard<std::mutex> file_lock(files_mtx_);
 
       // uint64_t invalid_data_size = 0;
       // uint64_t valid_data_size = 0;
@@ -3795,7 +3795,7 @@ void ZenFS::OpenZonePageCacheEviction(void){
 
       sort(all_extents.begin(),all_extents.end());
       for(int evict_open_first = 1 ; evict_open_first>=0; evict_open_first--){
-        if(page_cache_size<zbd_->PageCacheLimit() /2 ){
+        if(page_cache_size<zbd_->PageCacheLimit() ){
           break;
         }
         for(std::pair<uint64_t,ZoneExtent*> ext : all_extents){
@@ -3808,23 +3808,23 @@ void ZenFS::OpenZonePageCacheEviction(void){
             if(!ext.second->zfile_){
               continue;
             }
-            if(!ext.second->zfile_->writer_mtx_.try_lock()){
-              continue;
-            }
+            // if(!ext.second->zfile_->writer_mtx_.try_lock()){
+            //   continue;
+            // }
 
             std::shared_ptr<char> tmp_cache = std::move(ext.second->page_cache_);
-            if(tmp_cache==nullptr){
-              ext.second->zfile_->writer_mtx_.unlock();
-              continue;
-            }
+            // if(tmp_cache==nullptr){
+            //   ext.second->zfile_->writer_mtx_.unlock();
+            //   continue;
+            // }
             // if(tmp_cache.use_count()>1){
             //   continue;
             // }
             zbd_->page_cache_size_-=ext.second->length_;
             page_cache_size-=ext.second->length_;
             tmp_cache.reset();
-            ext.second->zfile_->writer_mtx_.unlock();
-            if(page_cache_size<zbd_->PageCacheLimit()/2 ){
+            // ext.second->zfile_->writer_mtx_.unlock();
+            if(page_cache_size<zbd_->PageCacheLimit() ){
               break;
             }
         }
@@ -3991,9 +3991,9 @@ void ZenFS::LRUPageCacheEviction(){
             continue;
           }
 
-          if(!ext.second->zfile_->writer_mtx_.try_lock()){
-            continue;
-          }
+          // if(!ext.second->zfile_->writer_mtx_.try_lock()){
+          //   continue;
+          // }
           // if(zc_aware && std::find_if(zone_to_be_pinned.begin() ,
           //                 zone_to_be_pinned.end(),[&](const std::pair<uint64_t,uint64_t> valid_zidx ){
           //                   return valid_zidx.second==ext.second->zone_->zidx_;
@@ -4003,10 +4003,10 @@ void ZenFS::LRUPageCacheEviction(){
 
 
           std::shared_ptr<char> tmp_cache = std::move(ext.second->page_cache_);
-          if(tmp_cache==nullptr){
-            ext.second->zfile_->writer_mtx_.unlock();
-            continue;
-          }
+          // if(tmp_cache==nullptr){
+          //   ext.second->zfile_->writer_mtx_.unlock();
+          //   continue;
+          // }
           // if(tmp_cache.use_count()>1){
           //   // ext->page_cache_
           //   ext.second->zfile_->writer_mtx_.unlock();
@@ -4015,9 +4015,9 @@ void ZenFS::LRUPageCacheEviction(){
           page_cache_size-=ext.second->length_;
           zbd_->page_cache_size_-=ext.second->length_;
           tmp_cache.reset();
-          ext.second->zfile_->writer_mtx_.unlock();
+          // ext.second->zfile_->writer_mtx_.unlock();
 
-          if(page_cache_size<zbd_->PageCacheLimit()/2){
+          if(page_cache_size<zbd_->PageCacheLimit()){
             break;
           }
       }

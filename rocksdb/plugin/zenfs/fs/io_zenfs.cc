@@ -571,21 +571,7 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       zbd_->rocksdb_page_cache_hit_size_+=r;
     }else{
 
-      uint64_t align = extent->length_ % 4096;
-      uint64_t aligned_extent_length = extent->length_;
 
-      if(align){
-        aligned_extent_length+= 4096-align;
-      }
-      // uint64_t aligned_extent_start = extent->start_;
-      // align = aligned_extent_start % 4096;
-      // if(align){
-      //   aligned_extent_start+= 4096-align;
-      // }
-      char* debug_buffer=nullptr;
-      if(posix_memalign((void**)(&debug_buffer),sysconf(_SC_PAGE_SIZE),aligned_extent_length)){
-        printf("@@@@@@@@@@ debug buffer error\n");
-      }
 
       
       char stopwatch_buf[50];
@@ -607,21 +593,31 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
 
       ZenFSStopWatch z1((const char*)stopwatch_buf,zbd_);
 
+      if(zbd_->PCAEnabled() && z->state_==Zone::State::FINISH){
+        uint64_t align = extent->length_ % 4096;
+        uint64_t aligned_extent_length = extent->length_;
+        if(align){
+          aligned_extent_length+= 4096-align;
+        }
+        char* debug_buffer=nullptr;
+        if(posix_memalign((void**)(&debug_buffer),sysconf(_SC_PAGE_SIZE),aligned_extent_length)){
+          printf("@@@@@@@@@@ debug buffer error\n");
+        }
+        
+        zbd_->Read(debug_buffer,extent->start_,aligned_extent_length,true);
 
-      
-      
-      zbd_->Read(debug_buffer,extent->start_,aligned_extent_length,true);
-
-      memmove(ptr, debug_buffer+ (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
-
-      // r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+        memmove(ptr, debug_buffer+ (r_off -extent->start_) ,pread_sz > extent->length_ ? extent->length_ : pread_sz);
+        extent->page_cache_.reset(debug_buffer);
+        zbd_->page_cache_size_+=extent->length_;
+      }else{
+        r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
+      }
+      // 
       // if(ioptions.for_compaction){
-      extent->page_cache_.reset(debug_buffer);
-      zbd_->page_cache_size_+=extent->length_;
       r=pread_sz;
-
-        zbd_->rocksdb_page_cache_fault_size_+=r;
+      zbd_->rocksdb_page_cache_fault_size_+=r;
       // }
+ 
     }
     
 
