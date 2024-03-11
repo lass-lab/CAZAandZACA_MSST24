@@ -2282,7 +2282,7 @@ void ZonedBlockDevice::PutOpenIOZoneToken() {
       open_io_zones_--;
     }
   }
-  zone_resources_.notify_one();
+  zone_resources_.notify_all();
 }
 
 void ZonedBlockDevice::PutActiveIOZoneToken() {
@@ -2292,7 +2292,7 @@ void ZonedBlockDevice::PutActiveIOZoneToken() {
       active_io_zones_--;
     }
   }
-  zone_resources_.notify_one();
+  zone_resources_.notify_all();
 }
 
 IOStatus ZonedBlockDevice::ApplyFinishThreshold() {

@@ -1573,7 +1573,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
       printf("should_form_right_short_lived_sst\n");
     }
   }
-
+  uint64_t compaction_file_opened = 0;
   while (status.ok() && !cfd->IsDropped() && c_iter->Valid()) {
     // Invariant: c_iter.status() is guaranteed to be OK if c_iter->Valid()
     // returns true.
@@ -1593,6 +1593,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     // Open output file if necessary
     if (sub_compact->builder == nullptr) {
       status = OpenCompactionOutputFile(sub_compact);
+      compaction_file_opened++;
       if (!status.ok()) {
         break;
       }
@@ -1752,7 +1753,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
                         &sub_compact->compaction_job_stats);
     }
   }
-
+///////////////////////////////////////////////////////////////////////////
   sub_compact->compaction_job_stats.num_blobs_read =
       c_iter_stats.num_blobs_read;
   sub_compact->compaction_job_stats.total_blob_bytes_read =
@@ -1866,7 +1867,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     }
   }
 #endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-
+  printf("Average SST created per copmaction %lu\n",compaction_file_opened);
   sub_compact->c_iter.reset();
   blob_counter.reset();
   clip.reset();
