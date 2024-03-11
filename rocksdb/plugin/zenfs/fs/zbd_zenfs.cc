@@ -2188,7 +2188,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
           zone_resources_priority_queue_.pop();
           return true;
         } else {
-          zone_resources_.notify_all();
+          zone_resources_.notify_one();
           return false;
         }
       });
@@ -2276,7 +2276,7 @@ void ZonedBlockDevice::PutOpenIOZoneToken() {
       open_io_zones_--;
     }
   }
-  zone_resources_.notify_all();
+  zone_resources_.notify_one();
 }
 
 void ZonedBlockDevice::PutActiveIOZoneToken() {
@@ -2286,7 +2286,7 @@ void ZonedBlockDevice::PutActiveIOZoneToken() {
       active_io_zones_--;
     }
   }
-  zone_resources_.notify_all();
+  zone_resources_.notify_one();
 }
 
 IOStatus ZonedBlockDevice::ApplyFinishThreshold() {
