@@ -770,15 +770,15 @@ Status CompactionJob::Run() {
 
   compaction_stats_.micros = db_options_.clock->NowMicros() - start_micros;
   compaction_stats_.cpu_micros = 0;
-  printf("[%d]---\n",compact_->compaction->output_level());
+  // printf("[%d]---\n",compact_->compaction->output_level());
 
   for (size_t i = 0; i < compact_->sub_compact_states.size(); i++) {
     compaction_stats_.cpu_micros +=
         compact_->sub_compact_states[i].compaction_job_stats.cpu_micros;
 
-   printf("%lu ",compact_->sub_compact_states[i].sstfiles_created_per_subcompaction);
+  //  printf("%lu ",compact_->sub_compact_states[i].sstfiles_created_per_subcompaction);
   }
-  printf("[%d]---end\n",compact_->compaction->output_level());
+  // printf("\n[%d]---end\n",compact_->compaction->output_level());
 
   RecordTimeToHistogram(stats_, COMPACTION_TIME, compaction_stats_.micros);
   RecordTimeToHistogram(stats_, COMPACTION_CPU_TIME,
