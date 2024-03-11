@@ -511,9 +511,9 @@ IOStatus Zone::Append(char *data, uint64_t size, bool zc) {
   uint64_t left = size;
   int ret;
   (void)(zc);
-  if(!zc  && zbd_->GetZCRunning()){
-    while(zbd_->GetZCRunning());
-  }
+  // if(!zc  && zbd_->GetZCRunning()){
+  //   while(zbd_->GetZCRunning());
+  // }
 
   // std::lock_guard<std::mutex> lg_wp(wp_lock_);
   if (capacity_ < size)
