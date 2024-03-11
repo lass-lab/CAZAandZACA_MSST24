@@ -1867,7 +1867,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     }
   }
 #endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-  printf("Average SST created per copmaction %lu\n",compaction_file_opened);
+  printf("[%d] Average SST created per copmaction %lu\n",sub_compact->compaction->output_level(),compaction_file_opened);
   sub_compact->c_iter.reset();
   blob_counter.reset();
   clip.reset();
