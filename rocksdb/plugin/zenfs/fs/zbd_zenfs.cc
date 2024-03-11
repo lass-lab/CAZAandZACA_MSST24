@@ -2164,35 +2164,43 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
    * the caller is allowed to write to a closed zone. The callee
    * is responsible for calling a PutOpenIOZoneToken to return the resource
    */
+
+
+
+
   std::unique_lock<std::mutex> lk(zone_resources_mtx_);
 
-  zone_resources_.wait(lk, [this, allocator_open_limit] {
-    if (open_io_zones_.load() < allocator_open_limit) {
+
+  if(AsyncZCEnabled()){
+    // // push priority queue to my level
+    zone_resources_priority_queue_.push((int)open_class);
+
+    zone_resources_.wait(lk, [this, allocator_open_limit,open_class] {
+
+
+    if (open_io_zones_.load() < allocator_open_limit && 
+          open_class == zone_resources_priority_queue_.top() ) {
       open_io_zones_++;
+      zone_resources_priority_queue_.pop();
       return true;
     } else {
+
       return false;
     }
   });
-
-  /////////////////////
-
-
-  // std::unique_lock<std::mutex> lk(zone_resources_mtx_);
-  // // push priority queue to my level
-  // zone_resources_priority_queue_.push((int)opopen_classen_class);
-
-  // zone_resources_.wait(lk, [this, allocator_open_limit] {
-  //   if (open_io_zones_.load() < allocator_open_limit) {
-  //     open_io_zones_++;
-  //     return true;
-  //   } else {
-      
+  }else{
+    zone_resources_.wait(lk, [this, allocator_open_limit] {
+      if (open_io_zones_.load() < allocator_open_limit) {
+        open_io_zones_++;
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
 
 
-  //     return false;
-  //   }
-  // });
+
 
 
 }

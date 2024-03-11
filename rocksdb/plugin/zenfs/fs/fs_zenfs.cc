@@ -2882,7 +2882,7 @@ std::vector<ZoneExtent*> ZenFS::MemoryMoveExtents(ZoneFile* zfile,
     // }
     ZoneExtent* new_ext=new ZoneExtent(ext->start_,ext->length_,nullptr,
           ext->fname_,ext->header_size_,
-          zbd_->AsyncZCEnabled() ? ext->last_accessed_ : NowMicros(),
+          NowMicros(),
           zfile
           );
     new_ext->zone_=ext->zone_;
