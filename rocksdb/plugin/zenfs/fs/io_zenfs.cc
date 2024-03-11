@@ -1002,13 +1002,15 @@ IOStatus ZoneFile::BufferedAppend(char** _buffer, uint64_t data_size) {
     // zenfs_
     extents_.push_back(new_ext);
 
-    int ret =
-          posix_memalign((void**)_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
+    // int ret =
+    //       posix_memalign((void**)_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
 
-    if (ret){ 
-      printf("ZoneFile::BufferedAppend memory allocate failed\n");
-      (*_buffer) = nullptr;
-    }
+    // if (ret){ 
+    //   printf("ZoneFile::BufferedAppend memory allocate failed\n");
+    //   (*_buffer) = nullptr;
+    // }
+
+
     extent_start_ = active_zone_->wp_;
     active_zone_->used_capacity_ += extent_length;
     file_size_ += extent_length;
@@ -1028,8 +1030,8 @@ IOStatus ZoneFile::BufferedAppend(char** _buffer, uint64_t data_size) {
       if (!s.ok()) return s;
     }
     
-    zbd_->page_cache_size_+=extent_length;
-    new_ext->page_cache_.reset(buffer);
+    // zbd_->page_cache_size_+=extent_length;
+    // new_ext->page_cache_.reset(buffer);
 
   }
 
@@ -1082,13 +1084,13 @@ IOStatus ZoneFile::SparseAppend(char** _sparse_buffer, uint64_t data_size) {
     // zenfs_->db_ptr_;
 
     extents_.push_back(new_ext);
-    int ret =
-          posix_memalign((void**)_sparse_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
+    // int ret =
+    //       posix_memalign((void**)_sparse_buffer, sysconf(_SC_PAGESIZE), buffer_size_);
 
-    if (ret) {
-        (*_sparse_buffer) = nullptr;
-        printf("ZoneFile::SparseAppend memory allocation failed\n");
-    }
+    // if (ret) {
+    //     (*_sparse_buffer) = nullptr;
+    //     printf("ZoneFile::SparseAppend memory allocation failed\n");
+    // }
     extent_start_ = active_zone_->wp_;
     active_zone_->used_capacity_ += extent_length;
     file_size_ += extent_length;
@@ -1109,8 +1111,8 @@ IOStatus ZoneFile::SparseAppend(char** _sparse_buffer, uint64_t data_size) {
       s = AllocateNewZone();
       if (!s.ok()) return s;
     }
-    zbd_->page_cache_size_+=extent_length;
-    new_ext->page_cache_.reset(sparse_buffer);
+    // zbd_->page_cache_size_+=extent_length;
+    // new_ext->page_cache_.reset(sparse_buffer);
 
   }
 
