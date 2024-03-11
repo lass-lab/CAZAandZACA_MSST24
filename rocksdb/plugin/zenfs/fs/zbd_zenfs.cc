@@ -2184,7 +2184,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       zone_resources_priority_queue_.pop();
       return true;
     } else {
-
+      zone_resources_.notify_one();
       return false;
     }
   });
