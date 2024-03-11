@@ -2165,6 +2165,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
    * is responsible for calling a PutOpenIOZoneToken to return the resource
    */
   std::unique_lock<std::mutex> lk(zone_resources_mtx_);
+
   zone_resources_.wait(lk, [this, allocator_open_limit] {
     if (open_io_zones_.load() < allocator_open_limit) {
       open_io_zones_++;
@@ -2173,6 +2174,27 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       return false;
     }
   });
+
+  /////////////////////
+
+
+  std::unique_lock<std::mutex> lk(zone_resources_mtx_);
+  // push priority queue to my level
+  zone_resources_priority_queue_.push((int)opopen_classen_class);
+
+  zone_resources_.wait(lk, [this, allocator_open_limit] {
+    if (open_io_zones_.load() < allocator_open_limit) {
+      open_io_zones_++;
+      return true;
+    } else {
+      
+
+
+      return false;
+    }
+  });
+
+
 }
 
 
@@ -4059,17 +4081,17 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
     goto end;
   }
 
-  if(GetActiveIOZoneTokenIfAvailable()){
-    s = AllocateEmptyZone(&allocated_zone);
-    if (allocated_zone != nullptr&&s.ok()) {
-      // assert(allocated_zone->IsBusy());
-      allocated_zone->lifetime_ = file_lifetime;
-      new_zone = true;
-      goto end;
-    } else {
-      PutActiveIOZoneToken();
-    }
-  }
+  // if(GetActiveIOZoneTokenIfAvailable()){
+  //   s = AllocateEmptyZone(&allocated_zone);
+  //   if (allocated_zone != nullptr&&s.ok()) {
+  //     // assert(allocated_zone->IsBusy());
+  //     allocated_zone->lifetime_ = file_lifetime;
+  //     new_zone = true;
+  //     goto end;
+  //   } else {
+  //     PutActiveIOZoneToken();
+  //   }
+  // }
 
   // if(allocated_zone!=nullptr){
    

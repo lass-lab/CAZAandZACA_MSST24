@@ -108,7 +108,7 @@ class ZoneFile;
 class ZoneExtent;
 
 enum WaitForOpenZoneClass{
-  L0,L1,L2,L3,L4,ZC,WAL
+WAL,ZC,L0,L1,L2,L3,L4
 };
 
 class ZoneList {
@@ -590,6 +590,10 @@ class ZonedBlockDevice {
      for notifying changes in open_io_zones_ */
   std::mutex zone_resources_mtx_;
   std::condition_variable zone_resources_;
+
+  std::priority_queue<int, std::vector<int>, std::greater<int>> zone_resources_priority_queue_;
+
+
   std::mutex zone_deferred_status_mutex_;
   IOStatus zone_deferred_status_;
 
