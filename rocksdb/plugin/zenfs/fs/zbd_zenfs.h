@@ -106,6 +106,11 @@ class ZoneFile;
 #define IS_BIG_SSTABLE(file_size) (bool)((uint64_t)(file_size) > (uint64_t)(63<<20))
 // predicted_size > (uint64_t)( (uint64_t)1<<25 + (uint64_t)31<<20);
 class ZoneExtent;
+
+enum WaitForOpenZoneClass{
+  L0,L1,L2,L3,L4,ZC,WAL
+};
+
 class ZoneList {
  private:
   void *data_;

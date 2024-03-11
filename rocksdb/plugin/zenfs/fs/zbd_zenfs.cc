@@ -2119,9 +2119,40 @@ void ZonedBlockDevice::PutMigrationIOZoneToken(void) {
   migrate_resource_.notify_one();
 }
 
-void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized) {
+void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneClass open_class) {
   long allocator_open_limit;
 
+  char stopwatch_buf[50];
+//  L0,L1,L2,L3,L4,ZC,WAL
+  // ZenFSStopWatch z1("WaitForOpenIOZoneToken",this);
+      switch (open_class)
+      {
+      case L0: // full
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L0");
+        break;
+      case L1:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L1");
+        break;
+      case L2:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L2");
+        break;
+      case L3:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L3");
+        break;
+      case L4:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L4");
+        break;
+      case ZC:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken ZC");
+        break;
+      case WAL:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken WAL");
+        break;
+      default:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken Unknown class ? %d",open_class);
+        break;
+      }
+     ZenFSStopWatch z1((const char*)stopwatch_buf,this);
   /* Avoid non-priortized allocators from starving prioritized ones */
   if (prioritized) {
     allocator_open_limit = max_nr_open_io_zones_;

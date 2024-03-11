@@ -3762,7 +3762,7 @@ void ZenFS::OpenZonePageCacheEviction(void){
 
         std::vector< std::pair< uint64_t,ZoneExtent* >> all_extents;
       // uint64_t page_cache_size = zbd_->page_cache_size_;
-      uint64_t page_cache_size = 0;
+      // uint64_t page_cache_size = 0;
       all_extents.clear();
 
 
@@ -3778,10 +3778,10 @@ void ZenFS::OpenZonePageCacheEviction(void){
         extents=file->GetExtents();
         for (ZoneExtent* ext : extents ) {
           if(ext){
-            if(ext->page_cache_ !=nullptr){
-              // zbd_->page_cache_size_ = page_cache_size;
-              page_cache_size+=ext->length_;
-            }
+            // if(ext->page_cache_ !=nullptr){
+            //   // zbd_->page_cache_size_ = page_cache_size;
+            //   page_cache_size+=ext->length_;
+            // }
             all_extents.push_back({ext->last_accessed_,ext});
             
           }
@@ -3791,11 +3791,11 @@ void ZenFS::OpenZonePageCacheEviction(void){
         }
         file->ReleaseWRLock();
       }
-      zbd_->page_cache_size_ = page_cache_size;
+      // zbd_->page_cache_size_ = page_cache_size;
 
       sort(all_extents.begin(),all_extents.end());
       for(int evict_open_first = 1 ; evict_open_first>=0; evict_open_first--){
-        if(page_cache_size<zbd_->PageCacheLimit() ){
+        if(zbd_->page_cache_size_<zbd_->PageCacheLimit() ){
           break;
         }
         for(std::pair<uint64_t,ZoneExtent*> ext : all_extents){
@@ -3821,10 +3821,10 @@ void ZenFS::OpenZonePageCacheEviction(void){
             //   continue;
             // }
             zbd_->page_cache_size_-=ext.second->length_;
-            page_cache_size-=ext.second->length_;
+            // page_cache_size-=ext.second->length_;
             tmp_cache.reset();
             // ext.second->zfile_->writer_mtx_.unlock();
-            if(page_cache_size<zbd_->PageCacheLimit() ){
+            if(zbd_->page_cache_size_<zbd_->PageCacheLimit() ){
               break;
             }
         }
@@ -3920,7 +3920,7 @@ void ZenFS::ZCPageCacheEviction(void){
 void ZenFS::LRUPageCacheEviction(){
       std::vector< std::pair< uint64_t,ZoneExtent* >> all_extents;
       // uint64_t page_cache_size = zbd_->page_cache_size_;
-      uint64_t page_cache_size=0;
+      // uint64_t page_cache_size=0;
       all_extents.clear();
       // all_extents_tmp.clear();
 
@@ -3953,9 +3953,9 @@ void ZenFS::LRUPageCacheEviction(){
         for (ZoneExtent* ext : extents ) {
           if(ext){
             // all_extents_tmp.push_back(ext);
-            if(ext->page_cache_!=nullptr){
-              page_cache_size+=ext->length_;
-            }
+            // if(ext->page_cache_!=nullptr){
+            //   page_cache_size+=ext->length_;
+            // }
             all_extents.push_back({ext->last_accessed_,ext});
             
           }
@@ -3971,7 +3971,7 @@ void ZenFS::LRUPageCacheEviction(){
         //   break;
         // }
       }
-      zbd_->page_cache_size_ = page_cache_size;
+      // zbd_->page_cache_size_ = page_cache_size;
       // for(auto ext: all_extents_tmp){
       //   if(ext){
       //     all_extents.push_back(ext);
@@ -4012,12 +4012,12 @@ void ZenFS::LRUPageCacheEviction(){
           //   ext.second->zfile_->writer_mtx_.unlock();
           //   continue;
           // }
-          page_cache_size-=ext.second->length_;
+          // page_cache_size-=ext.second->length_;
           zbd_->page_cache_size_-=ext.second->length_;
           tmp_cache.reset();
           // ext.second->zfile_->writer_mtx_.unlock();
 
-          if(page_cache_size<zbd_->PageCacheLimit()){
+          if(zbd_->page_cache_size_<zbd_->PageCacheLimit()){
             break;
           }
       }

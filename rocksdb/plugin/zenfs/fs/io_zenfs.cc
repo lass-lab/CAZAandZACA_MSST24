@@ -612,12 +612,16 @@ IOStatus ZoneFile::PositionedRead(uint64_t offset, size_t n,const IOOptions& iop
       }else{
         r = zbd_->Read(ptr, r_off, pread_sz, (direct && aligned));
       }
+
       // 
       // if(ioptions.for_compaction){
+      
+      
       r=pread_sz;
       zbd_->rocksdb_page_cache_fault_size_+=r;
       // }
- 
+
+      
     }
     
 
