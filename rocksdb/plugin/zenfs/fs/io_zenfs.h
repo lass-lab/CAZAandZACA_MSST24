@@ -253,7 +253,7 @@ class ZoneFile {
   class ReadLock {
    public:
     ReadLock(ZoneFile* zfile) : zfile_(zfile) {
-      while(zfile->GetZbd()->GetZCRunning());
+      // while(zfile->GetZbd()->GetZCRunning());
       zfile_->writer_mtx_.lock();
       zfile_->readers_++;
       zfile_->writer_mtx_.unlock();
