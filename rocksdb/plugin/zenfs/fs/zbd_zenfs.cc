@@ -4009,15 +4009,17 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   switch (level)
   {
   case 0:
-    /* code */
     open_class=L0;
     break;
   case 1:
     open_class = L1;
+    break;
   case 2:
     open_class = L2;
+    break;
   case 3:
     open_class = L3;
+    break;
   default:
     open_class = L4;
     break;
