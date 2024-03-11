@@ -3746,7 +3746,7 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
   uint64_t try_n= 0 ;
   should_be_copied+=4096*256;
   unsigned int best_diff = LIFETIME_DIFF_NOT_GOOD;
-  WaitForOpenIOZoneToken(false);
+  WaitForOpenIOZoneToken(false,ZC);
 
   while((*out_zone)==nullptr){
     
@@ -3855,7 +3855,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   // WaitForOpenIOZoneToken(false);
 
   // WaitForMigrationIOZoneToken();
-  WaitForOpenIOZoneToken(false);
+  WaitForOpenIOZoneToken(false,ZC);
 
   while(CalculateCapacityRemain()>min_capacity){
     if((*run_gc_worker_)==false){
@@ -4004,8 +4004,28 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
   //     return s;
   //   }
   // }
-
-  WaitForOpenIOZoneToken(io_type == IOType::kWAL);
+    // L0,L1,L2,L3,L4,ZC,WAL
+  WaitForOpenZoneClass open_class;
+  switch (level)
+  {
+  case 0:
+    /* code */
+    open_class=L0;
+    break;
+  case 1:
+    open_class = L1;
+  case 2:
+    open_class = L2;
+  case 3:
+    open_class = L3;
+  default:
+    open_class = L4;
+    break;
+  }
+  if(io_type == IOType::kWAL){
+    open_class=WAL;
+  }
+  WaitForOpenIOZoneToken(io_type == IOType::kWAL,open_class);
   
   if(is_sst&&level>=0 && allocation_scheme_==CAZA){
     s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
