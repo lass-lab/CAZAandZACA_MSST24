@@ -2171,7 +2171,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
   std::unique_lock<std::mutex> lk(zone_resources_mtx_);
 
 
-  if(AsyncZCEnabled()){
+  if(AsyncZCEnabled() && !prioritized ){
     // // push priority queue to my level
     zone_resources_priority_queue_.push((int)open_class);
 
