@@ -2177,14 +2177,15 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
   (void)(prioritized);
   if(AsyncZCEnabled() ){
     // // push priority queue to my level
-    // if(prioritized){
-    //   open_io_zones_++;
-    //   return;
-    // }else{
+    if(prioritized){
+      open_io_zones_++;
+      return;
+    }
+    // else{
     //   allocator_open_limit = max_nr_open_io_zones_ - 1;
     // }
 
-      allocator_open_limit = max_nr_open_io_zones_;
+      allocator_open_limit = max_nr_open_io_zones_-1;
       std::unique_lock<std::mutex> lk(zone_resources_mtx_);
       zone_resources_priority_queue_.push((int)open_class);
 
