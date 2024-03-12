@@ -584,7 +584,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   uint64_t sp = 0;
 #endif
   // Reserve one zone for metadata and another one for extent migration
-  int reserved_zones = 1;
+  int reserved_zones = 4;
   // int migrate_zones = 1;
   // printf("ZonedBlockDevice::Open@@\n");
   if (!readonly && !exclusive)
@@ -2173,13 +2173,14 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
 
   if(AsyncZCEnabled() ){
     // // push priority queue to my level
-    if(prioritized){
-      open_io_zones_++;
-      return;
-    }else{
-      allocator_open_limit = max_nr_open_io_zones_ - 1;
-    }
-    // if(!prioritized){
+    // if(prioritized){
+    //   open_io_zones_++;
+    //   return;
+    // }else{
+    //   allocator_open_limit = max_nr_open_io_zones_ - 1;
+    // }
+
+
       std::unique_lock<std::mutex> lk(zone_resources_mtx_);
       zone_resources_priority_queue_.push((int)open_class);
 
@@ -2196,7 +2197,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
           return false;
         }
       });
-    // }
+
   }else{
     allocator_open_limit = max_nr_open_io_zones_;
     
