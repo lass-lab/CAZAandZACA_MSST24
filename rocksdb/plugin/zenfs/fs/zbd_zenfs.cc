@@ -1746,7 +1746,11 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
           z->Release();
           return reset_status;
         }
-        if (!full) PutActiveIOZoneToken();
+        if (!full) {
+          PutActiveIOZoneToken();
+          PutOpenIOZoneToken();
+        }
+
       } 
 
       z->Release();
