@@ -904,7 +904,7 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
   // }
 
   int try_n= 0;
-  IOStatus s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_,predicted_size_ ,&zone,min_capacity);
+  IOStatus s = zbd_->AllocateIOZone(linkfiles_[0],IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_,predicted_size_ ,&zone,min_capacity);
   // assert(IOStatus::NoSpace("Not enough capacity for append")==IOStatus::NosSpace());
   //  no_input_fno_(0);
   input_fno_.clear();
@@ -923,7 +923,7 @@ IOStatus ZoneFile::AllocateNewZone(uint64_t min_capacity) {
 
       // sleep(1);
 
-      s = zbd_->AllocateIOZone(IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_,predicted_size_,&zone,min_capacity);
+      s = zbd_->AllocateIOZone(linkfiles_[0],IsSST(),smallest_,largest_,level_,lifetime_, io_type_,input_fno_,predicted_size_,&zone,min_capacity);
       // zenfs_->ZCUnLock();
       try_n++;
       // usleep(1000 * 1000);

@@ -4014,7 +4014,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
   return s;
 }
 
-IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& largest, int level,
+IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& smallest,Slice& largest, int level,
                                           Env::WriteLifeTimeHint file_lifetime, IOType io_type, 
                                           std::vector<uint64_t>& input_fno,uint64_t predicted_size,
                                           Zone **out_zone,uint64_t min_capacity) {
@@ -4072,6 +4072,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(bool is_sst,Slice& smallest,Slice& lar
     open_class = L3;
     break;
   default:
+    printf("fname ?? %s level ?? %d\n",fname.c_str(),level);
     open_class = L4;
     break;
   }
