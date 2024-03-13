@@ -596,6 +596,8 @@ class ZonedBlockDevice {
   std::mutex zone_resources_mtx_;
   std::condition_variable zone_resources_;
 
+  std::condition_variable priority_zone_resources_[10];
+
   std::priority_queue<int, std::vector<int>, std::greater<int>> zone_resources_priority_queue_;
 
 

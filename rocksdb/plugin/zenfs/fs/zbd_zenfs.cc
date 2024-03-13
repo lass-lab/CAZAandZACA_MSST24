@@ -2181,31 +2181,38 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       open_io_zones_++;
       return;
     }
-    // else{
-    //   allocator_open_limit = max_nr_open_io_zones_ - 1;
-    // }
+      // allocator_open_limit = max_nr_open_io_zones_-1;
+      // std::unique_lock<std::mutex> lk(zone_resources_mtx_);
+      // zone_resources_priority_queue_.push((int)open_class);
+
+      // zone_resources_.wait(lk, [this, allocator_open_limit,open_class] {
+      //   // if( zone_resources_priority_queue && open_io_zones_.load() < allocator_open_limit){
+
+      //   // }
+      //   if (
+      //     open_class == zone_resources_priority_queue_.top()&&
+      //     open_io_zones_.load() < allocator_open_limit
+      //          ) {
+      //     open_io_zones_++;
+      //     zone_resources_priority_queue_.pop();
+      //     return true;
+      //   } else {
+      //     zone_resources_.notify_all();
+      //     return false;
+      //   }
+      // });
+    ////////////////////
 
       allocator_open_limit = max_nr_open_io_zones_-1;
       std::unique_lock<std::mutex> lk(zone_resources_mtx_);
-      zone_resources_priority_queue_.push((int)open_class);
-
-      zone_resources_.wait(lk, [this, allocator_open_limit,open_class] {
-        // if( zone_resources_priority_queue && open_io_zones_.load() < allocator_open_limit){
-
-        // }
-        if (
-          open_class == zone_resources_priority_queue_.top()&&
-          open_io_zones_.load() < allocator_open_limit
-               ) {
+      priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit] {
+        if (open_io_zones_.load() < allocator_open_limit) {
           open_io_zones_++;
-          zone_resources_priority_queue_.pop();
           return true;
         } else {
-          zone_resources_.notify_all();
           return false;
         }
       });
-
   }else{
     allocator_open_limit = max_nr_open_io_zones_;
     
@@ -2291,7 +2298,17 @@ void ZonedBlockDevice::PutOpenIOZoneToken() {
       open_io_zones_--;
     }
   }
-  zone_resources_.notify_all();
+  if(AsyncZCEnabled()){
+    for(size_t oc =0 ; oc< 10; oc++){
+      priority_zone_resources_[oc].notify_one();
+    }
+  }else{
+    zone_resources_.notify_all();
+  }
+  
+
+
+
 }
 
 void ZonedBlockDevice::PutActiveIOZoneToken() {
@@ -2301,7 +2318,14 @@ void ZonedBlockDevice::PutActiveIOZoneToken() {
       active_io_zones_--;
     }
   }
-  zone_resources_.notify_all();
+
+  if(AsyncZCEnabled()){
+    for(size_t oc =0 ; oc< 10; oc++){
+      priority_zone_resources_[oc].notify_one();
+    }
+  }else{
+    zone_resources_.notify_all();
+  }
 }
 
 IOStatus ZonedBlockDevice::ApplyFinishThreshold() {
@@ -4063,11 +4087,11 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
     switch (level)
     {
     case 0:
-      // open_class=L0;
-      // break;
+      open_class=L0;
+      break;
     case 1:
-      // open_class = L1;
-      // break;
+      open_class = L1;
+      break;
     case 2:
       open_class = L2;
       break;
