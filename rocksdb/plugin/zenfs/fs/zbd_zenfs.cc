@@ -4066,8 +4066,8 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       // open_class=L0;
       // break;
     case 1:
-      open_class = L1;
-      break;
+      // open_class = L1;
+      // break;
     case 2:
       open_class = L2;
       break;
