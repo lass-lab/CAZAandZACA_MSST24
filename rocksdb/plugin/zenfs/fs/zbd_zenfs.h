@@ -108,7 +108,7 @@ class ZoneFile;
 class ZoneExtent;
 
 enum WaitForOpenZoneClass{
-WAL=0,ZC=1,L0=2,L1=3,L2=4,L3=5,L4=6
+WAL=0,ZC=1,L0=2,L1=3,L2=4,L3=5,L4=6,L5=7
 };
 
 class ZoneList {

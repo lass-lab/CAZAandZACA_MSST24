@@ -4057,27 +4057,34 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
   // }
     // L0,L1,L2,L3,L4,ZC,WAL
   WaitForOpenZoneClass open_class;
-  switch (level)
-  {
-  case 0:
-    open_class=L0;
-    break;
-  case 1:
-    open_class = L1;
-    break;
-  case 2:
-    open_class = L2;
-    break;
-  case 3:
-    open_class = L3;
-    break;
-  default:
-    // printf("fname ?? %s level ?? %d\n",fname.c_str(),level);
-    open_class = L4;
-    break;
-  }
   if(io_type == IOType::kWAL){
     open_class=WAL;
+  }else{
+    switch (level)
+    {
+    case 0:
+      open_class=L0;
+      break;
+    case 1:
+      open_class = L1;
+      break;
+    case 2:
+      open_class = L2;
+      break;
+    case 3:
+      open_class = L3;
+      break;
+    case 4:
+      open_class = L4;
+      break;
+    case 5:
+      open_class = L5;
+      break;
+    default:
+      printf("fname ?? %s level ?? %d\n",fname.c_str(),level);
+      open_class = L4;
+      break;
+    }
   }
   WaitForOpenIOZoneToken(io_type == IOType::kWAL,open_class);
   
