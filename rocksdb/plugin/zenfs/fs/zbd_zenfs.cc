@@ -2190,6 +2190,9 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       zone_resources_priority_queue_.push((int)open_class);
 
       zone_resources_.wait(lk, [this, allocator_open_limit,open_class] {
+        // if( zone_resources_priority_queue && open_io_zones_.load() < allocator_open_limit){
+
+        // }
         if (
           open_class == zone_resources_priority_queue_.top()&&
           open_io_zones_.load() < allocator_open_limit
@@ -2198,7 +2201,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
           zone_resources_priority_queue_.pop();
           return true;
         } else {
-          zone_resources_.notify_all();
+          zone_resources_.notify_one();
           return false;
         }
       });
@@ -2288,7 +2291,7 @@ void ZonedBlockDevice::PutOpenIOZoneToken() {
       open_io_zones_--;
     }
   }
-  zone_resources_.notify_all();
+  zone_resources_.notify_one();
 }
 
 void ZonedBlockDevice::PutActiveIOZoneToken() {
@@ -2298,7 +2301,7 @@ void ZonedBlockDevice::PutActiveIOZoneToken() {
       active_io_zones_--;
     }
   }
-  zone_resources_.notify_all();
+  zone_resources_.notify_one();
 }
 
 IOStatus ZonedBlockDevice::ApplyFinishThreshold() {
