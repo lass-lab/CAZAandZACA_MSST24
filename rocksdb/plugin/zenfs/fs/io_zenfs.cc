@@ -1443,7 +1443,7 @@ IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime, int lev
 
 void ZonedWritableFile::SetMinMaxKeyAndLevel(const Slice& s,const Slice& l,const int output_level){
   if(output_level<0){
-    // printf("@@@ ZonedWritableFile::SetMinMaxAndLEvel :: failed , level should be > 0\n");
+    printf("@@@ ZonedWritableFile::SetMinMaxAndLEvel :: failed , level should be > 0\n");
     return;
   }
   // printf("set min max : fno :%ld at %d\n",zoneFile_->fno_,output_level);
@@ -1787,6 +1787,7 @@ void ZonedWritableFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) {
     zoneFile_->fno_=fno_;
     zoneFile_->input_fno_=input_fno_;
     zoneFile_->GetZbd()->SetSSTFileforZBDNoLock(fno_,zoneFile_.get());
+    zoneFile_->level_=level_;
   }
   zoneFile_->SetWriteLifeTimeHint(hint,level_);
 }
