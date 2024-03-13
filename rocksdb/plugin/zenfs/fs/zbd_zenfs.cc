@@ -4063,8 +4063,8 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
     switch (level)
     {
     case 0:
-      open_class=L0;
-      break;
+      // open_class=L0;
+      // break;
     case 1:
       open_class = L1;
       break;
@@ -4082,7 +4082,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       break;
     default:
       printf("fname ?? %s level ?? %d\n",fname.c_str(),level);
-      open_class = L4;
+      open_class = L5;
       break;
     }
   }
