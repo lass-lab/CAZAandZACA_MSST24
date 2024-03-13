@@ -2205,14 +2205,27 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
 
       allocator_open_limit = max_nr_open_io_zones_-1;
       std::unique_lock<std::mutex> lk(zone_resources_mtx_);
-      priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit] {
-        if (open_io_zones_.load() < allocator_open_limit) {
-          open_io_zones_++;
-          return true;
-        } else {
-          return false;
-        }
-      });
+      if(open_class == L1){
+        priority_zone_resources_[L0].wait(lk, [this,allocator_open_limit] {
+          if (open_io_zones_.load() < allocator_open_limit) {
+            open_io_zones_++;
+            return true;
+          } else {
+            return false;
+          }
+        });
+      }else{
+        priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit] {
+          if (open_io_zones_.load() < allocator_open_limit) {
+            open_io_zones_++;
+            return true;
+          } else {
+            return false;
+          }
+        });
+      }
+
+
   }else{
     allocator_open_limit = max_nr_open_io_zones_;
     
