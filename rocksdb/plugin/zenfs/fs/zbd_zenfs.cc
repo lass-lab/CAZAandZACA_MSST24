@@ -4072,7 +4072,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
     open_class = L3;
     break;
   default:
-    printf("fname ?? %s level ?? %d\n",fname.c_str(),level);
+    // printf("fname ?? %s level ?? %d\n",fname.c_str(),level);
     open_class = L4;
     break;
   }
