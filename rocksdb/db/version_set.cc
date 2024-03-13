@@ -2867,10 +2867,12 @@ void VersionStorageInfo::ComputeCompactionScore(
           score =
               std::max(score, static_cast<double>(total_size) / l0_target_size);
           if(num_sorted_runs>=mutable_cf_options.level0_stop_writes_trigger){
-            printf("num_sorted_runs 1 %d %d\n",num_sorted_runs,mutable_cf_options.level0_stop_writes_trigger);
-          }else{
-             printf("num_sorted_runs 2 %d %d\n",num_sorted_runs,mutable_cf_options.level0_stop_writes_trigger);
+            // printf("num_sorted_runs 1 %de %d\n",num_sorted_runs,mutable_cf_options.level0_stop_writes_trigger);
+            score=100.0;
           }
+          // else{
+          //    printf("num_sorted_runs 2 %d %d\n",num_sorted_runs,mutable_cf_options.level0_stop_writes_trigger);
+          // }
         }
       }
     } else {
