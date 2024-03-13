@@ -2862,9 +2862,15 @@ void VersionStorageInfo::ComputeCompactionScore(
                 std::max(l0_target_size,
                          static_cast<uint64_t>(level_max_bytes_[base_level_] /
                                                level_multiplier_));
+            
           }
           score =
               std::max(score, static_cast<double>(total_size) / l0_target_size);
+          if(num_sorted_runs>=mutable_cf_options.level0_stop_writes_trigger){
+            printf("num_sorted_runs 1 %d %d\n",num_sorted_runs,mutable_cf_options.level0_stop_writes_trigger);
+          }else{
+             printf("num_sorted_runs 2 %d %d\n",num_sorted_runs,mutable_cf_options.level0_stop_writes_trigger);
+          }
         }
       }
     } else {
