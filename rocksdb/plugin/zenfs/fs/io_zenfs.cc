@@ -400,7 +400,7 @@ IOStatus ZoneFile::CloseActiveZone() {
     }
     WaitForOpenZoneClass open_class;
     if(is_sst_){
-      open_class_= level_-2;
+      open_class= level_-2;
     }else if(is_wal_){
       open_class=WAL;
     }else{ //unkown
