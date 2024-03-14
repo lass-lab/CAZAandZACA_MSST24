@@ -1748,7 +1748,7 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
         }
         if (!full) {
           PutActiveIOZoneToken();
-          PutOpenIOZoneToken();
+          // PutOpenIOZoneToken();
         }
 
       } 
@@ -2073,7 +2073,7 @@ IOStatus ZonedBlockDevice::RuntimePartialZoneReset(std::vector<bool>& is_reseted
     if(!full){ //was not full
       if(z->IsEmpty()){
         PutActiveIOZoneToken();
-        PutOpenIOZoneToken();
+        // PutOpenIOZoneToken();
       }
     }
   }
@@ -2206,24 +2206,35 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       allocator_open_limit = max_nr_open_io_zones_-1;
       std::unique_lock<std::mutex> lk(zone_resources_mtx_);
       if(open_class == L1){
-        priority_zone_resources_[L0].wait(lk, [this,allocator_open_limit] {
-          if (open_io_zones_.load() < allocator_open_limit) {
-            open_io_zones_++;
-            return true;
-          } else {
-            return false;
-          }
-        });
-      }else{
-        priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit] {
-          if (open_io_zones_.load() < allocator_open_limit) {
-            open_io_zones_++;
-            return true;
-          } else {
-            return false;
-          }
-        });
+        // priority_zone_resources_[L0].wait(lk, [this,allocator_open_limit] {
+        //   if (open_io_zones_.load() < allocator_open_limit) {
+        //     open_io_zones_++;
+        //     return true;
+        //   } else {
+        //     return false;
+        //   }
+        // });
+        open_class=L0;
       }
+      // else{
+        priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit] {
+          uint64_t cur_open_classes=0;
+          for(int oc = 0; oc<open_class; oc++){
+            cur_open_classes+=cur_open_class[open_class];
+            if(cur_open_classes>saturation_point_){
+              return false;
+            }
+          }
+          
+          if (open_io_zones_.load() < allocator_open_limit) {
+            open_io_zones_++;
+            cur_open_class_[open_class]++;
+            return true;
+          } else {
+            return false;
+          }
+        });
+      // }
 
 
   }else{
@@ -2304,11 +2315,15 @@ bool ZonedBlockDevice::GetActiveIOZoneTokenIfAvailable() {
   return false;
 }
 
-void ZonedBlockDevice::PutOpenIOZoneToken() {
+void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
+  if(open_class==L1){
+    open_class=L0;
+  }
   {
     std::unique_lock<std::mutex> lk(zone_resources_mtx_);
     if(open_io_zones_.load()!=0){
       open_io_zones_--;
+      cur_open_class_[open_class]--;
     }
   }
   if(AsyncZCEnabled()){
@@ -2333,7 +2348,7 @@ void ZonedBlockDevice::PutActiveIOZoneToken() {
   }
 
   if(AsyncZCEnabled()){
-    for(size_t oc =0 ; oc< 10; oc++){
+    for(int oc =0 ; oc< 10; oc++){
       priority_zone_resources_[oc].notify_one();
     }
   }else{
@@ -3874,7 +3889,7 @@ void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint
       zone->Close();
       zone->Release();
       
-       PutOpenIOZoneToken();
+       PutOpenIOZoneToken(ZC);
       if(full){
         PutActiveIOZoneToken();
       }
@@ -3897,7 +3912,7 @@ IOStatus ZonedBlockDevice::ReleaseMigrateZone(Zone *zone) {
       // PutMigrationIOZoneToken();
       zone->Release();
 
-      PutOpenIOZoneToken();
+      PutOpenIOZoneToken(ZC);
 
       if(full){
         PutActiveIOZoneToken();
@@ -4129,14 +4144,14 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
     s = AllocateCompactionAwaredZone(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
 
     if(!s.ok()){
-      PutOpenIOZoneToken();
+      PutOpenIOZoneToken(open_class);
       return s;
     }
   }else if(is_sst&&level>=0 && allocation_scheme_==CAZA_ADV){
     s = AllocateCompactionAwaredZoneV2(smallest,largest,level,file_lifetime,std::vector<uint64_t>(0),predicted_size,&allocated_zone,min_capacity);
     // printf("AllocateCompactionAwaredZoneV2\n");
     if(!s.ok()){
-      PutOpenIOZoneToken();
+      PutOpenIOZoneToken(open_class);
       return s;
     }
 
@@ -4174,7 +4189,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
   /* Try to fill an already open zone(with the best life time diff) */
   s = GetBestOpenZoneMatch(file_lifetime, &best_diff,input_fno ,&allocated_zone,min_capacity);
   if (!s.ok()) {
-    PutOpenIOZoneToken();
+    PutOpenIOZoneToken(open_class);
     return s;
   }
 
@@ -4242,7 +4257,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
           new_zone, allocated_zone->start_, allocated_zone->wp_,
           allocated_zone->lifetime_, file_lifetime);
   } else {
-    PutOpenIOZoneToken();
+    PutOpenIOZoneToken(open_class);
   }
   // if(allocated_zone==nullptr){
   //   s=GetAnyLargestRemainingZone(&allocated_zone,false);

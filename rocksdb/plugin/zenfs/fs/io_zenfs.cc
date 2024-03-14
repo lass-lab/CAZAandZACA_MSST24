@@ -398,7 +398,16 @@ IOStatus ZoneFile::CloseActiveZone() {
     if (!s.ok()) {
       return s;
     }
-    zbd_->PutOpenIOZoneToken();
+    WaitForOpenZoneClass open_class;
+    if(is_sst_){
+      open_class_= level_-2;
+    }else if(is_wal_){
+      open_class=WAL;
+    }else{ //unkown
+      open_class=L5;
+    }
+
+    zbd_->PutOpenIOZoneToken(open_class);
     if (full) {
       zbd_->PutActiveIOZoneToken();
     }

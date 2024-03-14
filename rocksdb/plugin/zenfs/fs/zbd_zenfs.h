@@ -597,7 +597,8 @@ class ZonedBlockDevice {
   std::condition_variable zone_resources_;
 
   std::condition_variable priority_zone_resources_[10];
-
+  int  cur_open_class_[open_class] = { 0,0,0,0,0,0,0,0,0,0};
+  int saturation_point_ = 7;
   std::priority_queue<int, std::vector<int>, std::greater<int>> zone_resources_priority_queue_;
 
 
@@ -1185,7 +1186,7 @@ class ZonedBlockDevice {
 
   void SetFinishTreshold(uint64_t threshold) { finish_threshold_ = threshold; }
 
-  void PutOpenIOZoneToken();
+  void PutOpenIOZoneToken(WaitForOpenZoneClass open_class);
   void PutMigrationIOZoneToken(void);
   void PutActiveIOZoneToken();
   void MoveResources(bool to_migration);
