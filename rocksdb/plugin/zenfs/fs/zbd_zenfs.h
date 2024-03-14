@@ -597,7 +597,7 @@ class ZonedBlockDevice {
   std::condition_variable zone_resources_;
 
   std::condition_variable priority_zone_resources_[10];
-  int  cur_open_class_[10] = { 0,0,0,0,0,0,0,0,0,0};
+  int  cur_open_per_class_[10] = { 0,0,0,0,0,0,0,0,0,0};
   int saturation_point_ = 7;
   std::priority_queue<int, std::vector<int>, std::greater<int>> zone_resources_priority_queue_;
 
