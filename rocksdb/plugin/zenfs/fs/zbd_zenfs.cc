@@ -2179,6 +2179,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
     // // push priority queue to my level
     if(prioritized){
       open_io_zones_++;
+      cur_open_zone_per_class_[WAL]++;
       return;
     }
       // allocator_open_limit = max_nr_open_io_zones_-1;
@@ -2221,7 +2222,9 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
           int cur_open_classes=0;
           for(int oc = 0; oc<open_class; oc++){
             cur_open_classes+=cur_open_zone_per_class_[oc];
+            
             printf("[%d] %d\n",oc,cur_open_zone_per_class_[oc]);
+
             if(cur_open_classes>saturation_point_){
               printf("%d return false\n",cur_open_classes);
               return false;
