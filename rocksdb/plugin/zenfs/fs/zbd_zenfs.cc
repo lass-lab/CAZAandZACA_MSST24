@@ -2220,7 +2220,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
         priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit,open_class] {
           int cur_open_classes=0;
           for(int oc = 0; oc<open_class; oc++){
-            cur_open_classes+=cur_open_per_class_[open_class];
+            cur_open_classes+=cur_open_zone_per_class_[open_class];
             if(cur_open_classes>saturation_point_){
               return false;
             }
@@ -2228,7 +2228,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
           
           if (open_io_zones_.load() < allocator_open_limit) {
             open_io_zones_++;
-            cur_open_class_[open_class]++;
+            cur_open_zone_per_class_[open_class]++;
             return true;
           } else {
             return false;
@@ -2323,7 +2323,7 @@ void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
     std::unique_lock<std::mutex> lk(zone_resources_mtx_);
     if(open_io_zones_.load()!=0){
       open_io_zones_--;
-      cur_open_class_[open_class]--;
+      cur_open_zone_per_class_[open_class]--;
     }
   }
   if(AsyncZCEnabled()){
