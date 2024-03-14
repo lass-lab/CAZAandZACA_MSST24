@@ -2220,8 +2220,8 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
         priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit,open_class] {
           int cur_open_classes=0;
           for(int oc = 0; oc<open_class; oc++){
-            cur_open_classes+=cur_open_zone_per_class_[open_class];
-            printf("[%d] %d\n",oc,cur_open_zone_per_class_[open_class]);
+            cur_open_classes+=cur_open_zone_per_class_[oc];
+            printf("[%d] %d\n",oc,cur_open_zone_per_class_[oc]);
             if(cur_open_classes>saturation_point_){
               printf("%d return false\n",cur_open_classes);
               return false;
