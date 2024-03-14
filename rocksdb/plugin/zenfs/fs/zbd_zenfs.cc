@@ -2227,11 +2227,12 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
 
             if(cur_open_classes>saturation_point_){
               // printf("%d return false\n",cur_open_classes);
+                          printf("\n");
               return false;
             }
-            printf("\n")
+
           }
-          
+                      printf("\n");
           if (open_io_zones_.load() < allocator_open_limit) {
             open_io_zones_++;
             cur_open_zone_per_class_[open_class]++;
