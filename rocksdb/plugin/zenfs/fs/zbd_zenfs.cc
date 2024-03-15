@@ -2212,6 +2212,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
 
       allocator_open_limit = max_nr_open_io_zones_-1;
       std::unique_lock<std::mutex> lk(zone_resources_mtx_);
+      waiting_class_[open_class]++;
       if(open_class == L1){
         // priority_zone_resources_[L0].wait(lk, [this,allocator_open_limit] {
         //   if (open_io_zones_.load() < allocator_open_limit) {
@@ -2251,7 +2252,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
           }
         });
       // }
-
+    waiting_class_[open_class]--;
 
   }else{
     allocator_open_limit = max_nr_open_io_zones_;
@@ -2335,17 +2336,25 @@ void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
   if(open_class==L1){
     open_class=L0;
   }
+  int should_wake_up = -1;
   {
     std::unique_lock<std::mutex> lk(zone_resources_mtx_);
     if(open_io_zones_.load()!=0){
       open_io_zones_--;
       cur_open_zone_per_class_[open_class]--;
     }
+    for(size_t oc =0 ; oc< 10; oc++){
+      if(waiting_class_[oc]){
+        should_wake_up=oc;
+        break;
+      }
+    }
   }
   if(AsyncZCEnabled()){
-    for(size_t oc =0 ; oc< 10; oc++){
-      priority_zone_resources_[oc].notify_one();
-    }
+    // for(size_t oc =0 ; oc< 10; oc++){
+    //   priority_zone_resources_[oc].notify_one();
+    // }
+    priority_zone_resources_[should_wake_up].notify_one();
   }else{
     zone_resources_.notify_all();
   }
