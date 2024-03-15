@@ -2354,11 +2354,11 @@ void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
     // priority_zone_resources_[WAL].notify_one();
     // priority_zone_resources_[ZC].notify_one();
     for(int oc = 0 ; oc <=ZC ; oc++){
+      priority_zone_resources_[oc].notify_one();
       if(open_io_zones_.load()==max_nr_open_io_zones_){
         // break;
         return;
       }
-      priority_zone_resources_[oc].notify_one();
     }
     // if l0-l1 compaction blocked by l1-l2 compaction, scehdule l1-l2 aggresively.
     double l0score = PredictCompactionScore(0);
@@ -2369,10 +2369,10 @@ void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
 
     ////////////////////////
     for(int oc =L0 ; oc< 10; oc++){
+      priority_zone_resources_[oc].notify_one();
       if(open_io_zones_.load()==max_nr_open_io_zones_){
         return;
       }
-      priority_zone_resources_[oc].notify_one();
     }
     // priority_zone_resources_[should_wake_up].notify_one();
   }else{
