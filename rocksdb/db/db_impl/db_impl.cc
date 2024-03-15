@@ -3170,9 +3170,9 @@ double DBImpl::ReCalculateCompactionScore(int level){
   // immutable_db_options_;
   // mutable_db_options_;
   // GetColumnFamilySet()->GetDefault()->im
-  if(versions_==nullptr){
-    return 0.0;
-  }
+  // if(versions_==nullptr){
+  //   return 0.0;
+  // }
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   // versions_->GetColumnFamilySet()->GetDefault()->current().
   // versions_->GetColumnFamilySet().optio
