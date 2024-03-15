@@ -2361,7 +2361,7 @@ void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
       priority_zone_resources_[L2].notify_one();
     }
     for(int oc =L0 ; oc< 10; oc++){
-      if(open_io_zones_.load()==max_nr_open_io_zones_){
+      if(open_io_zones_.load()==max_nr_open_io_zones_ && oc>L2){
         break;
       }
       priority_zone_resources_[oc].notify_one();
