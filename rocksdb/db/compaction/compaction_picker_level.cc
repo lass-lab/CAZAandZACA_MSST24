@@ -193,6 +193,7 @@ void LevelCompactionBuilder::SetupInitialFiles() {
         // If L0->base_level compaction is pending, don't schedule further
         // compaction from base level. Otherwise L0->base_level compaction
         // may starve.
+        
         continue;
       }
       output_level_ =

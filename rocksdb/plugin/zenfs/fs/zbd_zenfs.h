@@ -945,6 +945,7 @@ class ZonedBlockDevice {
       }
       return db_ptr_->ReCalculateCompactionScore(0);
     }
+    
     if(level == 1){
       return (double)((double)( lsm_tree_[level].load()) / (double)(max_bytes_for_level_base_));
     }

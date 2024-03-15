@@ -2336,25 +2336,34 @@ void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
   if(open_class==L1){
     open_class=L0;
   }
-  int should_wake_up = -1;
+  // int should_wake_up = -1;
   {
     std::unique_lock<std::mutex> lk(zone_resources_mtx_);
     if(open_io_zones_.load()!=0){
       open_io_zones_--;
       cur_open_zone_per_class_[open_class]--;
     }
-    for(size_t oc =0 ; oc< 10; oc++){
-      if(waiting_class_[oc]){
-        should_wake_up=oc;
-        break;
-      }
-    }
+    // for(size_t oc =0 ; oc< 10; oc++){
+    //   if(waiting_class_[oc]){
+    //     should_wake_up=oc;
+    //     // break;
+    //   }
+    // }
   }
   if(AsyncZCEnabled()){
-    // for(size_t oc =0 ; oc< 10; oc++){
-    //   priority_zone_resources_[oc].notify_one();
-    // }
-    priority_zone_resources_[should_wake_up].notify_one();
+    // if l0-l1 compaction blocked by l1-l2 compaction, scehdule l1-l2 aggresively.
+    double l0score = PredictCompactionScore(0);
+    double l1score = PredictCompactionScore(1);
+    if(l0score>1.0 && l1score>1.0 && l1score>l0score ){
+      priority_zone_resources_[L2].notify_one();
+    }
+    for(int oc =0 ; oc< 10; oc++){
+      if(open_io_zones_.load()==max_nr_open_io_zones_){
+        break;
+      }
+      priority_zone_resources_[oc].notify_one();
+    }
+    // priority_zone_resources_[should_wake_up].notify_one();
   }else{
     zone_resources_.notify_all();
   }
