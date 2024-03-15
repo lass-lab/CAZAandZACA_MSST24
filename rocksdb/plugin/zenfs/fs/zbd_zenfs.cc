@@ -2212,7 +2212,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
 
       allocator_open_limit = max_nr_open_io_zones_-1;
       std::unique_lock<std::mutex> lk(zone_resources_mtx_);
-      waiting_class_[open_class]++;
+      // waiting_class_[open_class]++;
       if(open_class == L1){
         // priority_zone_resources_[L0].wait(lk, [this,allocator_open_limit] {
         //   if (open_io_zones_.load() < allocator_open_limit) {
@@ -2252,7 +2252,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
           }
         });
       // }
-    waiting_class_[open_class]--;
+    // waiting_class_[open_class]--;
 
   }else{
     allocator_open_limit = max_nr_open_io_zones_;
@@ -2351,16 +2351,19 @@ void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
     // }
   }
   if(AsyncZCEnabled()){
+    priority_zone_resources_[0].notify_one();
+    priority_zone_resources_[1].notify_one();
     // if l0-l1 compaction blocked by l1-l2 compaction, scehdule l1-l2 aggresively.
     double l0score = PredictCompactionScore(0);
     double l1score = PredictCompactionScore(1);
+
     if(l0score>1.0 && l1score>1.0 && l1score>l0score ){
       priority_zone_resources_[L2].notify_one();
     }
-    for(int oc =0 ; oc< 10; oc++){
-      if(open_io_zones_.load()==max_nr_open_io_zones_){
-        break;
-      }
+    for(int oc =L0 ; oc< 10; oc++){
+      // if(open_io_zones_.load()==max_nr_open_io_zones_){
+      //   break;
+      // }
       priority_zone_resources_[oc].notify_one();
     }
     // priority_zone_resources_[should_wake_up].notify_one();
