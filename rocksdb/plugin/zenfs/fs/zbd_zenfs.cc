@@ -2351,18 +2351,26 @@ void ZonedBlockDevice::PutOpenIOZoneToken(WaitForOpenZoneClass open_class) {
     // }
   }
   if(AsyncZCEnabled()){
-    priority_zone_resources_[0].notify_one();
-    priority_zone_resources_[1].notify_one();
+    // priority_zone_resources_[WAL].notify_one();
+    // priority_zone_resources_[ZC].notify_one();
+    for(int oc = 0 ; oc <=ZC ; oc++){
+      if(open_io_zones_.load()==max_nr_open_io_zones_){
+        // break;
+        return;
+      }
+      priority_zone_resources_[oc].notify_one();
+    }
     // if l0-l1 compaction blocked by l1-l2 compaction, scehdule l1-l2 aggresively.
     double l0score = PredictCompactionScore(0);
     double l1score = PredictCompactionScore(1);
-
     if(l0score>1.0 && l1score>1.0 && l1score>l0score ){
       priority_zone_resources_[L2].notify_one();
     }
+
+    ////////////////////////
     for(int oc =L0 ; oc< 10; oc++){
       if(open_io_zones_.load()==max_nr_open_io_zones_){
-        break;
+        return;
       }
       priority_zone_resources_[oc].notify_one();
     }
