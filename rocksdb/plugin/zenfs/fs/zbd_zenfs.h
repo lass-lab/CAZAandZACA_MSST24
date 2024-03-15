@@ -64,7 +64,7 @@ class ZoneFile;
 
 #define ZENFS_META_ZONES (3)
 
-#define log2_DEVICE_IO_CAPACITY (7) //64GB
+#define log2_DEVICE_IO_CAPACITY (8) //64GB
 
 #define ZC_COMPACTION_IO_PRIORITY IOPRIO_PRIO_VALUE(IOPRIO_CLASS_RT,4)
 
@@ -108,7 +108,7 @@ class ZoneFile;
 class ZoneExtent;
 
 enum WaitForOpenZoneClass{
-WAL=0,ZC=1,L0=2,L1=3,L2=4,L3=5,L4=6,L5=7
+WAL=0,ZC=1,L0=2,L1=3,L2=4,L3=5,L4=6,L5=7,L6=8,L7=9
 };
 
 class ZoneList {
@@ -598,7 +598,7 @@ class ZonedBlockDevice {
 
   std::condition_variable priority_zone_resources_[10];
   int  cur_open_zone_per_class_[10] = { 0,0,0,0,0,0,0,0,0,0};
-  int saturation_point_ = 7;
+  int saturation_point_ = 6;
   std::priority_queue<int, std::vector<int>, std::greater<int>> zone_resources_priority_queue_;
 
 

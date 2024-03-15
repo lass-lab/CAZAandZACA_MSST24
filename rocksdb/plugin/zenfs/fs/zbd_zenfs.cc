@@ -584,7 +584,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   uint64_t sp = 0;
 #endif
   // Reserve one zone for metadata and another one for extent migration
-  int reserved_zones = 4;
+  int reserved_zones = 2;
   // int migrate_zones = 1;
   // printf("ZonedBlockDevice::Open@@\n");
   if (!readonly && !exclusive)
@@ -2131,6 +2131,12 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
   // ZenFSStopWatch z1("WaitForOpenIOZoneToken",this);
       switch (open_class)
       {
+      case ZC:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken ZC");
+        break;
+      case WAL:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken WAL");
+        break;
       case L0: // full
         sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L0");
         break;
@@ -2146,12 +2152,11 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       case L4:
         sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L4");
         break;
-      case ZC:
-        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken ZC");
+      case L5:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L5");
         break;
-      case WAL:
-        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken WAL");
-        break;
+      case L6:
+        sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken L6");
       default:
         sprintf((char*)stopwatch_buf, "WaitForOpenIOZoneToken Unknown class ? %d",open_class);
         break;
@@ -2220,19 +2225,22 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       // else{
         priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit,open_class] {
           int cur_open_classes=0;
-          for(int oc = 0; oc<open_class; oc++){
-            cur_open_classes+=cur_open_zone_per_class_[oc];
-            
-            printf("[%d] %d\n",oc,cur_open_zone_per_class_[oc]);
+          if(oc>L2){
+            for(int oc = 0; oc<open_class; oc++){
+              cur_open_classes+=cur_open_zone_per_class_[oc];
+              
+              // printf("[%d] %d\n",oc,cur_open_zone_per_class_[oc]);
 
-            if(cur_open_classes>saturation_point_){
-              // printf("%d return false\n",cur_open_classes);
-                          printf("\n");
-              return false;
+              if(cur_open_classes>saturation_point_){
+                // printf("%d return false\n",cur_open_classes);
+                            // printf("\n");
+                return false;
+              }
+
             }
-
           }
-                      printf("\n");
+
+                      // printf("\n");
           if (open_io_zones_.load() < allocator_open_limit) {
             open_io_zones_++;
             cur_open_zone_per_class_[open_class]++;
@@ -4139,9 +4147,15 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
     case 5:
       open_class = L5;
       break;
+    case 6:
+      open_class = L6;
+      break;
+    case 7:
+      open_class = L7;
+      break;
     default:
       printf("fname ?? %s level ?? %d\n",fname.c_str(),level);
-      open_class = L5;
+      open_class = L7;
       break;
     }
   }
