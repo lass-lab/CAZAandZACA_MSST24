@@ -2226,7 +2226,7 @@ void ZonedBlockDevice::WaitForOpenIOZoneToken(bool prioritized,WaitForOpenZoneCl
       // else{
         priority_zone_resources_[open_class].wait(lk, [this,allocator_open_limit,open_class] {
           int cur_open_classes=0;
-          if(open_class>L2){
+          if(open_class>L2 &&AsyncZCEnabled()>1 ){
             for(int oc = 0; oc<open_class; oc++){
               cur_open_classes+=cur_open_zone_per_class_[oc];
               
