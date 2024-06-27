@@ -94,4 +94,4 @@ fuzz/crash-*
 
 cmake-build-*
 third-party/folly/
-.dbg
+*.dbg

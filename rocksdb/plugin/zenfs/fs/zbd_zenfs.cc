@@ -2821,6 +2821,8 @@ void ZonedBlockDevice::AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,
       cur_score=zidx.first;
       target_zone=io_zones[zidx.second];
       // cur_invalid_data=(target_zone->wp_-target_zone->start_) - target_zone->used_capacity_;
+
+
       if(cur_score==0){
         break;
       }
@@ -2833,7 +2835,9 @@ void ZonedBlockDevice::AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,
         continue;
       }
 
-      if(target_zone->capacity_<=min_capacity){
+      if(target_zone->capacity_<=min_capacity 
+      || target_zone->IsEmpty()
+      ){
         target_zone->Release();
         continue;
       }
@@ -3401,12 +3405,10 @@ l0:
 
 
   // Empty zone allocation should set lifetime for zone
-      if(GetActiveIOZoneTokenIfAvailable()){
-  s = AllocateEmptyZone(&allocated_zone);
-  }
-  // if(!s.ok()){
-  //   return s;
+  // if(GetActiveIOZoneTokenIfAvailable()){
+  // s = AllocateEmptyZone(&allocated_zone);
   // }
+
   if(allocated_zone!=nullptr){
     *zone_out=allocated_zone;
     allocated_zone->lifetime_ = file_lifetime;
@@ -3474,7 +3476,6 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
     target_zone=io_zones[zidx.second];
 
 
-    
     if(cur_score == 0){
       continue;
     }
@@ -3484,7 +3485,9 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
     if(!target_zone->Acquire()){
       continue;
     }
-    if(target_zone->capacity_<=min_capacity || target_zone->IsFull()){
+    if(target_zone->capacity_<=min_capacity || target_zone->IsFull()
+    ||target_zone->IsEmpty()
+    ){
       target_zone->Release();
       continue;
     }
@@ -3492,50 +3495,6 @@ IOStatus ZonedBlockDevice::AllocateMostL0FilesZone(std::vector<uint64_t>& zone_s
     break;
   }
 
-///////////////////
-  // for(size_t i =ZENFS_META_ZONES+ZENFS_SPARE_ZONES; i<zone_score.size(); i++){
-  //   if(is_input_in_zone[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES]){
-  //     continue;
-  //   }
-  //   cur_score=zone_score[i];
-  //   target_zone=io_zones[i-ZENFS_META_ZONES-ZENFS_SPARE_ZONES];
-
-
-
-  //   if(cur_score == 0){
-  //     continue;
-  //   }
-  //   if(cur_score<max_score){
-  //     continue;
-  //   }
-  //   if(!target_zone->Acquire()){
-  //     continue;
-  //   }
-  //   if(target_zone->capacity_<=min_capacity || target_zone->IsFull()){
-  //     target_zone->Release();
-  //     continue;
-  //   }
-
-  //   if(cur_score>max_score){
-  //     if(allocated_zone){
-  //       allocated_zone->Release();
-  //       if(!s.ok()){
-  //         printf("AllocateMostL0FilesZone :: fail 1\n");
-  //         return s;
-  //       }
-  //     }
-  //     allocated_zone=target_zone;
-  //     max_score=cur_score;
-  //     continue;
-  //   }
-
-  //   target_zone->Release();
-  //   if(!s.ok()){
-  //     printf("AllocateMostL0FilesZone :: fail 2\n");
-  //     return s;
-  //   }
-
-  // }
 
   *zone_out=allocated_zone;
   return IOStatus::OK();
@@ -3794,15 +3753,19 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
       uint64_t score=zscore.first;
       uint64_t zidx = zscore.second;
       // printf("zscore : %lu zidx %lu\n",score>>20,zidx);
+      
       if(score==0){
         break;
       }
       Zone* z = io_zones[zidx]; 
 
+      // if(z->IsEmpty()){
+      //   continue;
+      // }
       if(!z->Acquire()){
         continue;
       }
-      if(z->capacity_<=min_capacity || z->IsFull()){
+      if(z->capacity_<=min_capacity || z->IsFull() || z->IsEmpty()){
         z->Release();
         continue;
       }
@@ -3886,23 +3849,10 @@ int ZonedBlockDevice::Read(char *buf, uint64_t offset, int n, bool direct) {
   return ret;
 }
 
-  // void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone){
-  //   WaitForOpenIOZoneToken(true);
-  //   while(GetActiveIOZoneTokenIfAvailable()==false);
-  //   while((*out_zone)==nullptr){
-  //     AllocateEmptyZone(out_zone);
-  //   }
-  // }
+
 
 void ZonedBlockDevice::TakeSMRMigrateZone(Zone** out_zone,Env::WriteLifeTimeHint file_lifetime,uint64_t should_be_copied){
-//     // 
-//     WaitForOpenIOZoneToken(false);
-//     while(GetActiveIOZoneTokenIfAvailable()==false);
-//     while((*out_zone)==nullptr){
-//       AllocateEmptyZone(out_zone);
-//     }
-//     (void)(should_be_copied);
-//     (*out_zone)->lifetime_=file_lifetime;
+
 
   uint64_t try_n= 0 ;
   should_be_copied+=4096*256;
