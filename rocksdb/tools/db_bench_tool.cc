@@ -1692,7 +1692,7 @@ DEFINE_uint64(input_aware_scheme,0,"input_aware_scheme");
 
 DEFINE_uint64(async_zc_enabled,0,"async_zc_enabled");
 
-DEFINE_uint64(default_extent_size,268435456,"default_extent_size");
+DEFINE_uint64(default_extent_size,1048576,"default_extent_size");
 
 DEFINE_uint64(page_cache_size,0,"page_cache_size");
 

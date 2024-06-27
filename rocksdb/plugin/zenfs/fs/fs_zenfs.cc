@@ -258,8 +258,8 @@ ZenFS::ZenFS(ZonedBlockDevice* zbd, std::shared_ptr<FileSystem> aux_fs,
   //   io_uring* read_ring_to_be_reap_[1000];
   // io_context_t* write_ioctx_to_be_reap_[1000];
 
-  memset(read_ring_to_be_reap_,0,sizeof(read_ring_to_be_reap_));
-  memset(write_ioctx_to_be_reap_,0,sizeof(write_ioctx_to_be_reap_));
+  // memset(read_ring_to_be_reap_,0,sizeof(read_ring_to_be_reap_));
+  // memset(write_ioctx_to_be_reap_,0,sizeof(write_ioctx_to_be_reap_));
   // printf("Reset scheme :: %d\n",reset_scheme_);
 
   
