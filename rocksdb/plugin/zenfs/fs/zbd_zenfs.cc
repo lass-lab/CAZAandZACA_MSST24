@@ -1971,8 +1971,8 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
 IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   size_t total_invalid=0;
   // size_t reclaimed_invalid=0;
-  uint64_t zeu_size=128<<20;
-  // uint64_t zeu_size=1<<30;
+  // uint64_t zeu_size=128<<20;
+  uint64_t zeu_size=1<<30;
   (void)(zeu_size);
   IOStatus reset_status=IOStatus::OK();
   // if(cur_free_percent_>=99){
