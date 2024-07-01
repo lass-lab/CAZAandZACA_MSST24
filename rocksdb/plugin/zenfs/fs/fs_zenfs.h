@@ -638,10 +638,11 @@ ret:
   size_t ZoneCleaning(bool forced) override __attribute__((hot));
   int GetMountTime(void) override { return mount_time_.load(); }
   uint64_t NowMicros(void) override {
-    if(!run_gc_worker_){
-      return 0;
-    }
-    return db_ptr_ ? db_ptr_->NowMicros() : 0; 
+    return 0;
+    // if(!run_gc_worker_){
+    //   return 0;
+    // }
+    // return db_ptr_ ? db_ptr_->NowMicros() : 0; 
   }
   // uint64_t NowMicros
   bool IsZCRunning(void) { return run_gc_worker_; }

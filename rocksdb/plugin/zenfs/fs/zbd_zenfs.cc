@@ -213,7 +213,7 @@ IOStatus Zone::Reset() {
   uint64_t max_capacity;
 
   assert(!IsUsed());
-
+  is_finished_=false;
   // ZenFSStopWatch z1("zone-reset");
 
   IOStatus ios = zbd_be_->Reset(start_, &offline, &max_capacity);
@@ -412,6 +412,7 @@ IOStatus Zone::Finish() {
   if (ios != IOStatus::OK()) return ios;
   state_=FINISH;
   capacity_ = 0;
+  is_finished_=true;
   wp_ = start_ + zbd_->GetZoneSize();
 
   return IOStatus::OK();
@@ -600,8 +601,8 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
                                   std::to_string(ZENFS_MIN_ZONES) +
                                   " required)");
   }
-  max_nr_active_zones=0;
-  max_nr_open_zones=0;
+  // max_nr_active_zones=0;
+  // max_nr_open_zones=0;
   if (max_nr_active_zones == 0)
     max_nr_active_io_zones_ = zbd_be_->GetNrZones();
   else
@@ -670,7 +671,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   open_io_zones_ = 0;
   // uint64_t device_io_capacity= (1<<log2_DEVICE_IO_CAPACITY);
   // uint64_t device_io_capacity= 72;
-  uint64_t device_io_capacity= 100;
+  uint64_t device_io_capacity= 80;
   device_io_capacity=device_io_capacity<<30;
   for (; i < zone_rep->ZoneCount() && (io_zones.size()*meta_zones[0]->max_capacity_)<(device_io_capacity);  i++) {
     /* Only use sequential write required zones */
@@ -849,14 +850,16 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   size_t rc = reset_count_.load();
   uint64_t wwp=BYTES_TO_MB(wasted_wp_.load()); //MB
   uint64_t R_wp;
-  uint64_t zone_sz=BYTES_TO_MB(GetZoneSize()); // MB
+  uint64_t zone_sz=BYTES_TO_MB(io_zones[0]->max_capacity_); // MB
   size_t total_erased;
   long long read_lock_overhead_sum = 0;
   printf("zone size at ~ %lu\n",zone_sz);
-  if((rc+reset_count_zc_.load())==0){
+  // if((rc+reset_count_zc_.load())==0){
+  if((rc)==0){
     R_wp= 100;
   }else{
-    R_wp= (zone_sz*100-wwp*100/(rc+reset_count_zc_.load()))/zone_sz; // MB
+    // R_wp= (zone_sz*100-wwp*100/(rc+reset_count_zc_.load()))/zone_sz; // MB
+     R_wp= (zone_sz*100-((wwp*100)/rc) )/zone_sz; // MB
   }
 
   /*
@@ -874,8 +877,12 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("============================================================\n");
   printf("FAR STAT 1 :: WWP (MB) : %lu, R_wp : %lu\n",
          BYTES_TO_MB(wasted_wp_.load()), R_wp);
+  if(rc!=0){
   printf("FAR STAT 1-1 :: Runtime zone reset R_wp %lu\n",
        ( (zone_sz*100) - ((wwp*100)/rc))/zone_sz   );
+  }
+  // printf("FAR STAT 1-1 :: Runtime zone reset R_wp %lu\n",
+  //      ( (zone_sz*100) - ((wwp*100)/rc))/zone_sz   );
   printf("FAR STAT 2 :: ZC IO Blocking time : %d, Compaction Refused : %lu\n",
          zone_cleaning_io_block_, compaction_blocked_at_amount_.size());
   printf("FAR STAT 4 :: Zone Cleaning Trigger Time Lapse\n");
@@ -1758,7 +1765,7 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
         }else{
           erase_size_proactive_zc_.fetch_add(io_zones[i]->wp_-io_zones[i]->start_);
         }
-        wasted_wp_.fetch_add(io_zones[i]->capacity_);
+        // wasted_wp_.fetch_add(io_zones[i]->capacity_);
         reset_status = z->Reset();
         reset_count_zc_.fetch_add(1);
         if (!reset_status.ok()) {
@@ -1965,6 +1972,7 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   size_t total_invalid=0;
   // size_t reclaimed_invalid=0;
   uint64_t zeu_size=128<<20;
+  (void)(zeu_size);
   IOStatus reset_status=IOStatus::OK();
   // if(cur_free_percent_>=99){
   //   return reset_status;
@@ -2009,6 +2017,8 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
       if(total_invalid%zeu_size){
         wasted_wp_.fetch_add(zeu_size - (total_invalid%zeu_size));
       }
+      // wasted_wp_.fetch_add(z->max_capacity_-total_invalid);
+
       // printf("end erase written  : %lu rt %lu is_end_erase_unit_should_be_erased %d\n",end_erase_unit_written,reset_threshold_,is_end_erase_unit_should_be_erased);
       reset_status = z->Reset();
       // printf("Reset !! %lu\n",i);
@@ -3797,6 +3807,32 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
     return IOStatus::OK();
   }
 
+IOStatus ZonedBlockDevice::AllocateAllInvalidZone(Zone** zone_out){
+  IOStatus s;
+  Zone *allocated_zone = nullptr;
+
+  for (const auto z : io_zones) {
+    if (!z->Acquire()) {
+      continue;
+    }
+    if(z->IsEmpty()){
+        z->Release();
+        continue;
+    }
+    if(z->IsUsed()){
+      z->Release();
+      continue;
+    }
+    allocated_zone = z;
+    break;
+  }
+
+
+
+  *zone_out = allocated_zone;
+  return IOStatus::OK();
+}
+
 IOStatus ZonedBlockDevice::AllocateEmptyZone(Zone **zone_out) {
   IOStatus s;
   Zone *allocated_zone = nullptr;
@@ -3988,14 +4024,16 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
 
         if(GetActiveIOZoneTokenIfAvailable()){
           s=AllocateEmptyZone(out_zone); 
-        if (s.ok() && (*out_zone) != nullptr) {
-          Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-          (*out_zone)->lifetime_=file_lifetime;
-          break;
+          if (s.ok() && (*out_zone) != nullptr) {
+            Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+            (*out_zone)->lifetime_=file_lifetime;
+            break;
+          }else{
+            PutActiveIOZoneToken();
+          }
         }else{
-          PutActiveIOZoneToken();
-        }
-      } 
+          AllocateAllInvalidZone(out_zone);
+        } 
       
       }else{
 

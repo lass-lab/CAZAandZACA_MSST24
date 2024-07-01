@@ -49,6 +49,8 @@ class ZenFSSnapshotOptions;
 class Zone;
 class ZoneFile;
 
+
+#define ZEU_SIZE = 128<<20;
 // uint64_t ZONE_CLEANING_KICKING_POINT=20;
 
 // #define ZONE_CLEANING_KICKING_POINT (40)
@@ -295,6 +297,7 @@ class Zone {
   unsigned int log2_erase_unit_size_ = 0;
   uint64_t erase_unit_size_ = 0;
   uint64_t block_sz_;
+  bool is_finished_ = false;
 
   uint64_t reset_count_ = 0;
   // uint64_t invalid_wp_;
@@ -713,10 +716,11 @@ class ZonedBlockDevice {
           , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
           levels_size_(levels_size),avg_invalid_ratio_(avg_invalid_ratio),cur_ops_(cur_ops),
           cur_gc_written_(cur_gc_written), valid_data_size_(valid_data_size), invalid_data_size_(invalid_data_size),cumulative_io_blocking_(cumulative_io_blocking) {
-      if((rc+rc_zc)==0){
+      if((rc)==0){
         R_wp_= 100;
       }else{
-        R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
+        // R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
+        R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc))/BYTES_TO_MB(zone_sz);
       }
       (void)(same_zone_score_for_timelapse);
       (void)(inval_score_for_timelapse);
@@ -1498,7 +1502,7 @@ class ZonedBlockDevice {
                                 uint64_t min_capacity = 0);
   IOStatus GetAnyLargestRemainingZone(Zone** zone_out,bool force,uint64_t min_capacity = 0);
   IOStatus AllocateEmptyZone(Zone **zone_out);
-
+  IOStatus AllocateAllInvalidZone(Zone** zone_out);
   bool CompactionSimulator(uint64_t predicted_size,int level,Slice& smallest, Slice& largest);
   bool CalculateZoneScore(std::vector<uint64_t>& fno_list,std::vector<uint64_t>& zone_score);
   void AllocateZoneBySortedScore(std::vector<std::pair<uint64_t,uint64_t>>& sorted,Zone** allocated_zone,uint64_t min_capacity);

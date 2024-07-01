@@ -21,6 +21,9 @@
 #include "rocksdb/env.h"
 #include "rocksdb/io_status.h"
 
+#ifdef BLKPARTIALRESETZONE
+  #undef BLKPARTIALRESETZONE
+#endif
 // #define BLKPARTIALRESETZONE	_IOW(0x12, 137, struct blk_zone_range)
 // #define BLKDUMMYCMD	_IOW(0x12, 138, struct blk_zone_range)
 
