@@ -596,8 +596,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
     {    
         clock_gettime(CLOCK_MONOTONIC, &start_timespec);
         std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
-        // if(zbd_->GetZoneSize() < (1<<29) ){ // SMR
-        if(false ){ // SMR
+        if(zbd_->GetZoneSize() < (1<<29) ){ // SMR
+        // if(false ){ // SMR
 
           page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
         }else{
@@ -1495,7 +1495,7 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
   {
     std::lock_guard<std::mutex> file_lock(files_mtx_);
     std::shared_ptr<ZoneFile> zoneFile = GetFileNoLock(fname);
-
+    int sleeping_time=0;
     /* if reopen is true and the file exists, return it */
     if (reopen && zoneFile != nullptr) {
       zoneFile->AcquireWRLock();
@@ -1508,6 +1508,13 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
       s = DeleteFileNoLock(fname, file_opts.io_options, dbg);
       if (!s.ok()) return s;
       resetIOZones = true;
+    }
+    while(zbd_->GetZCRunning()){
+      sleeping_time++;
+      sleep(1);
+      if(sleeping_time>5){
+        break;
+      }
     }
 
     zoneFile =
