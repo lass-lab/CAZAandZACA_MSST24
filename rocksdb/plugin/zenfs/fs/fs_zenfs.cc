@@ -1512,7 +1512,7 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
     while(zbd_->GetZCRunning()){
       // sleeping_time++;
       // sleep(1);
-      if(mount_time_-start_time > 2){
+      if(mount_time_-start_time){
         break;
       }
       // if(sleeping_time>5){
