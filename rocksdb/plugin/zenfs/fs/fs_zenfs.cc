@@ -1495,7 +1495,7 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
   {
     std::lock_guard<std::mutex> file_lock(files_mtx_);
     std::shared_ptr<ZoneFile> zoneFile = GetFileNoLock(fname);
-    // int sleeping_time=0;
+    int start_time=mount_time_.load();
     /* if reopen is true and the file exists, return it */
     if (reopen && zoneFile != nullptr) {
       zoneFile->AcquireWRLock();
@@ -1509,9 +1509,12 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
       if (!s.ok()) return s;
       resetIOZones = true;
     }
-    if(zbd_->GetZCRunning()){
+    while(zbd_->GetZCRunning()){
       // sleeping_time++;
-      sleep(1);
+      // sleep(1);
+      if(mount_time_-start_time > 2){
+        break;
+      }
       // if(sleeping_time>5){
       //   break;
       // }
