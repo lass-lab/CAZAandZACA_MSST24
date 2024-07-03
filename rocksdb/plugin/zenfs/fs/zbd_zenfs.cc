@@ -1972,7 +1972,8 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   size_t total_invalid=0;
   // size_t reclaimed_invalid=0;
   // uint64_t zeu_size=128<<20;
-  uint64_t zeu_size=1<<30;
+  // uint64_t zeu_size=1<<30;
+  uint64_t zeu_size=64<<20;
   (void)(zeu_size);
   IOStatus reset_status=IOStatus::OK();
   // if(cur_free_percent_>=99){
@@ -4199,11 +4200,16 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
     if(allocated_zone!=nullptr){
       goto end;
     }
-    if(GetActiveIOZoneTokenIfAvailable()){
-      s = AllocateEmptyZone(&allocated_zone);
-      if(allocated_zone==nullptr){
-        PutActiveIOZoneToken();
-      }
+
+
+    
+
+    if(!GetActiveIOZoneTokenIfAvailable()){
+      FinishCheapestIOZone(false);
+    }
+    s = AllocateEmptyZone(&allocated_zone);
+    if(allocated_zone==nullptr){
+      PutActiveIOZoneToken();
     }
   }
 
