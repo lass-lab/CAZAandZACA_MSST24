@@ -1509,16 +1509,16 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
       if (!s.ok()) return s;
       resetIOZones = true;
     }
-    while(zbd_->GetZCRunning()){
-      // sleeping_time++;
-      // sleep(1);
-      if(mount_time_-start_time){
-        break;
-      }
-      // if(sleeping_time>5){
-      //   break;
-      // }
-    }
+    // while(zbd_->GetZCRunning()){
+    //   // sleeping_time++;
+    //   // sleep(1);
+    //   if(mount_time_-start_time){
+    //     break;
+    //   }
+    //   // if(sleeping_time>5){
+    //   //   break;
+    //   // }
+    // }
 
     zoneFile =
         std::make_shared<ZoneFile>(zbd_, next_file_id_++, &metadata_writer_,this);
