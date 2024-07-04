@@ -1495,7 +1495,7 @@ IOStatus ZenFS::OpenWritableFile(const std::string& filename,
   {
     std::lock_guard<std::mutex> file_lock(files_mtx_);
     std::shared_ptr<ZoneFile> zoneFile = GetFileNoLock(fname);
-    int start_time=mount_time_.load();
+    // int start_time=mount_time_.load();
     /* if reopen is true and the file exists, return it */
     if (reopen && zoneFile != nullptr) {
       zoneFile->AcquireWRLock();
