@@ -596,8 +596,8 @@ size_t ZenFS::ZoneCleaning(bool forced){
     {    
         clock_gettime(CLOCK_MONOTONIC, &start_timespec);
         std::sort(migrate_exts.begin(),migrate_exts.end(),ZoneExtentSnapshot::SortByLBA);
-        if(zbd_->GetZoneSize() < (1<<29) ){ // SMR
-        // if(false ){ // SMR
+        // if(zbd_->GetZoneSize() < (1<<29) ){ // SMR
+        if(false ){ // SMR
 
           page_cache_hit_size = SMRLargeIOMigrateExtents(migrate_exts,should_be_copied,everything_in_page_cache);
         }else{

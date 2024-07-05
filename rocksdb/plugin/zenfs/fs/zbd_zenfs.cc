@@ -1977,9 +1977,9 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   // cosmos small
 
   // femu large
-  uint64_t zeu_size=1<<30;
+  // uint64_t zeu_size=1<<30;
   // femu small
-  // uint64_t zeu_size=64<<20;
+  uint64_t zeu_size=64<<20;
   (void)(zeu_size);
   IOStatus reset_status=IOStatus::OK();
   // if(cur_free_percent_>=99){
