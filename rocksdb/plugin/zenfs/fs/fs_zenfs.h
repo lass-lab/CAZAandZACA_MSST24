@@ -470,6 +470,7 @@ class ZenFS : public FileSystemWrapper {
         run_gc_worker_= false;
       if (gc_worker_) {
         gc_worker_->join();
+        gc_worker_=nullptr;
       }
     }
     // printf("ZenFS::GetFreeSPace %lu %p\n",free_percent_,this);
