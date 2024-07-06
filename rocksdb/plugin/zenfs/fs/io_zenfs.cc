@@ -1433,13 +1433,13 @@ IOStatus ZoneFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint lifetime, int lev
   case 0:
     /* fall through */
   case 1:
-    lifetime_=Env::WLTH_SHORT;
-    break;
-  case 2:
     lifetime_=Env::WLTH_MEDIUM;
     break;
-  case 3:
+  case 2:
     lifetime_=Env::WLTH_LONG;
+    break;
+  case 3:
+    lifetime_=Env::WLTH_EXTREME;
     break;
   default:
     lifetime_=Env::WLTH_EXTREME;
