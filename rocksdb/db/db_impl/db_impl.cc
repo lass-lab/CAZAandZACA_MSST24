@@ -784,12 +784,14 @@ Status DBImpl::CloseImpl() { return CloseHelper(); }
 
 DBImpl::~DBImpl() {
   // TODO: remove this.
-  // if(){
+  
+  uint64_t zns_free_space=1998,zns_free_percent;
+  
   std::string stats;
   if(immutable_db_options_.is_db_bench==false){ // this is YCSB
   GetProperty("rocksdb.stats",&stats);
   // GetProperty()
-
+  fs_->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   printf("==============================~DBImpl=========================\n");
   printf("%s\n",stats.c_str());
   printf("==============================~DBImpl=========================\n");
@@ -801,7 +803,7 @@ DBImpl::~DBImpl() {
     // }
     
     // fs_->SetDBPtr(nullptr);
-    uint64_t zns_free_space,zns_free_percent;
+
     fs_->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   }
   init_logger_creation_s_.PermitUncheckedError();

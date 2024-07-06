@@ -464,6 +464,11 @@ class ZenFS : public FileSystemWrapper {
 // loop:
     // uint64_t fr;
     struct timespec start_timespec, end_timespec;
+    // bool should_end = false;
+    if(diskfree!=nullptr&&(*diskfree)==1998){
+        // should_end=true;
+        run_gc_worker_= false;
+    }
     // printf("ZenFS::GetFreeSPace %lu %p\n",free_percent_,this);
     if(diskfree!=nullptr){
       *diskfree = zbd_->GetFreeSpace();
@@ -491,6 +496,7 @@ class ZenFS : public FileSystemWrapper {
       // zbd_->AddCumulativeIOBlocking(elapsed_ns_timespec);
 
     }
+
 ret:
     *free_percent=free_percent_;
     
