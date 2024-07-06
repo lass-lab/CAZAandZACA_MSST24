@@ -468,6 +468,9 @@ class ZenFS : public FileSystemWrapper {
     if(diskfree!=nullptr&&(*diskfree)==1998){
         // should_end=true;
         run_gc_worker_= false;
+      if (gc_worker_) {
+        gc_worker_->join();
+      }
     }
     // printf("ZenFS::GetFreeSPace %lu %p\n",free_percent_,this);
     if(diskfree!=nullptr){
