@@ -1163,6 +1163,7 @@ class ZonedBlockDevice {
         invalid_data_size,valid_data_size, 
         (invalid_data_size*100)/(valid_data_size+invalid_data_size) ,page_cache_hit_size });
   }
+  void PrintAllStat();
   void AddTimeLapse(int T,uint64_t cur_ops);
   void AddCumulativeIOBlocking(long ns){
     // cumulative_io_blocking_.fetch_add(((ns/1000)/1000));

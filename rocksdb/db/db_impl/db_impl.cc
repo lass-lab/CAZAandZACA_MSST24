@@ -801,6 +801,8 @@ DBImpl::~DBImpl() {
     // }
     
     // fs_->SetDBPtr(nullptr);
+    uint64_t zns_free_space,zns_free_percent;
+    fs_->GetFreeSpace(std::string(),IOOptions(),&zns_free_space,&zns_free_percent,nullptr);
   }
   init_logger_creation_s_.PermitUncheckedError();
 
@@ -3066,6 +3068,9 @@ uint64_t DBImpl::NowMicros(void){
 }
 
 void DBImpl::SameLevelFileList(int level, std::vector<uint64_t>& fno_list, bool exclude_being_compacted){
+  if(!versions_){
+    return;
+  }
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   const std::vector<int>& files_by_compactio_pri=vstorage->FilesByCompactionPri(level);
 
@@ -3171,9 +3176,9 @@ double DBImpl::ReCalculateCompactionScore(int level){
   // immutable_db_options_;
   // mutable_db_options_;
   // GetColumnFamilySet()->GetDefault()->im
-  // if(versions_==nullptr){
-  //   return 0.0;
-  // }
+  if(versions_==nullptr){
+    return 0.0;
+  }
   auto vstorage=versions_->GetColumnFamilySet()->GetDefault()->current()->storage_info();
   // versions_->GetColumnFamilySet()->GetDefault()->current().
   // versions_->GetColumnFamilySet().optio

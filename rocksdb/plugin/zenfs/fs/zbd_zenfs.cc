@@ -847,7 +847,7 @@ void ZonedBlockDevice::LogGarbageInfo() {
   Info(logger_, "%s", ss.str().data());
 }
 
-ZonedBlockDevice::~ZonedBlockDevice() {
+void ZonedBlockDevice::PrintAllStat(){
   size_t rc = reset_count_.load();
   uint64_t wwp=BYTES_TO_MB(wasted_wp_.load()); //MB
   uint64_t R_wp;
@@ -1129,68 +1129,299 @@ ZonedBlockDevice::~ZonedBlockDevice() {
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
   printf("============================================================\n\n");
+
+}
+
+ZonedBlockDevice::~ZonedBlockDevice() {
+  // size_t rc = reset_count_.load();
+  // uint64_t wwp=BYTES_TO_MB(wasted_wp_.load()); //MB
+  // uint64_t R_wp;
+  // uint64_t zone_sz=BYTES_TO_MB(io_zones[0]->max_capacity_); // MB
+  // size_t total_erased;
+  // long long read_lock_overhead_sum = 0;
+  // printf("zone size at ~ %lu\n",zone_sz);
+  // // if((rc+reset_count_zc_.load())==0){
+  // if((rc)==0){
+  //   R_wp= 100;
+  // }else{
+  //   // R_wp= (zone_sz*100-wwp*100/(rc+reset_count_zc_.load()))/zone_sz; // MB
+  //    R_wp= (zone_sz*100-((wwp*100)/rc) )/zone_sz; // MB
+  // }
+
+  /*
+  ( (1024*100) - ((wwp*100)/rc) )/1024   
+
+
+( (1024*100) - ((1536*100)/3))/1024   
+
+
+
+( (1024*100) - ((2048*100)/4) )/1024   
+
+  
+  */
+  // printf("============================================================\n");
+  // printf("FAR STAT 1 :: WWP (MB) : %lu, R_wp : %lu\n",
+  //        BYTES_TO_MB(wasted_wp_.load()), R_wp);
+  // if(rc!=0){
+  // printf("FAR STAT 1-1 :: Runtime zone reset R_wp %lu\n",
+  //      ( (zone_sz*100) - ((wwp*100)/rc))/zone_sz   );
+  // }
+  // // printf("FAR STAT 1-1 :: Runtime zone reset R_wp %lu\n",
+  // //      ( (zone_sz*100) - ((wwp*100)/rc))/zone_sz   );
+  // printf("FAR STAT 2 :: ZC IO Blocking time : %d, Compaction Refused : %lu\n",
+  //        zone_cleaning_io_block_, compaction_blocked_at_amount_.size());
+  // printf("FAR STAT 4 :: Zone Cleaning Trigger Time Lapse\n");
+  // printf("============================================================\n");
+  // uint64_t total_copied = 0;
+  // size_t rc_zc = 0;
+  // int io_blocking_sum=0;
+  // long long io_blocking_ms_sum= 0;
+  // uint64_t page_cache_hit_size_sum = 0;
+  // for(size_t i=0;i<zc_timelapse_.size();i++){
+  //   // bool forced=zc_timelapse_[i].forced;
+  //   // size_t zc_z=zc_timelapse_[i].zc_z;
+  //   int s= zc_timelapse_[i].s;
+  //   int e= zc_timelapse_[i].e;
+  //   long long us=zc_timelapse_[i].us;
+  //   io_blocking_sum+=e-s+1;
+  //   io_blocking_ms_sum+=us/1000;
+  //   uint64_t invalid_data_size = zc_timelapse_[i].invalid_data_size;
+  //   uint64_t valid_data_size = zc_timelapse_[i].valid_data_size;
+  //   uint64_t invalid_ratio = zc_timelapse_[i].invalid_ratio;
+  //   uint64_t page_cache_hit_size = zc_timelapse_[i].page_cache_hit_size;
+  //   page_cache_hit_size_sum+=page_cache_hit_size;
+  //   printf("[%lu]\t%d ~ %d\t %llu ms,\t %ld (MB)\t%lu\t%lu\t%lu\t%lu\n",i+1,s,e,us/1000,(zc_timelapse_[i].copied>>20),
+  //       invalid_data_size,valid_data_size,invalid_ratio,page_cache_hit_size );
+  //   total_copied+=zc_timelapse_[i].copied;
+  //   rc_zc ++;
+  // }
+  
+  // printf("Total ZC Copied (MB) :: %lu(%lu), Recaimed by ZC :: %lu \n",
+  //        BYTES_TO_MB(total_copied),(gc_bytes_written_.load())>>20, rc_zc);
+  // printf("============================================================\n\n");
+  // // printf("FAR STAT  :: Reset Count (R+ZC) : %ld+%ld=%ld\n", rc - rc_zc, rc_zc,
+  //       //  rc);
+  // // printf(
+  // //     "FAR STAT 5 :: Total Run-time Reset Latency : %0.2lf, avg Zone Reset "
+  // //     "Latency : %0.2lf\n",
+  // //     (double)runtime_reset_latency_.load() / CLOCKS_PER_SEC,
+  // //     (double)runtime_reset_reset_latency_.load() /
+  // //         (CLOCKS_PER_SEC * (rc - rc_zc)));
+
+  // // printf("============================================================\n\n");
+  // // printf("FAR STAT 6-1 :: I/O Blocked Time Lapse\n");
+  // // printf("============================================================\n");
+
+  // printf("FAR STAT 6-2 :: Compaction Blocked TimeLapse\n");
+  // printf("============================================================\n");
+  // for(size_t i =0 ;i <compaction_blocked_at_amount_.size();i++){
+  //   printf(" %d | ",compaction_blocked_at_amount_[i]);
+  // }
+  // printf("\n============================================================\n");
+  // // size_t j = 0;
+  // for (auto it=compaction_blocked_at_.begin(); it != compaction_blocked_at_.end(); ++it){     
+  //   std::cout <<*it<<" | ";
+  // }
+  // printf("\n============================================================\n");
+  // for(size_t i=0;i<io_block_timelapse_.size() ;i++){
+  //   int s= io_block_timelapse_[i].s;
+  //   int e= io_block_timelapse_[i].e;
+  //   pid_t tid=io_block_timelapse_[i].tid;
+  //   printf("[%lu] :: (%d) %d ~ %d\n",i+1,tid%100,s,e );
+  // }
+  // printf("============================================================\n\n");
+  // printf("FAR STAT :: Time Lapse\n");
+  // //   T       fr      rc   rc_zc p_rc  Rwp     Twp   erase_sz   p_er_sz
+  // // printf(
+  // //     "Sec    | Free |  RC |  RCZ |  RCP  | R_wp    |   Twp    |   erase_sz     |    erase_sz_zc |   p_er_sz      |\n");
+  // printf(
+  //   "Sec \tFree \tRC \tRCZ \tRCP \tR_wp \tTwp \terase_sz \terase_sz_zc \tp_er_sz\n");
+  
+  
   // for(size_t i=0;i<far_stats_.size();i++){
-  //   far_stats_[i].PrintInvalidZoneDist();
+  //   far_stats_[i].PrintStat();
   //   // write_stall_timelapse_[i].PrintStat();
   // }
-  // std::vector<uint64_t> sst_file_size_last_;
-  // std::mutex sst_file_size_last_lock_;
-  // std::vector<uint64_t> sst_file_size_else_;
-  // std::mutex sst_file_size_else_lock_;
-  // for()
+
+  // printf("============================================================\n");
+  // printf("FAR STAT :: Partial Zone Reset %u\n",partial_reset_scheme_);
+  // printf("called n : %lu erased unit n : %lu\n",partial_reset_called_n.load(),partial_reset_total_erased_n.load());
+  // printf("Partial Zone Reset Decoupling : total : %lu, to valid %lu\n",
+  //                                                   partial_erase_size_.load()>>20,
+  //                                                   partial_to_valid_erase_size_.load()>>20);
+  // if(reset_resigned_.load()!=0){
+  //   printf("RUNTIME ZONE RESET CANDIDATE RATIO : %lu\n",100 - (reset_resigned_.load()*100)/reset_tried_.load());
+  //   if(runtime_zone_reset_called_n_.load()!=0){
+  //   printf("RUNTIME ZONE RESET RECLAIMED RATIO : %lu, called(%lu)\n",(ratio_sum2_.load()/runtime_zone_reset_called_n_.load()),runtime_zone_reset_called_n_.load());
+  //   }
+  //   printf("RUNTIME ZONE RESET RESIGNED INVALID RATIO : %lu\n",100-(ratio_sum_.load()/reset_resigned_.load()));
+
+  // }
+  // // if(far_stats_.size()){
+  // //   printf("CANDIDATE RATIO  : %lu(%lu)\n",(candidate_ratio_sum_/far_stats_.size()),candidate_ratio_sum_);
+  // //   printf("CANDIDATE VALID RATIO : %lu(%lu)\n",candidate_valid_ratio_sum_/far_stats_.size(),candidate_valid_ratio_sum_);
+  // //   printf("NO CANDIDATE VALID RATIO : %lu(%lu)\n",no_candidate_valid_ratio_sum_/far_stats_.size(),no_candidate_valid_ratio_sum_);
+  // // }
+  // // if(before_zc_T_+1){
+  // //   printf("BEFORE ZC T : %lu\n",before_zc_T_);
+  // //   printf("BEFORE ZC CANDIDATE RATIO  : %lu(%lu)\n",(candidate_ratio_sum_before_zc_/(before_zc_T_+1)),candidate_ratio_sum_before_zc_);
+  // //   printf("BEFORE ZC CANDIDATE VALID RATIO : %lu(%lu)\n",candidate_valid_ratio_sum_before_zc_/(before_zc_T_+1),candidate_valid_ratio_sum_before_zc_);
+  // //   printf("BEFORE ZC NO CANDIDATE VALID RATIO : %lu(%lu)\n",no_candidate_valid_ratio_sum_before_zc_/(before_zc_T_+1),no_candidate_valid_ratio_sum_before_zc_);
+  // // }
+  // for(const auto z : io_zones){
+  //   read_lock_overhead_sum += z->read_lock_overhead_.load();
+  // }
+  // total_erased=erase_size_zc_.load()+erase_size_.load()+partial_erase_size_.load()+erase_size_proactive_zc_.load();
+  // if(total_erased){
+  //   printf("copied/erased ratio : %lu/%lu=%lu\n",gc_bytes_written_.load(),(total_erased),(gc_bytes_written_.load()*100)/total_erased);
+  // }else{
+  //   printf("copied/erased ratio : (NULL)\n");
+  // }
+  // if(gc_bytes_written_.load()){
+  //     printf("ZC cache hit ratio  %lu/%lu = %lu\n"
+  //     ,page_cache_hit_size_sum
+  //     ,(gc_bytes_written_.load()>>20)+page_cache_hit_size_sum
+  //     ,(page_cache_hit_size_sum*100)/((gc_bytes_written_.load()>>20)+page_cache_hit_size_sum ));
+  // }
+  // //   std::atomic<uint64_t> rocksdb_page_cache_fault_size_{0};
+  // // std::atomic<uint64_t> rocksdb_page_cache_hit_size_{0};
+  // if(rocksdb_page_cache_hit_size_.load()){
+  //     printf("RocksDB cache hit ratio  %lu/%lu = %lu\n"
+  //     ,rocksdb_page_cache_hit_size_.load()
+  //     ,(rocksdb_page_cache_fault_size_.load()+rocksdb_page_cache_hit_size_.load() )
+  //     ,(rocksdb_page_cache_hit_size_.load()*100)/((rocksdb_page_cache_hit_size_.load())+rocksdb_page_cache_fault_size_.load() ));
+  // }
+  // if(GetUserBytesWritten()){
+  //   printf("copy/written ratio : %lu/%lu=%lu\n",gc_bytes_written_.load(),GetUserBytesWritten(),(gc_bytes_written_.load()*100)/GetUserBytesWritten());
+  // }
+  // printf("ZC read amp %lu\n",zc_read_amp_);
+  // printf("TOTAL I/O BLOKCING TIME %d\n",io_blocking_sum);
+  // printf("TOTAL I/O BLOCKING TIME(ms) %llu\n",io_blocking_ms_sum);
+  // if(io_blocking_ms_sum/1000){
+  //   printf("COPY(MB/s) %llu\n",(gc_bytes_written_.load()>>20)/(io_blocking_ms_sum/1000));
+  // }
+
+  // printf("TOTAL ERASED AT RZR DEVICE VIEW : %lu(MB)\n",(wasted_wp_.load()+erase_size_.load())>>20 );
+  // printf("WWP %lu(mb)",wasted_wp_.load()>>20);
+  // printf("READ LOCK OVERHEAD %llu\n",read_lock_overhead_sum);
+  // // printf("runtime reset latency : %llu(ms)\n",runtime_reset_latency_.load()/1000);
+  // // if(compaction_triggered_.load()){
+  // // printf("avg. compaction input size : %lu MB (= %lu/%lu)\n",(total_compaction_input_size_.load()>>20)/compaction_triggered_.load()
+  // //                                                         ,total_compaction_input_size_.load()>>20,compaction_triggered_.load());
+  // // }else printf("no compaction triggered\n");
+
+  // uint64_t sum_in_is = 0;
+  // uint64_t sum_in_os = 0;
+  // uint64_t sum_out_s = 0;
+  // uint64_t sum_triggered = 0;
+  // for(int l = 0;l<10;l++){
+  //   CompactionStats* cstat=&compaction_stats_[l];
+  //   uint64_t in_is=cstat->input_size_input_level_.load();
+  //   uint64_t in_os=cstat->input_size_output_level_.load();
+  //   uint64_t out_s=cstat->output_size_.load();
+  //   uint64_t triggered=cstat->compaction_triggered_.load();
+
+
+  //   sum_in_is+=in_is;
+  //   sum_in_os+=in_os;
+  //   sum_out_s+=out_s;
+  //   sum_triggered+=triggered;
+  //   printf("LEVEL %d :: ",l);
+  //   if(triggered==0 || out_s == 0){
+  //     printf("\n");
+  //     continue;
+  //   }
+
+  //   printf("%lu,%lu -> %lu(%lu%%) // %lu triggered\n",(
+  //           (in_is>>20)/triggered),((in_os>>20)/triggered),
+  //           ((out_s>>20)/triggered),((in_is+in_os)*100/out_s) ,triggered);
+  // }
+  // if(sum_triggered!=0 && sum_out_s!=0 ){
+  //   printf("AVG.   :: %lu,%lu -> %lu(%lu%%) // %lu triggered\n",(
+  //           (sum_in_is>>20)/sum_triggered),((sum_in_os>>20)/sum_triggered),
+  //           ((sum_out_s>>20)/sum_triggered),((sum_in_is+sum_in_os)*100/sum_out_s) ,sum_triggered);
+  // }
+    
+  //   // uint64_t sum_score = 0;
+  //   // uint64_t sum_n = 0;
+  //   // for(int level = 0; level < 5; level++){
+  //   //   if(compaction_triggered_[level].load()){
+  //   //     printf("[%d] Same zone score : %lu/%lu = %lu\n",level,
+  //   //       same_zone_score_atomic_[level].load(),compaction_triggered_[level].load(),
+  //   //       same_zone_score_atomic_[level].load()/compaction_triggered_[level].load());
+  //   //     sum_score+=same_zone_score_atomic_[level].load();
+  //   //     sum_n+=compaction_triggered_[level].load();
+  //   //   }
+  //   // }
+  //   // printf("avg Same zone score : %lu/%lu = %lu\n",sum_score,sum_n,sum_score/sum_n);
+  //   // sum_score=0;
+  //   // sum_n =0;
+  //   // for(int level = 0; level < 5; level++){
+  //   //   if(compaction_triggered_[level].load()){
+  //   //     printf("[%d] invalidation score : %lu/%lu = %lu\n",level,
+  //   //     invalidate_score_atomic_[level].load(),compaction_triggered_[level].load(),
+  //   //     invalidate_score_atomic_[level].load()/compaction_triggered_[level].load());
+  //   //     sum_score+=same_zone_score_atomic_[level].load();
+  //   //     sum_n+=compaction_triggered_[level].load();
+  //   //   }
+  //   // }
+  //   // printf("avg inval zone score : %lu/%lu = %lu\n",sum_score,sum_n,sum_score/sum_n);
+  //   {
+  //   std::lock_guard<std::mutex> lg(same_zone_score_mutex_);
+
+  //   double avg_same_zone_score,avg_inval_score;
+  //   double sum_sum_score=0.0, sum_sum_inval_score=0.0;
+  //   size_t total_n = 0;
+  //   for(int i = 0; i<5; i++){
+
+  //     double sum_score=0.0;
+  //     double sum_inval_score=0.0;
+  //     size_t score_n=same_zone_score_[i].size();
+  //     if(score_n>0){
+  //       for(size_t j = 0; j < same_zone_score_[i].size(); j++){
+  //         sum_score+=same_zone_score_[i][j];
+  //       }
+  //       avg_same_zone_score=sum_score/score_n;
+
+  //       for(size_t j =0;j<invalidate_score_[i].size();j++){
+  //         sum_inval_score+=invalidate_score_[i][j];
+  //       }
+  //       avg_inval_score=sum_inval_score/score_n;
+  //       printf("[%d] samezone score : %lf\tinvalidate score %lf\n",i,avg_same_zone_score,avg_inval_score);
+  //     }else{
+  //       printf("[%d] samezone score : (none)\tinvalidate score (none)\n",i);
+  //     }
+      
+      
+  //     sum_sum_score+=sum_score;
+  //     sum_sum_inval_score+=sum_inval_score;
+  //     total_n+=score_n;
+      
+  //   }
+  //   if(total_n){
+  //     printf("total samezone score : %lf\tinvalidate score %lf\n",sum_sum_score/total_n,sum_sum_inval_score/total_n);
+  //   }
+  // }
+  //   // read_latency_sum_.fetch_add(microseconds);
+  // // read_n_.fetch_add(1);
+  // // if(read_n_.load()){
+  // //   printf("read latency %lu / %lu = %lu us\n",
+  // //     read_latency_sum_.load(),read_n_.load(),read_latency_sum_.load()/read_n_.load());
+  // // }
+  // printf("Cumulative I/O Blocking %lu\n",cumulative_io_blocking_);
+  // PrintCumulativeBreakDown();
+  // printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
-  // printf("============last sst files================\n");
-  // {
-  //   std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
-  //   for(auto size : sst_file_size_last_){
-  //     if(size.first==1){
-  //       continue;
-  //     }
-  //     printf("%lu\t",size.second>>20);
-  //   }
-  // }
-  // printf("\n");
-  // printf("============else sst files================\n");
-  // {
-  //   std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
-  //   for(auto size : sst_file_size_else_){
-  //     if(size.first==1){
-  //       continue;
-  //     }
-  //     printf("%lu\t",size.second>>20);
-  //   }
-  // }
-  // printf("==========================================\n");
+  // printf("============================================================\n\n");
 
-  // printf("============last sst files(l1)================\n");
-  // {
-  //   std::lock_guard<std::mutex> lg(sst_file_size_last_lock_);
-  //   for(auto size : sst_file_size_last_){
-  //     if(size.first!=1){
-  //       continue;
-  //     }
-  //     printf("%lu\t",size.second>>20);
-  //   }
-  // }
-  // printf("\n");
-  // printf("============else sst files(l1)================\n");
-  // {
-  //   std::lock_guard<std::mutex> lg(sst_file_size_else_lock_);
-  //   for(auto size : sst_file_size_else_){
-  //     if(size.first!=1){
-  //       continue;
-  //     }
-  //     printf("%lu\t",size.second>>20);
-  //   }
-  // }
-  // printf("==========================================\n");
-  // db_ptr_-
-  // if(db_ptr_){
-  //   std::string stats;
-  //   db_ptr_->GetProperty("rocksdb.stats",&stats);
-  //   printf("%s\n",stats.c_str());
-  // }
 
+
+
+
+
+
+  
   for (const auto z : meta_zones) {
     delete z;
   }
@@ -1974,11 +2205,11 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   // size_t reclaimed_invalid=0;
   
   // cosmos large
-  // uint64_t zeu_size=128<<20;
+  uint64_t zeu_size=128<<20;
   // cosmos small
 
   // femu large
-  uint64_t zeu_size=1<<30;
+  // uint64_t zeu_size=1<<30;
   // femu small
   // uint64_t zeu_size=64<<20;
   (void)(zeu_size);
@@ -3716,7 +3947,7 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
 }
 
   void ZonedBlockDevice::AdjacentFileList(Slice& smallest ,Slice& largest, int level, std::vector<uint64_t>& fno_list){
-    assert(db_ptr_!=nullptr);
+    // assert(db_ptr_!=nullptr);
     fno_list.clear();
     if(db_ptr_==nullptr){
       return;
