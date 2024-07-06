@@ -311,7 +311,7 @@ ZenFS::~ZenFS() {
   meta_log_.reset(nullptr);
 
   ClearFiles();
-  // zbd_->PrintAllStat();
+  zbd_->PrintAllStat();
   delete zbd_;
 }
 
