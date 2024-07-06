@@ -1998,8 +1998,10 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
         }else{
           erase_size_proactive_zc_.fetch_add(io_zones[i]->wp_-io_zones[i]->start_);
         }
-        // wasted_wp_.fetch_add(io_zones[i]->capacity_);
-        reset_status = z->Reset();
+        {// wasted_wp_.fetch_add(io_zones[i]->capacity_);
+          ZenFSStopWatch z2("zone-reset spent",this);
+          reset_status = z->Reset();
+        }
         reset_count_zc_.fetch_add(1);
         if (!reset_status.ok()) {
           z->Release();
