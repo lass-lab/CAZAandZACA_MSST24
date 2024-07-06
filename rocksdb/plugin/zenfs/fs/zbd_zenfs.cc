@@ -1133,7 +1133,7 @@ void ZonedBlockDevice::PrintAllStat(){
 }
 
 ZonedBlockDevice::~ZonedBlockDevice() {
-  PrintAllStat();
+  // PrintAllStat();
   // size_t rc = reset_count_.load();
   // uint64_t wwp=BYTES_TO_MB(wasted_wp_.load()); //MB
   // uint64_t R_wp;
