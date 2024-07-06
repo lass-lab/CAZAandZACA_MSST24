@@ -799,7 +799,8 @@ DBImpl::~DBImpl() {
     // }else{
     //   printf("immutable_db_options_.stats nullptr\n");
     // }
-  fs_->SetDBPtr(nullptr);
+    
+    fs_->SetDBPtr(nullptr);
   }
   init_logger_creation_s_.PermitUncheckedError();
 
