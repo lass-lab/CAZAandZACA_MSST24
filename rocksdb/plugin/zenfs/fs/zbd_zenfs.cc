@@ -2205,11 +2205,11 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   // size_t reclaimed_invalid=0;
   
   // cosmos large
-  uint64_t zeu_size=128<<20;
+  // uint64_t zeu_size=128<<20;
   // cosmos small
 
   // femu large
-  // uint64_t zeu_size=1<<30;
+  uint64_t zeu_size=1<<30;
   // femu small
   // uint64_t zeu_size=64<<20;
   (void)(zeu_size);
