@@ -2994,7 +2994,7 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
                                                         Zone **zone_out,uint64_t min_capacity){
   
   /////////////////////////////// CAZA
-  if(allocation_scheme_==LIZA){
+  if(allocation_scheme_==LIZA || db_ptr_==nullptr){
     return IOStatus::OK();
   }
 
@@ -3533,7 +3533,11 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
                                     uint64_t min_capacity){
   Zone* allocated_zone = nullptr;
   IOStatus s;
-  const Comparator* icmp = db_ptr_->GetDefaultICMP();
+
+  const Comparator* icmp = db_ptr_ ? db_ptr_->GetDefaultICMP() : nullptr;
+  if(!icmp){
+    return IOStatus::OK();
+  }
   ZoneFile* zFile;
   size_t idx;
   size_t l_idx;
@@ -3750,8 +3754,10 @@ IOStatus ZonedBlockDevice::AllocateSameLevelFilesZone(Slice& smallest,Slice& lar
   void ZonedBlockDevice::SameLevelFileList(int level, std::vector<uint64_t>& fno_list,bool exclude_being_compacted){
     assert(db_ptr_!=nullptr);
     fno_list.clear();
-    // printf("level %d",level);
-    db_ptr_->SameLevelFileList(level,fno_list,exclude_being_compacted);
+    // printf("level %d",level);`
+    if(db_ptr_){
+      db_ptr_->SameLevelFileList(level,fno_list,exclude_being_compacted);
+    }
   }
 
   IOStatus ZonedBlockDevice::GetNearestZoneFromZoneFile(ZoneFile* zFile,std::vector<bool>& is_input_in_zone,
