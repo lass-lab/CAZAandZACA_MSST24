@@ -409,11 +409,12 @@ IOStatus Zone::Finish() {
   // assert(IsBusy());
 
   IOStatus ios = zbd_be_->Finish(start_);
+  printf("finish %lu\n",zidx_);
   if (ios != IOStatus::OK()) return ios;
   state_=FINISH;
   capacity_ = 0;
   is_finished_=true;
-  wp_ = start_ + zbd_->GetZoneSize();
+  // wp_ = start_ + zbd_->GetZoneSize();s
 
   return IOStatus::OK();
 }
