@@ -2268,7 +2268,10 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
       // wasted_wp_.fetch_add(z->max_capacity_-total_invalid);
 
       // printf("end erase written  : %lu rt %lu is_end_erase_unit_should_be_erased %d\n",end_erase_unit_written,reset_threshold_,is_end_erase_unit_should_be_erased);
-      reset_status = z->Reset();
+      {
+        ZenFSStopWatch z4("zone-reset spent",this);
+        reset_status = z->Reset();
+      }
       // printf("Reset !! %lu\n",i);
 
 
