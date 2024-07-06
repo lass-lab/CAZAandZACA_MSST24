@@ -2027,8 +2027,8 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
         }
       }
       erase_size_.fetch_add(total_invalid);
-      printf("zeu size %lu wwp mb %lu\n",
-      zeu_size, total_invalid%zeu_size ? (zeu_size - (total_invalid%zeu_size))>>20 : 0 );
+      // printf("zeu size %lu wwp mb %lu\n",
+      // zeu_size, total_invalid%zeu_size ? (zeu_size - (total_invalid%zeu_size))>>20 : 0 );
       if(total_invalid%zeu_size){
         
         wasted_wp_.fetch_add(zeu_size - (total_invalid%zeu_size));
@@ -2720,11 +2720,11 @@ double ZonedBlockDevice::GetMaxSameZoneScore(std::vector<uint64_t>& compaction_i
 
 double ZonedBlockDevice::GetMaxInvalidateCompactionScore(std::vector<uint64_t>& file_candidates,uint64_t * candidate_size,bool stats){
   // std::vector<std::pair<bool,uint64_t>> zone_score;
-  printf("io zones n %lu\n",io_zones.size());
+  // printf("io zones n %lu\n",io_zones.size());
   std::vector<bool> is_sst_in_zone(io_zones.size(),false);
   std::vector<uint64_t> sst_in_zone(io_zones.size(),0);
   std::vector<uint64_t> zone_score(io_zones.size(),0);
-  printf("io zones n %lu 22222222\n",io_zones.size());
+  // printf("io zones n %lu 22222222\n",io_zones.size());
   uint64_t total_size = 0;
   uint64_t zidx;
   uint64_t zone_size= io_zones[0]->max_capacity_;
@@ -4046,9 +4046,10 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
             break;
           }else{
             PutActiveIOZoneToken();
+            // AllocateAllInvalidZone(out_zone);
           }
         }else{
-          AllocateAllInvalidZone(out_zone);
+          // AllocateAllInvalidZone(out_zone);
         } 
       
       }else{
