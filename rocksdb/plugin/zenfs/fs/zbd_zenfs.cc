@@ -2027,7 +2027,8 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
         }
       }
       erase_size_.fetch_add(total_invalid);
-      printf("zeu size %lu wwp mb %lu\n",zeu_size, total_invalid%zeu_size ? (zeu_size - (total_invalid%zeu_size))>>20 : 0 )
+      printf("zeu size %lu wwp mb %lu\n",
+      zeu_size, total_invalid%zeu_size ? (zeu_size - (total_invalid%zeu_size))>>20 : 0 );
       if(total_invalid%zeu_size){
         
         wasted_wp_.fetch_add(zeu_size - (total_invalid%zeu_size));
