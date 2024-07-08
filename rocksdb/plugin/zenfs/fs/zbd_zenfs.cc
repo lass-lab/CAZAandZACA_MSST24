@@ -4467,11 +4467,11 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       goto end;
     }
 
-    AllocateAllInvalidZone(&allocated_zone);
+    // AllocateAllInvalidZone(&allocated_zone);
     
-    if(allocated_zone!=nullptr){
-      goto end;
-    }
+    // if(allocated_zone!=nullptr){
+    //   goto end;
+    // }
 
 
     if(!GetActiveIOZoneTokenIfAvailable()){
