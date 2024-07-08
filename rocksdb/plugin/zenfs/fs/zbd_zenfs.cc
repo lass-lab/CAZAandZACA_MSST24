@@ -414,7 +414,7 @@ IOStatus Zone::Finish() {
   state_=FINISH;
   capacity_ = 0;
   is_finished_=true;
-  // wp_ = start_ + zbd_->GetZoneSize();s
+  wp_ = start_ + zbd_->GetZoneSize();
 
   return IOStatus::OK();
 }
@@ -1128,6 +1128,14 @@ void ZonedBlockDevice::PrintAllStat(){
   PrintCumulativeBreakDown();
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
+  // blocking	copy	zc	runtime	ea
+  printf("%llu\t%lu\t%lu\t%lu\t%lu\t\n",
+  io_blocking_ms_sum,
+  gc_bytes_written_.load()>>20,
+  erase_size_zc_.load()>>20 ,
+  erase_size_.load()>>20,
+  wasted_wp_.load()>>20
+  );
   printf("============================================================\n\n");
 
 }
@@ -4459,8 +4467,12 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       goto end;
     }
 
-
+    AllocateAllInvalidZone(&allocated_zone);
     
+    if(allocated_zone!=nullptr){
+      goto end;
+    }
+
 
     if(!GetActiveIOZoneTokenIfAvailable()){
       FinishCheapestIOZone(false);
