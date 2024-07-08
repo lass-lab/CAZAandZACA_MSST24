@@ -1129,7 +1129,7 @@ void ZonedBlockDevice::PrintAllStat(){
   printf("%lu~%lu\n",GetZoneCleaningKickingPoint(),GetReclaimUntil());
   
   // blocking	copy	zc	runtime	ea
-  printf("%llu\t%lu\t%lu\t%lu\t%lu\t\n",
+  printf("FASTFAST\t%llu\t%lu\t%lu\t%lu\t%lu\t\n",
   io_blocking_ms_sum,
   gc_bytes_written_.load()>>20,
   erase_size_zc_.load()>>20 ,
@@ -2214,15 +2214,18 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
 IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   size_t total_invalid=0;
   // size_t reclaimed_invalid=0;
-  
+#if DEVICE==COSMOS_LARGE
   // cosmos large
-  // uint64_t zeu_size=128<<20;
+  uint64_t zeu_size=128<<20;
   // cosmos small
-
+#elif DEVICE==FEMU_LARGE
   // femu large
   uint64_t zeu_size=1<<30;
   // femu small
   // uint64_t zeu_size=64<<20;
+#elif DEVICE==FEMU_SMALL
+  uint64_t zeu_size=64<<20;
+#endif
   (void)(zeu_size);
   IOStatus reset_status=IOStatus::OK();
   // if(cur_free_percent_>=99){
@@ -4467,12 +4470,14 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       goto end;
     }
 
-    // AllocateAllInvalidZone(&allocated_zone);
-    
-    // if(allocated_zone!=nullptr){
-    //   goto end;
-    // }
 
+#if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
+    AllocateAllInvalidZone(&allocated_zone);
+    
+    if(allocated_zone!=nullptr){
+      goto end;
+    }
+#endif
 
     if(!GetActiveIOZoneTokenIfAvailable()){
       FinishCheapestIOZone(false);
