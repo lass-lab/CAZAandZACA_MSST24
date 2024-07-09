@@ -2455,8 +2455,8 @@ void DBImpl::EnableManualCompaction() {
 }
 
 void DBImpl::MaybeScheduleFlushOrCompaction() {
-  uint64_t zns_free_space;
-  uint64_t zns_free_percent;
+  uint64_t zns_free_space=100;
+  uint64_t zns_free_percent=100;
   mutex_.AssertHeld();
   if (!opened_successfully_) {
     // Compaction may introduce data race to DB open

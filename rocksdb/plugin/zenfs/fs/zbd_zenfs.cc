@@ -2760,6 +2760,8 @@ IOStatus ZonedBlockDevice::FinishCheapestIOZone(bool put_token) {
 
   return s;
 }
+
+
 IOStatus ZonedBlockDevice::GetAnyLargestRemainingZone(Zone** zone_out,bool force,uint64_t min_capacity){
   (void)(force);
   IOStatus s=IOStatus::OK();
@@ -2789,6 +2791,38 @@ IOStatus ZonedBlockDevice::GetAnyLargestRemainingZone(Zone** zone_out,bool force
   *zone_out=allocated_zone;
   return s;
 }
+
+
+IOStatus ZonedBlockDevice::GetAnySmallestRemainingZone(Zone** zone_out,bool force,uint64_t min_capacity){
+  (void)(force);
+  IOStatus s=IOStatus::OK();
+  Zone* allocated_zone=nullptr;
+  uint64_t smallest_capacity = io_zones[0]->max_capacity_;
+  for(const auto z : io_zones){
+    if(!z->Acquire()){
+      continue;
+    }
+    if(z->IsEmpty()){
+      z->Release();
+      continue;
+    }
+    if(z->capacity_>min_capacity && smallest_capacity>z->capacity_ ){
+      if(allocated_zone){
+        allocated_zone->Release();
+      }
+      allocated_zone=z;
+      smallest_capacity=z->capacity_;
+      continue;
+    }
+
+
+    z->Release();
+  }
+  
+  *zone_out=allocated_zone;
+  return s;
+}
+
 // IOStatus ZonedBlockDevice::GetAnyLargestRemainingZone(Zone** zone_out,bool force,uint64_t min_capacity){
 //   IOStatus s=IOStatus::OK();
 //   Zone* allocated_zone=nullptr;
@@ -4325,7 +4359,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
-    s = GetAnyLargestRemainingZone(out_zone,false,min_capacity);
+    s = GetAnySmallestRemainingZone(out_zone,false,min_capacity);
     if(s.ok()&&(*out_zone)!=nullptr){
       Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
       break;

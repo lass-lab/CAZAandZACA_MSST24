@@ -1508,6 +1508,7 @@ class ZonedBlockDevice {
                                 unsigned int *best_diff_out,std::vector<uint64_t> input_fno, Zone **zone_out,
                                 uint64_t min_capacity = 0);
   IOStatus GetAnyLargestRemainingZone(Zone** zone_out,bool force,uint64_t min_capacity = 0);
+  IOStatus GetAnySmallestRemainingZone(Zone** zone_out,bool force,uint64_t min_capacity= 0 );
   IOStatus AllocateEmptyZone(Zone **zone_out);
   IOStatus AllocateAllInvalidZone(Zone** zone_out);
   bool CompactionSimulator(uint64_t predicted_size,int level,Slice& smallest, Slice& largest);
