@@ -50,7 +50,7 @@ class Zone;
 class ZoneFile;
 
 
-#define ZEU_SIZE = 128<<20;
+#define ZEU_SIZE = 128<<20
 // uint64_t ZONE_CLEANING_KICKING_POINT=20;
 
 // #define ZONE_CLEANING_KICKING_POINT (40)

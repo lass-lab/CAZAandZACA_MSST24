@@ -3205,8 +3205,16 @@ uint64_t ZenFS::MigrateExtents(
   std::map<std::string, std::vector<ZoneExtentSnapshot*>> file_extents;
 
   for (auto* ext : extents) {
+    
     std::string fname = ext->filename;
-    file_extents[fname].emplace_back(ext);
+    
+    // if(fname.ene)
+    if(ends_with(fname,".sst")||ends_with(fname,".log")){
+      file_extents[fname].emplace_back(ext);
+    }else{
+      ext->zone_p->used_capacity_-=ext->length;
+    }
+    
   }
   //  printf("after MigrateExtents\n");e
   for (const auto& it : file_extents) {
