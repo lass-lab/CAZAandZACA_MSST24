@@ -503,6 +503,7 @@ class ZenFS : public FileSystemWrapper {
     }
 
 ret:
+    free_percent_=zbd_->CalculateFreePercent();
     *free_percent=free_percent_;
     
     return IOStatus::OK();      
