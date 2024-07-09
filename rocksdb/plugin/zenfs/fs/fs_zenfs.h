@@ -491,6 +491,7 @@ class ZenFS : public FileSystemWrapper {
         // sleep(1);
 
       }
+      zbd_->RuntimeReset();
       // while(zbd_->CalculateFreePercent()<=zbd_->GetZoneCleaningKickingPoint()
       //   &&zbd_->GetZCRunning() 
       // );

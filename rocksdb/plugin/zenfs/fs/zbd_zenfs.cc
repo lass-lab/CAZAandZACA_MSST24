@@ -4359,7 +4359,8 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
-    s = GetAnySmallestRemainingZone(out_zone,false,min_capacity);
+    // s = GetAnySmallestRemainingZone(out_zone,false,min_capacity);
+    s = GetAnyLargestRemainingZone(out_zone,false,min_capacity);
     if(s.ok()&&(*out_zone)!=nullptr){
       Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
       break;
