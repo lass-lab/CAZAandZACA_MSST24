@@ -104,7 +104,7 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
 }
 
 bool Zone::IsUsed() { 
-  return (used_capacity_ > 0 || used_capacity_>max_capacity_*2); 
+  return (used_capacity_ > 0 && used_capacity_<max_capacity_*2); 
   }
 uint64_t Zone::GetCapacityLeft() { return capacity_; }
 bool Zone::IsFull() { return (capacity_ == 0); }
