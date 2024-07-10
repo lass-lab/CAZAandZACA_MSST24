@@ -103,7 +103,9 @@ Zone::Zone(ZonedBlockDevice *zbd, ZonedBlockDeviceBackend *zbd_be,
   erase_unit_size_=(1<<log2_erase_unit_size_);
 }
 
-bool Zone::IsUsed() { return (used_capacity_ > 0); }
+bool Zone::IsUsed() { 
+  return (used_capacity_ > 0 || used_capacity_>max_capacity_*2); 
+  }
 uint64_t Zone::GetCapacityLeft() { return capacity_; }
 bool Zone::IsFull() { return (capacity_ == 0); }
 bool Zone::IsEmpty() { return (wp_ == start_); }
@@ -223,7 +225,7 @@ IOStatus Zone::Reset() {
     capacity_ = 0;
   else
     max_capacity_ = capacity_ = max_capacity;
-
+  used_capacity_=0;
   state_=EMPTY;
 
   wp_ = start_;
