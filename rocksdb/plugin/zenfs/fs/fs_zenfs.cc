@@ -868,8 +868,13 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
         // }
         page_cache_mtx_.lock();
         zbd_->SetZCRunning(true);
-        for(;zbd_->GetFullZoneN()&&free_percent_< (reclaim_until) && run_gc_worker_;){
-           
+        if(!zbd_->GetFullZoneN() && free_percent_<15){
+            zbd_->FinishCheapestIOZone(true);
+        }
+        for(;
+        zbd_->GetFullZoneN()&&
+        free_percent_< (reclaim_until) && run_gc_worker_;){
+
           ZoneCleaning(force);
           free_percent_ = zbd_->CalculateFreePercent();
           force=(before_free_percent==free_percent_);
