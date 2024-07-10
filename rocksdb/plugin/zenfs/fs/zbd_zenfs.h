@@ -1114,7 +1114,7 @@ class ZonedBlockDevice {
   std::vector<Zone*>* GetIOZones(){
     return &io_zones;
   }
-
+  IOStatus FinishCheapestIOZone(bool put_token = true);
   IOStatus AllocateIOZone(std::string fname,bool is_sst,Slice& smallest, Slice& largest ,int level,
                             Env::WriteLifeTimeHint file_lifetime, IOType io_type,
                             std::vector<uint64_t>& input_fno,uint64_t predicted_size,
@@ -1504,7 +1504,7 @@ class ZonedBlockDevice {
   void WaitForOpenIOZoneToken(bool prioritized, WaitForOpenZoneClass open_class);
   bool GetMigrationIOZoneToken(void);
   IOStatus ApplyFinishThreshold();
-  IOStatus FinishCheapestIOZone(bool put_token = true);
+  
   IOStatus GetBestOpenZoneMatch(Env::WriteLifeTimeHint file_lifetime,
                                 unsigned int *best_diff_out,std::vector<uint64_t> input_fno, Zone **zone_out,
                                 uint64_t min_capacity = 0);
