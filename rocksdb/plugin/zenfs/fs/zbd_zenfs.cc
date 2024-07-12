@@ -589,6 +589,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
 #endif
   // Reserve one zone for metadata and another one for extent migration
   int reserved_zones = 2;
+  (void)(reserved_zones);
   // int migrate_zones = 1;
   // printf("ZonedBlockDevice::Open@@\n");
   if (!readonly && !exclusive)
@@ -606,20 +607,23 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   }
   // max_nr_active_zones=0;
   // max_nr_open_zones=0;
-  if (max_nr_active_zones == 0)
-    max_nr_active_io_zones_ = zbd_be_->GetNrZones();
-  else
-    max_nr_active_io_zones_ = max_nr_active_zones - reserved_zones - max_migrate_zones_;
 
-  if (max_nr_open_zones == 0)
-    max_nr_open_io_zones_ = zbd_be_->GetNrZones();
-  else
-    max_nr_open_io_zones_ = max_nr_open_zones - reserved_zones - max_migrate_zones_;
+  // if (max_nr_active_zones == 0)
+  //   max_nr_active_io_zones_ = zbd_be_->GetNrZones();
+  // else
+  //   max_nr_active_io_zones_ = max_nr_active_zones - reserved_zones - max_migrate_zones_;
 
-  Info(logger_, "Zone block device nr zones: %lu max active: %u max open: %u \n",
-       zbd_be_->GetNrZones(), max_nr_active_zones, max_nr_open_zones);
-  printf("Zone block device nr zones: %lu max active: %u (%d) max open: %u(%d) \n",
-       zbd_be_->GetNrZones(), max_nr_active_zones,max_nr_active_io_zones_.load(), max_nr_open_zones,max_nr_open_io_zones_);
+  // if (max_nr_open_zones == 0)
+  //   max_nr_open_io_zones_ = zbd_be_->GetNrZones();
+  // else
+  //   max_nr_open_io_zones_ = max_nr_open_zones - reserved_zones - max_migrate_zones_;
+
+  // Info(logger_, "Zone block device nr zones: %lu max active: %u max open: %u \n",
+  //      zbd_be_->GetNrZones(), max_nr_active_zones, max_nr_open_zones);
+  // printf("Zone block device nr zones: %lu max active: %u (%d) max open: %u(%d) \n",
+  //      zbd_be_->GetNrZones(), max_nr_active_zones,max_nr_active_io_zones_.load(), max_nr_open_zones,max_nr_open_io_zones_);
+
+
   zone_rep = zbd_be_->ListZones();
 
   if(log2_erase_unit_size_>0){
@@ -716,15 +720,31 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   //   ZONE_CLEANING_KICKING_POINT=40;
   // }else{
     ZONE_CLEANING_KICKING_POINT=20;
-  // }
-  // for(uint64_t fr = 100;fr>0;fr--){
-  //   uint64_t lazylog=LazyLog(io_zones[0]->max_capacity_,fr,70);
-  //   uint64_t lazylinear=LazyLinear(io_zones[0]->max_capacity_,fr,70);
 
 
-  //   printf("%ld : %ld / %ld , diff : %ld\n",fr,lazylinear,lazylog,lazylinear-lazylog);
-  // }
-  // start_time_ = time(NULL);
+#if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
+  // max_nr_active_io_zones_=io_zones.size()/2;
+  // max_nr_open_io_zones_=io_zones.size()/2;
+    max_nr_active_io_zones_=80;
+  max_nr_open_io_zones_=80;
+#else
+  if (max_nr_active_zones == 0)
+    max_nr_active_io_zones_ = zbd_be_->GetNrZones();
+  else
+    max_nr_active_io_zones_ = max_nr_active_zones - reserved_zones - max_migrate_zones_;
+
+  if (max_nr_open_zones == 0)
+    max_nr_open_io_zones_ = zbd_be_->GetNrZones();
+  else
+    max_nr_open_io_zones_ = max_nr_open_zones - reserved_zones - max_migrate_zones_;
+
+
+#endif
+  Info(logger_, "Zone block device nr zones: %lu max active: %u max open: %u \n",
+       zbd_be_->GetNrZones(), max_nr_active_zones, max_nr_open_zones);
+  printf("Zone block device nr zones: %lu max active: %u (%d) max open: %u(%d) \n",
+       zbd_be_->GetNrZones(), max_nr_active_zones,max_nr_active_io_zones_.load(), max_nr_open_zones,max_nr_open_io_zones_);
+
   for(i = 0 ; i<=256; i++){
     cost_[READ_DISK_COST][i]=ReadDiskCost(i);
     cost_[READ_PAGE_COST][i]=ReadPageCacheCost(i);
