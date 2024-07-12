@@ -86,7 +86,7 @@ class ZoneFile;
 #define FEMU_LARGE  2
 #define FEMU_SMALL  3
 
-#define DEVICE FEMU_LARGE
+#define DEVICE FEMU_SMALL
 
 // #define ZONE_SIZE_PER_DEVICE_SIZE (100/(ZENFS_IO_ZONES))
 

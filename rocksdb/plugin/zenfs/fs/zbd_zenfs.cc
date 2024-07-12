@@ -411,7 +411,7 @@ IOStatus Zone::Finish() {
   // assert(IsBusy());
 
   IOStatus ios = zbd_be_->Finish(start_);
-  printf("finish %lu\n",zidx_);
+  // printf("finish %lu\n",zidx_);
   if (ios != IOStatus::OK()) return ios;
   state_=FINISH;
   capacity_ = 0;
@@ -4327,24 +4327,18 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
         if (s.ok() && (*out_zone) != nullptr) {
           break;
         }
-
-        if(GetActiveIOZoneTokenIfAvailable()){
-          s=AllocateEmptyZone(out_zone); 
-          if (s.ok() && (*out_zone) != nullptr) {
-            Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
-            (*out_zone)->lifetime_=file_lifetime;
-            break;
-          }else{
-            PutActiveIOZoneToken();
-            // AllocateAllInvalidZone(out_zone);
+        #if DEVICE==FEMU_LARGE || DEVICE==FEMU_SMALL
+          if(GetActiveIOZoneTokenIfAvailable()){
+            s=AllocateEmptyZone(out_zone); 
+            if (s.ok() && (*out_zone) != nullptr) {
+              Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+              (*out_zone)->lifetime_=file_lifetime;
+              break;
+            }else{
+              PutActiveIOZoneToken();
+            }
           }
-        }else{
-          // AllocateAllInvalidZone(out_zone);
-        } 
-      
-      }else{
-
-        // printf("I am LIZA!\n");
+        #endif
       }
       
       if (s.ok() && (*out_zone) != nullptr) {
