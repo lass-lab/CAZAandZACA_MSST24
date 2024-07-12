@@ -1157,7 +1157,7 @@ IOStatus ZenFS::SyncFileMetadataNoLock(ZoneFile* zoneFile, bool replace) {
 
   zoneFile->EncodeUpdateTo(&fileRecord);
   PutLengthPrefixedSlice(&output, Slice(fileRecord));
-#ifndef DEVICE==FEMU_SMALL
+#if DEVICE==FEMU_SMALL
   s = PersistRecord(output);
 #endif
   if (s.ok()) zoneFile->MetadataSynced();
