@@ -2824,7 +2824,7 @@ bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(void){
 
   // if (s.ok()) {
   // if(put_token){
-  PutActiveIOZoneToken();
+  // PutActiveIOZoneToken();
   // }
   return true;
 }
