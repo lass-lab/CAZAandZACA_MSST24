@@ -4619,6 +4619,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       }
       PutActiveIOZoneToken();
     }
+  #if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
     else if(FinishFreeSpaceAdaptiveIOZone()){
 
       s = AllocateEmptyZone(&allocated_zone);
@@ -4627,7 +4628,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       }
       PutActiveIOZoneToken();
     }
-
+  #endif
 
 #if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
     
