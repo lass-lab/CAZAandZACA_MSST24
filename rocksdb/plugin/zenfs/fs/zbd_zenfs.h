@@ -306,7 +306,7 @@ class Zone {
   unsigned int log2_erase_unit_size_ = 0;
   uint64_t erase_unit_size_ = 0;
   uint64_t block_sz_;
-  bool is_finished_ = false;
+  uint64_t is_finished_ = 0;
 
   uint64_t reset_count_ = 0;
   // uint64_t invalid_wp_;
@@ -728,8 +728,8 @@ class ZonedBlockDevice {
       if((rc)==0){
         R_wp_= 100;
       }else{
-        // R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
-        R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc))/BYTES_TO_MB(zone_sz);
+        R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc+rc_zc))/BYTES_TO_MB(zone_sz);
+        // R_wp_= (BYTES_TO_MB(zone_sz)*100-BYTES_TO_MB(wwp)*100/(rc))/BYTES_TO_MB(zone_sz);
       }
       (void)(same_zone_score_for_timelapse);
       (void)(inval_score_for_timelapse);
@@ -1116,6 +1116,7 @@ class ZonedBlockDevice {
   std::vector<Zone*>* GetIOZones(){
     return &io_zones;
   }
+  bool FinishFreeSpaceAdaptiveIOZone(void);
   IOStatus FinishCheapestIOZone(bool put_token = true);
   IOStatus AllocateIOZone(std::string fname,bool is_sst,Slice& smallest, Slice& largest ,int level,
                             Env::WriteLifeTimeHint file_lifetime, IOType io_type,

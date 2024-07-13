@@ -215,7 +215,7 @@ IOStatus Zone::Reset() {
   uint64_t max_capacity;
 
   assert(!IsUsed());
-  is_finished_=false;
+  is_finished_=0;
   // ZenFSStopWatch z1("zone-reset");
 
   IOStatus ios = zbd_be_->Reset(start_, &offline, &max_capacity);
@@ -414,8 +414,9 @@ IOStatus Zone::Finish() {
   // printf("finish %lu\n",zidx_);
   if (ios != IOStatus::OK()) return ios;
   state_=FINISH;
+  is_finished_=capacity_;
   capacity_ = 0;
-  is_finished_=true;
+ 
   wp_ = start_ + zbd_->GetZoneSize();
 
   return IOStatus::OK();
@@ -723,10 +724,24 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
 
 
 #if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
-  // max_nr_active_io_zones_=io_zones.size()/2;
-  // max_nr_open_io_zones_=io_zones.size()/2;
-    max_nr_active_io_zones_=80;
-  max_nr_open_io_zones_=80;
+// #if 0
+  // max_nr_active_io_zones_ = zbd_be_->GetNrZones();
+  // max_nr_open_io_zones_ = zbd_be_->GetNrZones();
+  max_nr_active_io_zones_=io_zones.size()/8;
+  max_nr_open_io_zones_=io_zones.size()/8;
+  
+  // max_nr_active_io_zones_=io_zones.size()/4;
+  // max_nr_open_io_zones_=io_zones.size()/4;
+  // max_nr_active_io_zones_=80;
+  // max_nr_open_io_zones_=80;
+
+  // max_nr_active_io_zones_=40;
+  // max_nr_open_io_zones_=40;
+  // max_nr_active_io_zones_=40;
+  // max_nr_open_io_zones_=40;
+
+  // max_nr_active_io_zones_=20;
+  // max_nr_open_io_zones_=20;
 #else
   if (max_nr_active_zones == 0)
     max_nr_active_io_zones_ = zbd_be_->GetNrZones();
@@ -1850,7 +1865,10 @@ IOStatus ZonedBlockDevice::AsyncResetUnusedIOZones(void) {
       if (!z->IsUsed()) {
         // bool full=
         if(full){
-          erase_size_zc_.fetch_add(io_zones[i]->max_capacity_);
+          // if(z->is_finished_){
+          //   erase_size_zc_.fetch_add(io_zones[i]->max_capacity_-z->is_finished_);
+          // }e
+          erase_size_zc_.fetch_add(io_zones[i]->max_capacity_-z->is_finished_);
         }else{
           erase_size_proactive_zc_.fetch_add(io_zones[i]->wp_-io_zones[i]->start_);
         }
@@ -1990,6 +2008,21 @@ IOStatus ZonedBlockDevice::ResetMultipleUnusedIOZones(void) {
 IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
   ZenFSStopWatch z4("Small reset",this);
   IOStatus reset_status;
+#if DEVICE==COSMOS_LARGE
+  // cosmos large
+  uint64_t zeu_size=128<<20;
+  // cosmos small
+#elif DEVICE==FEMU_LARGE
+  // femu large
+  uint64_t zeu_size=1<<30;
+  // femu small
+  // uint64_t zeu_size=64<<20;
+#elif DEVICE==FEMU_SMALL
+  uint64_t zeu_size=64<<20;
+#else // WD
+  uint64_t zeu_size=io_zones[0]->max_capacity_;
+#endif
+  (void)(zeu_size);
 
 
   for (size_t i =0;i<io_zones.size();i++) {
@@ -2024,10 +2057,17 @@ IOStatus ZonedBlockDevice::ResetUnusedIOZones(void) {
       if (!z->IsUsed()) {
         // bool full=
         if(full){
-          erase_size_zc_.fetch_add(io_zones[i]->max_capacity_);
+          // erase_size_zc_.fetch_add(io_zones[i]->max_capacity_);
+          erase_size_zc_.fetch_add(z->max_capacity_-z->is_finished_);
         }else{
           erase_size_proactive_zc_.fetch_add(io_zones[i]->wp_-io_zones[i]->start_);
         }
+        
+        if(z->is_finished_&&
+        (z->max_capacity_ - z->is_finished_)%zeu_size){
+          wasted_wp_.fetch_add(zeu_size - ((z->max_capacity_ - z->is_finished_)%zeu_size));
+        }
+
         {// wasted_wp_.fetch_add(io_zones[i]->capacity_);
           ZenFSStopWatch z2("zone-reset spent",this);
           reset_status = z->Reset();
@@ -2247,8 +2287,13 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
   // uint64_t zeu_size=64<<20;
 #elif DEVICE==FEMU_SMALL
   uint64_t zeu_size=64<<20;
+#else // WD
+  uint64_t zeu_size=io_zones[0]->max_capacity_;
 #endif
   (void)(zeu_size);
+
+
+
   IOStatus reset_status=IOStatus::OK();
   // if(cur_free_percent_>=99){
   //   return reset_status;
@@ -2278,8 +2323,12 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
 
 
       bool full = z->IsFull();
+      // if(z->is_finished_!=0){
 
+      // }else{
       total_invalid= z->wp_-z->start_ < z->max_capacity_  ? (z->wp_ - z->start_) : z->max_capacity_;
+      // }
+      
 
       // printf("total invalid %lu end erase unit wrttien %lu total_full_erase_unit written %lu erase unit size %lu\n",total_invalid,end_erase_unit_written,total_full_erase_unit_written,erase_unit_size);
       // if(end_erase_unit_written>reset_threshold_){ //eu
@@ -2292,6 +2341,9 @@ IOStatus ZonedBlockDevice::RuntimeZoneReset(std::vector<bool>& is_reseted) {
         if(reset_scheme_!=kEager){
           goto no_reset;
         }
+      }
+      if(z->is_finished_){
+        total_invalid=z->max_capacity_-z->is_finished_;
       }
       erase_size_.fetch_add(total_invalid);
       // printf("zeu size %lu wwp mb %lu\n",
@@ -2737,6 +2789,44 @@ IOStatus ZonedBlockDevice::ApplyFinishThreshold() {
   }
 
   return IOStatus::OK();
+}
+
+bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(void){
+  // IOStatus s;
+  Zone *finish_victim = nullptr;
+  for (const auto z : io_zones) {
+    if (z->Acquire()) {
+      if (z->IsEmpty() || z->IsFull()) {
+        z->Release();
+        // if (!s.ok()) return s;
+        continue;
+      }
+      if (finish_victim == nullptr) {
+        finish_victim = z;
+        continue;
+      }
+      if (finish_victim->capacity_ > z->capacity_) {
+        finish_victim->Release();
+        // if (!s.ok()) return s;
+        finish_victim = z;
+      } else {
+        z->Release();
+      }
+    }
+  }
+  if(finish_victim->capacity_>reset_threshold_arr_[cur_free_percent_]){
+    finish_victim->Release();
+    return false;
+  }
+
+  finish_victim->Finish();
+  finish_victim->Release();
+
+  // if (s.ok()) {
+  // if(put_token){
+  PutActiveIOZoneToken();
+  // }
+  return true;
 }
 
 IOStatus ZonedBlockDevice::FinishCheapestIOZone(bool put_token) {
@@ -3363,9 +3453,6 @@ IOStatus ZonedBlockDevice::AllocateCompactionAwaredZoneV2(Slice& smallest, Slice
         zone_score.clear();
         zone_score.assign(io_zones.size(),0);
         DownwardAdjacentFileList(smallest, largest, level, fno_list);
-
-
-
         if(CalculateZoneScore(fno_list,zone_score)){
           sorted = SortedByZoneScore(zone_score);
           AllocateZoneBySortedScore(sorted,&allocated_zone,min_capacity);
@@ -4521,22 +4608,36 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       goto end;
     }
 
+    // RuntimeReset();
 
-#if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
-    AllocateAllInvalidZone(&allocated_zone);
-    
-    if(allocated_zone!=nullptr){
-      goto end;
-    }
-#endif
 
-    if(!GetActiveIOZoneTokenIfAvailable()){
-      FinishCheapestIOZone(false);
-    }
-    s = AllocateEmptyZone(&allocated_zone);
-    if(allocated_zone==nullptr){
+    if(GetActiveIOZoneTokenIfAvailable()){
+
+      s = AllocateEmptyZone(&allocated_zone);
+      if(allocated_zone!=nullptr){
+        goto end;
+      }
       PutActiveIOZoneToken();
     }
+    else if(FinishFreeSpaceAdaptiveIOZone()){
+
+      s = AllocateEmptyZone(&allocated_zone);
+      if(allocated_zone!=nullptr){
+        goto end;
+      }
+      PutActiveIOZoneToken();
+    }
+
+
+#if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
+    
+    // AllocateAllInvalidZone(&allocated_zone);
+    
+    // if(allocated_zone!=nullptr){
+    //   goto end;
+    // }
+#endif
+
   }
 
   if(allocated_zone!=nullptr){

@@ -1034,8 +1034,9 @@ IOStatus ZenFS::PersistSnapshot(ZenMetaLog* meta_writer) {
 
 IOStatus ZenFS::PersistRecord(std::string record) {
   IOStatus s;
-
+  (void)(record);
   std::lock_guard<std::mutex> lock(metadata_sync_mtx_);
+#if 0
   s = meta_log_->AddRecord(record);
   if (s == IOStatus::NoSpace()) {
     Info(logger_, "Current meta zone full, rolling to next meta zone");
@@ -1043,7 +1044,7 @@ IOStatus ZenFS::PersistRecord(std::string record) {
     /* After a successfull roll, a complete snapshot has been persisted
      * - no need to write the record update */
   }
-
+#endif
   return s;
 }
 
@@ -1157,7 +1158,7 @@ IOStatus ZenFS::SyncFileMetadataNoLock(ZoneFile* zoneFile, bool replace) {
 
   zoneFile->EncodeUpdateTo(&fileRecord);
   PutLengthPrefixedSlice(&output, Slice(fileRecord));
-#if DEVICE==FEMU_SMALL
+#if 0
   s = PersistRecord(output);
 #endif
   if (s.ok()) zoneFile->MetadataSynced();
