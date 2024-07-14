@@ -543,10 +543,10 @@ size_t ZenFS::ZoneCleaning(bool forced){
       //  zbd_->GetIOZone(zone.start)->Release();
     }
   }
-  
-  if(selected_victim_zone_start==0){
-    // printf("??? selected_victim_zone_start %lu\n",selected_victim_zone_start);
+  if(min_gc_cost>=99){
+    return 0;
   }
+
   // sort(victim_candidate.rbegin(), victim_candidate.rend());
 
   // sort(victim_candidate.begin(), victim_candidate.end());
@@ -866,21 +866,23 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
         //   //   ZC_not_working++;
         //   // }
         // }
-        page_cache_mtx_.lock();
+        // page_cache_mtx_.lock();
         zbd_->SetZCRunning(true);
 
         for(;
         // zbd_->GetFullZoneN()&&
-        free_percent_< (reclaim_until) && run_gc_worker_;){
+        free_percent_< (reclaim_until) && run_gc_worker_;)
+        {
           if(!zbd_->GetFullZoneN()&& free_percent_<reclaim_until-5){
               zbd_->FinishCheapestIOZone(true);
           }
-          ZoneCleaning(force);
+          if(!ZoneCleaning(force)){
+            break;
+          }
           free_percent_ = zbd_->CalculateFreePercent();
           force=(before_free_percent==free_percent_);
-          // (void)before_free_percent;
         }
-        page_cache_mtx_.unlock();
+        // page_cache_mtx_.unlock();
       }
     }
     zbd_->SetZCRunning(false);
