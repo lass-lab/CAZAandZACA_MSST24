@@ -542,10 +542,12 @@ size_t ZenFS::ZoneCleaning(bool forced){
       }
       //  zbd_->GetIOZone(zone.start)->Release();
     }
+
+    if(min_gc_cost>=99){
+      return 0;
+    }
   }
-  if(min_gc_cost>=99){
-    return 0;
-  }
+
 
   // sort(victim_candidate.rbegin(), victim_candidate.rend());
 
