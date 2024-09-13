@@ -1454,8 +1454,8 @@ class ZonedBlockDevice {
     page_cache_limit_ = other_options[3];
     pca_selection_ = other_options[4];
 
-    max_nr_active_io_zones_=pca_selection_;
-    max_nr_open_io_zones_=pca_selection_;
+    // max_nr_active_io_zones_=pca_selection_;
+    // max_nr_open_io_zones_=pca_selection_;
     
   printf("Zone block device nr zones: %lu max active:  (%d) max open: (%d) \n",
        zbd_be_->GetNrZones(), max_nr_active_io_zones_.load(), max_nr_open_io_zones_);
