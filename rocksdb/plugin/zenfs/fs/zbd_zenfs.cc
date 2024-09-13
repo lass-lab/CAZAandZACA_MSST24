@@ -589,7 +589,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
   uint64_t sp = 0;
 #endif
   // Reserve one zone for metadata and another one for extent migration
-  int reserved_zones = 2;
+  int reserved_zones = 1;
   (void)(reserved_zones);
   // int migrate_zones = 1;
   // printf("ZonedBlockDevice::Open@@\n");
@@ -727,13 +727,13 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
 // #if 0
   // max_nr_active_io_zones_ = zbd_be_->GetNrZones();
   // max_nr_open_io_zones_ = zbd_be_->GetNrZones();
-  max_nr_active_io_zones_=io_zones.size()/8;
-  max_nr_open_io_zones_=io_zones.size()/8;
+  // max_nr_active_io_zones_=io_zones.size()/8;
+  // max_nr_open_io_zones_=io_zones.size()/8;
   
   // max_nr_active_io_zones_=io_zones.size()/4;
   // max_nr_open_io_zones_=io_zones.size()/4;
-  // max_nr_active_io_zones_=80;
-  // max_nr_open_io_zones_=80;
+  max_nr_active_io_zones_=pca_selection_;
+  max_nr_open_io_zones_=pca_selection_;
 
   // max_nr_active_io_zones_=40;
   // max_nr_open_io_zones_=40;
@@ -2791,8 +2791,68 @@ IOStatus ZonedBlockDevice::ApplyFinishThreshold() {
   return IOStatus::OK();
 }
 
+bool ZonedBlockDevice::FinishThereIsInvalidIOZone(void){
+  Zone *finish_victim = nullptr;
+
+  for (const auto z : io_zones) {
+    if (z->Acquire()) {
+      if (z->IsEmpty() || z->IsFull()) {
+        z->Release();
+        continue;
+      }
+      // if((z->used_capacity_*100)/(z->wp_-z->start_)>=98){
+      //   z->Release();
+      //   continue;
+      // }
+      if (finish_victim == nullptr) {
+        finish_victim = z;
+        continue;
+      }
+      if (finish_victim->capacity_ > z->capacity_) {
+        finish_victim->Release();
+        finish_victim = z;
+      } else {
+        z->Release();
+      }
+    }
+  }
+
+  // If all non-busy zones are empty or full, we should return success.
+  if (finish_victim == nullptr) {
+    Info(logger_, "All non-busy zones are empty or full, skip.");
+    // return IOStatus::OK();
+    return false;
+  }
+
+  finish_victim->Finish();
+  finish_victim->Release();
+
+  // if (s.ok()) {
+  // if(put_token){
+  PutActiveIOZoneToken();
+  // }
+  // }
+
+
+  return true;
+}
+
 bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(void){
-  // IOStatus s;
+#if DEVICE==COSMOS_LARGE
+  // cosmos large
+  uint64_t zeu_size=128<<20;
+  // cosmos small
+#elif DEVICE==FEMU_LARGE
+  // femu large
+  uint64_t zeu_size=1<<30;
+  // femu small
+  // uint64_t zeu_size=64<<20;
+#elif DEVICE==FEMU_SMALL
+  uint64_t zeu_size=64<<20;
+#else // WD
+  uint64_t zeu_size=io_zones[0]->max_capacity_;
+#endif
+  // uint64_t zeu_remained;
   Zone *finish_victim = nullptr;
   for (const auto z : io_zones) {
     if (z->Acquire()) {
@@ -2814,10 +2874,21 @@ bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(void){
       }
     }
   }
-  if(finish_victim->capacity_>reset_threshold_arr_[cur_free_percent_]){
-    finish_victim->Release();
+  if(finish_victim==nullptr){
     return false;
   }
+  if(reset_scheme_==kEager){
+    finish_victim->Finish();
+    finish_victim->Release();
+    return true;
+  }
+  if(finish_victim->capacity_%zeu_size){
+    if(zeu_size-(finish_victim->capacity_%zeu_size)>reset_threshold_arr_[cur_free_percent_]){
+      finish_victim->Release();
+      return false;
+    }
+  }
+
 
   finish_victim->Finish();
   finish_victim->Release();
@@ -4469,6 +4540,8 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
       break;
     }
 
+
+
     if(GetActiveIOZoneTokenIfAvailable()){
       s=AllocateEmptyZone(out_zone); 
       if (s.ok() && (*out_zone) != nullptr) {
@@ -4477,10 +4550,22 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
         break;
       }else{
         PutActiveIOZoneToken();
-        // PutMigrationIOZoneToken();
       }
     }
-
+#if DEVICE==COSMOS_LARGE
+    else{
+      FinishCheapestIOZone(false);
+      s=AllocateEmptyZone(out_zone); 
+      
+      if (s.ok() && (*out_zone) != nullptr) {
+        Info(logger_, "TakeMigrateZone: %lu", (*out_zone)->start_);
+        (*out_zone)->lifetime_=file_lifetime;
+        break;
+      }else{
+        PutActiveIOZoneToken();
+      }
+    }
+#endif
 
     // FinishCheapestIOZone();
 
@@ -4610,7 +4695,7 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
 
     // RuntimeReset();
 
-
+  // #if DEVICE==FEMU_LARGE || DEVICE==FEMU_SMALL
     if(GetActiveIOZoneTokenIfAvailable()){
 
       s = AllocateEmptyZone(&allocated_zone);
@@ -4619,25 +4704,17 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       }
       PutActiveIOZoneToken();
     }
-  #if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
-    else if(FinishFreeSpaceAdaptiveIOZone()){
+  // #if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
+    // else if(FinishFreeSpaceAdaptiveIOZone()){
 
-      s = AllocateEmptyZone(&allocated_zone);
-      if(allocated_zone!=nullptr){
-        goto end;
-      }
-      PutActiveIOZoneToken();
-    }
-  #endif
-
-#if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
-    
-    // AllocateAllInvalidZone(&allocated_zone);
-    
-    // if(allocated_zone!=nullptr){
-    //   goto end;
+    //   s = AllocateEmptyZone(&allocated_zone);
+    //   if(allocated_zone!=nullptr){
+    //     goto end;
+    //   }
+    //   PutActiveIOZoneToken();
     // }
-#endif
+  // #endif
+
 
   }
 

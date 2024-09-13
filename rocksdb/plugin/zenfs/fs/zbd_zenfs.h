@@ -88,7 +88,7 @@ class ZoneFile;
 
 #define ZN540 4
 
-#define DEVICE FEMU_SMALL
+#define DEVICE FEMU_LARGE
 
 // #define ZONE_SIZE_PER_DEVICE_SIZE (100/(ZENFS_IO_ZONES))
 
@@ -686,7 +686,7 @@ class ZonedBlockDevice {
     int T_;
     uint64_t R_wp_; // (%)
     uint64_t RT_;
-
+    uint64_t wwp_;
     size_t candidate_ratio_;
 
     std::vector<int> num_files_levels_;
@@ -722,7 +722,7 @@ class ZonedBlockDevice {
             uint64_t cur_ops,uint64_t cur_gc_written, uint64_t valid_data_size, uint64_t invalid_data_size,uint64_t cumulative_io_blocking) 
         : free_percent_(fr),  reset_count_(rc),reset_count_zc_(rc_zc),partial_reset_count_(partial_rc),
           erase_size_(er_sz),erase_size_zc_(er_sz_zc), erase_size_proactive_zc_(er_sz_pr_zc) ,partial_erase_size_(p_er_sz) 
-          , T_(T), RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
+          , T_(T),wwp_((wwp)) ,RT_(rt), num_files_levels_(num_files_levels), compaction_scores_(compaction_scores),
           levels_size_(levels_size),avg_invalid_ratio_(avg_invalid_ratio),cur_ops_(cur_ops),
           cur_gc_written_(cur_gc_written), valid_data_size_(valid_data_size), invalid_data_size_(invalid_data_size),cumulative_io_blocking_(cumulative_io_blocking) {
       if((rc)==0){
@@ -798,7 +798,7 @@ class ZonedBlockDevice {
       //        R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20));
             printf("%4d\t%3ld\t%3ld\t%3ld\t%3ld\t%4ld\t%4ld\t%10ld\t%10ld\t%10ld\t%.4lf\t", 
                 T_, free_percent_, reset_count_,reset_count_zc_,partial_reset_count_,
-             R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(partial_erase_size_>>20)
+             R_wp_, (RT_ >> 20),(erase_size_>>20),(erase_size_zc_>>20),(wwp_>>20)
              ,avg_invalid_ratio_);
       // for(int i = 0 ; i < 5 ; i++){
       //   printf("%.4lf\t",avg_same_zone_score_[i]);
@@ -865,7 +865,7 @@ class ZonedBlockDevice {
   std::atomic<uint64_t> lsm_tree_[10];
   std::atomic<uint64_t> page_cache_size_{0};
     uint64_t ZENFS_CONVENTIONAL_ZONE = 0;
-
+  uint64_t reset_count_zc() { return reset_count_zc_.load(); }
   // validsize,zidx
   std::vector<std::pair<uint64_t,uint64_t>> HighPosibilityTobeVictim(uint64_t n){
     std::vector<std::pair<uint64_t,uint64_t>> sorted,ret;
@@ -916,10 +916,10 @@ class ZonedBlockDevice {
     return async_zc_enabled_;
   }
   uint64_t PCAEnabled(){
-    return pca_selection_;
+    return false;
   }
   uint64_t PageCacheLimit(){
-    return page_cache_limit_;
+    return 0;
   }
 
   uint64_t ZCPageCacheLimit(){
@@ -1117,7 +1117,9 @@ class ZonedBlockDevice {
     return &io_zones;
   }
   bool FinishFreeSpaceAdaptiveIOZone(void);
+  bool FinishThereIsInvalidIOZone(void);
   IOStatus FinishCheapestIOZone(bool put_token = true);
+  
   IOStatus AllocateIOZone(std::string fname,bool is_sst,Slice& smallest, Slice& largest ,int level,
                             Env::WriteLifeTimeHint file_lifetime, IOType io_type,
                             std::vector<uint64_t>& input_fno,uint64_t predicted_size,
@@ -1450,6 +1452,12 @@ class ZonedBlockDevice {
     default_extent_size_ = other_options[2];
     page_cache_limit_ = other_options[3];
     pca_selection_ = other_options[4];
+
+    max_nr_active_io_zones_=pca_selection_;
+    max_nr_open_io_zones_=pca_selection_;
+    
+  printf("Zone block device nr zones: %lu max active:  (%d) max open: (%d) \n",
+       zbd_be_->GetNrZones(), max_nr_active_io_zones_.load(), max_nr_open_io_zones_);
 
     for(auto opt : other_options){
       printf("other options %lu\n",opt);

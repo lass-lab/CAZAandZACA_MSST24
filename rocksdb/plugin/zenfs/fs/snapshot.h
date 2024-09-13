@@ -52,6 +52,7 @@ class ZoneSnapshot {
   uint64_t used_capacity;
   uint64_t max_capacity;
   uint64_t zidx;
+  uint64_t is_finished;
   Zone* zone_p;
   std::vector<ZoneExtentSnapshot*> extents_in_zone;
   bool lock_held = false;
@@ -63,6 +64,7 @@ class ZoneSnapshot {
         used_capacity(zone->used_capacity_),
         max_capacity(zone->max_capacity_),
         zidx(zone->zidx_),
+        is_finished(zone->is_finished_),
         zone_p(zone) {
           extents_in_zone.clear();
         }

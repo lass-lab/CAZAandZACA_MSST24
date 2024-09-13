@@ -522,6 +522,11 @@ size_t ZenFS::ZoneCleaning(bool forced){
       if(zone.capacity !=0 ){
         continue;
       }
+      if(zone.used_capacity*100/(zone.max_capacity-zone.is_finished)
+        >=98){
+        continue;
+      }
+
       // if(zone.used_capacity>(zone.max_capacity*95)/100){
       //   continue;
       // }
@@ -819,10 +824,10 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
   //   printf("ioprio_set error %d , %ld\n",ret_ioprio,ioprio_get(IOPRIO_WHO_PROCESS,0));
   // }
   // printf("ZC ioprio_set , %ld\n",ioprio_get(IOPRIO_WHO_PROCESS,0));
-
+  
   (void) run_once;
-  bool force=false;
-  uint64_t before_free_percent;
+  // bool force=false;
+  // uint64_t before_free_percent;
 
   while (run_gc_worker_) {
 
@@ -841,48 +846,41 @@ void ZenFS::ZoneCleaningWorker(bool run_once) {
     }
 
     zbd_->SetZCRunning(false);
+    uint64_t prev_zc_z= zbd_->reset_count_zc();
     if(free_percent_<MODIFIED_ZC_KICKING_POINT&&
         run_gc_worker_){ // IO BLOCK
       free_percent_ = zbd_->CalculateFreePercent();
-      force=false;
+      // force=false;
       
       (void)(reclaim_until);
       {
-        // ZenFSStopWatch("While ZoneCleaning Sum");
-        // while(
-        //     free_percent_<= (reclaim_until)&&
-        //       run_gc_worker_
-        //       &&zbd_->GetFullZoneN()
-        //       ){
-        //   zbd_->SetZCRunning(true);  
-        //   before_free_percent=free_percent_;
-
-        //   {
-        //     // ZenFSStopWatch("ZoneCleaning Sum");
-        //     ZoneCleaning(force);
-        //   }
-
-        //   free_percent_ = zbd_->CalculateFreePercent();
-        //   force=(before_free_percent==free_percent_);
-        //   // if(force&&before_free_percent==free_percent_){
-        //   //   ZC_not_working++;
-        //   // }
-        // }
-        // page_cache_mtx_.lock();
         zbd_->SetZCRunning(true);
 
         for(;
         // zbd_->GetFullZoneN()&&
         free_percent_< (reclaim_until) && run_gc_worker_;)
         {
-          if(!zbd_->GetFullZoneN()&& free_percent_<reclaim_until-5){
-              zbd_->FinishCheapestIOZone(true);
+          if(!zbd_->GetFullZoneN()&& free_percent_<reclaim_until){
+              // if(!zbd_->FinishThereIsInvalidIOZone()){
+              //   break;
+              // }
+              // zbd_->FinishCheapestIOZone(true);
           }
-          if(!ZoneCleaning(force)){
+          if(!zbd_->GetFullZoneN()){
+            break;
+          }
+          if(!ZoneCleaning(false)){
             break;
           }
           free_percent_ = zbd_->CalculateFreePercent();
-          force=(before_free_percent==free_percent_);
+          // force=(before_free_percent==free_percent_);
+
+          if(prev_zc_z==zbd_->reset_count_zc()){
+            break;
+          }else{
+            prev_zc_z=zbd_->reset_count_zc();
+          }
+
         }
         // page_cache_mtx_.unlock();
       }
@@ -3241,6 +3239,11 @@ uint64_t ZenFS::MigrateExtents(
     // s=zbd_->ResetUnusedIOZones();
   }
   // return s;
+  // if(ret==){
+
+  // }
+  // if(ext->zone_p->used_capacity_>)
+  // extents[0]->zone_p->used_capacity_=0;
   return ret;
 }
 
@@ -4438,6 +4441,7 @@ uint64_t ZenFS::MigrateFileExtents(
                               zfile->predicted_size_,
                               ext->length_,&run_gc_worker_,zfile->IsSST());
     if(!run_gc_worker_){
+      zfile->ReleaseWRLock();
       return ret;
     }
     if(target_zone!=nullptr&&target_zone->lifetime_==Env::WriteLifeTimeHint::WLTH_NOT_SET){
@@ -4475,6 +4479,7 @@ uint64_t ZenFS::MigrateFileExtents(
     }
 
     if(!run_gc_worker_){
+      zfile->ReleaseWRLock();
       return ret;
     }
 
