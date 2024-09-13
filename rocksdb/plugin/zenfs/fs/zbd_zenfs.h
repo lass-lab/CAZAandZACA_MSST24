@@ -684,9 +684,10 @@ class ZonedBlockDevice {
     size_t partial_erase_size_=0;
 
     int T_;
+    uint64_t wwp_;
     uint64_t R_wp_; // (%)
     uint64_t RT_;
-    uint64_t wwp_;
+    
     size_t candidate_ratio_;
 
     std::vector<int> num_files_levels_;
