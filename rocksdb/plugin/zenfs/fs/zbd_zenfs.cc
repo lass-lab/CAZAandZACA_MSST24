@@ -2879,6 +2879,76 @@ bool ZonedBlockDevice::FinishThereIsInvalidIOZone(void){
   return true;
 }
 
+bool ZonedBlockDevice::FinishFreeSpaceAdaptiveMostHotIOZone(bool put_token){
+#if DEVICE==COSMOS_LARGE
+  // cosmos large
+  uint64_t zeu_size=128<<20;
+  // cosmos small
+#elif DEVICE==FEMU_LARGE
+  // femu large
+  uint64_t zeu_size=1<<30;
+  // femu small
+  // uint64_t zeu_size=64<<20;
+#elif DEVICE==FEMU_SMALL
+  uint64_t zeu_size=64<<20;
+#else // WD
+  uint64_t zeu_size=io_zones[0]->max_capacity_;
+#endif
+  // uint64_t zeu_remained;
+  Zone *finish_victim = nullptr;
+
+  bool max_coldness=0.0;
+  for (const auto z : io_zones) {
+    if (z->Acquire()) {
+      if (z->IsEmpty() || z->IsFull()) {
+        z->Release();
+        // if (!s.ok()) return s;
+        continue;
+      }
+      if (finish_victim == nullptr) {
+        finish_victim = z;
+        continue;
+      }
+
+      if(finish_victim->capacity<finish_threshold_arr_[cur_free_percent_]){
+        continue;
+      }
+
+      if (finish_victim->capacity_ > z->capacity_) {
+        finish_victim->Release();
+        // if (!s.ok()) return s;
+        finish_victim = z;
+      } else {
+        z->Release();
+      }
+    }
+  }
+  if(finish_victim==nullptr){
+    return false;
+  }
+  if(finish_scheme2_==kEager){
+    finish_victim->Finish();
+    finish_victim->Release();
+    return true;
+  }
+  // if(finish_victim->capacity_%zeu_size){
+  //   if(zeu_size-(finish_victim->capacity_%zeu_size)>finish_threshold_arr_[cur_free_percent_]){
+  //     finish_victim->Release();
+  //     return false;
+  //   }
+  // }
+
+
+  finish_victim->Finish();
+  finish_victim->Release();
+
+  // if (s.ok()) {
+  if(put_token){
+    PutActiveIOZoneToken();
+  }
+  return true;
+}
+
 bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(bool put_token){
 #if DEVICE==COSMOS_LARGE
   // cosmos large

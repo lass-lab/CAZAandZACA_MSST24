@@ -387,6 +387,8 @@ class Env : public Customizable {
 
   virtual void GiveZenFStoLSMTreeHint(std::vector<uint64_t>& ,std::vector<uint64_t>&,int,bool) {}
 
+  virtual void SetZNSFileTemparature(uint64_t , double ){}
+
   virtual void StatsCompactionFileSize(bool,int,uint64_t) {}
 
   virtual void StatsAverageCompactionInputSize(int,int,uint64_t,uint64_t,uint64_t) {}
@@ -1498,6 +1500,9 @@ class EnvWrapper : public Env {
   void GiveZenFStoLSMTreeHint(std::vector<uint64_t>& compaction_inputs_input_level_fno,
                                 std::vector<uint64_t>& compaction_inputs_output_level_fno ,int output_level,bool trivial_move) override {
     target_.env->GiveZenFStoLSMTreeHint(compaction_inputs_input_level_fno,compaction_inputs_output_level_fno,output_level,trivial_move);
+  }
+  void SetZNSFileTemparature(uint64_t fno, double temperature){
+    target_.env->SetZNSFileTemparature(fno,temperature);
   }
 
   void StatsCompactionFileSize(bool is_last_file,int output_level,uint64_t file_size){

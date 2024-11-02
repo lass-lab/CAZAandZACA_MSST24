@@ -510,6 +510,10 @@ ret:
     return IOStatus::OK();      
   }
 
+  void SetZNSFileTemparature(uint64_t fno,double temperature){
+    zbd_->SetZNSFileTemparature(fno,temperature);
+  }
+
   IOStatus GetFileModificationTime(const std::string& fname,
                                    const IOOptions& options, uint64_t* mtime,
                                    IODebugContext* dbg) override;

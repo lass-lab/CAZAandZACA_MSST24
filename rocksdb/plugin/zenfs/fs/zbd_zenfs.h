@@ -309,7 +309,7 @@ class Zone {
   uint64_t is_finished_ = 0;
 
   uint64_t reset_count_ = 0;
-  uint64_t temperature_ = 0;
+  double temperature_ = 0.0;
 
 
   // uint64_t invalid_wp_;
@@ -954,6 +954,20 @@ class ZonedBlockDevice {
     }
     return max_bytes_for_level;
   }
+
+  void SetZNSFileTemparature(uint64_t fno, double temperature){
+    ZoneFile* zfile = GetSSTZoneFileInZBDNoLock(fno);
+    for(auto z : io_zones){
+      z->temperature_=0.0;
+    }
+    for(auto ext :zfile->GetExtents()){
+      ext->zone_->temperature_+=temperature;
+    }
+    for(auto z : io_zones){
+      z->temperature_/=(z->used_capacity_>>20);
+    }
+  }
+
 
   double PredictCompactionScore(int level){
 

@@ -2792,6 +2792,8 @@ double VersionStorageInfo::ReCalculateCompactionScore(
       horizontal_lifetime = cmp_index/files_by_compaction_pri_[level].size();
     }
     f->zns_temperature_=  alpha_ * (1 - horizontal_lifetime) + (1.0-alpha) * (1 / score);
+    immutable_options.fs->SetZNSFileTemparature(f.fno_,f->zns_temperature_);
+    
   }
     // for (auto* f : files_[level]) {
     //   double horizontal_lifetime;
