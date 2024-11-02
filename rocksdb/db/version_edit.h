@@ -189,7 +189,7 @@ struct FileMetaData {
   uint64_t raw_value_size = 0;  // total uncompressed value size.
 
   int refs = 0;  // Reference count
-
+  double zns_temperature_= 0.0;
   bool being_compacted = false;       // Is this file undergoing compaction?
   bool init_stats_from_file = false;  // true if the data-entry stats of this
                                       // file has initialized from file.

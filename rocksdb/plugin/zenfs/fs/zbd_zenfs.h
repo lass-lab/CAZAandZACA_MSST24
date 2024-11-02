@@ -88,7 +88,7 @@ class ZoneFile;
 
 #define ZN540 4
 
-#define DEVICE FEMU_LARGE
+#define DEVICE ZN540
 
 // #define ZONE_SIZE_PER_DEVICE_SIZE (100/(ZENFS_IO_ZONES))
 
@@ -309,6 +309,9 @@ class Zone {
   uint64_t is_finished_ = 0;
 
   uint64_t reset_count_ = 0;
+  uint64_t temperature_ = 0;
+
+
   // uint64_t invalid_wp_;
   enum State{
     EMPTY,OPEN,CLOSE,FINISH,RO,OFFLINE
@@ -461,6 +464,7 @@ class ZonedBlockDevice {
   std::atomic<bool> force_zc_should_triggered_{false};
   uint64_t reset_threshold_ = 0;
   uint64_t reset_threshold_arr_[101];
+  uint64_t finish_threshold_arr_[101];
   std::atomic<long> active_io_zones_;
   std::atomic<long> open_io_zones_;
   std::atomic<long> migration_io_zones_{0};
@@ -635,6 +639,7 @@ class ZonedBlockDevice {
   void EncodeJsonZone(std::ostream &json_stream,
                       const std::vector<Zone *> zones);
   void CalculateResetThreshold(uint64_t free_percent);
+  void CalculateFinishThreshold(uint64_t free_percent);
   uint32_t reset_scheme_;
   uint64_t allocation_scheme_;
   uint32_t partial_reset_scheme_;
@@ -642,6 +647,9 @@ class ZonedBlockDevice {
   uint64_t tuning_point_;
   uint64_t async_zc_enabled_;
   uint64_t pca_selection_;
+
+  uint64_t finish_scheme1_;
+  uint64_t finish_scheme2_;
 
 
   uint64_t page_cache_limit_ = 0;
@@ -1117,7 +1125,7 @@ class ZonedBlockDevice {
   std::vector<Zone*>* GetIOZones(){
     return &io_zones;
   }
-  bool FinishFreeSpaceAdaptiveIOZone(void);
+  bool FinishFreeSpaceAdaptiveIOZone(bool put_token=true);
   bool FinishThereIsInvalidIOZone(void);
   IOStatus FinishCheapestIOZone(bool put_token = true);
   

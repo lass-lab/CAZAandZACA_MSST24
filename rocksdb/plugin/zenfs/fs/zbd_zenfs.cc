@@ -725,15 +725,15 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
 
 #if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
 // #if 0
-  // max_nr_active_io_zones_ = zbd_be_->GetNrZones();
-  // max_nr_open_io_zones_ = zbd_be_->GetNrZones();
+  max_nr_active_io_zones_ = zbd_be_->GetNrZones();
+  max_nr_open_io_zones_ = zbd_be_->GetNrZones();
   // max_nr_active_io_zones_=io_zones.size()/8;
   // max_nr_open_io_zones_=io_zones.size()/8;
   
   // max_nr_active_io_zones_=io_zones.size()/4;
   // max_nr_open_io_zones_=io_zones.size()/4;
-  max_nr_active_io_zones_=pca_selection_;
-  max_nr_open_io_zones_=pca_selection_;
+  // max_nr_active_io_zones_=pca_selection_;
+  // max_nr_open_io_zones_=pca_selection_;
 
   // max_nr_active_io_zones_=40;
   // max_nr_open_io_zones_=40;
@@ -742,7 +742,7 @@ IOStatus ZonedBlockDevice::Open(bool readonly, bool exclusive) {
 
   // max_nr_active_io_zones_=20;
   // max_nr_open_io_zones_=20;
-#else
+#else // here
   if (max_nr_active_zones == 0)
     max_nr_active_io_zones_ = zbd_be_->GetNrZones();
   else
@@ -1781,6 +1781,48 @@ inline uint64_t ZonedBlockDevice::LazyExponential(uint64_t sz, uint64_t fr,
   double b = pow(100, 1 / (float)T);
   b = pow(b, fr);
   return sz - (b * sz / 100);
+}
+
+void ZonedBlockDevice::CalculateFinishThreshold(uint64_t free_percent) {
+  uint64_t rt = 0;
+  // uint64_t max_capacity = (1<<io_zones[0]->log2_erase_unit_size_);
+  // uint64_t free_percent = cur_free_percent_;
+  uint64_t max_capacity = io_zones[0]->max_capacity_;
+
+  // printf("CalculateResetThreshold : %lu\n",max_capacity);
+  switch (reset_scheme_)
+  {
+  case kEager:
+    rt = max_capacity;
+    break;
+  case kLazy:
+    rt = 0;
+    break;
+  case kFAR: // Constant scale
+    rt = max_capacity - (max_capacity * free_percent) / 100;
+    break;
+  case kLazy_Log:
+    rt = LazyLog(max_capacity, free_percent, tuning_point_);
+    break;
+  case kNoRuntimeLinear:
+  case kLazy_Linear:
+    rt = LazyLinear(max_capacity, free_percent, tuning_point_);
+    break;
+  case kCustom:
+    rt = Custom(max_capacity, free_percent, tuning_point_);
+    break;
+  case kLogLinear:
+    rt = LogLinear(max_capacity, free_percent, tuning_point_);
+    break;
+  case kLazyExponential:
+    rt = LazyExponential(max_capacity, free_percent, tuning_point_);
+    break;
+  default:
+    break;
+  }
+  // reset_threshold_ = rt;
+  finish_threshold_arr_[free_percent]=rt;
+  // printf("%lu : %lu\n",free_percent,rt);
 }
 
 void ZonedBlockDevice::CalculateResetThreshold(uint64_t free_percent) {
@@ -2837,7 +2879,7 @@ bool ZonedBlockDevice::FinishThereIsInvalidIOZone(void){
   return true;
 }
 
-bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(void){
+bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(bool put_token){
 #if DEVICE==COSMOS_LARGE
   // cosmos large
   uint64_t zeu_size=128<<20;
@@ -2877,13 +2919,13 @@ bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(void){
   if(finish_victim==nullptr){
     return false;
   }
-  if(reset_scheme_==kEager){
+  if(finish_scheme2_==kEager){
     finish_victim->Finish();
     finish_victim->Release();
     return true;
   }
   if(finish_victim->capacity_%zeu_size){
-    if(zeu_size-(finish_victim->capacity_%zeu_size)>reset_threshold_arr_[cur_free_percent_]){
+    if(zeu_size-(finish_victim->capacity_%zeu_size)>finish_threshold_arr_[cur_free_percent_]){
       finish_victim->Release();
       return false;
     }
@@ -2894,9 +2936,9 @@ bool ZonedBlockDevice::FinishFreeSpaceAdaptiveIOZone(void){
   finish_victim->Release();
 
   // if (s.ok()) {
-  // if(put_token){
-  // PutActiveIOZoneToken();
-  // }
+  if(put_token){
+    PutActiveIOZoneToken();
+  }
   return true;
 }
 
@@ -4567,7 +4609,6 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     }
 #endif
 
-    // FinishCheapestIOZone();
 
 
 
@@ -4575,10 +4616,7 @@ IOStatus ZonedBlockDevice::TakeMigrateZone(Slice& smallest,Slice& largest, int l
     s = ResetUnusedIOZones();
 
     blocking_time++;
-    // if(blocking_time>256){
-    //   FinishCheapestIOZone();
 
-    // }
     if(!s.ok()){
       return s;
     }
@@ -4704,16 +4742,6 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
       }
       PutActiveIOZoneToken();
     }
-  // #if DEVICE==COSMOS_LARGE || DEVICE==COSMOS_SMALL
-    // else if(FinishFreeSpaceAdaptiveIOZone()){
-
-    //   s = AllocateEmptyZone(&allocated_zone);
-    //   if(allocated_zone!=nullptr){
-    //     goto end;
-    //   }
-    //   PutActiveIOZoneToken();
-    // }
-  // #endif
 
 
   }
@@ -4796,6 +4824,44 @@ IOStatus ZonedBlockDevice::AllocateIOZone(std::string fname ,bool is_sst,Slice& 
     //   }
     // }
   }
+
+  if(allocated_zone==nullptr){
+    if(finish_scheme1_==0){ // baseline
+        FinishCheapestIOZone(false);
+        AllocateEmptyZone(&allocated_zone);
+        if(allocated_zone!=nullptr){
+          goto end;
+        }
+        PutActiveIOZoneToken();
+    }else{ // free space adaptive
+      if(finish_scheme1_==1){
+        if(FinishFreeSpaceAdaptiveIOZone(false)){
+          AllocateEmptyZone(&allocated_zone);
+          if(allocated_zone!=nullptr){
+            goto end;
+          }
+          PutActiveIOZoneToken();
+        }
+
+      }else{
+        // get most hot
+        if(FinishFreeSpaceAdaptiveMostHotIOZone(false)){
+          AllocateEmptyZone(&allocated_zone);
+          if(allocated_zone!=nullptr){
+            goto end;
+          }
+          PutActiveIOZoneToken();
+        }
+      }
+    
+
+    }
+  }
+  
+
+
+
+
   if(s.ok()&&allocated_zone==nullptr){
     s=GetAnyLargestRemainingZone(&allocated_zone,false,min_capacity);
     if(allocated_zone){

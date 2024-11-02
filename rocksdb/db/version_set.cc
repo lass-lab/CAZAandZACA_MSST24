@@ -2777,6 +2777,34 @@ double VersionStorageInfo::ReCalculateCompactionScore(
       score = static_cast<double>(level_bytes_no_compacting) /
               MaxBytesForLevel(level);
     }
+  double alpha=0.5;
+  // const std::vector<int>& file_size =
+  //     vstorage_->FilesByCompactionPri(start_level_);
+  // files_by_compaction_pri_[level]
+
+  for(unsigned int cmp_index= 0 ;cmp_index<files_by_compaction_pri_[level].size();cmp_index++ ){
+    int index = files_by_compaction_pri_[cmp_index];
+    auto* f = files_[index];
+    double horizontal_lifetime;
+    if(level==0){
+      horizontal_lifetime=1.0;
+    }else{
+      horizontal_lifetime = cmp_index/files_by_compaction_pri_[level].size();
+    }
+    f->zns_temperature_=  alpha_ * (1 - horizontal_lifetime) + (1.0-alpha) * (1 / score);
+  }
+    // for (auto* f : files_[level]) {
+    //   double horizontal_lifetime;
+    //   if(level==0){
+    //     horizontal_lifetime=0.0;
+    //   }else{
+
+    //   }
+    //   f->zns_temperature_=  alpha_ * (1 - horizontal_lifetime) + (1.0-alpha) * (1 / score);
+    
+    // }
+  
+
 
   
   return score;
